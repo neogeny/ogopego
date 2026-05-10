@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
+	"github.com/fatih/color"
 )
 
 var CLI struct {
@@ -31,16 +32,106 @@ var CLI struct {
 	} `cmd:"grammar" help:"Grammar transformations"`
 
 	Output string `help:"Output to a file instead of stdout" short:"o"`
-	Color  string `help:"Control when to use color in output." short:"C" enum:"auto,always,never" default:"auto"`
+	Color  string `help:"Control colorized output for API results" short:"C" enum:"auto,always,never" default:"auto"`
 	Trace  bool   `help:"Display a detailed trace of the parsing process." short:"t"`
+}
+
+var useColorOutput bool
+
+func init() {
+	color.NoColor = false
+}
+
+func coloredHelp(options kong.HelpOptions, ctx *kong.Context) error {
+	out := color.Output
+
+	headerBold := color.New(color.FgYellow, color.Bold)
+	flagCyan := color.New(color.FgCyan)
+	cmdGreen := color.New(color.FgGreen)
+	descWhite := color.New(color.FgWhite)
+
+	selected := ctx.Selected()
+	
+	if selected == nil || ctx.Command() == "" {
+		headerBold.Fprintf(out, "Usage: ogo <command> [flags]\n\n")
+		descWhite.Fprintf(out, "ogopego: A PEG parser generator in Go\n\n")
+		
+		flagCyan.Fprintf(out, "Flags:\n")
+		flagCyan.Fprintf(out, "  -h, --help             Show context-sensitive help.\n")
+		flagCyan.Fprintf(out, "  -o, --output=STRING    Output to a file instead of stdout\n")
+		flagCyan.Fprintf(out, "  -C, --color=auto       Control colorized output for API results\n")
+		flagCyan.Fprintf(out, "  -t, --trace           Display a detailed trace of the parsing process.\n\n")
+		
+		cmdGreen.Fprintf(out, "Commands:\n")
+		cmdGreen.Fprintf(out, "  run        Execute a grammar against one or more input files.\n")
+		cmdGreen.Fprintf(out, "  boot       The internal boot grammar\n")
+		cmdGreen.Fprintf(out, "  grammar    Grammar transformations\n\n")
+		
+		cmdGreen.Fprintf(out, "Run \"ogo <command> --help\" for more information on a command.\n")
+	} else {
+		headerBold.Fprintf(out, "Usage: ogo %s %s\n\n", selected.Name, selected.FlagSummary(true))
+		
+		if selected.Detail != "" {
+			descWhite.Fprintf(out, "%s\n\n", selected.Detail)
+		} else if selected.Help != "" {
+			descWhite.Fprintf(out, "%s\n\n", selected.Help)
+		}
+
+		if len(selected.Positional) > 0 {
+			cmdGreen.Fprintf(out, "Arguments:\n")
+			for _, arg := range selected.Positional {
+				cmdGreen.Fprintf(out, "  %s\n", arg.Summary())
+			}
+			out.Write([]byte("\n"))
+		}
+
+		flagCyan.Fprintf(out, "Flags:\n")
+		flagCyan.Fprintf(out, "  -h, --help             Show context-sensitive help.\n")
+		flagCyan.Fprintf(out, "  -o, --output=STRING    Output to a file instead of stdout\n")
+		flagCyan.Fprintf(out, "  -C, --color=auto       Control colorized output for API results\n")
+		flagCyan.Fprintf(out, "  -t, --trace           Display a detailed trace of the parsing process.\n")
+		
+		for _, flag := range selected.Flags {
+			flagCyan.Fprintf(out, "  %s\n", flag.String())
+		}
+	}
+
+	return nil
+}
+
+func isTerminal() bool {
+	return os.Getenv("TERM") != "dumb"
 }
 
 func main() {
 	ctx := kong.Parse(&CLI,
 		kong.Name("ogo"),
 		kong.Description("ogopego: A PEG parser generator in Go"),
+		kong.Help(coloredHelp),
+		kong.UsageOnError(),
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: false,
+			Summary: false,
+		}),
 	)
 
 	_ = ctx
-	_ = os.Stdout
+
+	switch CLI.Color {
+	case "always":
+		useColorOutput = true
+		color.NoColor = false
+	case "never":
+		useColorOutput = false
+		color.NoColor = true
+	case "auto":
+		if isTerminal() {
+			useColorOutput = true
+			color.NoColor = false
+		} else {
+			useColorOutput = false
+			color.NoColor = true
+		}
+	}
+	_ = useColorOutput
 }
