@@ -1,23 +1,46 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
-	. "github.com/neogeny/ogopego/input"
+	"github.com/alecthomas/kong"
 )
 
-// TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
-func main() {
-	//TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-	// to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-	s := "gopher"
-	fmt.Printf("Hello and welcome, %s!\n", s)
-	fmt.Print(Sample())
+var CLI struct {
+	Run struct {
+		Grammar string   `arg:"" required name:"grammar" help:"Path to the compiled TatSu JSON grammar."`
+		Inputs  []string `arg:"" required name:"inputs" help:"The files to be parsed."`
+		Json    bool    `help:"Print the output tree in JSON format" short:"j"`
+		Model  bool    `help:"Print the Rust code for the tree construction" short:"m"`
+		Short  bool    `help:"Print the Tree in short notation" short:"s"`
+	} `cmd:"" help:"Execute a grammar against one or more input files."`
 
-	for i := 1; i <= 5; i++ {
-		//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-		fmt.Println("i =", 100/i)
-	}
+	Boot struct {
+		Json      bool `help:"Print the boot grammar in JSON format" short:"j"`
+		Model     bool `help:"Print the Rust code for the boot model construction" short:"m"`
+		Pretty    bool `help:"Pretty-print the boot grammar" short:"p"`
+		Railroads bool `help:"Print a railroad diagram" short:"r" group:"format"`
+	} `cmd:"boot" help:"The internal boot grammar"`
+
+	Grammar struct {
+		Grammar   string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)."`
+		Json      bool   `help:"Print the grammar in JSON format" short:"j"`
+		Model     bool   `help:"Print the Rust code grammar model constructors" short:"m"`
+		Pretty    bool   `help:"Pretty-print the grammar (EBNF)" short:"p"`
+		Railroads bool   `help:"Print a railroad diagram" short:"r"`
+	} `cmd:"grammar" help:"Grammar transformations"`
+
+	Output string `help:"Output to a file instead of stdout" short:"o"`
+	Color  string `help:"Control when to use color in output." short:"C" enum:"auto,always,never" default:"auto"`
+	Trace  bool   `help:"Display a detailed trace of the parsing process." short:"t"`
+}
+
+func main() {
+	ctx := kong.Parse(&CLI,
+		kong.Name("ogo"),
+		kong.Description("ogopego: A PEG parser generator in Go"),
+	)
+
+	_ = ctx
+	_ = os.Stdout
 }
