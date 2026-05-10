@@ -1,0 +1,287 @@
+package input
+
+import (
+	"strings"
+	"unicode/utf8"
+)
+
+type CursorHeavy struct {
+	IgnoreCase bool
+	NameGuard  bool
+	Source     string
+	Patterns   *TokenizingPatterns
+}
+
+type StrCursor struct {
+	text   string
+	offset int
+	heavy  *CursorHeavy
+}
+
+func NewStrCursor(text string) *StrCursor {
+	return &StrCursor{
+		text:   text,
+		offset: 0,
+		heavy: &CursorHeavy{
+			IgnoreCase: false,
+			NameGuard:  true,
+			Source:     "some input",
+			Patterns:   &TokenizingPatterns{},
+		},
+	}
+}
+
+func NewStrCursorFromSource(source, text string, start int) *StrCursor {
+	if start > len(text) {
+		start = len(text)
+	}
+	for start < len(text) && !utf8.RuneStart(text[start]) {
+		start++
+	}
+	return &StrCursor{
+		text:   text,
+		offset: start,
+		heavy: &CursorHeavy{
+			IgnoreCase: false,
+			NameGuard:  true,
+			Source:     source,
+			Patterns:   &TokenizingPatterns{},
+		},
+	}
+}
+
+func (s *StrCursor) InputSource() string {
+	return s.heavy.Source
+}
+
+func (s *StrCursor) Mark() int {
+	return s.offset
+}
+
+func (s *StrCursor) Reset(mark int) {
+	s.offset = mark
+}
+
+func (s *StrCursor) AsStr() string {
+	return s.text
+}
+
+func (s *StrCursor) AsRef() string {
+	return s.text
+}
+
+func (s *StrCursor) IgnoreCase() bool {
+	return s.heavy.IgnoreCase
+}
+
+func (s *StrCursor) NameGuard() bool {
+	return s.heavy.NameGuard
+}
+
+func (s *StrCursor) Lookahead(start int) string {
+	if start >= len(s.text) {
+		return ""
+	}
+	tail := s.text[start:]
+	i := strings.IndexByte(tail, '\n')
+	if i == -1 {
+		return tail
+	}
+	return tail[:i]
+}
+
+func (s *StrCursor) AtEnd() bool {
+	return s.offset >= len(s.text)
+}
+
+func (s *StrCursor) Next() (rune, bool) {
+	r, ok := s.Peek()
+	if ok {
+		s.offset += utf8.RuneLen(r)
+	}
+	return r, ok
+}
+
+func (s *StrCursor) Peek() (rune, bool) {
+	if s.AtEnd() {
+		return 0, false
+	}
+	r, _ := utf8.DecodeRuneInString(s.text[s.offset:])
+	return r, true
+}
+
+func (s *StrCursor) PeekToken(token string) bool {
+	if s.offset+len(token) > len(s.text) {
+		return false
+	}
+	slice := s.text[s.offset : s.offset+len(token)]
+	if s.IgnoreCase() {
+		return strings.EqualFold(slice, token)
+	}
+	return slice == token
+}
+
+func (s *StrCursor) MatchToken(token string) bool {
+	if s.PeekToken(token) {
+		s.offset += len(token)
+		return true
+	}
+	return false
+}
+
+func (s *StrCursor) MatchPattern(pat Pattern) (string, bool) {
+	text := s.text[s.offset:]
+	m, ok := pat.Match(text)
+	if !ok {
+		return "", false
+	}
+	s.offset += m.End()
+	if g, ok := m.Group(1); ok {
+		return g, true
+	}
+	if g, ok := m.Group(0); ok {
+		return g, true
+	}
+	return "", false
+}
+
+func (s *StrCursor) MatchEOL() bool {
+	mark := s.offset
+	s.eatSpacesNoNewlines()
+	if n, ok := takeLinebreakLen(s.text[s.offset:]); ok {
+		s.offset += n
+		s.eatSpacesNoNewlines()
+		return true
+	}
+	s.offset = mark
+	return false
+}
+
+func (s *StrCursor) NextToken() {
+	if s.heavy.Patterns == nil {
+		return
+	}
+	for {
+		prev := s.offset
+		s.eatPattern(s.heavy.Patterns.Wsp)
+		if s.eatPattern(s.heavy.Patterns.Eol) {
+			s.eatPattern(s.heavy.Patterns.Wsp)
+		}
+		s.eatPattern(s.heavy.Patterns.Cmt)
+		if s.AtEnd() || s.offset == prev {
+			break
+		}
+	}
+}
+
+func (s *StrCursor) Pos() (int, int) {
+	return s.PosAt(s.offset)
+}
+
+func (s *StrCursor) PosAt(mark int) (int, int) {
+	if mark > len(s.text) {
+		mark = len(s.text)
+	}
+	head := s.text[:mark]
+
+	var lastLine string
+	line := 0
+	start := 0
+	for i, c := range head {
+		if c == '\n' {
+			lastLine = head[start:i]
+			line++
+			start = i + 1
+		}
+	}
+	if start < len(head) {
+		lastLine = head[start:]
+		line++
+	}
+	if head == "" {
+		line = 0
+	}
+
+	return line, utf8.RuneCountInString(lastLine)
+}
+
+func (s *StrCursor) Location() Location {
+	return s.LocationAt(s.offset)
+}
+
+func (s *StrCursor) LocationAt(mark int) Location {
+	line, col := s.PosAt(mark)
+	return Location{
+		Source: s.InputSource(),
+		Line:   line,
+		Col:    col,
+	}
+}
+
+func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
+	s.heavy = &CursorHeavy{
+		IgnoreCase: s.heavy.IgnoreCase,
+		NameGuard:  s.heavy.NameGuard,
+		Source:     s.heavy.Source,
+		Patterns:   patterns,
+	}
+}
+
+func (s *StrCursor) Clone() Cursor {
+	return &StrCursor{
+		text:   s.text,
+		offset: s.offset,
+		heavy:  s.heavy,
+	}
+}
+
+func (s *StrCursor) eatPattern(pat Pattern) bool {
+	if s.AtEnd() || pat.Pattern() == "" {
+		return false
+	}
+	text := s.text[s.offset:]
+	if m, ok := pat.Match(text); ok {
+		s.offset += m.End()
+		return true
+	}
+	return false
+}
+
+func (s *StrCursor) eatSpacesNoNewlines() {
+	for {
+		prev := s.offset
+		s.offset += takeNonNewlineWhitespaceLen(s.text[s.offset:])
+		if s.eatPattern(s.heavy.Patterns.Eol) {
+			s.offset += takeNonNewlineWhitespaceLen(s.text[s.offset:])
+		}
+		s.eatPattern(s.heavy.Patterns.Cmt)
+		if s.offset == prev {
+			break
+		}
+	}
+}
+
+func takeLinebreakLen(s string) (int, bool) {
+	if len(s) == 0 {
+		return 0, false
+	}
+	switch s[0] {
+	case '\n':
+		return 1, true
+	case '\r':
+		if len(s) > 1 && s[1] == '\n' {
+			return 2, true
+		}
+		return 1, true
+	}
+	return 0, false
+}
+
+func takeNonNewlineWhitespaceLen(s string) int {
+	for i, c := range s {
+		if c != ' ' && c != '\t' && c != '\f' {
+			return i
+		}
+	}
+	return len(s)
+}
