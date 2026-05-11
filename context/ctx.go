@@ -207,6 +207,7 @@ func (b *BaseCtx) Token(token string) (string, error) {
 }
 
 func (b *BaseCtx) Pattern(pattern string) (string, error) {
+	b.NextToken()
 	re := b.GetPattern(pattern)
 	if re == nil {
 		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("invalid pattern %q", pattern)}

@@ -261,7 +261,10 @@ func (s *Synth) Parse(ctx context.Ctx) (trees.Tree, error) {
 }
 
 func (c *Call) Parse(ctx context.Ctx) (trees.Tree, error) {
-	return nil, fmt.Errorf("rule calls not yet supported: %s", c.Name)
+	if c.Target == nil {
+		return nil, fmt.Errorf("call to %q has not been linked", c.Name)
+	}
+	return c.Target.Parse(ctx)
 }
 
 func (s *SkipTo) Parse(ctx context.Ctx) (trees.Tree, error) {
@@ -301,7 +304,11 @@ func (r *Rule) Parse(ctx context.Ctx) (trees.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.RuleNode{TypeName: r.Name, Tree: result}, nil
+	folded := trees.Fold(result)
+	if len(r.Params) == 0 || r.Params[0] == "bool" {
+		return folded, nil
+	}
+	return &trees.RuleNode{TypeName: r.Params[0], Tree: folded}, nil
 }
 
 func (g *Grammar) Parse(ctx context.Ctx) (trees.Tree, error) {

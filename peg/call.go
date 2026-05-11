@@ -2,5 +2,6 @@ package peg
 
 type Call struct {
 	ModelBase
-	Name string
+	Name   string
+	Target *Rule
 }

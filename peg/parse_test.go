@@ -57,7 +57,7 @@ func TestParsePattern(t *testing.T) {
 func TestParseSequence(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Sequence{
-		Sequence: []any{
+		Sequence: []Model{
 			&Token{Token: "hello"},
 			&Token{Token: "world"},
 		},
@@ -82,7 +82,7 @@ func TestParseSequence(t *testing.T) {
 
 func TestParseSequenceEmpty(t *testing.T) {
 	ctx := ctxFrom("anything")
-	expr := &Sequence{Sequence: []any{}}
+	expr := &Sequence{Sequence: []Model{}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -321,6 +321,7 @@ func TestParseRule(t *testing.T) {
 			Box:  Box{Exp: &Token{Token: "hello"}},
 			Name: "test",
 		},
+		Params: []string{"test"},
 	}
 	result, err := expr.Parse(ctx)
 	if err != nil {
@@ -349,6 +350,7 @@ func TestParseGrammar(t *testing.T) {
 					Box:  Box{Exp: &Token{Token: "hello"}},
 					Name: "start",
 				},
+				Params: []string{"start"},
 			},
 		},
 	}
@@ -375,12 +377,14 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 					Box:  Box{Exp: &Token{Token: "hello"}},
 					Name: "first",
 				},
+				Params: []string{"first"},
 			},
 			{
 				NamedBox: NamedBox{
 					Box:  Box{Exp: &Token{Token: "universe"}},
 					Name: "second",
 				},
+				Params: []string{"second"},
 			},
 		},
 	}
@@ -483,10 +487,10 @@ func TestParseChoiceResetsCursor(t *testing.T) {
 	expr := &Choice{
 		Options: []*Option{
 			{Box: Box{Exp: &Sequence{
-				Sequence: []any{&Token{Token: "wrong"}, &Token{Token: "stuff"}},
+				Sequence: []Model{&Token{Token: "wrong"}, &Token{Token: "stuff"}},
 			}}},
 			{Box: Box{Exp: &Sequence{
-				Sequence: []any{&Token{Token: "hello"}, &Token{Token: "world"}},
+				Sequence: []Model{&Token{Token: "hello"}, &Token{Token: "world"}},
 			}}},
 		},
 	}
@@ -503,10 +507,10 @@ func TestParseChoiceResetsCursor(t *testing.T) {
 func TestParseClosureIncremental(t *testing.T) {
 	ctx := ctxFrom("a b c")
 	expr := &Sequence{
-		Sequence: []any{
+		Sequence: []Model{
 			&Token{Token: "a"},
 			&Closure{Box: Box{Exp: &Sequence{
-				Sequence: []any{&Token{Token: "b"}, &Token{Token: "c"}},
+				Sequence: []Model{&Token{Token: "b"}, &Token{Token: "c"}},
 			}}},
 		},
 	}
@@ -531,7 +535,7 @@ func TestParseKeywordIsKeyword(t *testing.T) {
 func TestParseFoldIntegration(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Sequence{
-		Sequence: []any{
+		Sequence: []Model{
 			&Named{
 				NamedBox: NamedBox{
 					Box:  Box{Exp: &Token{Token: "hello"}},
