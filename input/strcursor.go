@@ -3,6 +3,8 @@ package input
 import (
 	"strings"
 	"unicode/utf8"
+
+	"github.com/neogeny/ogopego/util/pyre"
 )
 
 type CursorHeavy struct {
@@ -129,7 +131,10 @@ func (s *StrCursor) MatchToken(token string) bool {
 	return false
 }
 
-func (s *StrCursor) MatchPattern(pat Pattern) (string, bool) {
+func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
+	if pat == nil {
+		return "", false
+	}
 	text := s.text[s.offset:]
 	m, ok := pat.Match(text)
 	if !ok {
@@ -235,8 +240,8 @@ func (s *StrCursor) Clone() Cursor {
 	}
 }
 
-func (s *StrCursor) eatPattern(pat Pattern) bool {
-	if s.AtEnd() || pat.Pattern() == "" {
+func (s *StrCursor) eatPattern(pat pyre.Pattern) bool {
+	if pat == nil || s.AtEnd() || pat.Pattern() == "" {
 		return false
 	}
 	text := s.text[s.offset:]

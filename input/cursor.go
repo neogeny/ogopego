@@ -1,25 +1,17 @@
 package input
 
+import "github.com/neogeny/ogopego/util/pyre"
+
 type Location struct {
 	Source string
 	Line   int
 	Col    int
 }
 
-type MatchResult interface {
-	End() int
-	Group(i int) (string, bool)
-}
-
-type Pattern interface {
-	Match(text string) (MatchResult, bool)
-	Pattern() string
-}
-
 type TokenizingPatterns struct {
-	Wsp Pattern
-	Cmt Pattern
-	Eol Pattern
+	Wsp pyre.Pattern
+	Cmt pyre.Pattern
+	Eol pyre.Pattern
 }
 
 type Cursor interface {
@@ -36,7 +28,7 @@ type Cursor interface {
 	Peek() (rune, bool)
 	PeekToken(token string) bool
 	MatchToken(token string) bool
-	MatchPattern(pattern Pattern) (string, bool)
+	MatchPattern(pattern pyre.Pattern) (string, bool)
 	MatchEOL() bool
 	NextToken()
 	Pos() (int, int)

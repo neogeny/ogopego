@@ -28,6 +28,10 @@ fmt:
 deps:
     go mod download
 
+# Vendor dependencies to local vendor/ directory
+vendor:
+    go mod vendor
+
 # Run go vet
 vet:
     go vet ./...
