@@ -2,6 +2,8 @@ module github.com/neogeny/ogopego
 
 go 1.26.3
 
+require github.com/davecgh/go-spew v1.1.1
+
 require (
 	github.com/alecthomas/kong v1.15.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
