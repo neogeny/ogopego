@@ -1,7 +1,7 @@
 package peg
 
 type Constant struct {
-	Model
+	ModelBase
 	Literal string
 }
 

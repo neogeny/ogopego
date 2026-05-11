@@ -277,7 +277,7 @@ func ruleFromJSON(h *helper) (*peg.Rule, error) {
 	return r, nil
 }
 
-func modelFromJSON(h *helper, err error) (any, error) {
+func modelFromJSON(h *helper, err error) (peg.Model, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func modelFromJSON(h *helper, err error) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		var seq []any
+		var seq []peg.Model
 		for _, ih := range items {
 			exp, err := modelFromJSON(ih, nil)
 			if err != nil {
@@ -513,7 +513,8 @@ func modelFromJSON(h *helper, err error) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.RuleInclude{NamedBox: peg.NamedBox{Name: name}}, nil
+		exp, _ := modelFromJSON(h.getNested("exp"))
+		return &peg.RuleInclude{Name: name, Exp: exp}, nil
 
 	default:
 		return nil, h.error(fmt.Sprintf("Unsupported: %s", cls))

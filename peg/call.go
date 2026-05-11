@@ -1,6 +1,6 @@
 package peg
 
 type Call struct {
-	Model
+	ModelBase
 	Name string
 }

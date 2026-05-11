@@ -2,7 +2,7 @@ package peg
 
 type Join struct {
 	Box
-	Sep any
+	Sep Model
 }
 
 type PositiveJoin struct {

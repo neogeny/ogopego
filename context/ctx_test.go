@@ -1,17 +1,16 @@
 package context
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/neogeny/ogopego/input"
+	"github.com/neogeny/ogopego/trees"
 )
 
 func newTestBaseCtx() *BaseCtx {
 	c := input.NewStrCursor("some input text")
-	return &BaseCtx{
-		cursor:    c,
-		cursorMut: c,
-	}
+	return NewBaseCtx(c)
 }
 
 func TestBaseCtxCallStack(t *testing.T) {
@@ -50,7 +49,7 @@ func TestBaseCtxCallStackLeaveEmpty(t *testing.T) {
 
 func TestBaseCtxFailure(t *testing.T) {
 	ctx := newTestBaseCtx()
-	dis := ctx.Failure(5, ParseFailure{Message: "expected number"})
+	dis := ctx.Failure(5, errors.New("expected number"))
 	if dis == nil {
 		t.Fatal("expected non-nil DisasterReport")
 	}
@@ -60,9 +59,6 @@ func TestBaseCtxFailure(t *testing.T) {
 	if dis.Failure.Message != "expected number" {
 		t.Errorf("expected 'expected number', got %q", dis.Failure.Message)
 	}
-	if dis.CutSeen {
-		t.Error("expected CutSeen false")
-	}
 	if ctx.FurthestFailure() != dis {
 		t.Error("expected furthest failure to match")
 	}
@@ -70,8 +66,8 @@ func TestBaseCtxFailure(t *testing.T) {
 
 func TestBaseCtxFailureNoRegress(t *testing.T) {
 	ctx := newTestBaseCtx()
-	ctx.Failure(10, ParseFailure{Message: "first"})
-	ctx.Failure(3, ParseFailure{Message: "second"})
+	ctx.Failure(10, errors.New("first"))
+	ctx.Failure(3, errors.New("second"))
 	if ctx.FurthestFailure().Failure.Message != "first" {
 		t.Errorf("expected furthest to stay 'first', got %q", ctx.FurthestFailure().Failure.Message)
 	}
@@ -79,34 +75,84 @@ func TestBaseCtxFailureNoRegress(t *testing.T) {
 
 func TestBaseCtxFailureProgression(t *testing.T) {
 	ctx := newTestBaseCtx()
-	ctx.Failure(5, ParseFailure{Message: "first"})
-	ctx.Failure(15, ParseFailure{Message: "second"})
+	ctx.Failure(5, errors.New("first"))
+	ctx.Failure(15, errors.New("second"))
 	if ctx.FurthestFailure().Failure.Message != "second" {
 		t.Errorf("expected furthest 'second', got %q", ctx.FurthestFailure().Failure.Message)
 	}
 }
 
-func TestBaseCtxCut(t *testing.T) {
+func TestBaseCtxTokenMatch(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.CutSeen() {
-		t.Error("expected CutSeen false initially")
+	ctx.NextToken()
+	matched, err := ctx.Token("some")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	ctx.Cut()
-	if !ctx.CutSeen() {
-		t.Error("expected CutSeen true after Cut()")
-	}
-	ctx.ClearCut()
-	if ctx.CutSeen() {
-		t.Error("expected CutSeen false after ClearCut()")
+	if matched != "some" {
+		t.Errorf("expected 'some', got %q", matched)
 	}
 }
 
-func TestBaseCtxCutInFailure(t *testing.T) {
+func TestBaseCtxTokenMismatch(t *testing.T) {
 	ctx := newTestBaseCtx()
-	ctx.Cut()
-	dis := ctx.Failure(5, ParseFailure{Message: "cut failure"})
-	if !dis.CutSeen {
-		t.Error("expected CutSeen true in failure report")
+	ctx.NextToken()
+	_, err := ctx.Token("wrong")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestBaseCtxPatternMatch(t *testing.T) {
+	ctx := newTestBaseCtx()
+	ctx.NextToken()
+	matched, err := ctx.Pattern(`\w+`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if matched != "some" {
+		t.Errorf("expected 'some', got %q", matched)
+	}
+}
+
+func TestBaseCtxPatternMismatch(t *testing.T) {
+	ctx := newTestBaseCtx()
+	ctx.NextToken()
+	_, err := ctx.Pattern(`\d+`)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestBaseCtxConstant(t *testing.T) {
+	ctx := newTestBaseCtx()
+	t1, _ := ctx.Constant("hello")
+	if tt, ok := t1.(*trees.Text); !ok || tt.Value != "hello" {
+		t.Errorf("expected Text{hello}, got %T %+v", t1, t1)
+	}
+	t2, _ := ctx.Constant(42)
+	if tn, ok := t2.(*trees.Number); !ok || tn.Value != 42 {
+		t.Errorf("expected Number{42}, got %T %+v", t2, t2)
+	}
+	t3, _ := ctx.Constant(true)
+	if tb, ok := t3.(*trees.Bool); !ok || tb.Value != true {
+		t.Errorf("expected Bool{true}, got %T %+v", t3, t3)
+	}
+	t4, _ := ctx.Constant(nil)
+	if _, ok := t4.(*trees.Nil); !ok {
+		t.Errorf("expected Nil, got %T", t4)
+	}
+}
+
+func TestBaseCtxEof(t *testing.T) {
+	ctx := newTestBaseCtx()
+	if ctx.Eof() {
+		t.Error("expected Eof false")
+	}
+	c := input.NewStrCursor("")
+	ctx2 := NewBaseCtx(c)
+	if !ctx2.Eof() {
+		t.Error("expected Eof true on empty input")
 	}
 }
 
@@ -182,30 +228,14 @@ func TestBaseCtxCursorDelegation(t *testing.T) {
 	}
 }
 
-func TestBaseCtxMatchEOL(t *testing.T) {
+func TestBaseCtxDot(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.MatchEOL() {
-		t.Error("expected no EOL match in 'some input text'")
+	r, err := ctx.Dot()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-}
-
-func TestBaseCtxMatchToken(t *testing.T) {
-	ctx := newTestBaseCtx()
-	ctx.NextToken()
-	if !ctx.MatchToken("some") {
-		t.Error("expected MatchToken 'some'")
-	}
-}
-
-func TestBaseCtxMatchPattern(t *testing.T) {
-	ctx := newTestBaseCtx()
-	ctx.NextToken()
-	m, ok := ctx.MatchPattern(`\w+`)
-	if !ok {
-		t.Fatal("expected pattern match")
-	}
-	if m != "some" {
-		t.Errorf("expected 'some', got %q", m)
+	if r != 's' {
+		t.Errorf("expected 's', got %c", r)
 	}
 }
 
@@ -218,51 +248,67 @@ func TestBaseCtxParseEOF(t *testing.T) {
 
 func TestBaseCtxParseEOFAtEnd(t *testing.T) {
 	c := input.NewStrCursor("")
-	ctx := &BaseCtx{
-		cursor:    c,
-		cursorMut: c,
-	}
+	ctx := NewBaseCtx(c)
 	if !ctx.ParseEOF() {
 		t.Error("expected ParseEOF true on empty input")
 	}
 }
 
-func TestBaseCtxPushMerge(t *testing.T) {
+func TestBaseCtxMatchToken(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if p := ctx.Push(); p != nil {
-		t.Error("expected nil from Push")
-	}
-	if m := ctx.Merge(nil); m != nil {
-		t.Error("expected nil from Merge")
+	ok := ctx.MatchToken("some")
+	if !ok {
+		t.Error("expected MatchToken 'some'")
 	}
 }
 
-func TestBaseCtxMemo(t *testing.T) {
+func TestBaseCtxMatchPattern(t *testing.T) {
 	ctx := newTestBaseCtx()
-	key := MemoKey{Mark: 0, Name: "test", CanMemo: true}
-	if m := ctx.Memo(key); m != nil {
-		t.Error("expected nil memo")
+	m, ok := ctx.MatchPattern(`\w+`)
+	if !ok {
+		t.Fatal("expected pattern match")
 	}
-	ctx.Memoize(key, "some tree", 10)
-}
-
-func TestBaseCtxClearErrorMemos(t *testing.T) {
-	ctx := newTestBaseCtx()
-	ctx.ClearErrorMemos()
-}
-
-func TestBaseCtxPruneCache(t *testing.T) {
-	ctx := newTestBaseCtx()
-	ctx.PruneCache(5)
-}
-
-func TestBaseCtxTrackUntrack(t *testing.T) {
-	ctx := newTestBaseCtx()
-	key := MemoKey{Mark: 0, Name: "test", CanMemo: true}
-	if n := ctx.Track(key); n != 0 {
-		t.Errorf("expected 0 from Track, got %d", n)
+	if m != "some" {
+		t.Errorf("expected 'some', got %q", m)
 	}
-	if n := ctx.Untrack(key); n != 0 {
-		t.Errorf("expected 0 from Untrack, got %d", n)
+}
+
+func TestBaseCtxMatchEOL(t *testing.T) {
+	ctx := newTestBaseCtx()
+	if ctx.MatchEOL() {
+		t.Error("expected no EOL match in 'some input text'")
+	}
+}
+
+func TestBaseCtxVoid(t *testing.T) {
+	ctx := newTestBaseCtx()
+	err := ctx.Void()
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
+}
+
+func TestBaseCtxFail(t *testing.T) {
+	ctx := newTestBaseCtx()
+	err := ctx.Fail()
+	if err == nil {
+		t.Error("expected error from Fail()")
+	}
+}
+
+func TestBaseCtxEofCheck(t *testing.T) {
+	ctx := newTestBaseCtx()
+	err := ctx.EofCheck()
+	if err == nil {
+		t.Error("expected error from EofCheck on non-empty input")
+	}
+}
+
+func TestBaseCtxEofCheckAtEnd(t *testing.T) {
+	c := input.NewStrCursor("")
+	ctx := NewBaseCtx(c)
+	err := ctx.EofCheck()
+	if err != nil {
+		t.Errorf("expected nil, got %v", err)
 	}
 }

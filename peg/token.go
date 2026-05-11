@@ -1,6 +1,6 @@
 package peg
 
 type Token struct {
-	Model
+	ModelBase
 	Token string
 }

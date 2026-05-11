@@ -1,7 +1,7 @@
 package peg
 
 type Patterns struct {
-	Model
+	ModelBase
 	Whitespace  string
 	Comments    string
 	EOLComments string

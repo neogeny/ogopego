@@ -1,7 +1,7 @@
 package peg
 
 type Grammar struct {
-	Model
+	ModelBase
 	Name       string
 	Directives map[string]any
 	Keywords   []string

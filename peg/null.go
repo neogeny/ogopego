@@ -1,5 +1,5 @@
 package peg
 
 type NULL struct {
-	Model
+	ModelBase
 }

@@ -1,6 +1,6 @@
 package peg
 
 type Choice struct {
-	Model
+	ModelBase
 	Options []*Option
 }

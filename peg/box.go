@@ -1,6 +1,6 @@
 package peg
 
 type Box struct {
-	Model
-	Exp any
+	ModelBase
+	Exp Model
 }

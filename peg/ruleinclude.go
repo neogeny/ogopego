@@ -1,5 +1,7 @@
 package peg
 
 type RuleInclude struct {
-	NamedBox
+	ModelBase
+	Name string
+	Exp  Model
 }

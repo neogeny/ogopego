@@ -1,7 +1,7 @@
 package peg
 
 type Comment struct {
-	Model
+	ModelBase
 	Comment string
 }
 

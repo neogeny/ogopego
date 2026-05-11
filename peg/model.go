@@ -1,7 +1,17 @@
 package peg
 
-type Model struct {
+import (
+	"github.com/neogeny/ogopego/context"
+	"github.com/neogeny/ogopego/trees"
+)
+
+type Model interface {
+	Parse(ctx context.Ctx) (trees.Tree, error)
+	followRef() *ModelBase
+}
+
+type ModelBase struct {
 	*Node
 }
 
-func (m *Model) followRef() *Model { return m }
+func (m *ModelBase) followRef() *ModelBase { return m }

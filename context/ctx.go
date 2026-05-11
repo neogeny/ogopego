@@ -1,7 +1,10 @@
 package context
 
 import (
+	"fmt"
+
 	"github.com/neogeny/ogopego/input"
+	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -9,40 +12,35 @@ type Ctx interface {
 	Cursor() input.Cursor
 	CursorMut() input.Cursor
 	CallStack() CallStack
-	CutSeen() bool
 	Tracer() Tracer
 	Mark() int
-	Enter(name string)
-	Leave()
-	Track(key MemoKey) int
-	Untrack(key MemoKey) int
-	Failure(start int, source ParseFailure) *DisasterReport
-	SetFurthestFailure(dis *DisasterReport)
-	FurthestFailure() *DisasterReport
 	Reset(mark int)
 	AtEnd() bool
-	ParseEOF() bool
-	Dot() (rune, bool)
 	Next() (rune, bool)
 	Peek() (rune, bool)
-	MatchEOL() bool
-	MatchVoid()
+	Dot() (rune, error)
 	NextToken()
-	GetPattern(pattern string) pyre.Pattern
+	MatchEOL() bool
 	MatchToken(token string) bool
 	MatchPattern(pattern string) (string, bool)
-	Intern(s string) string
-	Key(name string, canMemo bool, mark int) MemoKey
-	Memo(key MemoKey) *Memo
-	Memoize(key MemoKey, tree interface{}, lastMark int)
-	ClearErrorMemos()
-	PruneCache(cutpoint int)
-	Cut()
-	ClearCut()
+	GetPattern(pattern string) pyre.Pattern
+	Token(token string) (string, error)
+	Pattern(pattern string) (string, error)
+	Void() error
+	Fail() error
+	Eof() bool
+	EofCheck() error
+	EolCheck() error
+	Constant(literal any) (trees.Tree, error)
+	Enter(name string)
+	Leave()
+	Failure(start int, source error) *DisasterReport
+	FurthestFailure() *DisasterReport
+	SetFurthestFailure(dis *DisasterReport)
 	IsKeyword(name string) bool
 	SetKeywords(keywords []string)
-	Merge(other Ctx) Ctx
-	Push() Ctx
+	Intern(s string) string
+	ParseEOF() bool
 	HeartbeatTick()
 }
 
@@ -51,10 +49,16 @@ type BaseCtx struct {
 	cursorMut    input.Cursor
 	callStack    CallStack
 	tracer       Tracer
-	cut          bool
 	furthest     *DisasterReport
 	patternCache map[string]pyre.Pattern
 	keywords     []string
+}
+
+func NewBaseCtx(cursor input.Cursor) *BaseCtx {
+	return &BaseCtx{
+		cursor:    cursor,
+		cursorMut: cursor,
+	}
 }
 
 func (b *BaseCtx) Cursor() input.Cursor {
@@ -67,10 +71,6 @@ func (b *BaseCtx) CursorMut() input.Cursor {
 
 func (b *BaseCtx) CallStack() CallStack {
 	return b.callStack
-}
-
-func (b *BaseCtx) CutSeen() bool {
-	return b.cut
 }
 
 func (b *BaseCtx) Tracer() Tracer {
@@ -97,16 +97,16 @@ func (b *BaseCtx) Peek() (rune, bool) {
 	return b.cursorMut.Peek()
 }
 
-func (b *BaseCtx) Dot() (rune, bool) {
-	return b.Next()
+func (b *BaseCtx) Dot() (rune, error) {
+	r, ok := b.Next()
+	if !ok {
+		return 0, &ParseError{Pos: b.Mark(), Message: "expected any character"}
+	}
+	return r, nil
 }
 
 func (b *BaseCtx) MatchEOL() bool {
 	return b.cursorMut.MatchEOL()
-}
-
-func (b *BaseCtx) MatchVoid() {
-	b.NextToken()
 }
 
 func (b *BaseCtx) NextToken() {
@@ -130,35 +130,6 @@ func (b *BaseCtx) IsKeyword(name string) bool {
 
 func (b *BaseCtx) SetKeywords(keywords []string) {
 	b.keywords = keywords
-}
-
-func (b *BaseCtx) Cut() {
-	b.cut = true
-}
-
-func (b *BaseCtx) ClearCut() {
-	b.cut = false
-}
-
-func (b *BaseCtx) SetFurthestFailure(dis *DisasterReport) {
-	b.furthest = dis
-}
-
-func (b *BaseCtx) FurthestFailure() *DisasterReport {
-	return b.furthest
-}
-
-func (b *BaseCtx) Failure(start int, source ParseFailure) *DisasterReport {
-	b.cursorMut.Reset(start)
-
-	if f := b.FurthestFailure(); f != nil && f.Start >= b.Mark() {
-		f.CutSeen = b.cut
-		return f
-	}
-
-	dis := &DisasterReport{Start: start, Failure: source, CutSeen: b.cut}
-	b.SetFurthestFailure(dis)
-	return dis
 }
 
 func (b *BaseCtx) GetPattern(pattern string) pyre.Pattern {
@@ -190,20 +161,6 @@ func (b *BaseCtx) MatchPattern(pattern string) (string, bool) {
 	return b.cursorMut.MatchPattern(re)
 }
 
-func (b *BaseCtx) Key(name string, canMemo bool, mark int) MemoKey {
-	return MemoKey{Mark: mark, Name: name, CanMemo: canMemo}
-}
-
-func (b *BaseCtx) Memo(key MemoKey) *Memo {
-	return nil
-}
-
-func (b *BaseCtx) Memoize(key MemoKey, tree interface{}, lastMark int) {}
-
-func (b *BaseCtx) ClearErrorMemos() {}
-
-func (b *BaseCtx) PruneCache(cutpoint int) {}
-
 func (b *BaseCtx) Enter(name string) {
 	b.callStack = append(b.callStack, name)
 }
@@ -214,14 +171,6 @@ func (b *BaseCtx) Leave() {
 	}
 }
 
-func (b *BaseCtx) Track(key MemoKey) int {
-	return 0
-}
-
-func (b *BaseCtx) Untrack(key MemoKey) int {
-	return 0
-}
-
 func (b *BaseCtx) ParseEOF() bool {
 	b.Enter("__eof__")
 	b.NextToken()
@@ -230,10 +179,86 @@ func (b *BaseCtx) ParseEOF() bool {
 	return result
 }
 
-func (b *BaseCtx) Push() Ctx {
+func (b *BaseCtx) Failure(start int, source error) *DisasterReport {
+	b.Reset(start)
+	if f := b.FurthestFailure(); f != nil && f.Start >= b.Mark() {
+		return f
+	}
+	dis := &DisasterReport{Start: start, Failure: ParseFailure{Message: source.Error()}}
+	b.SetFurthestFailure(dis)
+	return dis
+}
+
+func (b *BaseCtx) FurthestFailure() *DisasterReport {
+	return b.furthest
+}
+
+func (b *BaseCtx) SetFurthestFailure(dis *DisasterReport) {
+	b.furthest = dis
+}
+
+func (b *BaseCtx) Token(token string) (string, error) {
+	b.NextToken()
+	ok := b.cursorMut.MatchToken(token)
+	if !ok {
+		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("expected %q", token)}
+	}
+	return token, nil
+}
+
+func (b *BaseCtx) Pattern(pattern string) (string, error) {
+	re := b.GetPattern(pattern)
+	if re == nil {
+		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("invalid pattern %q", pattern)}
+	}
+	m, ok := b.cursorMut.MatchPattern(re)
+	if !ok {
+		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("expected pattern %q", pattern)}
+	}
+	return m, nil
+}
+
+func (b *BaseCtx) Void() error {
+	b.NextToken()
 	return nil
 }
 
-func (b *BaseCtx) Merge(other Ctx) Ctx {
+func (b *BaseCtx) Fail() error {
+	return &ParseError{Pos: b.Mark(), Message: "fail"}
+}
+
+func (b *BaseCtx) EofCheck() error {
+	b.NextToken()
+	if !b.cursor.AtEnd() {
+		return &ParseError{Pos: b.Mark(), Message: "expected end of text"}
+	}
 	return nil
+}
+
+func (b *BaseCtx) EolCheck() error {
+	if !b.cursorMut.MatchEOL() {
+		return &ParseError{Pos: b.Mark(), Message: "expected end of line"}
+	}
+	return nil
+}
+
+func (b *BaseCtx) Eof() bool {
+	return b.cursor.AtEnd()
+}
+
+func (b *BaseCtx) Constant(literal any) (trees.Tree, error) {
+	switch v := literal.(type) {
+	case string:
+		return &trees.Text{Value: v}, nil
+	case float64:
+		return &trees.Number{Value: v}, nil
+	case bool:
+		return &trees.Bool{Value: v}, nil
+	case nil:
+		return &trees.Nil{}, nil
+	case int:
+		return &trees.Number{Value: float64(v)}, nil
+	default:
+		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
+	}
 }

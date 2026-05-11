@@ -1,6 +1,6 @@
 package peg
 
 type Pattern struct {
-	Model
+	ModelBase
 	Pattern string
 }
