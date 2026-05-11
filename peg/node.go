@@ -2,7 +2,6 @@ package peg
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	"github.com/davecgh/go-spew/spew"
@@ -81,80 +80,28 @@ func (n *Node) Clone() *Node {
 	return &cp
 }
 
-// marshalValue recursively converts a Go value to a JSON-safe form.
-func marshalValue(v any) any {
-	if v == nil {
+func (n *Node) __pub__() map[string]any {
+	if n == nil {
 		return nil
 	}
-	rv := reflect.ValueOf(v)
-	switch rv.Kind() {
-	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64, reflect.String:
-		return v
-	case reflect.Slice, reflect.Array:
-		n := rv.Len()
-		out := make([]any, 0, n)
-		for i := range n {
-			out = append(out, marshalValue(rv.Index(i).Interface()))
+	out := make(map[string]any)
+	v := reflect.ValueOf(n).Elem()
+	t := v.Type()
+	for i := range v.NumField() {
+		f := t.Field(i)
+		if !f.IsExported() {
+			continue
 		}
-		return out
-	case reflect.Map:
-		out := make(map[string]any, rv.Len())
-		for _, key := range rv.MapKeys() {
-			k := fmt.Sprint(key.Interface())
-			out[k] = marshalValue(rv.MapIndex(key).Interface())
-		}
-		return out
-	case reflect.Ptr, reflect.Interface:
-		if rv.IsNil() {
-			return nil
-		}
-		return marshalValue(rv.Elem().Interface())
-	case reflect.Struct:
-		if m, ok := v.(json.Marshaler); ok {
-			raw, _ := m.MarshalJSON()
-			var out any
-			_ = json.Unmarshal(raw, &out)
-			return out
-		}
-		out := make(map[string]any)
-		t := rv.Type()
-		for i := range rv.NumField() {
-			name := t.Field(i).Name
-			if !t.Field(i).IsExported() {
-				continue
-			}
-			out[name] = marshalValue(rv.Field(i).Interface())
-		}
-		return out
-	default:
-		return fmt.Sprint(v)
+		out[f.Name] = v.Field(i).Interface()
 	}
+	return out
 }
 
 func (n *Node) MarshalJSON() ([]byte, error) {
 	if n == nil {
 		return []byte("null"), nil
 	}
-	out := make(map[string]any)
-	out["__class__"] = "Node"
-	if n.Ast != nil {
-		out["ast"] = marshalValue(n.Ast)
-	}
-	if n.Pos != nil {
-		out["pos"] = marshalValue(n.Pos)
-	}
-	if len(n.Children) > 0 {
-		children := make([]any, 0, len(n.Children))
-		for _, child := range n.Children {
-			if child == nil {
-				children = append(children, nil)
-			} else {
-				children = append(children, child)
-			}
-		}
-		out["children"] = children
-	}
-	return json.Marshal(out)
+	pub := n.__pub__()
+	pub["__class__"] = "Node"
+	return json.Marshal(pub)
 }
