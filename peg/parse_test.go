@@ -11,7 +11,7 @@ import (
 
 func ctxFrom(s string) context.Ctx {
 	c := input.NewStrCursor(s)
-	pat, err := pyre.Compile(`(?m)\s+`)
+	pat, err := pyre.Compile(`(?m)[ \t]+`)
 	if err != nil {
 		panic(err)
 	}

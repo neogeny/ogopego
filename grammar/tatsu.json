@@ -1051,17 +1051,8 @@
       "__class__": "Rule",
       "name": "EOL",
       "exp": {
-        "__class__": "Sequence",
-        "sequence": [
-          {
-            "__class__": "Pattern",
-            "pattern": "(?m)[ \\t]*$"
-          },
-          {
-            "__class__": "Pattern",
-            "pattern": "(?m)(?:\\r?\\n|\\r)?"
-          }
-        ]
+        "__class__": "Pattern",
+        "pattern": "[ \\t]*(?:\\r?\\n|\\r)"
       },
       "params": [],
       "kwparams": {},

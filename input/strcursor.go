@@ -140,11 +140,7 @@ func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	end := m.End()
-	if end == 0 {
-		return "", false
-	}
-	s.offset += end
+	s.offset += m.End()
 	if g, ok := m.Group(1); ok {
 		return g, true
 	}

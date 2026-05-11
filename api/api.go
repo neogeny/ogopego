@@ -34,7 +34,7 @@ func ParseGrammar(grammar string) (trees.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	pat, err := pyre.Compile(`(?m)\s+`)
+	pat, err := pyre.Compile(`(?m)[ \t]+`)
 	if err != nil {
 		return nil, err
 	}
