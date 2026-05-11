@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // ParseInfo holds parse position information.
@@ -49,6 +51,10 @@ func (n *Node) Line() int {
 		return 0
 	}
 	return n.Pos.Line
+}
+
+func (n *Node) AsStr() string {
+	return spew.Sdump(n)
 }
 
 func (n *Node) Path() []*Node {
