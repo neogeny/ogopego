@@ -14,6 +14,7 @@ type DisasterReport struct {
 	Start   int
 	Failure ParseFailure
 	CutSeen bool
+	Memento *input.Memento
 }
 
 type ParseState struct {

@@ -223,6 +223,15 @@ func (s *StrCursor) LocationAt(mark int) Location {
 	}
 }
 
+func (s *StrCursor) SetIgnoreCase(ignore bool) {
+	s.heavy = &CursorHeavy{
+		IgnoreCase: ignore,
+		NameGuard:  s.heavy.NameGuard,
+		Source:     s.heavy.Source,
+		Patterns:   s.heavy.Patterns,
+	}
+}
+
 func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
 	s.heavy = &CursorHeavy{
 		IgnoreCase: s.heavy.IgnoreCase,

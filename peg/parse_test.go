@@ -9,7 +9,7 @@ import (
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
-func ctxFrom(s string) context.Ctx {
+func ctxFrom(s string) Ctx {
 	c := input.NewStrCursor(s)
 	pat, err := pyre.Compile(`(?m)[ \t]+`)
 	if err != nil {

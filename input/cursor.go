@@ -36,5 +36,6 @@ type Cursor interface {
 	Location() Location
 	LocationAt(mark int) Location
 	SetPatterns(patterns *TokenizingPatterns)
+	SetIgnoreCase(ignore bool)
 	Clone() Cursor
 }

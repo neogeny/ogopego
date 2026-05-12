@@ -3,7 +3,6 @@ package peg
 import (
 	"fmt"
 
-	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -36,7 +35,7 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 	return nil, fmt.Errorf("rule %q not found", name)
 }
 
-func (g *Grammar) ParseTreeFrom(ctx context.Ctx, start string) (trees.Tree, error) {
+func (g *Grammar) ParseTreeFrom(ctx Ctx, start string) (trees.Tree, error) {
 	if len(g.Keywords) > 0 {
 		ctx.SetKeywords(g.Keywords)
 	}
@@ -47,7 +46,7 @@ func (g *Grammar) ParseTreeFrom(ctx context.Ctx, start string) (trees.Tree, erro
 	return rule.Parse(ctx)
 }
 
-func (g *Grammar) ParseTree(ctx context.Ctx) (trees.Tree, error) {
+func (g *Grammar) ParseTree(ctx Ctx) (trees.Tree, error) {
 	start := "start"
 	if _, err := g.GetRule(start); err != nil {
 		if len(g.Rules) == 0 {

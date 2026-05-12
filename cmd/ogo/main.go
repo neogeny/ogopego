@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
+	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/peg"
 )
 
 func main() {
@@ -45,23 +50,71 @@ func main() {
 	}
 	_ = useColorOutput
 
+	var output string
+
 	switch cmd.Name {
 	case "run":
-		fmt.Fprintln(os.Stderr, "grammar:", CLI.Run.Grammar)
-		fmt.Fprintln(os.Stderr, "inputs:", CLI.Run.Inputs)
-		fmt.Fprintln(os.Stderr, "json:", CLI.Run.Json)
-		fmt.Fprintln(os.Stderr, "model:", CLI.Run.Model)
-		fmt.Fprintln(os.Stderr, "short:", CLI.Run.Short)
+		err := fmt.Errorf("run command not fully wired yet")
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
+
 	case "boot":
-		fmt.Fprintln(os.Stderr, "json:", CLI.Boot.Json)
-		fmt.Fprintln(os.Stderr, "model:", CLI.Boot.Model)
-		fmt.Fprintln(os.Stderr, "pretty:", CLI.Boot.Pretty)
-		fmt.Fprintln(os.Stderr, "railroads:", CLI.Boot.Railroads)
+		gram, err := api.BootGrammar()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
+			os.Exit(1)
+		}
+		switch {
+		case CLI.Boot.Json:
+			output = json.AsJSONs(gram)
+		case CLI.Boot.Pretty:
+			output = gram.PrettyPrint()
+		case CLI.Boot.Railroads:
+			output = gram.Railroads()
+		default:
+			output = gram.PrettyPrint()
+		}
+
 	case "grammar":
-		fmt.Fprintln(os.Stderr, "grammar:", CLI.Grammar.Grammar)
-		fmt.Fprintln(os.Stderr, "json:", CLI.Grammar.Json)
-		fmt.Fprintln(os.Stderr, "model:", CLI.Grammar.Model)
-		fmt.Fprintln(os.Stderr, "pretty:", CLI.Grammar.Pretty)
-		fmt.Fprintln(os.Stderr, "railroads:", CLI.Grammar.Railroads)
+		gram, err := loadGrammar(CLI.Grammar.Grammar)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			os.Exit(1)
+		}
+		switch {
+		case CLI.Grammar.Json:
+			output = json.AsJSONs(gram)
+		case CLI.Grammar.Pretty:
+			output = gram.PrettyPrint()
+		case CLI.Grammar.Railroads:
+			output = gram.Railroads()
+		default:
+			output = gram.PrettyPrint()
+		}
+	}
+
+	if output != "" {
+		if CLI.Output != "" {
+			if err := os.WriteFile(CLI.Output, []byte(output), 0644); err != nil {
+				fmt.Fprintln(os.Stderr, "error writing output:", err)
+				os.Exit(1)
+			}
+		} else {
+			fmt.Println(output)
+		}
+	}
+}
+
+func loadGrammar(path string) (*peg.Grammar, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading %s: %w", path, err)
+	}
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".json":
+		return api.LoadGrammarFromJSON(data)
+	default:
+		return api.Compile(string(data))
 	}
 }
