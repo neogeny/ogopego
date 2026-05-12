@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -187,19 +187,19 @@ func (b *BaseCtx) EolCheck() error {
 
 func (b *BaseCtx) Eof() bool { return b.cursor.AtEnd() }
 
-func (b *BaseCtx) Constant(literal any) (trees.Tree, error) {
+func (b *BaseCtx) Constant(literal any) (tree.Tree, error) {
 	switch v := literal.(type) {
 	case string:
-		return &trees.Text{Value: v}, nil
+		return &tree.Text{Value: v}, nil
 	case float64:
-		return &trees.Number{Value: v}, nil
+		return &tree.Number{Value: v}, nil
 	case bool:
-		return &trees.Bool{Value: v}, nil
+		return &tree.Bool{Value: v}, nil
 	case nil:
-		return &trees.Nil{}, nil
+		return &tree.Nil{}, nil
 	case int:
-		return &trees.Number{Value: float64(v)}, nil
+		return &tree.Number{Value: float64(v)}, nil
 	default:
-		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
+		return &tree.Text{Value: fmt.Sprintf("%v", v)}, nil
 	}
 }

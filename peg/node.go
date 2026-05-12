@@ -3,6 +3,7 @@ package peg
 import (
 	"encoding/json"
 	"reflect"
+	"weak"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -19,7 +20,7 @@ type ParseInfo struct {
 
 // Node is an AST node produced by parsing.
 type Node struct {
-	parent   *Node
+	parent   weak.Pointer[Node]
 	Ast      any
 	Pos      *ParseInfo
 	Children []*Node
@@ -29,12 +30,12 @@ func (n *Node) Parent() *Node {
 	if n == nil {
 		return nil
 	}
-	return n.parent
+	return n.parent.Value()
 }
 
-func (n *Node) SetParent(p *Node) {
+func (n *Node) setParent(p *Node) {
 	if n != nil {
-		n.parent = p
+		n.parent = weak.Make(p)
 	}
 }
 
@@ -61,23 +62,13 @@ func (n *Node) Path() []*Node {
 		return nil
 	}
 	var ancestors []*Node
-	for cur := n; cur != nil; cur = cur.parent {
+	for cur := n; cur != nil; cur = cur.Parent() {
 		ancestors = append(ancestors, cur)
 	}
 	for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
 		ancestors[i], ancestors[j] = ancestors[j], ancestors[i]
 	}
 	return ancestors
-}
-
-func (n *Node) Clone() *Node {
-	if n == nil {
-		return nil
-	}
-	cp := *n
-	cp.parent = nil
-	cp.Children = append([]*Node(nil), n.Children...)
-	return &cp
 }
 
 func (n *Node) __pub__() map[string]any {

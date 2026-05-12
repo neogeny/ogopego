@@ -263,16 +263,16 @@ func ruleFromJSON(h *helper) (*peg.Rule, error) {
 
 	r := &peg.Rule{
 		NamedBox: peg.NamedBox{
-			Box: peg.Box{Exp: exp},
+			Box:  peg.Box{Exp: exp},
 			Name: name,
 		},
-		Params:     params,
-		IsName:     isName,
-		IsTokn:     isTokn,
-		NoMemo:     noMemo,
-		NoStak:     noStak,
-		IsMemo:     isMemo,
-		IsLrec:     isLrec,
+		Params: params,
+		IsName: isName,
+		IsTokn: isTokn,
+		NoMemo: noMemo,
+		NoStak: noStak,
+		IsMemo: isMemo,
+		IsLrec: isLrec,
 	}
 	return r, nil
 }

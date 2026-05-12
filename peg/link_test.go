@@ -33,8 +33,10 @@ func expectValidateError(t *testing.T, g *Grammar) {
 }
 
 // linkTestGrammar builds a simple grammar:
-//   expr = atom ('+' atom)*
-//   atom = 'x'
+//
+//	expr = atom ('+' atom)*
+//	atom = 'x'
+//
 // Uses Call to reference atom from expr.
 func linkTestGrammar() *Grammar {
 	atom := &Rule{
@@ -99,8 +101,9 @@ func TestLinkCallUndefined(t *testing.T) {
 }
 
 // includeTestGrammar builds a grammar with RuleInclude:
-//   rule_a = 'a'
-//   rule_b = >rule_a   (includes rule_a)
+//
+//	rule_a = 'a'
+//	rule_b = >rule_a   (includes rule_a)
 func includeTestGrammar() *Grammar {
 	ruleA := &Rule{
 		NamedBox: NamedBox{
@@ -110,7 +113,7 @@ func includeTestGrammar() *Grammar {
 	}
 	ruleB := &Rule{
 		NamedBox: NamedBox{
-			Box: Box{Exp: &RuleInclude{Name: "rule_a"}},
+			Box:  Box{Exp: &RuleInclude{Name: "rule_a"}},
 			Name: "rule_b",
 		},
 	}

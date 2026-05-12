@@ -3,7 +3,7 @@ package api
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 )
 
 func TestParseGrammar(t *testing.T) {
@@ -14,7 +14,7 @@ func TestParseGrammar(t *testing.T) {
 	if result == nil {
 		t.Fatal("expected non-nil Tree")
 	}
-	if _, ok := result.(*trees.Nil); ok {
+	if _, ok := result.(*tree.Nil); ok {
 		t.Fatal("unexpected Nil tree")
 	}
 }
@@ -67,4 +67,3 @@ func TestCompileToJSONString(t *testing.T) {
 		t.Fatal("expected non-empty string")
 	}
 }
-

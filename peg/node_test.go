@@ -10,7 +10,7 @@ func TestNodeNilSafety(t *testing.T) {
 	if p := n.Parent(); p != nil {
 		t.Error("expected nil parent")
 	}
-	n.SetParent(&Node{})
+	n.setParent(&Node{})
 	if s := n.Text(); s != "" {
 		t.Errorf("expected empty text, got %q", s)
 	}
@@ -35,7 +35,7 @@ func TestNodeNilSafety(t *testing.T) {
 func TestNodeParent(t *testing.T) {
 	parent := &Node{}
 	child := &Node{}
-	child.SetParent(parent)
+	child.setParent(parent)
 	if child.Parent() != parent {
 		t.Error("expected parent to match")
 	}
@@ -84,8 +84,8 @@ func TestNodePath(t *testing.T) {
 	root := &Node{Ast: "root"}
 	mid := &Node{Ast: "mid"}
 	leaf := &Node{Ast: "leaf"}
-	mid.SetParent(root)
-	leaf.SetParent(mid)
+	mid.setParent(root)
+	leaf.setParent(mid)
 	path := leaf.Path()
 	if len(path) != 3 {
 		t.Fatalf("expected 3 ancestors, got %d", len(path))
@@ -125,7 +125,7 @@ func TestNodeClone(t *testing.T) {
 			{Ast: "child"},
 		},
 	}
-	n.SetParent(parent)
+	n.setParent(parent)
 	c := n.Clone()
 	if c.Parent() != nil {
 		t.Error("clone should have nil parent")
@@ -203,7 +203,7 @@ func TestNodeMarshalJSONWithChildren(t *testing.T) {
 		Ast:      "parent",
 		Children: []*Node{child},
 	}
-	child.SetParent(parent)
+	child.setParent(parent)
 	b, err := parent.MarshalJSON()
 	if err != nil {
 		t.Fatal(err)

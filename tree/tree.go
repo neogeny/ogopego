@@ -1,11 +1,11 @@
-package trees
+package tree
 
 type Tree interface {
 	tree()
-	Fold(gather *Merge) Tree
+	fold(gather *treeMerge) Tree
 }
 
-type Merge struct {
+type treeMerge struct {
 	Root Tree
 	Map  map[string]Tree
 }
@@ -14,12 +14,12 @@ func Fold(tree Tree) Tree {
 	if tree == nil {
 		return &Nil{}
 	}
-	g := &Merge{Map: make(map[string]Tree)}
-	result := tree.Fold(g)
+	g := &treeMerge{Map: make(map[string]Tree)}
+	result := tree.fold(g)
 	return finish(g, result)
 }
 
-func finish(g *Merge, base Tree) Tree {
+func finish(g *treeMerge, base Tree) Tree {
 	switch g.Root.(type) {
 	case *Nil, nil:
 	default:
@@ -99,7 +99,7 @@ func appendAsList(a, b Tree) Tree {
 	return &Seq{Items: []Tree{a, b}}
 }
 
-func (m *Merge) insert(key string, val Tree) {
+func (m *treeMerge) insert(key string, val Tree) {
 	existing, ok := m.Map[key]
 	if !ok {
 		m.Map[key] = val
@@ -108,7 +108,7 @@ func (m *Merge) insert(key string, val Tree) {
 	}
 }
 
-func (m *Merge) insertAsList(key string, val Tree) {
+func (m *treeMerge) insertAsList(key string, val Tree) {
 	existing, ok := m.Map[key]
 	if !ok {
 		m.Map[key] = &Seq{Items: []Tree{val}}

@@ -3,7 +3,7 @@ package peg
 import (
 	"fmt"
 
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 )
 
 type Call struct {
@@ -12,7 +12,7 @@ type Call struct {
 	Target *Rule
 }
 
-func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
+func (c *Call) Parse(ctx Ctx) (tree.Tree, error) {
 	if c.Target == nil {
 		return nil, fmt.Errorf("call to %q has not been linked", c.Name)
 	}

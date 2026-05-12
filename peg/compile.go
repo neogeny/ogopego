@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 )
 
 type comp struct {
@@ -25,20 +25,20 @@ func (c *comp) error(msg string) error {
 	return fmt.Errorf("compile: %s at %s", msg, strings.Join(c.path, " -> "))
 }
 
-func Compile(tree trees.Tree) (*Grammar, error) {
+func Compile(tree tree.Tree) (*Grammar, error) {
 	c := &comp{}
 	return c.compileGrammar(tree)
 }
 
-func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {
-	rn, ok := tree.(*trees.RuleNode)
+func (c *comp) node(tree tree.Tree) (string, tree.Tree, error) {
+	rn, ok := tree.(*tree.TreeNode)
 	if !ok {
 		return "", nil, c.error(fmt.Sprintf("expected RuleNode, got %T", tree))
 	}
 	return rn.TypeName, rn.Tree, nil
 }
 
-func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
+func (c *comp) nodeCheck(tree tree.Tree, typename string) (tree.Tree, error) {
 	name, inner, err := c.node(tree)
 	if err != nil {
 		return nil, err
@@ -49,8 +49,8 @@ func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
 	return inner, nil
 }
 
-func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
-	mn, ok := tree.(*trees.MapNode)
+func (c *comp) mapGet(tree tree.Tree, key string) (tree.Tree, error) {
+	mn, ok := tree.(*tree.MapNode)
 	if !ok {
 		return nil, c.error(fmt.Sprintf("expected MapNode for key %q, got %T", key, tree))
 	}
@@ -61,8 +61,8 @@ func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
 	return val, nil
 }
 
-func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
-	mn, ok := tree.(*trees.MapNode)
+func (c *comp) mapGetDefault(tree tree.Tree, key, def string) string {
+	mn, ok := tree.(*tree.MapNode)
 	if !ok {
 		return def
 	}
@@ -73,26 +73,26 @@ func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
 	return textValue(val)
 }
 
-func textValue(tree trees.Tree) string {
-	t, ok := tree.(*trees.Text)
+func textValue(tree tree.Tree) string {
+	t, ok := tree.(*tree.Text)
 	if ok {
 		return t.Value
 	}
 	return ""
 }
 
-func listValue(tree trees.Tree) []trees.Tree {
+func listValue(tree tree.Tree) []tree.Tree {
 	switch t := tree.(type) {
-	case *trees.Seq:
+	case *tree.Seq:
 		return t.Items
-	case *trees.List:
+	case *tree.List:
 		return t.Items
 	default:
 		return nil
 	}
 }
 
-func strListValue(tree trees.Tree) []string {
+func strListValue(tree tree.Tree) []string {
 	items := listValue(tree)
 	if items == nil {
 		return nil
@@ -107,14 +107,14 @@ func strListValue(tree trees.Tree) []string {
 	return out
 }
 
-func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
+func (c *comp) compileGrammar(tree tree.Tree) (*Grammar, error) {
 	cc := c.push("Grammar")
 	inner, err := cc.nodeCheck(tree, "Grammar")
 	if err != nil {
 		return nil, err
 	}
 
-	mn, ok := inner.(*trees.MapNode)
+	mn, ok := inner.(*tree.MapNode)
 	if !ok {
 		return nil, cc.error(fmt.Sprintf("expected MapNode, got %T", inner))
 	}
@@ -148,7 +148,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 	if dirsTree, ok := mn.Entries["directives"]; ok {
 		dirList := listValue(dirsTree)
 		for _, d := range dirList {
-			dm, dOk := d.(*trees.MapNode)
+			dm, dOk := d.(*tree.MapNode)
 			if !dOk {
 				continue
 			}
@@ -169,7 +169,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 				if s != "" {
 					keywords = append(keywords, s)
 				}
-				if rn, ok := kw.(*trees.RuleNode); ok && rn.TypeName == "Word" {
+				if rn, ok := kw.(*tree.TreeNode); ok && rn.TypeName == "Word" {
 					s := textValue(rn.Tree)
 					if s != "" {
 						keywords = append(keywords, s)
@@ -191,13 +191,13 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 	return g, nil
 }
 
-func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
+func (c *comp) compileRule(tree tree.Tree) (*Rule, error) {
 	inner, err := c.nodeCheck(tree, "Rule")
 	if err != nil {
 		return nil, err
 	}
 
-	mn, ok := inner.(*trees.MapNode)
+	mn, ok := inner.(*tree.MapNode)
 	if !ok {
 		return nil, c.error(fmt.Sprintf("expected MapNode for Rule, got %T", inner))
 	}
@@ -232,7 +232,7 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 	return r, nil
 }
 
-func (c *comp) compileExp(tree trees.Tree) (Model, error) {
+func (c *comp) compileExp(tree tree.Tree) (Model, error) {
 	typename, inner, err := c.node(tree)
 	if err != nil {
 		return nil, err
@@ -461,7 +461,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		exp = &Pattern{Pattern: textValue(inner)}
 
 	case "Patterns":
-		var items []trees.Tree
+		var items []tree.Tree
 		if t, err := cc.mapGet(inner, "tree"); err == nil {
 			items = listValue(t)
 		} else {
@@ -541,7 +541,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		exp = &RuleInclude{Name: textValue(inner)}
 
 	case "Sequence":
-		var items []trees.Tree
+		var items []tree.Tree
 		if t, err := cc.mapGet(inner, "tree"); err == nil {
 			items = listValue(t)
 		} else {

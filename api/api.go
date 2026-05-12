@@ -8,7 +8,7 @@ import (
 	"github.com/neogeny/ogopego/input"
 	"github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/peg"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -29,7 +29,7 @@ func BootGrammar() (*peg.Grammar, error) {
 	return bootGrammar()
 }
 
-func ParseGrammar(grammar string) (trees.Tree, error) {
+func ParseGrammar(grammar string) (tree.Tree, error) {
 	boot, err := bootGrammar()
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 // func ParseToJSON(grammar, text string) (any, error) { ... }
 // func ParseToJSONString(grammar, text string) (string, error) { ... }
 
-func ParseInput(parser *peg.Grammar, text string) (trees.Tree, error) {
+func ParseInput(parser *peg.Grammar, text string) (tree.Tree, error) {
 	ctx := context.NewBaseCtx(input.NewStrCursor(text))
 	return parser.ParseTree(ctx)
 }

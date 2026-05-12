@@ -1,11 +1,11 @@
-package trees
+package tree
 
 import (
 	"testing"
 )
 
-func text(s string) *Text     { return &Text{Value: s} }
-func seq(items ...Tree) *Seq  { return &Seq{Items: items} }
+func text(s string) *Text      { return &Text{Value: s} }
+func seq(items ...Tree) *Seq   { return &Seq{Items: items} }
 func list(items ...Tree) *List { return &List{Items: items} }
 
 func TestFoldNil(t *testing.T) {
@@ -228,8 +228,8 @@ func TestFoldSeqWithNil(t *testing.T) {
 }
 
 func TestFoldRuleNode(t *testing.T) {
-	result := Fold(&RuleNode{TypeName: "expr", Tree: text("42")})
-	r, ok := result.(*RuleNode)
+	result := Fold(&TreeNode{TypeName: "expr", Tree: text("42")})
+	r, ok := result.(*TreeNode)
 	if !ok {
 		t.Fatalf("expected RuleNode, got %T", result)
 	}

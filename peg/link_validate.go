@@ -1,6 +1,8 @@
 package peg
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (b *Box) ValidateLinked() error {
 	if b.Exp != nil {

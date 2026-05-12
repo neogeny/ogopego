@@ -298,7 +298,7 @@ func TestPrettyPositiveGather(t *testing.T) {
 func TestPrettyRule(t *testing.T) {
 	r := &Rule{
 		NamedBox: NamedBox{
-			Box:  Box{Exp: &Choice{
+			Box: Box{Exp: &Choice{
 				Options: []*Option{
 					{Box: Box{Exp: &Token{Token: "hello"}}},
 					{Box: Box{Exp: &Token{Token: "world"}}},

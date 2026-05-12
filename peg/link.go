@@ -1,6 +1,8 @@
 package peg
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (b *Box) Link(rules map[string]*Rule) error {
 	if b.Exp != nil {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/tree"
 )
 
 func newTestBaseCtx() *BaseCtx {
@@ -127,19 +127,19 @@ func TestBaseCtxPatternMismatch(t *testing.T) {
 func TestBaseCtxConstant(t *testing.T) {
 	ctx := newTestBaseCtx()
 	t1, _ := ctx.Constant("hello")
-	if tt, ok := t1.(*trees.Text); !ok || tt.Value != "hello" {
+	if tt, ok := t1.(*tree.Text); !ok || tt.Value != "hello" {
 		t.Errorf("expected Text{hello}, got %T %+v", t1, t1)
 	}
 	t2, _ := ctx.Constant(42)
-	if tn, ok := t2.(*trees.Number); !ok || tn.Value != 42 {
+	if tn, ok := t2.(*tree.Number); !ok || tn.Value != 42 {
 		t.Errorf("expected Number{42}, got %T %+v", t2, t2)
 	}
 	t3, _ := ctx.Constant(true)
-	if tb, ok := t3.(*trees.Bool); !ok || tb.Value != true {
+	if tb, ok := t3.(*tree.Bool); !ok || tb.Value != true {
 		t.Errorf("expected Bool{true}, got %T %+v", t3, t3)
 	}
 	t4, _ := ctx.Constant(nil)
-	if _, ok := t4.(*trees.Nil); !ok {
+	if _, ok := t4.(*tree.Nil); !ok {
 		t.Errorf("expected Nil, got %T", t4)
 	}
 }

@@ -29,9 +29,9 @@ func (w *prettyWriter) WriteLine(s string) {
 	}
 }
 
-func (w *prettyWriter) Indent()   { w.indent++ }
-func (w *prettyWriter) Dedent()   { w.indent-- }
-func (w *prettyWriter) Reset()    { w.buf.Reset() }
+func (w *prettyWriter) Indent() { w.indent++ }
+func (w *prettyWriter) Dedent() { w.indent-- }
+func (w *prettyWriter) Reset()  { w.buf.Reset() }
 func (w *prettyWriter) String() string {
 	return strings.TrimRight(w.buf.String(), "\n")
 }
@@ -82,17 +82,16 @@ func (m *RuleInclude) PrettyPrint() string {
 
 // Leaf terminals
 
-func (m *Cut) PrettyPrint() string           { return "~" }
-func (m *Dot) PrettyPrint() string           { return "." }
-func (m *EOF) PrettyPrint() string            { return "$" }
-func (m *EOL) PrettyPrint() string            { return "$->" }
-func (m *Fail) PrettyPrint() string           { return "!()" }
-func (m *NULL) PrettyPrint() string           { return "" }
-func (m *Void) PrettyPrint() string           { return "()" }
-func (m *EmptyClosure) PrettyPrint() string   { return "{}" }
-func (m *Comment) PrettyPrint() string        { return "" }
-func (m *EOLComment) PrettyPrint() string     { return "" }
-func (m *Patterns) PrettyPrint() string       { return "" }
+func (m *Cut) PrettyPrint() string          { return "~" }
+func (m *Dot) PrettyPrint() string          { return "." }
+func (m *EOF) PrettyPrint() string          { return "$" }
+func (m *EOL) PrettyPrint() string          { return "$->" }
+func (m *Fail) PrettyPrint() string         { return "!()" }
+func (m *NULL) PrettyPrint() string         { return "" }
+func (m *Void) PrettyPrint() string         { return "()" }
+func (m *EmptyClosure) PrettyPrint() string { return "{}" }
+func (m *Comment) PrettyPrint() string      { return "" }
+func (m *EOLComment) PrettyPrint() string   { return "" }
 
 // Option
 
