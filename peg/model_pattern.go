@@ -8,4 +8,4 @@ type Pattern struct {
 }
 
 func (t *Pattern) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Pattern) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Pattern) AsJSON() any                { return t.AsJSONOf(t) }

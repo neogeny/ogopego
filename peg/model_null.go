@@ -7,4 +7,4 @@ type NULL struct {
 }
 
 func (t *NULL) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *NULL) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *NULL) AsJSON() any                { return t.AsJSONOf(t) }

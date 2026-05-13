@@ -7,4 +7,4 @@ type Cut struct {
 }
 
 func (t *Cut) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Cut) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Cut) AsJSON() any                { return t.AsJSONOf(t) }

@@ -1,7 +1,7 @@
 # Justfile for ogopego
 
 # Build binary to ./bin/
-build:
+build: gofmt-check
     go build -o bin/ogo ./cmd/ogo
 
 # Run the CLI
@@ -9,7 +9,7 @@ run *args:
     go run ./cmd/ogo {{args}}
 
 # Run tests
-test:
+test: gofmt-check
     go test ./...
 
 # Run tests with verbose output
@@ -20,9 +20,17 @@ test-v:
 lint:
     golangci-lint run ./...
 
-# Check formatting
+# Check formatting (including vendor)
 fmt:
     gofmt -l -w -s .
+
+# Format all Go files excluding vendor
+gofmt:
+    find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l -w -s {} +
+
+# Check formatting (errors if changes needed)
+gofmt-check:
+    test -z "$(find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l {} +)"
 
 # Install dependencies
 deps:

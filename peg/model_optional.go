@@ -7,4 +7,4 @@ type Optional struct {
 }
 
 func (t *Optional) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Optional) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Optional) AsJSON() any                { return t.AsJSONOf(t) }

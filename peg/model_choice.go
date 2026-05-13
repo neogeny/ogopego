@@ -42,7 +42,7 @@ func (o *Optional) Parse(ctx Ctx) (trees.Tree, error) {
 }
 
 func (c *Choice) PubMap() *asjson.OrderedMap { return c.PubMapOf(c) }
-func (c *Choice) AsJSON() any               { return c.AsJSONOf(c) }
+func (c *Choice) AsJSON() any                { return c.AsJSONOf(c) }
 
 func (o *Option) PubMap() *asjson.OrderedMap { return o.PubMapOf(o) }
-func (o *Option) AsJSON() any               { return o.AsJSONOf(o) }
+func (o *Option) AsJSON() any                { return o.AsJSONOf(o) }

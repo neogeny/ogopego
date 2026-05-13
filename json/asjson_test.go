@@ -64,8 +64,8 @@ func TestAsJSONNestedSlice(t *testing.T) {
 }
 
 type testStruct struct {
-	Name  string
-	Value int
+	Name   string
+	Value  int
 	hidden string
 }
 

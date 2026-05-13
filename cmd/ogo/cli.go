@@ -13,9 +13,9 @@ var CLI struct {
 	Run struct {
 		Grammar string   `arg:"" required name:"grammar" help:"Path to the compiled TatSu JSON grammar."`
 		Inputs  []string `arg:"" required name:"inputs" help:"The files to be parsed."`
-		Json    bool    `help:"Print the output tree in JSON format" short:"j" group:"format"`
-		Model  bool    `help:"Print the Rust code for the tree construction" short:"m" group:"format"`
-		Short  bool    `help:"Print the Tree in short notation" short:"s" group:"format"`
+		Json    bool     `help:"Print the output tree in JSON format" short:"j" group:"format"`
+		Model   bool     `help:"Print the Rust code for the tree construction" short:"m" group:"format"`
+		Short   bool     `help:"Print the Tree in short notation" short:"s" group:"format"`
 	} `cmd:"" help:"Execute a grammar against one or more input files."`
 
 	Boot struct {
@@ -98,7 +98,7 @@ func coloredHelp(_ kong.HelpOptions, ctx *kong.Context) error {
 		}
 	}
 
-return nil
+	return nil
 }
 
 func validateExclusive(groups ...string) error {

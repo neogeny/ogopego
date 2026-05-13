@@ -10,7 +10,7 @@ import (
 type Event int
 
 const (
-	EventEntry    Event = iota
+	EventEntry Event = iota
 	EventSuccess
 	EventFailure
 	EventRecursion
@@ -33,15 +33,15 @@ type Tracer interface {
 
 type NullTracer struct{}
 
-func (NullTracer) Trace(_ Ctx, _ string)                           {}
-func (NullTracer) TraceEvent(_ Ctx, _ Event, _ string)              {}
-func (NullTracer) TraceEntry(_ Ctx)                                 {}
-func (NullTracer) TraceSuccess(_ Ctx)                               {}
-func (NullTracer) TraceFailure(_ Ctx, _ string)                     {}
-func (NullTracer) TraceRecursion(_ Ctx)                             {}
-func (NullTracer) TraceCut(_ Ctx)                                   {}
-func (NullTracer) TraceMatch(_ Ctx, _, _ string) bool               { return true }
-func (NullTracer) TraceNoMatch(_ Ctx, _, _ string) bool             { return false }
+func (NullTracer) Trace(_ Ctx, _ string)                {}
+func (NullTracer) TraceEvent(_ Ctx, _ Event, _ string)  {}
+func (NullTracer) TraceEntry(_ Ctx)                     {}
+func (NullTracer) TraceSuccess(_ Ctx)                   {}
+func (NullTracer) TraceFailure(_ Ctx, _ string)         {}
+func (NullTracer) TraceRecursion(_ Ctx)                 {}
+func (NullTracer) TraceCut(_ Ctx)                       {}
+func (NullTracer) TraceMatch(_ Ctx, _, _ string) bool   { return true }
+func (NullTracer) TraceNoMatch(_ Ctx, _, _ string) bool { return false }
 
 type ConsoleTracer struct{}
 

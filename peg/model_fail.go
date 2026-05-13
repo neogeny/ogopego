@@ -7,4 +7,4 @@ type Fail struct {
 }
 
 func (t *Fail) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Fail) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Fail) AsJSON() any                { return t.AsJSONOf(t) }

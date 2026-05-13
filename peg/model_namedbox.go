@@ -8,4 +8,4 @@ type NamedBox struct {
 }
 
 func (t *NamedBox) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *NamedBox) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *NamedBox) AsJSON() any                { return t.AsJSONOf(t) }

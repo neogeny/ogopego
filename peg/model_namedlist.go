@@ -7,4 +7,4 @@ type NamedList struct {
 }
 
 func (t *NamedList) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *NamedList) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *NamedList) AsJSON() any                { return t.AsJSONOf(t) }

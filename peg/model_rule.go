@@ -42,4 +42,4 @@ func (r *Rule) ShouldTrace() bool {
 }
 
 func (r *Rule) PubMap() *asjson.OrderedMap { return r.PubMapOf(r) }
-func (r *Rule) AsJSON() any               { return r.AsJSONOf(r) }
+func (r *Rule) AsJSON() any                { return r.AsJSONOf(r) }

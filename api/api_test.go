@@ -67,5 +67,3 @@ func TestBootGrammar(t *testing.T) {
 		t.Fatal("expected analyzed grammar")
 	}
 }
-
-

@@ -7,4 +7,4 @@ type Lookahead struct {
 }
 
 func (t *Lookahead) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Lookahead) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Lookahead) AsJSON() any                { return t.AsJSONOf(t) }

@@ -9,4 +9,4 @@ type RuleInclude struct {
 }
 
 func (t *RuleInclude) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *RuleInclude) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *RuleInclude) AsJSON() any                { return t.AsJSONOf(t) }

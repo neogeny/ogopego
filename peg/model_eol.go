@@ -7,4 +7,4 @@ type EOL struct {
 }
 
 func (t *EOL) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *EOL) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *EOL) AsJSON() any                { return t.AsJSONOf(t) }

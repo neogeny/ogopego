@@ -7,4 +7,4 @@ type Synth struct {
 }
 
 func (t *Synth) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Synth) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Synth) AsJSON() any                { return t.AsJSONOf(t) }

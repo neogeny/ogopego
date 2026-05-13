@@ -124,4 +124,4 @@ func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, star
 }
 
 func (c *Call) PubMap() *asjson.OrderedMap { return c.PubMapOf(c) }
-func (c *Call) AsJSON() any               { return c.AsJSONOf(c) }
+func (c *Call) AsJSON() any                { return c.AsJSONOf(c) }

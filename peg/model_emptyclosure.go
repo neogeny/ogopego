@@ -7,4 +7,4 @@ type EmptyClosure struct {
 }
 
 func (t *EmptyClosure) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *EmptyClosure) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *EmptyClosure) AsJSON() any                { return t.AsJSONOf(t) }

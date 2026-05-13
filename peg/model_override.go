@@ -7,4 +7,4 @@ type Override struct {
 }
 
 func (t *Override) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Override) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Override) AsJSON() any                { return t.AsJSONOf(t) }

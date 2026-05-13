@@ -8,7 +8,7 @@ type Constant struct {
 }
 
 func (t *Constant) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Constant) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Constant) AsJSON() any                { return t.AsJSONOf(t) }
 
 type Alert struct {
 	Constant
@@ -16,4 +16,4 @@ type Alert struct {
 }
 
 func (t *Alert) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Alert) AsJSON() any               { return t.AsJSONOf(t) }
+func (t *Alert) AsJSON() any                { return t.AsJSONOf(t) }
