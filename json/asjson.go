@@ -23,22 +23,21 @@ func (b *AsJSONBase) AsJSONOf(ref any) any {
 		return nil
 	}
 
-	v := reflect.ValueOf(ref)
-	for v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return nil
-		}
-		v = v.Elem()
+	t := reflect.TypeOf(ref)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
 	}
 
-	typename := v.Type().Name()
+	typename := t.Name()
 	out := orderedmap.New()
 	out.Set("__class__", typename)
 	for _, k := range pub.Keys() {
+		if k == "__class__" {
+			continue
+		}
 		val, _ := pub.Get(k)
 		out.Set(k, val)
 	}
-	out.Set("__class__", typename)
 	return out
 }
 

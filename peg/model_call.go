@@ -3,6 +3,7 @@ package peg
 import (
 	"fmt"
 
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -121,3 +122,6 @@ func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, star
 	}
 	return lastTree, nil
 }
+
+func (c *Call) PubMap() *asjson.OrderedMap { return c.PubMapOf(c) }
+func (c *Call) AsJSON() any               { return c.AsJSONOf(c) }

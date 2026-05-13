@@ -1,6 +1,9 @@
 package peg
 
-import "unicode"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"unicode"
+)
 
 type Rule struct {
 	NamedBox
@@ -37,3 +40,6 @@ func (r *Rule) IsMemoizable() bool {
 func (r *Rule) ShouldTrace() bool {
 	return !r.NoStak && !r.IsToken()
 }
+
+func (r *Rule) PubMap() *asjson.OrderedMap { return r.PubMapOf(r) }
+func (r *Rule) AsJSON() any               { return r.AsJSONOf(r) }

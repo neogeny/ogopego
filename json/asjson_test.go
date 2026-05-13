@@ -173,3 +173,47 @@ func TestAsJSONChanFunc(t *testing.T) {
 		t.Errorf("expected [null,null], got %s", string(b))
 	}
 }
+
+type mixinStruct struct {
+	AsJSONBase
+	Greeting string
+	Count    int
+}
+
+func (s *mixinStruct) PubMap() *OrderedMap {
+	return s.AsJSONBase.PubMapOf(s)
+}
+
+func (s *mixinStruct) AsJSON() any {
+	return s.AsJSONBase.AsJSONOf(s)
+}
+
+func TestAsJSONMixin(t *testing.T) {
+	s := &mixinStruct{Greeting: "hello", Count: 42}
+	result := AsJSON(s)
+	om, ok := result.(*OrderedMap)
+	if !ok {
+		t.Fatalf("expected *OrderedMap, got %T", result)
+	}
+	if cls, _ := om.Get("__class__"); cls != "mixinStruct" {
+		t.Errorf("expected __class__ mixinStruct, got %v", cls)
+	}
+	if g, _ := om.Get("Greeting"); g != "hello" {
+		t.Errorf("expected Greeting hello, got %v", g)
+	}
+}
+
+func TestAsJSONMixinPriority(t *testing.T) {
+	// Verify AsJSONMixin is checked before json.Marshaler
+	// mixinStruct doesn't implement MarshalJSON, but if it did,
+	// the AsJSONMixin path should still be taken
+	s := &mixinStruct{Greeting: "mixin", Count: 1}
+	result := AsJSON(s)
+	om, ok := result.(*OrderedMap)
+	if !ok {
+		t.Fatalf("expected *OrderedMap, got %T", result)
+	}
+	if cls, _ := om.Get("__class__"); cls != "mixinStruct" {
+		t.Errorf("expected __class__ mixinStruct, got %v", cls)
+	}
+}

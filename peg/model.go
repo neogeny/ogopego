@@ -20,7 +20,7 @@ type Model interface {
 }
 
 type ModelBase struct {
-	*Node
+	Node
 }
 
 func (m *ModelBase) followRef() *ModelBase { return m }
