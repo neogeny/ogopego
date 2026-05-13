@@ -90,7 +90,7 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 	acfg = acfg.Override(cfg)
 	ctx.Configure(acfg)
 
-	start := cfg.Start
+	start := acfg.Start
 	if start == "" {
 		start = "start"
 	}

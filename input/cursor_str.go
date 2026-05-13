@@ -4,12 +4,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
 type CursorHeavy struct {
-	cfg        config.Cfg
 	IgnoreCase bool
 	NameGuard  bool
 	Source     string
@@ -27,11 +25,9 @@ func NewStrCursor(text string) *StrCursor {
 		text:   text,
 		offset: 0,
 		heavy: &CursorHeavy{
-			cfg:        config.DefaultCfg(),
-			IgnoreCase: false,
-			NameGuard:  true,
-			Source:     "some input",
-			Patterns:   &TokenizingPatterns{},
+			NameGuard: true,
+			Source:    "some input",
+			Patterns:  &TokenizingPatterns{},
 		},
 	}
 }
@@ -47,17 +43,35 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 		text:   text,
 		offset: start,
 		heavy: &CursorHeavy{
-			cfg:        config.DefaultCfg(),
-			IgnoreCase: false,
-			NameGuard:  true,
-			Source:     source,
-			Patterns:   &TokenizingPatterns{},
+			NameGuard: true,
+			Source:    source,
+			Patterns:  &TokenizingPatterns{},
 		},
 	}
 }
 
 func (s *StrCursor) Configure(cfg Cfg) {
+	s.heavy.IgnoreCase = cfg.IgnoreCase
+	s.heavy.NameGuard = cfg.NameGuard
+	if cfg.Source != "" {
+		s.heavy.Source = cfg.Source
+	}
 
+	if cfg.Whitespace != nil {
+		if pat, err := pyre.Compile(*cfg.Whitespace); err == nil {
+			s.heavy.Patterns.Wsp = pat
+		}
+	}
+	if cfg.Comments != "" {
+		if pat, err := pyre.Compile(cfg.Comments); err == nil {
+			s.heavy.Patterns.Cmt = pat
+		}
+	}
+	if cfg.EolComments != "" {
+		if pat, err := pyre.Compile(cfg.EolComments); err == nil {
+			s.heavy.Patterns.Eol = pat
+		}
+	}
 }
 
 func (s *StrCursor) InputSource() string {
@@ -233,7 +247,6 @@ func (s *StrCursor) LocationAt(mark int) Location {
 
 func (s *StrCursor) SetIgnoreCase(ignore bool) {
 	s.heavy = &CursorHeavy{
-		cfg:        s.heavy.cfg,
 		IgnoreCase: ignore,
 		NameGuard:  s.heavy.NameGuard,
 		Source:     s.heavy.Source,
@@ -243,7 +256,6 @@ func (s *StrCursor) SetIgnoreCase(ignore bool) {
 
 func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
 	s.heavy = &CursorHeavy{
-		cfg:        s.heavy.cfg,
 		IgnoreCase: s.heavy.IgnoreCase,
 		NameGuard:  s.heavy.NameGuard,
 		Source:     s.heavy.Source,

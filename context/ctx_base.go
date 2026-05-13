@@ -32,240 +32,272 @@ func NewCtx(cursor input.Cursor, cfg *Cfg) *BaseCtx {
 	return &ctx
 }
 
-func (b *BaseCtx) Configure(cfg Cfg) {
-	b.cursor.Configure(cfg)
-	b.setKeywords(cfg.Keywords)
+func (ctx *BaseCtx) Configure(cfg Cfg) {
+	ctx.cursor.Configure(cfg)
+	ctx.setKeywords(cfg.Keywords)
 }
 
-func (b *BaseCtx) SetTracer(tracer Tracer) {
-	b.tracer = tracer
+func (ctx *BaseCtx) SetTracer(tracer Tracer) {
+	ctx.tracer = tracer
 }
 
-func (b *BaseCtx) Cursor() input.Cursor { return b.cursor }
+func (ctx *BaseCtx) Cursor() input.Cursor { return ctx.cursor }
 
-func (b *BaseCtx) CallStack() CallStack { return b.callStack }
+func (ctx *BaseCtx) CallStack() CallStack { return ctx.callStack }
 
-func (b *BaseCtx) Tracer() Tracer { return b.tracer }
+func (ctx *BaseCtx) Tracer() Tracer { return ctx.tracer }
 
-func (b *BaseCtx) Mark() int { return b.cursor.Mark() }
+func (ctx *BaseCtx) Mark() int { return ctx.cursor.Mark() }
 
-func (b *BaseCtx) Reset(mark int) { b.cursor.Reset(mark) }
+func (ctx *BaseCtx) Reset(mark int) { ctx.cursor.Reset(mark) }
 
-func (b *BaseCtx) AtEnd() bool { return b.cursor.AtEnd() }
+func (ctx *BaseCtx) AtEnd() bool { return ctx.cursor.AtEnd() }
 
-func (b *BaseCtx) Next() (rune, bool) { return b.cursor.Next() }
+func (ctx *BaseCtx) Next() (rune, bool) { return ctx.cursor.Next() }
 
-func (b *BaseCtx) Peek() (rune, bool) { return b.cursor.Peek() }
+func (ctx *BaseCtx) Peek() (rune, bool) { return ctx.cursor.Peek() }
 
-func (b *BaseCtx) Dot() (rune, error) {
-	r, ok := b.Next()
+func (ctx *BaseCtx) Dot() (rune, error) {
+	r, ok := ctx.Next()
 	if !ok {
 		return 0, &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("expected any character"),
 		}
 	}
 	return r, nil
 }
 
-func (b *BaseCtx) MatchEOL() bool { return b.cursor.MatchEOL() }
+func (ctx *BaseCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
 
-func (b *BaseCtx) NextToken() { b.cursor.NextToken() }
+func (ctx *BaseCtx) NextToken() { ctx.cursor.NextToken() }
 
-func (b *BaseCtx) HeartbeatTick() {}
+func (ctx *BaseCtx) HeartbeatTick() {}
 
-func (b *BaseCtx) Key(name string, canMemo bool) MemoKey {
-	return MemoKey{Mark: b.Mark(), Name: name, CanMemo: canMemo}
+func (ctx *BaseCtx) Key(name string, canMemo bool) MemoKey {
+	return MemoKey{Mark: ctx.Mark(), Name: name, CanMemo: canMemo}
 }
 
-func (b *BaseCtx) Memo(key MemoKey) (Memo, bool) {
-	if b.memoCache == nil {
+func (ctx *BaseCtx) Memo(key MemoKey) (Memo, bool) {
+	if ctx.memoCache == nil {
 		return Memo{}, false
 	}
-	m, ok := b.memoCache[key]
+	m, ok := ctx.memoCache[key]
 	return m, ok
 }
 
-func (b *BaseCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
+func (ctx *BaseCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
 	if !key.CanMemo {
 		return
 	}
-	if b.memoCache == nil {
-		b.memoCache = make(map[MemoKey]Memo)
+	if ctx.memoCache == nil {
+		ctx.memoCache = make(map[MemoKey]Memo)
 	}
-	b.memoCache[key] = Memo{Tree: tree, Mark: mark}
+	ctx.memoCache[key] = Memo{Tree: tree, Mark: mark}
 }
 
-func (b *BaseCtx) TrackRecursionDepth(key MemoKey) error {
-	if key == b.recursionKey {
-		b.recursionDepth++
+func (ctx *BaseCtx) TrackRecursionDepth(key MemoKey) error {
+	if key == ctx.recursionKey {
+		ctx.recursionDepth++
 	} else {
-		b.recursionKey = key
-		b.recursionDepth = 1
+		ctx.recursionKey = key
+		ctx.recursionDepth = 1
 	}
-	if b.recursionDepth > 64 {
+	if ctx.recursionDepth > 64 {
 		return fmt.Errorf("recursion depth exceeded")
 	}
 	return nil
 }
 
-func (b *BaseCtx) Untrack(key MemoKey) {
-	if key == b.recursionKey {
-		b.recursionDepth--
-		if b.recursionDepth <= 0 {
-			b.recursionKey = MemoKey{}
-			b.recursionDepth = 0
+func (ctx *BaseCtx) Untrack(key MemoKey) {
+	if key == ctx.recursionKey {
+		ctx.recursionDepth--
+		if ctx.recursionDepth <= 0 {
+			ctx.recursionKey = MemoKey{}
+			ctx.recursionDepth = 0
 		}
 	}
 }
 
-func (b *BaseCtx) Intern(s string) string { return s }
+func (ctx *BaseCtx) Intern(s string) string { return s }
 
-func (b *BaseCtx) IsKeyword(name string) bool {
-	_, ok := b.keywords[name]
+func (ctx *BaseCtx) IsKeyword(name string) bool {
+	_, ok := ctx.keywords[name]
 	return ok
 }
 
-func (b *BaseCtx) setKeywords(keywords []string) {
+func (ctx *BaseCtx) setKeywords(keywords []string) {
 	sort.Strings(keywords)
 	set := make(map[string]struct{}, len(keywords))
 	for _, kw := range keywords {
 		set[kw] = struct{}{}
 	}
-	b.keywords = set
+	ctx.keywords = set
 }
 
-func (b *BaseCtx) GetPattern(pattern string) pyre.Pattern {
-	if b.patternCache == nil {
-		b.patternCache = make(map[string]pyre.Pattern)
+func (ctx *BaseCtx) GetPattern(pattern string) pyre.Pattern {
+	if ctx.patternCache == nil {
+		ctx.patternCache = make(map[string]pyre.Pattern)
 	}
-	if p, ok := b.patternCache[pattern]; ok {
+	if p, ok := ctx.patternCache[pattern]; ok {
 		return p
 	}
 	p, err := pyre.Compile(pattern)
 	if err != nil {
 		return nil
 	}
-	b.patternCache[pattern] = p
+	ctx.patternCache[pattern] = p
 	return p
 }
 
-func (b *BaseCtx) MatchToken(token string) bool {
-	return b.cursor.MatchToken(token)
-}
+func (ctx *BaseCtx) MatchToken(token string) bool {
+	ctx.NextToken()
 
-func (b *BaseCtx) MatchPattern(pattern string) (string, bool) {
-	re := b.GetPattern(pattern)
-	return b.cursor.MatchPattern(re)
-}
-
-func (b *BaseCtx) Enter(name string) {
-	b.callStack = append(b.callStack, name)
-}
-
-func (b *BaseCtx) Leave() {
-	if len(b.callStack) > 0 {
-		b.callStack = b.callStack[:len(b.callStack)-1]
+	wordlike := true
+	for _, r := range token {
+		if !isAlphaNum(r) {
+			wordlike = false
+			break
+		}
 	}
-}
 
-func (b *BaseCtx) ParseEOF() bool {
-	b.Enter("__eof__")
-	b.NextToken()
-	result := b.cursor.AtEnd()
-	b.Leave()
+	var result bool
+	if wordlike && ctx.cursor.NameGuard() {
+		var pat string
+		if ctx.cursor.IgnoreCase() {
+			pat = token + `\b`
+		} else {
+			pat = `(?i)` + token + `\b`
+		}
+		_, result = ctx.MatchPattern(pat)
+	} else {
+		result = ctx.cursor.MatchToken(token)
+	}
+
+	if result {
+		ctx.Tracer().TraceMatch(ctx, token, "")
+	} else {
+		ctx.Tracer().TraceNoMatch(ctx, token, "")
+	}
 	return result
 }
 
-func (b *BaseCtx) Failure(start int, source error) *ParseFailure {
-	b.Reset(start)
+func isAlphaNum(r rune) bool {
+	return r == '_' || (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')
+}
+
+func (ctx *BaseCtx) MatchPattern(pattern string) (string, bool) {
+	re := ctx.GetPattern(pattern)
+	return ctx.cursor.MatchPattern(re)
+}
+
+func (ctx *BaseCtx) Enter(name string) {
+	ctx.callStack = append(ctx.callStack, name)
+}
+
+func (ctx *BaseCtx) Leave() {
+	if len(ctx.callStack) > 0 {
+		ctx.callStack = ctx.callStack[:len(ctx.callStack)-1]
+	}
+}
+
+func (ctx *BaseCtx) ParseEOF() bool {
+	ctx.Enter("__eof__")
+	ctx.NextToken()
+	result := ctx.cursor.AtEnd()
+	ctx.Leave()
+	return result
+}
+
+func (ctx *BaseCtx) Failure(start int, source error) *ParseFailure {
+	ctx.Reset(start)
 	nope := &ParseFailure{
 		Start: start,
-		Mark:  b.Mark(),
+		Mark:  ctx.Mark(),
 		Inner: source,
 	}
-	if furthest := b.FurthestFailure(); furthest != nil && furthest.Start >= b.Mark() {
+	if furthest := ctx.FurthestFailure(); furthest != nil && furthest.Start >= ctx.Mark() {
 		return nope
 	}
 	msg := source.Error()
 	dis := &DisasterReport{
 		Start:   start,
 		Failure: nope,
-		Memento: input.NewMemento(start, msg, b.cursor, b.callStack),
+		Memento: input.NewMemento(start, msg, ctx.cursor, ctx.callStack),
 	}
-	b.SetFurthestFailure(dis)
+	ctx.SetFurthestFailure(dis)
 	return nope
 }
 
-func (b *BaseCtx) FurthestFailure() *DisasterReport { return b.furthest }
+func (ctx *BaseCtx) FurthestFailure() *DisasterReport { return ctx.furthest }
 
-func (b *BaseCtx) SetFurthestFailure(dis *DisasterReport) { b.furthest = dis }
+func (ctx *BaseCtx) SetFurthestFailure(dis *DisasterReport) { ctx.furthest = dis }
 
-func (b *BaseCtx) Token(token string) (string, error) {
-	b.NextToken()
-	ok := b.cursor.MatchToken(token)
+func (ctx *BaseCtx) Token(token string) (string, error) {
+	ctx.NextToken()
+	ok := ctx.cursor.MatchToken(token)
 	if !ok {
 		return "", &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("expected %q", token),
 		}
 	}
 	return token, nil
 }
 
-func (b *BaseCtx) Pattern(pattern string) (string, error) {
-	b.NextToken()
-	re := b.GetPattern(pattern)
+func (ctx *BaseCtx) Pattern(pattern string) (string, error) {
+	ctx.NextToken()
+	re := ctx.GetPattern(pattern)
 	if re == nil {
 		return "", &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("invalid pattern %q", pattern)}
 	}
-	m, ok := b.cursor.MatchPattern(re)
+	m, ok := ctx.cursor.MatchPattern(re)
 	if !ok {
 		return "", &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("expected pattern %q", pattern),
 		}
 	}
 	return m, nil
 }
 
-func (b *BaseCtx) Void() error {
-	b.NextToken()
+func (ctx *BaseCtx) Void() error {
+	ctx.NextToken()
 	return nil
 }
 
-func (b *BaseCtx) Fail() error {
+func (ctx *BaseCtx) Fail() error {
 	return &ParseFailure{
-		Mark:  b.Mark(),
+		Mark:  ctx.Mark(),
 		Inner: fmt.Errorf("fail")}
 }
 
-func (b *BaseCtx) EofCheck() error {
-	b.NextToken()
-	if !b.cursor.AtEnd() {
+func (ctx *BaseCtx) EofCheck() error {
+	ctx.NextToken()
+	if !ctx.cursor.AtEnd() {
 		return &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("expected end of text"),
 		}
 	}
 	return nil
 }
 
-func (b *BaseCtx) EolCheck() error {
-	if !b.cursor.MatchEOL() {
+func (ctx *BaseCtx) EolCheck() error {
+	if !ctx.cursor.MatchEOL() {
 		return &ParseFailure{
-			Mark:  b.Mark(),
+			Mark:  ctx.Mark(),
 			Inner: fmt.Errorf("expected end of line"),
 		}
 	}
 	return nil
 }
 
-func (b *BaseCtx) Eof() bool { return b.cursor.AtEnd() }
+func (ctx *BaseCtx) Eof() bool { return ctx.cursor.AtEnd() }
 
-func (b *BaseCtx) Constant(literal any) (trees.Tree, error) {
+func (ctx *BaseCtx) Constant(literal any) (trees.Tree, error) {
 	switch v := literal.(type) {
 	case string:
 		return &trees.Text{Value: v}, nil
