@@ -31,20 +31,16 @@ func (s *Sequence) Parse(ctx Ctx) (trees.Tree, error) {
 }
 
 func (t *Token) Parse(ctx Ctx) (trees.Tree, error) {
-	mark := ctx.Mark()
 	matched, err := ctx.Token(t.Token)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
 	return &trees.Text{Value: matched}, nil
 }
 
 func (p *Pattern) Parse(ctx Ctx) (trees.Tree, error) {
-	mark := ctx.Mark()
 	matched, err := ctx.Pattern(p.Pattern)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
 	return &trees.Text{Value: matched}, nil
@@ -79,7 +75,10 @@ func (n *NegativeLookahead) Parse(ctx Ctx) (trees.Tree, error) {
 	if err == nil {
 		return nil, ctx.Failure(
 			mark,
-			fmt.Errorf("negative lookahead matched"),
+			fmt.Errorf(
+				"negative lookahead matched:%v",
+				n.Exp,
+			),
 		)
 	}
 	return trees.NIL, nil
