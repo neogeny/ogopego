@@ -177,12 +177,12 @@ func TestParseClosureMultiple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	seq, ok := result.(*trees.Seq)
+	lst, ok := result.(*trees.List)
 	if !ok {
-		t.Fatalf("expected Seq, got %T", result)
+		t.Fatalf("expected List, got %T", result)
 	}
-	if len(seq.Items) != 3 {
-		t.Errorf("expected 3 items, got %d", len(seq.Items))
+	if len(lst.Items) != 3 {
+		t.Errorf("expected 3 items, got %d", len(lst.Items))
 	}
 }
 
@@ -193,8 +193,12 @@ func TestParseClosureZero(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil for zero closure, got %T", result)
+	lst, ok := result.(*trees.List)
+	if !ok {
+		t.Fatalf("expected List for zero closure, got %T", result)
+	}
+	if len(lst.Items) != 0 {
+		t.Errorf("expected 0 items, got %d", len(lst.Items))
 	}
 }
 
@@ -205,12 +209,12 @@ func TestParsePositiveClosure(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	seq, ok := result.(*trees.Seq)
+	lst, ok := result.(*trees.List)
 	if !ok {
-		t.Fatalf("expected Seq, got %T", result)
+		t.Fatalf("expected List, got %T", result)
 	}
-	if len(seq.Items) != 3 {
-		t.Errorf("expected 3 items, got %d", len(seq.Items))
+	if len(lst.Items) != 3 {
+		t.Errorf("expected 3 items, got %d", len(lst.Items))
 	}
 }
 
@@ -243,9 +247,8 @@ func TestParseLookahead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	tt := result.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
+	if _, ok := result.(*trees.Nil); !ok {
+		t.Errorf("expected Nil after lookahead, got %T", result)
 	}
 	if ctx.Mark() != 0 {
 		t.Errorf("expected cursor restored to 0 after lookahead, got %d", ctx.Mark())
@@ -354,7 +357,7 @@ func TestParseGrammar(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx)
+	result, err := expr.Parse(ctx, cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -388,20 +391,16 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx)
+	result, err := expr.Parse(ctx, cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	seq, ok := result.(*trees.Seq)
+	rn, ok := result.(*trees.Node)
 	if !ok {
-		t.Fatalf("expected Seq, got %T", result)
+		t.Fatalf("expected Node, got %T", result)
 	}
-	if len(seq.Items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(seq.Items))
-	}
-	rn1 := seq.Items[0].(*trees.Node)
-	if rn1.TypeName != "first" {
-		t.Errorf("expected 'first', got %q", rn1.TypeName)
+	if rn.TypeName != "first" {
+		t.Errorf("expected 'first', got %q", rn.TypeName)
 	}
 }
 

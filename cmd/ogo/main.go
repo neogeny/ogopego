@@ -26,7 +26,7 @@ func main() {
 	)
 
 	if err := validateExclusive("format"); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -52,44 +52,46 @@ func main() {
 
 	var output string
 
-	switch cmd.Name {
-	case "run":
-		err := fmt.Errorf("run command not fully wired yet")
-		fmt.Fprintln(os.Stderr, "error:", err)
-		os.Exit(1)
-
-	case "boot":
-		gram, err := api.BootGrammar()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
-			os.Exit(1)
-		}
-		switch {
-		case CLI.Boot.Json:
-			output = json.AsJSONs(gram)
-		case CLI.Boot.Pretty:
-			output = gram.PrettyPrint()
-		case CLI.Boot.Railroads:
-			output = gram.Railroads()
-		default:
-			output = gram.PrettyPrint()
-		}
-
-	case "grammar":
-		gram, err := loadGrammar(CLI.Grammar.Grammar)
-		if err != nil {
+	if cmd != nil {
+		switch cmd.Name {
+		case "run":
+			err := fmt.Errorf("run command not fully wired yet")
 			fmt.Fprintln(os.Stderr, "error:", err)
 			os.Exit(1)
-		}
-		switch {
-		case CLI.Grammar.Json:
-			output = json.AsJSONs(gram)
-		case CLI.Grammar.Pretty:
-			output = gram.PrettyPrint()
-		case CLI.Grammar.Railroads:
-			output = gram.Railroads()
-		default:
-			output = gram.PrettyPrint()
+
+		case "boot":
+			gram, err := api.BootGrammar()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
+				os.Exit(1)
+			}
+			switch {
+			case CLI.Boot.Json:
+				output = json.AsJSONs(gram)
+			case CLI.Boot.Pretty:
+				output = gram.PrettyPrint()
+			case CLI.Boot.Railroads:
+				output = gram.Railroads()
+			default:
+				output = gram.PrettyPrint()
+			}
+
+		case "grammar":
+			gram, err := loadGrammar(CLI.Grammar.Grammar)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(1)
+			}
+			switch {
+			case CLI.Grammar.Json:
+				output = json.AsJSONs(gram)
+			case CLI.Grammar.Pretty:
+				output = gram.PrettyPrint()
+			case CLI.Grammar.Railroads:
+				output = gram.Railroads()
+			default:
+				output = gram.PrettyPrint()
+			}
 		}
 	}
 
@@ -115,6 +117,6 @@ func loadGrammar(path string) (*peg.Grammar, error) {
 	case ".json":
 		return api.LoadGrammarFromJSON(data)
 	default:
-		return api.Compile(string(data))
+		return api.Compile(string(data), nil)
 	}
 }

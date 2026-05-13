@@ -9,12 +9,14 @@ import (
 
 func newTestCtx() *BaseCtx {
 	c := input.NewStrCursor("some input text")
-	return NewBaseCtx(c)
+	return NewCtx(c, nil)
 }
 
 func newTestCtxWithTracer(tracer Tracer) *BaseCtx {
 	c := input.NewStrCursor("some input text")
-	return NewBaseCtxWithTracer(c, tracer)
+	ctx := NewCtx(c, nil)
+	ctx.SetTracer(tracer)
+	return ctx
 }
 
 func TestNullTracerImplementsTracer(t *testing.T) {
@@ -145,7 +147,8 @@ func TestTraceWithCallstack(t *testing.T) {
 
 func TestBaseCtxNewWithTracer(t *testing.T) {
 	c := input.NewStrCursor("test")
-	ctx := NewBaseCtxWithTracer(c, ConsoleTracer{})
+	ctx := NewCtx(c, nil)
+	ctx.SetTracer(ConsoleTracer{})
 	_, ok := ctx.Tracer().(ConsoleTracer)
 	if !ok {
 		t.Error("expected ConsoleTracer")

@@ -4,10 +4,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
 type CursorHeavy struct {
+	cfg        config.Cfg
 	IgnoreCase bool
 	NameGuard  bool
 	Source     string
@@ -25,6 +27,7 @@ func NewStrCursor(text string) *StrCursor {
 		text:   text,
 		offset: 0,
 		heavy: &CursorHeavy{
+			cfg:        config.DefaultCfg(),
 			IgnoreCase: false,
 			NameGuard:  true,
 			Source:     "some input",
@@ -44,12 +47,17 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 		text:   text,
 		offset: start,
 		heavy: &CursorHeavy{
+			cfg:        config.DefaultCfg(),
 			IgnoreCase: false,
 			NameGuard:  true,
 			Source:     source,
 			Patterns:   &TokenizingPatterns{},
 		},
 	}
+}
+
+func (s *StrCursor) Configure(cfg Cfg) {
+
 }
 
 func (s *StrCursor) InputSource() string {
@@ -225,6 +233,7 @@ func (s *StrCursor) LocationAt(mark int) Location {
 
 func (s *StrCursor) SetIgnoreCase(ignore bool) {
 	s.heavy = &CursorHeavy{
+		cfg:        s.heavy.cfg,
 		IgnoreCase: ignore,
 		NameGuard:  s.heavy.NameGuard,
 		Source:     s.heavy.Source,
@@ -234,6 +243,7 @@ func (s *StrCursor) SetIgnoreCase(ignore bool) {
 
 func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
 	s.heavy = &CursorHeavy{
+		cfg:        s.heavy.cfg,
 		IgnoreCase: s.heavy.IgnoreCase,
 		NameGuard:  s.heavy.NameGuard,
 		Source:     s.heavy.Source,

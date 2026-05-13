@@ -1,5 +1,7 @@
 package context
 
+import "github.com/neogeny/ogopego/trees"
+
 type MemoKey struct {
 	Mark    int
 	Name    string
@@ -7,6 +9,6 @@ type MemoKey struct {
 }
 
 type Memo struct {
-	Tree interface{}
+	Tree trees.Tree
 	Mark int
 }

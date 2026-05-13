@@ -10,26 +10,35 @@ import (
 )
 
 type BaseCtx struct {
-	cursor       input.Cursor
-	callStack    CallStack
-	tracer       Tracer
-	furthest     *DisasterReport
-	patternCache map[string]pyre.Pattern
-	keywords     map[string]struct{}
+	cfg            Cfg
+	cursor         input.Cursor
+	callStack      CallStack
+	tracer         Tracer
+	furthest       *DisasterReport
+	patternCache   map[string]pyre.Pattern
+	keywords       map[string]struct{}
+	memoCache      map[MemoKey]Memo
+	recursionKey   MemoKey
+	recursionDepth int
 }
 
-func NewBaseCtx(cursor input.Cursor) *BaseCtx {
-	return &BaseCtx{
+func NewCtx(cursor input.Cursor, cfg *Cfg) *BaseCtx {
+	ctx := BaseCtx{
+		cfg:    cfg.New(),
 		cursor: cursor,
 		tracer: NullTracer{},
 	}
+	ctx.cursor.Configure(ctx.cfg)
+	return &ctx
 }
 
-func NewBaseCtxWithTracer(cursor input.Cursor, tracer Tracer) *BaseCtx {
-	return &BaseCtx{
-		cursor: cursor,
-		tracer: tracer,
-	}
+func (b *BaseCtx) Configure(cfg Cfg) {
+	b.cursor.Configure(cfg)
+	b.setKeywords(cfg.Keywords)
+}
+
+func (b *BaseCtx) SetTracer(tracer Tracer) {
+	b.tracer = tracer
 }
 
 func (b *BaseCtx) Cursor() input.Cursor { return b.cursor }
@@ -65,6 +74,51 @@ func (b *BaseCtx) NextToken() { b.cursor.NextToken() }
 
 func (b *BaseCtx) HeartbeatTick() {}
 
+func (b *BaseCtx) Key(name string, canMemo bool) MemoKey {
+	return MemoKey{Mark: b.Mark(), Name: name, CanMemo: canMemo}
+}
+
+func (b *BaseCtx) Memo(key MemoKey) (Memo, bool) {
+	if b.memoCache == nil {
+		return Memo{}, false
+	}
+	m, ok := b.memoCache[key]
+	return m, ok
+}
+
+func (b *BaseCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
+	if !key.CanMemo {
+		return
+	}
+	if b.memoCache == nil {
+		b.memoCache = make(map[MemoKey]Memo)
+	}
+	b.memoCache[key] = Memo{Tree: tree, Mark: mark}
+}
+
+func (b *BaseCtx) TrackRecursionDepth(key MemoKey) error {
+	if key == b.recursionKey {
+		b.recursionDepth++
+	} else {
+		b.recursionKey = key
+		b.recursionDepth = 1
+	}
+	if b.recursionDepth > 64 {
+		return fmt.Errorf("recursion depth exceeded")
+	}
+	return nil
+}
+
+func (b *BaseCtx) Untrack(key MemoKey) {
+	if key == b.recursionKey {
+		b.recursionDepth--
+		if b.recursionDepth <= 0 {
+			b.recursionKey = MemoKey{}
+			b.recursionDepth = 0
+		}
+	}
+}
+
 func (b *BaseCtx) Intern(s string) string { return s }
 
 func (b *BaseCtx) IsKeyword(name string) bool {
@@ -72,7 +126,7 @@ func (b *BaseCtx) IsKeyword(name string) bool {
 	return ok
 }
 
-func (b *BaseCtx) SetKeywords(keywords []string) {
+func (b *BaseCtx) setKeywords(keywords []string) {
 	sort.Strings(keywords)
 	set := make(map[string]struct{}, len(keywords))
 	for _, kw := range keywords {

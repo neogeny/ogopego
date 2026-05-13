@@ -161,7 +161,7 @@ func TestBaseCtxKeywords(t *testing.T) {
 	if ctx.IsKeyword("if") {
 		t.Error("expected 'if' not a keyword initially")
 	}
-	ctx.SetKeywords([]string{"if", "else", "for"})
+	ctx.setKeywords([]string{"if", "else", "for"})
 	if !ctx.IsKeyword("if") {
 		t.Error("expected 'if' to be a keyword")
 	}

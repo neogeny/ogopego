@@ -9,10 +9,60 @@ import (
 type Grammar struct {
 	ModelBase
 	Name       string
+	cfg        Cfg
 	Directives map[string]any
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
+}
+
+func (g *Grammar) CfgFromDirectives() *Cfg {
+	c := Cfg{}
+
+	for name, val := range g.Directives {
+		s, ok := val.(string)
+		if !ok {
+			continue
+		}
+
+		switch name {
+		case "name":
+			c.Name = s
+		case "source":
+			c.Source = s
+		case "start":
+			c.Start = s
+		case "grammar":
+			c.Grammar = s
+		case "whitespace":
+			if s == "" || s == "None" || s == "False" {
+				c.Whitespace = nil
+			} else {
+				c.Whitespace = &s
+			}
+		case "comments":
+			c.Comments = s
+		case "eol_comments":
+			c.EolComments = s
+		case "ignorecase":
+			c.IgnoreCase = s == "True" || s == "true" || s == "1"
+		case "namechars":
+			c.NameChars = s
+		case "nameguard":
+			c.NameGuard = s == "True" || s == "true" || s == "1"
+		case "parseinfo":
+			c.ParseInfo = s == "True" || s == "true" || s == "1"
+		case "trace":
+			c.Trace = s == "True" || s == "true" || s == "1"
+		case "left_recursion":
+			c.NoLeftRecursion = s != "True" && s != "true" && s != "1"
+		case "nomemo":
+			c.NoMemo = s == "True" || s == "true" || s == "1"
+		case "noprunememosoncut":
+			c.NoPruneMemosOnCut = s == "True" || s == "true" || s == "1"
+		}
+	}
+	return &c
 }
 
 func (g *Grammar) Initialize() error {
@@ -35,24 +85,24 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 	return nil, fmt.Errorf("rule %q not found", name)
 }
 
-func (g *Grammar) ParseTreeFrom(ctx Ctx, start string) (trees.Tree, error) {
-	if len(g.Keywords) > 0 {
-		ctx.SetKeywords(g.Keywords)
+func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
+	acfg := g.CfgFromDirectives().New()
+	acfg = acfg.Override(cfg)
+	ctx.Configure(acfg)
+
+	start := cfg.Start
+	if start == "" {
+		start = "start"
 	}
 	rule, err := g.GetRule(start)
 	if err != nil {
-		return nil, err
+		if len(g.Rules) == 0 {
+			return nil, ctx.Failure(
+				ctx.Mark(),
+				fmt.Errorf("no rules in grammar"),
+			)
+		}
+		rule = g.Rules[0]
 	}
 	return rule.Parse(ctx)
-}
-
-func (g *Grammar) ParseTree(ctx Ctx) (trees.Tree, error) {
-	start := "start"
-	if _, err := g.GetRule(start); err != nil {
-		if len(g.Rules) == 0 {
-			return nil, fmt.Errorf("no rules in grammar")
-		}
-		start = g.Rules[0].Name
-	}
-	return g.ParseTreeFrom(ctx, start)
 }

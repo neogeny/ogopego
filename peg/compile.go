@@ -27,7 +27,11 @@ func (c *comp) error(msg string) error {
 
 func Compile(tree trees.Tree) (*Grammar, error) {
 	c := &comp{}
-	return c.compileGrammar(tree)
+	g, err := c.compileGrammar(tree)
+	if err != nil {
+		return nil, err
+	}
+	return g, nil
 }
 
 func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {

@@ -15,6 +15,7 @@ type TokenizingPatterns struct {
 }
 
 type Cursor interface {
+	Configurable
 	InputSource() string
 	Mark() int
 	Reset(mark int)

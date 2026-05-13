@@ -7,11 +7,11 @@ import (
 )
 
 func (c *Closure) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeat(ctx, c, false)
+	return repeat(ctx, c.Exp, false)
 }
 
 func (p *PositiveClosure) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeat(ctx, p, true)
+	return repeat(ctx, p.Exp, true)
 }
 
 func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {

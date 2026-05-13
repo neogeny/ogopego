@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseGrammar(t *testing.T) {
-	result, err := ParseGrammar("@@grammar :: Test\nstart := 'x'\n")
+	result, err := ParseGrammar("@@grammar :: Test start := 'x'", nil)
 	if err != nil {
 		t.Fatalf("ParseGrammar error: %v", err)
 	}
@@ -19,19 +19,9 @@ func TestParseGrammar(t *testing.T) {
 	}
 }
 
-func TestBootGrammar(t *testing.T) {
-	g, err := BootGrammar()
-	if err != nil {
-		t.Fatalf("BootGrammar error: %v", err)
-	}
-	if !g.Analyzed {
-		t.Fatal("expected analyzed grammar")
-	}
-}
-
 func TestCompile(t *testing.T) {
 	src := "@@grammar :: EBNFTest\nstart := expression $\nexpression := expression '+' term | expression '-' term | term\nterm := term '*' factor | term '/' factor | factor\nfactor := '(' expression ')' | number\nnumber := /\\d+/\n"
-	g, err := Compile(src)
+	g, err := Compile(src, nil)
 	if err != nil {
 		t.Fatalf("Compile error: %v", err)
 	}
@@ -48,7 +38,7 @@ func TestCompile(t *testing.T) {
 
 func TestCompileToJSON(t *testing.T) {
 	src := `start := 'x'`
-	json, err := CompileToJSON(src)
+	json, err := CompileToJSON(src, nil)
 	if err != nil {
 		t.Fatalf("CompileToJSON error: %v", err)
 	}
@@ -59,7 +49,7 @@ func TestCompileToJSON(t *testing.T) {
 
 func TestCompileToJSONString(t *testing.T) {
 	src := `start := 'x'`
-	s, err := CompileToJSONString(src)
+	s, err := CompileToJSONString(src, nil)
 	if err != nil {
 		t.Fatalf("CompileToJSONString error: %v", err)
 	}
@@ -67,3 +57,15 @@ func TestCompileToJSONString(t *testing.T) {
 		t.Fatal("expected non-empty string")
 	}
 }
+
+func TestBootGrammar(t *testing.T) {
+	g, err := BootGrammar()
+	if err != nil {
+		t.Fatalf("BootGrammar error: %v", err)
+	}
+	if !g.Analyzed {
+		t.Fatal("expected analyzed grammar")
+	}
+}
+
+

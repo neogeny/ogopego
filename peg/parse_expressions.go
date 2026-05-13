@@ -235,17 +235,3 @@ func (r *Rule) Parse(ctx Ctx) (trees.Tree, error) {
 	}
 	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
 }
-
-func (g *Grammar) Parse(ctx Ctx) (trees.Tree, error) {
-	if len(g.Keywords) > 0 {
-		ctx.SetKeywords(g.Keywords)
-	}
-	if len(g.Rules) == 0 {
-		return nil, ctx.Failure(
-			ctx.Mark(),
-			fmt.Errorf("no rules in grammar"),
-		)
-	}
-	rule := g.Rules[0]
-	return rule.Parse(ctx)
-}

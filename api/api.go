@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/neogeny/ogopego"
+	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/input"
 	"github.com/neogeny/ogopego/json"
@@ -11,6 +12,8 @@ import (
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
+
+type Cfg = config.Cfg
 
 var (
 	bootOnce sync.Once
@@ -29,7 +32,7 @@ func BootGrammar() (*peg.Grammar, error) {
 	return bootGrammar()
 }
 
-func ParseGrammar(grammar string) (trees.Tree, error) {
+func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	boot, err := bootGrammar()
 	if err != nil {
 		return nil, err
@@ -40,87 +43,69 @@ func ParseGrammar(grammar string) (trees.Tree, error) {
 	}
 	c := input.NewStrCursor(grammar)
 	c.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
-	return boot.ParseTree(context.NewBaseCtx(c))
+	return boot.Parse(context.NewCtx(c, cfg), cfg)
 }
 
-func ParseGrammarToJSON(grammar string) (any, error) {
-	tree, err := ParseGrammar(grammar)
+func ParseGrammarToJSON(grammar string, cfg *Cfg) (any, error) {
+	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
 		return nil, err
 	}
 	return json.AsJSON(tree), nil
 }
 
-func ParseGrammarToJSONString(grammar string) (string, error) {
-	tree, err := ParseGrammar(grammar)
+func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
+	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
 		return "", err
 	}
 	return json.AsJSONs(tree), nil
 }
 
-func Compile(grammar string) (*peg.Grammar, error) {
-	tree, err := ParseGrammar(grammar)
+func Compile(grammar string, cfg *Cfg) (*peg.Grammar, error) {
+	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
 		return nil, err
 	}
 	return peg.Compile(tree)
 }
 
-func CompileToJSON(grammar string) (any, error) {
-	g, err := Compile(grammar)
+func CompileToJSON(grammar string, cfg *Cfg) (any, error) {
+	g, err := Compile(grammar, cfg)
 	if err != nil {
 		return nil, err
 	}
 	return json.AsJSON(g), nil
 }
 
-func CompileToJSONString(grammar string) (string, error) {
-	g, err := Compile(grammar)
+func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
+	g, err := Compile(grammar, cfg)
 	if err != nil {
 		return "", err
 	}
 	return json.AsJSONs(g), nil
 }
 
-func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
-	return json.ParseGrammar(data)
+func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
+	ctx := context.NewCtx(input.NewStrCursor(text), cfg)
+	return parser.Parse(ctx, cfg)
 }
 
-// func LoadGrammarFromJSONToJSON(data []byte) (any, error) { ... }
-
-// func LoadTreeFromJSON(data []byte) (trees.Tree, error) { ... }
-// func LoadTreeToJSON(data []byte) (any, error) { ... }
-
-// func GrammarPretty(grammar string) (string, error) { ... }
-//   needs Compile + pretty printing.
-
-// func Parse(grammar, text string) (trees.Tree, error) { ... }
-//   needs Compile.
-// func ParseToJSON(grammar, text string) (any, error) { ... }
-// func ParseToJSONString(grammar, text string) (string, error) { ... }
-
-func ParseInput(parser *peg.Grammar, text string) (trees.Tree, error) {
-	ctx := context.NewBaseCtx(input.NewStrCursor(text))
-	return parser.ParseTree(ctx)
-}
-
-func ParseInputToJSON(parser *peg.Grammar, text string) (any, error) {
-	tree, err := ParseInput(parser, text)
+func ParseInputToJSON(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
+	tree, err := ParseInput(parser, text, cfg)
 	if err != nil {
 		return nil, err
 	}
 	return json.AsJSON(tree), nil
 }
 
-func ParseInputToJSONString(parser *peg.Grammar, text string) (string, error) {
-	tree, err := ParseInput(parser, text)
+func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string, error) {
+	tree, err := ParseInput(parser, text, cfg)
 	if err != nil {
 		return "", err
 	}
 	return json.AsJSONs(tree), nil
 }
-
-// func BootGrammarToJSON() (any, error) { ... }
-// func BootGrammarToJSONString() (string, error) { ... }
-// func BootGrammarPretty() (string, error) { ... }
+func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
+	return json.ParseGrammar(data)
+}
