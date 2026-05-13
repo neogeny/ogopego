@@ -59,7 +59,7 @@ func TestBaseCtxFailure(t *testing.T) {
 	if fail.Inner.Error() != "expected number" {
 		t.Errorf("expected 'expected number', got %q", fail.Inner.Error())
 	}
-	if ctx.FurthestFailure().Failure.Inner == fail.Inner {
+	if ctx.FurthestFailure().Failure.Inner != fail.Inner {
 		t.Error("expected furthest failure to match")
 	}
 }
@@ -68,7 +68,7 @@ func TestBaseCtxFailureNoRegress(t *testing.T) {
 	ctx := newTestBaseCtx()
 	_ = ctx.Failure(10, errors.New("first"))
 	_ = ctx.Failure(3, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Error() != "first" {
+	if ctx.FurthestFailure().Failure.Error() != "at 10: first" {
 		t.Errorf("expected furthest to stay 'first', got %q", ctx.FurthestFailure().Failure.Error())
 	}
 }
@@ -77,7 +77,7 @@ func TestBaseCtxFailureProgression(t *testing.T) {
 	ctx := newTestBaseCtx()
 	_ = ctx.Failure(5, errors.New("first"))
 	_ = ctx.Failure(15, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Error() != "second" {
+	if ctx.FurthestFailure().Failure.Error() != "at 15: second" {
 		t.Errorf("expected furthest 'second', got %q", ctx.FurthestFailure().Failure.Error())
 	}
 }

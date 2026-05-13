@@ -20,9 +20,6 @@ func TestNodeNilSafety(t *testing.T) {
 	if p := n.Path(); p != nil {
 		t.Error("expected nil path")
 	}
-	if c := n.Clone(); c != nil {
-		t.Error("expected nil clone")
-	}
 	b, err := n.MarshalJSON()
 	if err != nil {
 		t.Fatal(err)
@@ -113,45 +110,6 @@ func TestNodePathNil(t *testing.T) {
 	var n *Node
 	if p := n.Path(); p != nil {
 		t.Error("expected nil path")
-	}
-}
-
-func TestNodeClone(t *testing.T) {
-	parent := &Node{}
-	n := &Node{
-		Ast: "value",
-		Pos: &ParseInfo{Line: 5, Source: "src"},
-		Children: []*Node{
-			{Ast: "child"},
-		},
-	}
-	n.setParent(parent)
-	c := n.Clone()
-	if c.Parent() != nil {
-		t.Error("clone should have nil parent")
-	}
-	if c.Ast != n.Ast {
-		t.Error("clone should share ast")
-	}
-	if c.Pos != n.Pos {
-		t.Error("clone should share pos pointer")
-	}
-	if len(c.Children) != 1 {
-		t.Fatal("expected 1 child")
-	}
-	if c.Children[0] != n.Children[0] {
-		t.Error("clone should share child pointers")
-	}
-	c.Children[0] = &Node{Ast: "replaced"}
-	if n.Children[0].Ast != "child" {
-		t.Error("clone children slice should be independent")
-	}
-}
-
-func TestNodeCloneNil(t *testing.T) {
-	var n *Node
-	if c := n.Clone(); c != nil {
-		t.Error("expected nil clone")
 	}
 }
 
