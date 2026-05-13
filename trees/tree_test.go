@@ -2,6 +2,8 @@ package trees
 
 import (
 	"testing"
+
+	asjson "github.com/neogeny/ogopego/json"
 )
 
 func text(s string) *Text      { return &Text{Value: s} }
@@ -224,6 +226,42 @@ func TestFoldSeqWithNil(t *testing.T) {
 	}
 	if len(l.Items) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(l.Items))
+	}
+}
+
+func TestTextAsJSON(t *testing.T) {
+	result := asjson.AsJSON(&Text{Value: "hello"})
+	s, ok := result.(string)
+	if !ok {
+		t.Fatalf("expected string, got %T", result)
+	}
+	if s != "hello" {
+		t.Errorf("expected 'hello', got %v", s)
+	}
+}
+
+func TestNumberAsJSON(t *testing.T) {
+	result := asjson.AsJSON(&Number{Value: 42.5})
+	f, ok := result.(float64)
+	if !ok {
+		t.Fatalf("expected float64, got %T", result)
+	}
+	if f != 42.5 {
+		t.Errorf("expected 42.5, got %v", f)
+	}
+}
+
+func TestNodeAsJSONTree(t *testing.T) {
+	result := asjson.AsJSON(&Node{TypeName: "expr", Tree: text("42")})
+	om, ok := result.(*asjson.OrderedMap)
+	if !ok {
+		t.Fatalf("expected *OrderedMap, got %T", result)
+	}
+	if cls, _ := om.Get("__class__"); cls != "expr" {
+		t.Errorf("expected __class__=expr, got %v", cls)
+	}
+	if ast, _ := om.Get("ast"); ast != "42" {
+		t.Errorf("expected ast='42', got %v", ast)
 	}
 }
 

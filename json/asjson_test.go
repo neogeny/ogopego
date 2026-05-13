@@ -188,6 +188,8 @@ func (s *mixinStruct) AsJSON() any {
 	return s.AsJSONBase.AsJSONOf(s)
 }
 
+func (s *mixinStruct) AsJSONStr() string { return s.AsJSONStrOf(s) }
+
 func TestAsJSONMixin(t *testing.T) {
 	s := &mixinStruct{Greeting: "hello", Count: 42}
 	result := AsJSON(s)

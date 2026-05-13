@@ -1,6 +1,11 @@
 package trees
 
-type Seq struct{ Items []Tree }
+import asjson "github.com/neogeny/ogopego/json"
+
+type Seq struct {
+	TreeBase
+	Items []Tree
+}
 
 func (*Seq) tree() {}
 func (s *Seq) fold(gather *treeMerge) Tree {
@@ -10,8 +15,20 @@ func (s *Seq) fold(gather *treeMerge) Tree {
 	}
 	return out
 }
+func (s *Seq) PubMap() *asjson.OrderedMap { return s.PubMapOf(s) }
+func (s *Seq) AsJSON() any {
+	items := make([]any, len(s.Items))
+	for i, item := range s.Items {
+		items[i] = item.AsJSON()
+	}
+	return items
+}
+func (s *Seq) AsJSONStr() string { return treeJSONStr(s.AsJSON()) }
 
-type List struct{ Items []Tree }
+type List struct {
+	TreeBase
+	Items []Tree
+}
 
 func (*List) tree() {}
 func (l *List) fold(gather *treeMerge) Tree {
@@ -21,3 +38,12 @@ func (l *List) fold(gather *treeMerge) Tree {
 	}
 	return &List{Items: items}
 }
+func (l *List) PubMap() *asjson.OrderedMap { return l.PubMapOf(l) }
+func (l *List) AsJSON() any {
+	items := make([]any, len(l.Items))
+	for i, item := range l.Items {
+		items[i] = item.AsJSON()
+	}
+	return items
+}
+func (l *List) AsJSONStr() string { return treeJSONStr(l.AsJSON()) }

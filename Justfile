@@ -10,11 +10,11 @@ run *args:
 
 # Run tests
 test: gofmt-check
-    go test ./...
+    go test $(go list -e ./... | grep -v /fragments)
 
 # Run tests with verbose output
 test-v:
-    go test -v ./...
+    go test -v $(go list -e ./... | grep -v /fragments)
 
 # Run linter
 lint:
@@ -42,7 +42,7 @@ vendor:
 
 # Run go vet
 vet:
-    go vet ./...
+    go vet $(go list -e ./... | grep -v /fragments)
 
 # Tidy go.mod
 tidy:

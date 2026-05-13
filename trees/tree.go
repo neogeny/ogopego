@@ -1,8 +1,31 @@
 package trees
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/iancoleman/orderedmap"
+	asjson "github.com/neogeny/ogopego/json"
+)
+
+type TreeBase struct {
+	asjson.AsJSONBase
+}
+
+func newOM() *asjson.OrderedMap { return orderedmap.New() }
+
+func treeJSONStr(v any) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("!json:%v", err)
+	}
+	return string(b)
+}
+
 type Tree interface {
 	tree()
 	fold(gather *treeMerge) Tree
+	AsJSON() any
 }
 
 type treeMerge struct {

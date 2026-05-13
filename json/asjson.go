@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
+	"strings"
 
 	"github.com/iancoleman/orderedmap"
 )
@@ -17,6 +19,123 @@ type AsJSONMixin interface {
 }
 
 type AsJSONBase struct{}
+
+func AsJSON(v any) any {
+	seen := make(map[uintptr]bool)
+	return asjson(reflect.ValueOf(v), seen)
+}
+
+func AsJSONs(v any) string {
+	b, err := json.MarshalIndent(AsJSON(v), "", "  ")
+	if err != nil {
+		return fmt.Sprintf("!json:%v", err)
+	}
+	return string(b)
+}
+
+func ToJSONString(v any) string {
+	return toJSONString(v, "", "  ")
+}
+
+func toJSONString(v any, prefix, indent string) string {
+	switch val := v.(type) {
+	case *OrderedMap:
+		if len(val.Keys()) == 0 {
+			return "{}"
+		}
+		inner := prefix + indent
+		var buf strings.Builder
+		buf.WriteString("{\n")
+		for i, k := range val.Keys() {
+			item, _ := val.Get(k)
+			buf.WriteString(inner)
+			buf.WriteString(fmt.Sprintf("%q: ", k))
+			buf.WriteString(toJSONString(item, inner, indent))
+			if i < len(val.Keys())-1 {
+				buf.WriteString(",")
+			}
+			buf.WriteString("\n")
+		}
+		buf.WriteString(prefix + "}")
+		return buf.String()
+	case map[string]any:
+		if len(val) == 0 {
+			return "{}"
+		}
+		inner := prefix + indent
+		var buf strings.Builder
+		buf.WriteString("{\n")
+		keys := make([]string, 0, len(val))
+		for k := range val {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for i, k := range keys {
+			buf.WriteString(inner)
+			buf.WriteString(fmt.Sprintf("%q: ", k))
+			buf.WriteString(toJSONString(val[k], inner, indent))
+			if i < len(keys)-1 {
+				buf.WriteString(",")
+			}
+			buf.WriteString("\n")
+		}
+		buf.WriteString(prefix + "}")
+		return buf.String()
+	case []any:
+		if len(val) == 0 {
+			return "[]"
+		}
+		inner := prefix + indent
+		var buf strings.Builder
+		buf.WriteString("[\n")
+		for i, item := range val {
+			buf.WriteString(inner)
+			buf.WriteString(toJSONString(item, inner, indent))
+			if i < len(val)-1 {
+				buf.WriteString(",")
+			}
+			buf.WriteString("\n")
+		}
+		buf.WriteString(prefix + "]")
+		return buf.String()
+	case string:
+		return fmt.Sprintf("%q", val)
+	case float64:
+		if val == float64(int64(val)) {
+			return fmt.Sprintf("%d", int64(val))
+		}
+		return fmt.Sprintf("%g", val)
+	case bool:
+		if val {
+			return "true"
+		}
+		return "false"
+	case nil:
+		return "null"
+	default:
+		return fmt.Sprintf("%v", val)
+	}
+}
+
+func ToGoMap(v any) any {
+	switch val := v.(type) {
+	case *orderedmap.OrderedMap:
+		m := make(map[string]any)
+		for _, k := range val.Keys() {
+			item, _ := val.Get(k)
+			m[k] = ToGoMap(item)
+		}
+		return m
+	case []any:
+		s := make([]any, len(val))
+		for i, item := range val {
+			s[i] = ToGoMap(item)
+		}
+		return s
+	default:
+		return v
+	}
+}
 
 func (b *AsJSONBase) AsJSONStrOf(ref any) string {
 	val := b.AsJSONOf(ref)
@@ -79,19 +198,6 @@ func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
 		out.Set(f.Name, v.Field(i).Interface())
 	}
 	return out
-}
-
-func AsJSON(v any) any {
-	seen := make(map[uintptr]bool)
-	return asjson(reflect.ValueOf(v), seen)
-}
-
-func AsJSONs(v any) string {
-	b, err := json.MarshalIndent(AsJSON(v), "", "  ")
-	if err != nil {
-		return fmt.Sprintf("!json:%v", err)
-	}
-	return string(b)
 }
 
 func asjson(val reflect.Value, seen map[uintptr]bool) any {
