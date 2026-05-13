@@ -10,7 +10,7 @@ import (
 
 func newTestBaseCtx() *BaseCtx {
 	c := input.NewStrCursor("some input text")
-	return NewBaseCtx(c)
+	return NewCtx(c, nil)
 }
 
 func TestBaseCtxCallStack(t *testing.T) {
@@ -150,7 +150,7 @@ func TestBaseCtxEof(t *testing.T) {
 		t.Error("expected Eof false")
 	}
 	c := input.NewStrCursor("")
-	ctx2 := NewBaseCtx(c)
+	ctx2 := NewCtx(c, nil)
 	if !ctx2.Eof() {
 		t.Error("expected Eof true on empty input")
 	}
@@ -248,7 +248,7 @@ func TestBaseCtxParseEOF(t *testing.T) {
 
 func TestBaseCtxParseEOFAtEnd(t *testing.T) {
 	c := input.NewStrCursor("")
-	ctx := NewBaseCtx(c)
+	ctx := NewCtx(c, nil)
 	if !ctx.ParseEOF() {
 		t.Error("expected ParseEOF true on empty input")
 	}
@@ -306,7 +306,7 @@ func TestBaseCtxEofCheck(t *testing.T) {
 
 func TestBaseCtxEofCheckAtEnd(t *testing.T) {
 	c := input.NewStrCursor("")
-	ctx := NewBaseCtx(c)
+	ctx := NewCtx(c, nil)
 	err := ctx.EofCheck()
 	if err != nil {
 		t.Errorf("expected nil, got %v", err)

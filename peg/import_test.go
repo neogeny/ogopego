@@ -1,10 +1,8 @@
-package json
+package peg
 
 import (
 	"os"
 	"testing"
-
-	"github.com/neogeny/ogopego/peg"
 )
 
 func TestImportCalcJSON(t *testing.T) {
@@ -26,21 +24,21 @@ func TestImportCalcJSON(t *testing.T) {
 	if startRule.Name != "start" {
 		t.Errorf("expected first rule 'start', got %q", startRule.Name)
 	}
-	seq, ok := startRule.Exp.(*peg.Sequence)
+	seq, ok := startRule.Exp.(*Sequence)
 	if !ok {
 		t.Fatalf("expected start rule exp to be Sequence, got %T", startRule.Exp)
 	}
 	if len(seq.Sequence) != 2 {
 		t.Fatalf("expected 2 items in start sequence, got %d", len(seq.Sequence))
 	}
-	call, ok := seq.Sequence[0].(*peg.Call)
+	call, ok := seq.Sequence[0].(*Call)
 	if !ok {
 		t.Fatalf("expected first item to be Call, got %T", seq.Sequence[0])
 	}
 	if call.Name != "expression" {
 		t.Errorf("expected call to 'expression', got %q", call.Name)
 	}
-	eof, ok := seq.Sequence[1].(*peg.EOF)
+	eof, ok := seq.Sequence[1].(*EOF)
 	if !ok {
 		t.Fatalf("expected second item to be EOF, got %T", seq.Sequence[1])
 	}

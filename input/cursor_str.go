@@ -188,13 +188,18 @@ func (s *StrCursor) NextToken() {
 	if s.heavy.Patterns == nil {
 		return
 	}
+
+	wsp := s.heavy.Patterns.Wsp
+	eol := s.heavy.Patterns.Eol
+	cmt := s.heavy.Patterns.Cmt
+
 	for {
 		prev := s.offset
-		s.eatPattern(s.heavy.Patterns.Wsp)
-		if s.eatPattern(s.heavy.Patterns.Eol) {
-			s.eatPattern(s.heavy.Patterns.Wsp)
+		s.eatPattern(wsp)
+		if s.eatPattern(eol) {
+			s.eatPattern(wsp)
 		}
-		s.eatPattern(s.heavy.Patterns.Cmt)
+		s.eatPattern(cmt)
 		if s.AtEnd() || s.offset == prev {
 			break
 		}

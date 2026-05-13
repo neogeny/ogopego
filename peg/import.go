@@ -1,11 +1,11 @@
-package json
+package peg
 
 import (
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/neogeny/ogopego/peg"
+	json2 "github.com/neogeny/ogopego/json"
 )
 
 type helper struct {
@@ -32,12 +32,12 @@ func (h *helper) withValue(v any) *helper {
 	return &helper{value: obj, path: h.path}
 }
 
-func (h *helper) error(msg string) *JsonError {
+func (h *helper) error(msg string) *json2.JsonError {
 	s := strings.Join(h.path, " -> ")
 	if s == "" {
-		return newJsonError(msg)
+		return json2.NewJsonError(msg)
 	}
-	return newJsonError(fmt.Sprintf("%s at %s", msg, s))
+	return json2.NewJsonError(fmt.Sprintf("%s at %s", msg, s))
 }
 
 func (h *helper) getClass() (string, error) {
@@ -137,15 +137,15 @@ func (h *helper) getArray(field string) ([]*helper, error) {
 	return result, nil
 }
 
-func ParseGrammar(data []byte) (*peg.Grammar, error) {
+func ParseGrammar(data []byte) (*Grammar, error) {
 	var raw any
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return nil, newJsonError(fmt.Sprintf("JSON parse error: %v", err))
+		return nil, json2.NewJsonError(fmt.Sprintf("JSON parse error: %v", err))
 	}
 	return grammarFromJSON(newHelper(raw.(map[string]any)))
 }
 
-func grammarFromJSON(h *helper) (*peg.Grammar, error) {
+func grammarFromJSON(h *helper) (*Grammar, error) {
 	cls, err := h.getClass()
 	if err != nil {
 		return nil, err
@@ -164,11 +164,11 @@ func grammarFromJSON(h *helper) (*peg.Grammar, error) {
 		return nil, err
 	}
 
-	var rules []*peg.Rule
+	var rules []*Rule
 	for i, rh := range ruleHelpers {
 		r, err := ruleFromJSON(rh)
 		if err != nil {
-			return nil, newJsonError(fmt.Sprintf("rules[%d]: %v", i, err))
+			return nil, json2.NewJsonError(fmt.Sprintf("rules[%d]: %v", i, err))
 		}
 		rules = append(rules, r)
 	}
@@ -186,7 +186,7 @@ func grammarFromJSON(h *helper) (*peg.Grammar, error) {
 		}
 	}
 
-	g := &peg.Grammar{
+	g := &Grammar{
 		Name:       name,
 		Directives: directives,
 		Keywords:   keywords,
@@ -224,7 +224,7 @@ func parseDirectives(obj map[string]any) map[string]any {
 	return result
 }
 
-func ruleFromJSON(h *helper) (*peg.Rule, error) {
+func ruleFromJSON(h *helper) (*Rule, error) {
 	cls, err := h.getClass()
 	if err != nil {
 		return nil, err
@@ -261,9 +261,9 @@ func ruleFromJSON(h *helper) (*peg.Rule, error) {
 	isMemo := h.optBool("is_memo", true)
 	isLrec := h.optBool("is_lrec", false)
 
-	r := &peg.Rule{
-		NamedBox: peg.NamedBox{
-			Box:  peg.Box{Exp: exp},
+	r := &Rule{
+		NamedBox: NamedBox{
+			Box:  Box{Exp: exp},
 			Name: name,
 		},
 		Params: params,
@@ -277,7 +277,7 @@ func ruleFromJSON(h *helper) (*peg.Rule, error) {
 	return r, nil
 }
 
-func modelFromJSON(h *helper, err error) (peg.Model, error) {
+func modelFromJSON(h *helper, err error) (Model, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		var seq []peg.Model
+		var seq []Model
 		for _, ih := range items {
 			exp, err := modelFromJSON(ih, nil)
 			if err != nil {
@@ -300,29 +300,29 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 			}
 			seq = append(seq, exp)
 		}
-		return &peg.Sequence{Sequence: seq}, nil
+		return &Sequence{Sequence: seq}, nil
 
 	case "Choice":
 		items, err := h.getArray("options")
 		if err != nil {
 			return nil, err
 		}
-		var opts []*peg.Option
+		var opts []*Option
 		for _, ih := range items {
 			exp, err := modelFromJSON(ih.getNested("exp"))
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, &peg.Option{Box: peg.Box{Exp: exp}})
+			opts = append(opts, &Option{Box: Box{Exp: exp}})
 		}
-		return &peg.Choice{Options: opts}, nil
+		return &Choice{Options: opts}, nil
 
 	case "Option":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Option{Box: peg.Box{Exp: exp}}, nil
+		return &Option{Box: Box{Exp: exp}}, nil
 
 	case "Named":
 		name, err := h.getString("name")
@@ -333,7 +333,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Named{NamedBox: peg.NamedBox{Box: peg.Box{Exp: exp}, Name: name}}, nil
+		return &Named{NamedBox: NamedBox{Box: Box{Exp: exp}, Name: name}}, nil
 
 	case "NamedList":
 		name, err := h.getString("name")
@@ -344,32 +344,32 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.NamedList{Named: peg.Named{NamedBox: peg.NamedBox{Box: peg.Box{Exp: exp}, Name: name}}}, nil
+		return &NamedList{Named: Named{NamedBox: NamedBox{Box: Box{Exp: exp}, Name: name}}}, nil
 
 	case "Call":
 		name, err := h.getString("name")
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Call{Name: name}, nil
+		return &Call{Name: name}, nil
 
 	case "Token":
 		tok, err := h.getString("token")
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Token{Token: tok}, nil
+		return &Token{Token: tok}, nil
 
 	case "Pattern":
 		pat, err := h.getString("pattern")
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Pattern{Pattern: pat}, nil
+		return &Pattern{Pattern: pat}, nil
 
 	case "Constant":
 		lit := h.optString("literal")
-		return &peg.Constant{Literal: lit}, nil
+		return &Constant{Literal: lit}, nil
 
 	case "Alert":
 		lit := h.optString("literal")
@@ -377,77 +377,77 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if n, ok := h.optFloat("level"); ok {
 			level = int(n)
 		}
-		return &peg.Alert{Constant: peg.Constant{Literal: lit}, Level: level}, nil
+		return &Alert{Constant: Constant{Literal: lit}, Level: level}, nil
 
 	case "Group":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Group{Box: peg.Box{Exp: exp}}, nil
+		return &Group{Box: Box{Exp: exp}}, nil
 
 	case "Optional":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Optional{Box: peg.Box{Exp: exp}}, nil
+		return &Optional{Box: Box{Exp: exp}}, nil
 
 	case "Closure":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Closure{Box: peg.Box{Exp: exp}}, nil
+		return &Closure{Box: Box{Exp: exp}}, nil
 
 	case "PositiveClosure":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.PositiveClosure{Closure: peg.Closure{Box: peg.Box{Exp: exp}}}, nil
+		return &PositiveClosure{Closure: Closure{Box: Box{Exp: exp}}}, nil
 
 	case "Lookahead":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Lookahead{Box: peg.Box{Exp: exp}}, nil
+		return &Lookahead{Box: Box{Exp: exp}}, nil
 
 	case "NegativeLookahead":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.NegativeLookahead{Box: peg.Box{Exp: exp}}, nil
+		return &NegativeLookahead{Box: Box{Exp: exp}}, nil
 
 	case "SkipGroup":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.SkipGroup{Box: peg.Box{Exp: exp}}, nil
+		return &SkipGroup{Box: Box{Exp: exp}}, nil
 
 	case "SkipTo":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.SkipTo{Box: peg.Box{Exp: exp}}, nil
+		return &SkipTo{Box: Box{Exp: exp}}, nil
 
 	case "Override":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Override{Box: peg.Box{Exp: exp}}, nil
+		return &Override{Box: Box{Exp: exp}}, nil
 
 	case "OverrideList":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &peg.OverrideList{Box: peg.Box{Exp: exp}}, nil
+		return &OverrideList{Box: Box{Exp: exp}}, nil
 
 	case "Join":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -458,7 +458,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Join{Box: peg.Box{Exp: exp}, Sep: sep}, nil
+		return &Join{Box: Box{Exp: exp}, Sep: sep}, nil
 
 	case "PositiveJoin":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -469,7 +469,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.PositiveJoin{Join: peg.Join{Box: peg.Box{Exp: exp}, Sep: sep}}, nil
+		return &PositiveJoin{Join: Join{Box: Box{Exp: exp}, Sep: sep}}, nil
 
 	case "Gather":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -480,7 +480,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.Gather{Join: peg.Join{Box: peg.Box{Exp: exp}, Sep: sep}}, nil
+		return &Gather{Join: Join{Box: Box{Exp: exp}, Sep: sep}}, nil
 
 	case "PositiveGather":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -491,22 +491,22 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &peg.PositiveGather{Gather: peg.Gather{Join: peg.Join{Box: peg.Box{Exp: exp}, Sep: sep}}}, nil
+		return &PositiveGather{Gather: Gather{Join: Join{Box: Box{Exp: exp}, Sep: sep}}}, nil
 
 	case "Void":
-		return &peg.Void{}, nil
+		return &Void{}, nil
 
 	case "Cut":
-		return &peg.Cut{}, nil
+		return &Cut{}, nil
 
 	case "EOF":
-		return &peg.EOF{}, nil
+		return &EOF{}, nil
 
 	case "EOL":
-		return &peg.EOL{}, nil
+		return &EOL{}, nil
 
 	case "EmptyClosure":
-		return &peg.EmptyClosure{}, nil
+		return &EmptyClosure{}, nil
 
 	case "RuleInclude":
 		name, err := h.getString("name")
@@ -514,7 +514,7 @@ func modelFromJSON(h *helper, err error) (peg.Model, error) {
 			return nil, err
 		}
 		exp, _ := modelFromJSON(h.getNested("exp"))
-		return &peg.RuleInclude{Name: name, Exp: exp}, nil
+		return &RuleInclude{Name: name, Exp: exp}, nil
 
 	default:
 		return nil, h.error(fmt.Sprintf("Unsupported: %s", cls))

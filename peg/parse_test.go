@@ -16,7 +16,7 @@ func ctxFrom(s string) Ctx {
 		panic(err)
 	}
 	c.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
-	return context.NewBaseCtx(c)
+	return context.NewCtx(c, nil)
 }
 
 func TestParseToken(t *testing.T) {
@@ -357,7 +357,7 @@ func TestParseGrammar(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx, cfg)
+	result, err := expr.Parse(ctx, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -391,7 +391,7 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx, cfg)
+	result, err := expr.Parse(ctx, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -525,7 +525,7 @@ func TestParseClosureIncremental(t *testing.T) {
 
 func TestParseKeywordIsKeyword(t *testing.T) {
 	ctx := ctxFrom("if")
-	ctx.SetKeywords([]string{"if", "else"})
+	ctx.Configure(input.Cfg{Keywords: []string{"if", "else"}})
 	if !ctx.IsKeyword("if") {
 		t.Error("expected 'if' to be keyword")
 	}

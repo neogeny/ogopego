@@ -23,7 +23,7 @@ var (
 
 func bootGrammar() (*peg.Grammar, error) {
 	bootOnce.Do(func() {
-		bootGram, bootErr = json.LoadBootGrammar(ogopego.TatsuGrammarJSON)
+		bootGram, bootErr = peg.LoadBootGrammar(ogopego.TatsuGrammarJSON)
 	})
 	return bootGram, bootErr
 }
@@ -67,7 +67,7 @@ func Compile(grammar string, cfg *Cfg) (*peg.Grammar, error) {
 	if err != nil {
 		return nil, err
 	}
-	return peg.Compile(tree)
+	return peg.CompileGrammar(tree)
 }
 
 func CompileToJSON(grammar string, cfg *Cfg) (any, error) {
@@ -107,5 +107,5 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 	return json.AsJSONs(tree), nil
 }
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
-	return json.ParseGrammar(data)
+	return peg.ParseGrammar(data)
 }

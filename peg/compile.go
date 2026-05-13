@@ -25,7 +25,7 @@ func (c *comp) error(msg string) error {
 	return fmt.Errorf("compile: %s at %s", msg, strings.Join(c.path, " -> "))
 }
 
-func Compile(tree trees.Tree) (*Grammar, error) {
+func CompileGrammar(tree trees.Tree) (*Grammar, error) {
 	c := &comp{}
 	g, err := c.compileGrammar(tree)
 	if err != nil {

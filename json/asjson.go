@@ -4,7 +4,70 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"github.com/iancoleman/orderedmap"
 )
+
+type OrderedMap = orderedmap.OrderedMap
+
+type AsJSONMixin interface {
+	PubMap() *OrderedMap
+	AsJSON() any
+}
+
+type AsJSONBase struct{}
+
+func (b *AsJSONBase) AsJSONOf(ref any) any {
+	pub := b.PubMapOf(ref)
+	if pub == nil {
+		return nil
+	}
+
+	v := reflect.ValueOf(ref)
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+
+	typename := v.Type().Name()
+	out := orderedmap.New()
+	out.Set("__class__", typename)
+	for _, k := range pub.Keys() {
+		val, _ := pub.Get(k)
+		out.Set(k, val)
+	}
+	out.Set("__class__", typename)
+	return out
+}
+
+func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
+	if ref == nil {
+		return nil
+	}
+	v := reflect.ValueOf(ref)
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
+
+	out := orderedmap.New()
+	t := v.Type()
+	for i := range t.NumField() {
+		f := t.Field(i)
+		if !f.IsExported() {
+			continue
+		}
+		out.Set(f.Name, v.Field(i).Interface())
+	}
+	return out
+}
 
 func AsJSON(v any) any {
 	seen := make(map[uintptr]bool)
@@ -30,6 +93,9 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 		if v.IsNil() {
 			return nil
 		}
+		if m, ok := v.Interface().(AsJSONMixin); ok {
+			return mixinToJSON(m, seen, v.Type().Elem().Name())
+		}
 		if m, ok := v.Interface().(json.Marshaler); ok {
 			return marshalToAny(m)
 		}
@@ -37,6 +103,9 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 
 	case reflect.Struct:
 		if v.CanAddr() {
+			if m, ok := v.Addr().Interface().(AsJSONMixin); ok {
+				return mixinToJSON(m, seen, v.Type().Name())
+			}
 			if m, ok := v.Addr().Interface().(json.Marshaler); ok {
 				return marshalToAny(m)
 			}
@@ -87,6 +156,10 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 	default:
 		return fmt.Sprint(v.Interface())
 	}
+}
+
+func mixinToJSON(m AsJSONMixin, seen map[uintptr]bool, className string) any {
+	return m.AsJSON()
 }
 
 func marshalToAny(m json.Marshaler) any {

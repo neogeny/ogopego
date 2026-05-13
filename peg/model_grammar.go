@@ -9,7 +9,6 @@ import (
 type Grammar struct {
 	ModelBase
 	Name       string
-	cfg        Cfg
 	Directives map[string]any
 	Keywords   []string
 	Rules      []*Rule

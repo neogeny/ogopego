@@ -1,10 +1,6 @@
-package json
+package peg
 
-import (
-	"github.com/neogeny/ogopego/peg"
-)
-
-func LoadBootGrammar(data []byte) (*peg.Grammar, error) {
+func LoadBootGrammar(data []byte) (*Grammar, error) {
 	g, err := ParseGrammar(data)
 	if err != nil {
 		return nil, err

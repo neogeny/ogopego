@@ -2,10 +2,10 @@ package peg
 
 import (
 	"encoding/json"
-	"reflect"
 	"weak"
 
 	"github.com/davecgh/go-spew/spew"
+	asjson "github.com/neogeny/ogopego/json"
 )
 
 // ParseInfo holds parse position information.
@@ -20,6 +20,7 @@ type ParseInfo struct {
 
 // Node is an AST node produced by parsing.
 type Node struct {
+	asjson.AsJSONBase
 	parent   weak.Pointer[Node]
 	Ast      any
 	Pos      *ParseInfo
@@ -71,28 +72,20 @@ func (n *Node) Path() []*Node {
 	return ancestors
 }
 
-func (n *Node) __pub__() map[string]any {
+func (n *Node) PubMap() *asjson.OrderedMap {
 	if n == nil {
 		return nil
 	}
-	out := make(map[string]any)
-	v := reflect.ValueOf(n).Elem()
-	t := v.Type()
-	for i := range v.NumField() {
-		f := t.Field(i)
-		if !f.IsExported() {
-			continue
-		}
-		out[f.Name] = v.Field(i).Interface()
+	return n.AsJSONBase.PubMapOf(n)
+}
+
+func (n *Node) AsJSON() any {
+	if n == nil {
+		return nil
 	}
-	return out
+	return n.AsJSONBase.AsJSONOf(n)
 }
 
 func (n *Node) MarshalJSON() ([]byte, error) {
-	if n == nil {
-		return []byte("null"), nil
-	}
-	pub := n.__pub__()
-	pub["__class__"] = "Node"
-	return json.Marshal(pub)
+	return json.Marshal(n.AsJSON())
 }
