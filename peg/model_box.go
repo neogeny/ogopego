@@ -9,3 +9,4 @@ type Box struct {
 
 func (t *Box) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Box) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *Box) AsJSONStr() string          { return t.AsJSONStrOf(t) }

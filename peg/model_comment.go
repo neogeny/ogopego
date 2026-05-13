@@ -9,6 +9,7 @@ type Comment struct {
 
 func (t *Comment) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Comment) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *Comment) AsJSONStr() string          { return t.AsJSONStrOf(t) }
 
 type EOLComment struct {
 	Comment
@@ -16,3 +17,4 @@ type EOLComment struct {
 
 func (t *EOLComment) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *EOLComment) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *EOLComment) AsJSONStr() string          { return t.AsJSONStrOf(t) }

@@ -8,3 +8,4 @@ type NegativeLookahead struct {
 
 func (t *NegativeLookahead) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *NegativeLookahead) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *NegativeLookahead) AsJSONStr() string          { return t.AsJSONStrOf(t) }

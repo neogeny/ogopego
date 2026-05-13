@@ -8,3 +8,4 @@ type Named struct {
 
 func (t *Named) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Named) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *Named) AsJSONStr() string          { return t.AsJSONStrOf(t) }

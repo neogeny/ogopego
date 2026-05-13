@@ -86,6 +86,8 @@ func (n *Node) AsJSON() any {
 	return n.AsJSONBase.AsJSONOf(n)
 }
 
+func (n *Node) AsJSONStr() string { return n.AsJSONStrOf(n) }
+
 func (n *Node) MarshalJSON() ([]byte, error) {
 	return json.Marshal(n.AsJSON())
 }

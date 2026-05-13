@@ -9,3 +9,4 @@ type Sequence struct {
 
 func (t *Sequence) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Sequence) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *Sequence) AsJSONStr() string          { return t.AsJSONStrOf(t) }

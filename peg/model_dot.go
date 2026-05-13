@@ -8,3 +8,4 @@ type Dot struct {
 
 func (t *Dot) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Dot) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *Dot) AsJSONStr() string          { return t.AsJSONStrOf(t) }

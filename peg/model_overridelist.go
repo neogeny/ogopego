@@ -8,3 +8,4 @@ type OverrideList struct {
 
 func (t *OverrideList) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *OverrideList) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *OverrideList) AsJSONStr() string          { return t.AsJSONStrOf(t) }

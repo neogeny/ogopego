@@ -8,3 +8,4 @@ type PositiveClosure struct {
 
 func (t *PositiveClosure) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *PositiveClosure) AsJSON() any                { return t.AsJSONOf(t) }
+func (t *PositiveClosure) AsJSONStr() string          { return t.AsJSONStrOf(t) }

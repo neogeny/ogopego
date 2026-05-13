@@ -109,3 +109,4 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 
 func (g *Grammar) PubMap() *asjson.OrderedMap { return g.PubMapOf(g) }
 func (g *Grammar) AsJSON() any                { return g.AsJSONOf(g) }
+func (g *Grammar) AsJSONStr() string          { return g.AsJSONStrOf(g) }

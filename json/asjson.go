@@ -13,9 +13,22 @@ type OrderedMap = orderedmap.OrderedMap
 type AsJSONMixin interface {
 	PubMap() *OrderedMap
 	AsJSON() any
+	AsJSONStr() string
 }
 
 type AsJSONBase struct{}
+
+func (b *AsJSONBase) AsJSONStrOf(ref any) string {
+	val := b.AsJSONOf(ref)
+	if val == nil {
+		return ""
+	}
+	bts, err := json.MarshalIndent(val, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("!json:%v", err)
+	}
+	return string(bts)
+}
 
 func (b *AsJSONBase) AsJSONOf(ref any) any {
 	pub := b.PubMapOf(ref)
