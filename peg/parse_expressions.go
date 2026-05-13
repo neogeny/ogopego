@@ -4,277 +4,249 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
-func (s *Sequence) Parse(ctx Ctx) (tree.Tree, error) {
+func (s *Sequence) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
-	var items []tree.Tree
+	var items []trees.Tree
 	for _, el := range s.Sequence {
 		result, err := el.Parse(ctx)
 		if err != nil {
 			ctx.Reset(mark)
 			return nil, err
 		}
-		if _, ok := result.(*tree.Nil); !ok {
+		if _, ok := result.(*trees.Nil); !ok {
 			items = append(items, result)
 		}
 	}
 	switch len(items) {
 	case 0:
-		return &tree.Nil{}, nil
+		return &trees.Nil{}, nil
 	case 1:
 		return items[0], nil
 	default:
-		return &tree.Seq{Items: items}, nil
+		return &trees.Seq{Items: items}, nil
 	}
 }
 
-func (t *Token) Parse(ctx Ctx) (tree.Tree, error) {
+func (t *Token) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	matched, err := ctx.Token(t.Token)
 	if err != nil {
 		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Text{Value: matched}, nil
+	return &trees.Text{Value: matched}, nil
 }
 
-func (p *Pattern) Parse(ctx Ctx) (tree.Tree, error) {
+func (p *Pattern) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	matched, err := ctx.Pattern(p.Pattern)
 	if err != nil {
 		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Text{Value: matched}, nil
+	return &trees.Text{Value: matched}, nil
 }
 
-func (g *Group) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	result, err := g.Exp.Parse(ctx)
+func (g *Group) Parse(ctx Ctx) (trees.Tree, error) {
+	return g.Exp.Parse(ctx)
+}
+
+func (s *SkipGroup) Parse(ctx Ctx) (trees.Tree, error) {
+	_, err := s.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
-	return result, nil
+	return trees.NIL, nil
 }
 
-func (s *SkipGroup) Parse(ctx Ctx) (tree.Tree, error) {
+func (l *Lookahead) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
-	result, err := s.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
-	return result, nil
-}
-
-func (l *Lookahead) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	result, err := l.Exp.Parse(ctx)
+	_, err := l.Exp.Parse(ctx)
 	ctx.Reset(mark)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return trees.NIL, nil
 }
 
-func (n *NegativeLookahead) Parse(ctx Ctx) (tree.Tree, error) {
+func (n *NegativeLookahead) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	_, err := n.Exp.Parse(ctx)
 	ctx.Reset(mark)
 	if err == nil {
-		return nil, errors.New("negative lookahead matched")
+		return nil, ctx.Failure(
+			mark,
+			fmt.Errorf("negative lookahead matched"),
+		)
 	}
-	return &tree.Nil{}, nil
+	return trees.NIL, nil
 }
 
-func (n *Named) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (n *Named) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Named{Name: n.Name, Value: result}, nil
+	return &trees.Named{Name: n.Name, Value: result}, nil
 }
 
-func (n *NamedList) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (n *NamedList) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.NamedAsList{Name: n.Name, Value: result}, nil
+	return &trees.NamedAsList{Name: n.Name, Value: result}, nil
 }
 
-func (o *Override) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (o *Override) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Override{Value: result}, nil
+	return &trees.Override{Value: result}, nil
 }
 
-func (o *OverrideList) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (o *OverrideList) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.OverrideAsList{Value: result}, nil
+	return &trees.OverrideAsList{Value: result}, nil
 }
 
-func (d *Dot) Parse(ctx Ctx) (tree.Tree, error) {
+func (d *Dot) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	r, err := ctx.Dot()
 	if err != nil {
 		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Text{Value: string(r)}, nil
+	return &trees.Text{Value: string(r)}, nil
 }
 
-func (e *EOF) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (e *EOF) Parse(ctx Ctx) (trees.Tree, error) {
 	if !ctx.Eof() {
-		ctx.Reset(mark)
-		return nil, &ParseError{Pos: ctx.Mark(), Message: "expected EOF"}
+		return nil, ctx.Failure(
+			ctx.Mark(),
+			fmt.Errorf("expected EOF"),
+		)
 	}
-	return &tree.Nil{}, nil
+	return trees.NIL, nil
 }
 
-func (e *EOL) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (e *EOL) Parse(ctx Ctx) (trees.Tree, error) {
 	if !ctx.MatchEOL() {
-		ctx.Reset(mark)
-		return nil, &ParseError{Pos: ctx.Mark(), Message: "expected EOL"}
+		return nil, ctx.Failure(
+			ctx.Mark(),
+			fmt.Errorf("expected EOL"),
+		)
 	}
-	return &tree.Nil{}, nil
+	return &trees.Nil{}, nil
 }
 
-func (v *Void) Parse(ctx Ctx) (tree.Tree, error) {
+func (v *Void) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	err := ctx.Void()
 	if err != nil {
 		ctx.Reset(mark)
 		return nil, err
 	}
-	return &tree.Nil{}, nil
+	return trees.NIL, nil
 }
 
-func (f *Fail) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	ctx.Reset(mark)
+func (f *Fail) Parse(ctx Ctx) (trees.Tree, error) {
 	return nil, ctx.Fail()
 }
 
-func (n *NULL) Parse(ctx Ctx) (tree.Tree, error) {
-	return &tree.Nil{}, nil
+func (n *NULL) Parse(ctx Ctx) (trees.Tree, error) {
+	return &trees.Nil{}, nil
 }
 
-func (c *Constant) Parse(ctx Ctx) (tree.Tree, error) {
+func (c *Constant) Parse(ctx Ctx) (trees.Tree, error) {
 	return ctx.Constant(c.Literal)
 }
 
-func (a *Alert) Parse(ctx Ctx) (tree.Tree, error) {
+func (a *Alert) Parse(ctx Ctx) (trees.Tree, error) {
 	return ctx.Constant(a.Literal)
 }
 
-func (e *EmptyClosure) Parse(ctx Ctx) (tree.Tree, error) {
-	return &tree.Nil{}, nil
+func (e *EmptyClosure) Parse(ctx Ctx) (trees.Tree, error) {
+	return &trees.List{Items: nil}, nil
 }
 
-func (c *Cut) Parse(ctx Ctx) (tree.Tree, error) {
-	return &tree.Nil{}, nil
+func (c *Cut) Parse(ctx Ctx) (trees.Tree, error) {
+	return &trees.Nil{}, nil
 }
 
-func (o *Option) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
+func (o *Option) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
-		ctx.Reset(mark)
 		return nil, err
 	}
 	return result, nil
 }
 
-func (r *RuleInclude) Parse(ctx Ctx) (tree.Tree, error) {
+func (r *RuleInclude) Parse(ctx Ctx) (trees.Tree, error) {
 	if r.Exp == nil {
 		return nil, fmt.Errorf("RuleInclude %q has not been resolved", r.Name)
 	}
+	return r.Exp.Parse(ctx)
+}
+
+func (s *Synth) Parse(ctx Ctx) (trees.Tree, error) {
+	return s.Exp.Parse(ctx)
+}
+
+func (s *SkipTo) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
-	result, err := r.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
-	return &tree.Override{Value: result}, nil
-}
-
-func (s *Synth) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	result, err := s.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
-	return result, nil
-}
-
-func (s *SkipTo) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	ctx.Reset(mark)
-	return nil, errors.New("SkipTo not yet implemented")
-}
-
-func (c *Comment) Parse(ctx Ctx) (tree.Tree, error) {
-	return &tree.Nil{}, nil
-}
-
-func (e *EOLComment) Parse(ctx Ctx) (tree.Tree, error) {
-	return &tree.Nil{}, nil
-}
-
-func (r *Rule) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	result, err := r.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
-	folded := tree.Fold(result)
-	if len(r.Params) == 0 || r.Params[0] == "bool" {
-		return folded, nil
-	}
-	return &tree.TreeNode{TypeName: r.Params[0], Tree: folded}, nil
-}
-
-func (g *Grammar) Parse(ctx Ctx) (tree.Tree, error) {
-	mark := ctx.Mark()
-	if len(g.Keywords) > 0 {
-		ctx.SetKeywords(g.Keywords)
-	}
-	var items []tree.Tree
-	for _, rule := range g.Rules {
-		result, err := rule.Parse(ctx)
+	for {
+		_, err := s.Exp.Parse(ctx)
+		if err == nil {
+			return trees.NIL, nil
+		}
 		if err != nil {
 			ctx.Reset(mark)
 			return nil, err
 		}
-		items = append(items, result)
+
 	}
-	switch len(items) {
-	case 0:
-		return &tree.Nil{}, nil
-	case 1:
-		return items[0], nil
-	default:
-		return &tree.Seq{Items: items}, nil
+}
+
+func (c *Comment) Parse(ctx Ctx) (trees.Tree, error) {
+	return nil, errors.New("exp Comment not yet implemented")
+}
+
+func (e *EOLComment) Parse(ctx Ctx) (trees.Tree, error) {
+	return nil, errors.New("exp EOLComment not yet implemented")
+}
+
+func (r *Rule) Parse(ctx Ctx) (trees.Tree, error) {
+	mark := ctx.Mark()
+	result, err := r.Exp.Parse(ctx)
+	if err != nil {
+		ctx.Reset(mark)
+		return nil, err
 	}
+	folded := trees.Fold(result)
+	if len(r.Params) == 0 || r.Params[0] == "bool" {
+		return folded, nil
+	}
+	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
+}
+
+func (g *Grammar) Parse(ctx Ctx) (trees.Tree, error) {
+	if len(g.Keywords) > 0 {
+		ctx.SetKeywords(g.Keywords)
+	}
+	if len(g.Rules) == 0 {
+		return nil, ctx.Failure(
+			ctx.Mark(),
+			fmt.Errorf("no rules in grammar"),
+		)
+	}
+	rule := g.Rules[0]
+	return rule.Parse(ctx)
 }

@@ -68,7 +68,7 @@ func (m *Memento) Error() string {
 
 		if i == m.Line {
 			pad := strings.Repeat(" ", m.Col)
-			fmt.Fprintf(&b, "    %s %s%s^%s %s%s%s\n",
+			_, _ = fmt.Fprintf(&b, "    %s %s%s^%s %s%s%s\n",
 				bluePipe, pad,
 				ansiBold+ansiRed, ansiReset,
 				ansiRed, m.Msg, ansiReset)

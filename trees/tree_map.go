@@ -1,4 +1,4 @@
-package tree
+package trees
 
 type MapNode struct{ Entries map[string]Tree }
 

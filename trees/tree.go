@@ -1,4 +1,4 @@
-package tree
+package trees
 
 type Tree interface {
 	tree()

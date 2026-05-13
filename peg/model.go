@@ -2,15 +2,14 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/context"
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
 type Ctx = context.Ctx
-type ParseError = context.ParseError
-type DisasterReport = context.DisasterReport
+type ParseFailure = context.ParseFailure
 
 type Model interface {
-	Parse(ctx Ctx) (tree.Tree, error)
+	Parse(ctx Ctx) (trees.Tree, error)
 	Link(rules map[string]*Rule) error
 	ValidateLinked() error
 	followRef() *ModelBase

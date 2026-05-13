@@ -3,86 +3,102 @@ package peg
 import (
 	"fmt"
 
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
-func errNotImplemented(name string) error {
-	return fmt.Errorf("%s not yet implemented", name)
+func (c *Closure) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeat(ctx, c, false)
 }
 
-func (c *Closure) Parse(ctx Ctx) (tree.Tree, error) {
-	var items []tree.Tree
-	for {
-		mark := ctx.Mark()
-		result, err := c.Exp.Parse(ctx)
+func (p *PositiveClosure) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeat(ctx, p, true)
+}
+
+func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
+	var items []trees.Tree
+
+	if positive {
+		first, err := exp.Parse(ctx)
 		if err != nil {
-			ctx.Reset(mark)
-			break
+			return nil, err
 		}
-		if ctx.Mark() == mark {
-			break
-		}
-		if _, ok := result.(*tree.Nil); !ok {
-			items = append(items, result)
-		}
-	}
-	switch len(items) {
-	case 0:
-		return &tree.Nil{}, nil
-	case 1:
-		return items[0], nil
-	default:
-		return &tree.Seq{Items: items}, nil
-	}
-}
-
-func (p *PositiveClosure) Parse(ctx Ctx) (tree.Tree, error) {
-	startMark := ctx.Mark()
-	first, err := p.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(startMark)
-		return nil, err
-	}
-	var items []tree.Tree
-	if _, ok := first.(*tree.Nil); !ok {
 		items = append(items, first)
 	}
+
 	for {
 		mark := ctx.Mark()
-		result, err := p.Exp.Parse(ctx)
+		result, err := exp.Parse(ctx)
 		if err != nil {
-			ctx.Reset(mark)
 			break
 		}
 		if ctx.Mark() == mark {
+			return nil, ctx.Failure(
+				mark,
+				fmt.Errorf("closure did not consume any input, "+
+					"which would lead to an infinite loop"),
+			)
+		}
+		items = append(items, result)
+	}
+	return &trees.List{Items: items}, nil
+}
+
+func repeatWithSep(
+	ctx Ctx,
+	exp Model,
+	sep Model,
+	positive bool,
+	keepsep bool,
+) (trees.Tree, error) {
+	var items []trees.Tree
+
+	first, err := exp.Parse(ctx)
+	if err != nil {
+		if positive {
+			return nil, err
+		}
+		return &trees.List{Items: nil}, nil
+	}
+	items = append(items, first)
+
+	for {
+		mark := ctx.Mark()
+		result, err := sep.Parse(ctx)
+		if err != nil {
 			break
 		}
-		if _, ok := result.(*tree.Nil); !ok {
+		if keepsep {
 			items = append(items, result)
 		}
+
+		result, err = exp.Parse(ctx)
+		if err != nil {
+			// NOTE must match afer sep matched
+			return nil, err
+		}
+		if ctx.Mark() == mark {
+			return nil, ctx.Failure(
+				mark,
+				fmt.Errorf("closure did not consume any input, which would lead to an infinite loop"),
+			)
+		}
+		items = append(items, result)
 	}
-	switch len(items) {
-	case 0:
-		return &tree.Nil{}, nil
-	case 1:
-		return items[0], nil
-	default:
-		return &tree.Seq{Items: items}, nil
-	}
+	return &trees.List{Items: items}, nil
 }
 
-func (j *Join) Parse(ctx Ctx) (tree.Tree, error) {
-	return nil, errNotImplemented("Join")
+func (j *Join) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, j.Exp, j.Sep, false, true)
 }
 
-func (p *PositiveJoin) Parse(ctx Ctx) (tree.Tree, error) {
-	return nil, errNotImplemented("PositiveJoin")
+func (p *PositiveJoin) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, p.Exp, p.Sep, true, true)
 }
 
-func (g *Gather) Parse(ctx Ctx) (tree.Tree, error) {
-	return nil, errNotImplemented("Gather")
+func (g *Gather) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, g.Exp, g.Sep, false, false)
 }
 
-func (p *PositiveGather) Parse(ctx Ctx) (tree.Tree, error) {
-	return nil, errNotImplemented("PositiveGather")
+func (g *PositiveGather) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, g.Exp, g.Sep, true, false)
 }

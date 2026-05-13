@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -51,7 +51,10 @@ func (b *BaseCtx) Peek() (rune, bool) { return b.cursor.Peek() }
 func (b *BaseCtx) Dot() (rune, error) {
 	r, ok := b.Next()
 	if !ok {
-		return 0, &ParseError{Pos: b.Mark(), Message: "expected any character"}
+		return 0, &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("expected any character"),
+		}
 	}
 	return r, nil
 }
@@ -120,19 +123,24 @@ func (b *BaseCtx) ParseEOF() bool {
 	return result
 }
 
-func (b *BaseCtx) Failure(start int, source error) *DisasterReport {
+func (b *BaseCtx) Failure(start int, source error) *ParseFailure {
 	b.Reset(start)
-	if f := b.FurthestFailure(); f != nil && f.Start >= b.Mark() {
-		return f
+	nope := &ParseFailure{
+		Start: start,
+		Mark:  b.Mark(),
+		Inner: source,
+	}
+	if furthest := b.FurthestFailure(); furthest != nil && furthest.Start >= b.Mark() {
+		return nope
 	}
 	msg := source.Error()
 	dis := &DisasterReport{
 		Start:   start,
-		Failure: ParseFailure{Message: msg},
+		Failure: nope,
 		Memento: input.NewMemento(start, msg, b.cursor, b.callStack),
 	}
 	b.SetFurthestFailure(dis)
-	return dis
+	return nope
 }
 
 func (b *BaseCtx) FurthestFailure() *DisasterReport { return b.furthest }
@@ -143,7 +151,10 @@ func (b *BaseCtx) Token(token string) (string, error) {
 	b.NextToken()
 	ok := b.cursor.MatchToken(token)
 	if !ok {
-		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("expected %q", token)}
+		return "", &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("expected %q", token),
+		}
 	}
 	return token, nil
 }
@@ -152,11 +163,16 @@ func (b *BaseCtx) Pattern(pattern string) (string, error) {
 	b.NextToken()
 	re := b.GetPattern(pattern)
 	if re == nil {
-		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("invalid pattern %q", pattern)}
+		return "", &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("invalid pattern %q", pattern)}
 	}
 	m, ok := b.cursor.MatchPattern(re)
 	if !ok {
-		return "", &ParseError{Pos: b.Mark(), Message: fmt.Sprintf("expected pattern %q", pattern)}
+		return "", &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("expected pattern %q", pattern),
+		}
 	}
 	return m, nil
 }
@@ -167,39 +183,47 @@ func (b *BaseCtx) Void() error {
 }
 
 func (b *BaseCtx) Fail() error {
-	return &ParseError{Pos: b.Mark(), Message: "fail"}
+	return &ParseFailure{
+		Mark:  b.Mark(),
+		Inner: fmt.Errorf("fail")}
 }
 
 func (b *BaseCtx) EofCheck() error {
 	b.NextToken()
 	if !b.cursor.AtEnd() {
-		return &ParseError{Pos: b.Mark(), Message: "expected end of text"}
+		return &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("expected end of text"),
+		}
 	}
 	return nil
 }
 
 func (b *BaseCtx) EolCheck() error {
 	if !b.cursor.MatchEOL() {
-		return &ParseError{Pos: b.Mark(), Message: "expected end of line"}
+		return &ParseFailure{
+			Mark:  b.Mark(),
+			Inner: fmt.Errorf("expected end of line"),
+		}
 	}
 	return nil
 }
 
 func (b *BaseCtx) Eof() bool { return b.cursor.AtEnd() }
 
-func (b *BaseCtx) Constant(literal any) (tree.Tree, error) {
+func (b *BaseCtx) Constant(literal any) (trees.Tree, error) {
 	switch v := literal.(type) {
 	case string:
-		return &tree.Text{Value: v}, nil
+		return &trees.Text{Value: v}, nil
 	case float64:
-		return &tree.Number{Value: v}, nil
+		return &trees.Number{Value: v}, nil
 	case bool:
-		return &tree.Bool{Value: v}, nil
+		return &trees.Bool{Value: v}, nil
 	case nil:
-		return &tree.Nil{}, nil
+		return &trees.Nil{}, nil
 	case int:
-		return &tree.Number{Value: float64(v)}, nil
+		return &trees.Number{Value: float64(v)}, nil
 	default:
-		return &tree.Text{Value: fmt.Sprintf("%v", v)}, nil
+		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
 	}
 }

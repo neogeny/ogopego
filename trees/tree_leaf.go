@@ -1,4 +1,7 @@
-package tree
+package trees
+
+var NIL = &Nil{}
+var BOTTOM = &Bottom{}
 
 type Text struct{ Value string }
 

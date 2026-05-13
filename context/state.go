@@ -6,17 +6,6 @@ import (
 
 type CallStack []string
 
-type ParseFailure struct {
-	Message string
-}
-
-type DisasterReport struct {
-	Start   int
-	Failure ParseFailure
-	CutSeen bool
-	Memento *input.Memento
-}
-
 type ParseState struct {
 	cursor   input.Cursor
 	cutSeen  bool

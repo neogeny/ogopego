@@ -3,7 +3,7 @@ package peg
 import (
 	"fmt"
 
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
 type Grammar struct {
@@ -35,7 +35,7 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 	return nil, fmt.Errorf("rule %q not found", name)
 }
 
-func (g *Grammar) ParseTreeFrom(ctx Ctx, start string) (tree.Tree, error) {
+func (g *Grammar) ParseTreeFrom(ctx Ctx, start string) (trees.Tree, error) {
 	if len(g.Keywords) > 0 {
 		ctx.SetKeywords(g.Keywords)
 	}
@@ -46,7 +46,7 @@ func (g *Grammar) ParseTreeFrom(ctx Ctx, start string) (tree.Tree, error) {
 	return rule.Parse(ctx)
 }
 
-func (g *Grammar) ParseTree(ctx Ctx) (tree.Tree, error) {
+func (g *Grammar) ParseTree(ctx Ctx) (trees.Tree, error) {
 	start := "start"
 	if _, err := g.GetRule(start); err != nil {
 		if len(g.Rules) == 0 {

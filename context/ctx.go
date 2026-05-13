@@ -2,7 +2,7 @@ package context
 
 import (
 	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -28,10 +28,10 @@ type Ctx interface {
 	Eof() bool
 	EofCheck() error
 	EolCheck() error
-	Constant(literal any) (tree.Tree, error)
+	Constant(literal any) (trees.Tree, error)
 	Enter(name string)
 	Leave()
-	Failure(start int, source error) *DisasterReport
+	Failure(start int, source error) *ParseFailure
 	FurthestFailure() *DisasterReport
 	SetFurthestFailure(dis *DisasterReport)
 	IsKeyword(name string) bool

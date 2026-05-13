@@ -1,4 +1,4 @@
-package tree
+package trees
 
 import (
 	"testing"
@@ -228,8 +228,8 @@ func TestFoldSeqWithNil(t *testing.T) {
 }
 
 func TestFoldRuleNode(t *testing.T) {
-	result := Fold(&TreeNode{TypeName: "expr", Tree: text("42")})
-	r, ok := result.(*TreeNode)
+	result := Fold(&Node{TypeName: "expr", Tree: text("42")})
+	r, ok := result.(*Node)
 	if !ok {
 		t.Fatalf("expected RuleNode, got %T", result)
 	}

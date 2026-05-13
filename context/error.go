@@ -3,25 +3,46 @@ package context
 import (
 	"errors"
 	"fmt"
+
+	"github.com/neogeny/ogopego/input"
 )
 
 var ErrCut = errors.New("cut")
 
-type ParseError struct {
-	Pos     int
-	Message string
+type ParseFailure struct {
+	Start   int
+	Mark    int
+	CutSeen bool
 	Inner   error
 }
 
-func (e *ParseError) Error() string {
-	if e.Inner != nil {
-		return fmt.Sprintf("at %d: %s: %v", e.Pos, e.Message, e.Inner)
-	}
-	return fmt.Sprintf("at %d: %s", e.Pos, e.Message)
+type DisasterReport struct {
+	Start   int
+	CutSeen bool
+	Failure *ParseFailure
+	Memento *input.Memento
 }
 
-func (e *ParseError) Unwrap() error {
+func (e *ParseFailure) Error() string {
+	if e.Inner != nil {
+		return fmt.Sprintf("at %d: %v", e.Mark, e.Inner)
+	}
+	return fmt.Sprintf("at %d: ParseError", e.Mark)
+}
+
+func (e *ParseFailure) Unwrap() error {
 	return e.Inner
+}
+
+func (e *DisasterReport) Error() string {
+	if e.Failure != nil {
+		return e.Failure.Error()
+	}
+	return fmt.Sprintf("at %d: ParseError", e.Failure.Mark)
+}
+
+func (e *DisasterReport) Unwrap() error {
+	return e.Failure
 }
 
 type CutError struct {

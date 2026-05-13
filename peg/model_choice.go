@@ -3,7 +3,7 @@ package peg
 import (
 	"errors"
 
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
 type Choice struct {
@@ -11,7 +11,7 @@ type Choice struct {
 	Options []*Option
 }
 
-func (c *Choice) Parse(ctx Ctx) (tree.Tree, error) {
+func (c *Choice) Parse(ctx Ctx) (trees.Tree, error) {
 	startMark := ctx.Mark()
 	var lastErr error
 	for _, opt := range c.Options {
@@ -30,12 +30,12 @@ func (c *Choice) Parse(ctx Ctx) (tree.Tree, error) {
 	return nil, lastErr
 }
 
-func (o *Optional) Parse(ctx Ctx) (tree.Tree, error) {
+func (o *Optional) Parse(ctx Ctx) (trees.Tree, error) {
 	mark := ctx.Mark()
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		ctx.Reset(mark)
-		return &tree.Nil{}, nil
+		return &trees.Nil{}, nil
 	}
 	return result, nil
 }

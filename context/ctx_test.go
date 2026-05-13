@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/tree"
+	"github.com/neogeny/ogopego/trees"
 )
 
 func newTestBaseCtx() *BaseCtx {
@@ -49,36 +49,36 @@ func TestBaseCtxCallStackLeaveEmpty(t *testing.T) {
 
 func TestBaseCtxFailure(t *testing.T) {
 	ctx := newTestBaseCtx()
-	dis := ctx.Failure(5, errors.New("expected number"))
-	if dis == nil {
+	fail := ctx.Failure(5, errors.New("expected number"))
+	if fail == nil {
 		t.Fatal("expected non-nil DisasterReport")
 	}
-	if dis.Start != 5 {
-		t.Errorf("expected Start 5, got %d", dis.Start)
+	if fail.Start != 5 {
+		t.Errorf("expected Start 5, got %d", fail.Start)
 	}
-	if dis.Failure.Message != "expected number" {
-		t.Errorf("expected 'expected number', got %q", dis.Failure.Message)
+	if fail.Inner.Error() != "expected number" {
+		t.Errorf("expected 'expected number', got %q", fail.Inner.Error())
 	}
-	if ctx.FurthestFailure() != dis {
+	if ctx.FurthestFailure().Failure.Inner == fail.Inner {
 		t.Error("expected furthest failure to match")
 	}
 }
 
 func TestBaseCtxFailureNoRegress(t *testing.T) {
 	ctx := newTestBaseCtx()
-	ctx.Failure(10, errors.New("first"))
-	ctx.Failure(3, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Message != "first" {
-		t.Errorf("expected furthest to stay 'first', got %q", ctx.FurthestFailure().Failure.Message)
+	_ = ctx.Failure(10, errors.New("first"))
+	_ = ctx.Failure(3, errors.New("second"))
+	if ctx.FurthestFailure().Failure.Error() != "first" {
+		t.Errorf("expected furthest to stay 'first', got %q", ctx.FurthestFailure().Failure.Error())
 	}
 }
 
 func TestBaseCtxFailureProgression(t *testing.T) {
 	ctx := newTestBaseCtx()
-	ctx.Failure(5, errors.New("first"))
-	ctx.Failure(15, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Message != "second" {
-		t.Errorf("expected furthest 'second', got %q", ctx.FurthestFailure().Failure.Message)
+	_ = ctx.Failure(5, errors.New("first"))
+	_ = ctx.Failure(15, errors.New("second"))
+	if ctx.FurthestFailure().Failure.Error() != "second" {
+		t.Errorf("expected furthest 'second', got %q", ctx.FurthestFailure().Failure.Error())
 	}
 }
 
@@ -127,19 +127,19 @@ func TestBaseCtxPatternMismatch(t *testing.T) {
 func TestBaseCtxConstant(t *testing.T) {
 	ctx := newTestBaseCtx()
 	t1, _ := ctx.Constant("hello")
-	if tt, ok := t1.(*tree.Text); !ok || tt.Value != "hello" {
+	if tt, ok := t1.(*trees.Text); !ok || tt.Value != "hello" {
 		t.Errorf("expected Text{hello}, got %T %+v", t1, t1)
 	}
 	t2, _ := ctx.Constant(42)
-	if tn, ok := t2.(*tree.Number); !ok || tn.Value != 42 {
+	if tn, ok := t2.(*trees.Number); !ok || tn.Value != 42 {
 		t.Errorf("expected Number{42}, got %T %+v", t2, t2)
 	}
 	t3, _ := ctx.Constant(true)
-	if tb, ok := t3.(*tree.Bool); !ok || tb.Value != true {
+	if tb, ok := t3.(*trees.Bool); !ok || tb.Value != true {
 		t.Errorf("expected Bool{true}, got %T %+v", t3, t3)
 	}
 	t4, _ := ctx.Constant(nil)
-	if _, ok := t4.(*tree.Nil); !ok {
+	if _, ok := t4.(*trees.Nil); !ok {
 		t.Errorf("expected Nil, got %T", t4)
 	}
 }
