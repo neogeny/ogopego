@@ -1,3 +1,5 @@
+//go:build ignore
+
 type Logger struct {
     name   string
     stream io.Writer
