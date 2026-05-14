@@ -1,9 +1,16 @@
 package peg
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/trees"
+)
 
 type EmptyClosure struct {
 	ModelBase
+}
+
+func (e *EmptyClosure) Parse(ctx Ctx) (trees.Tree, error) {
+	return &trees.List{Items: nil}, nil
 }
 
 func (t *EmptyClosure) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }

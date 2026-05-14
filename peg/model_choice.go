@@ -12,6 +12,14 @@ type Option struct {
 	Box
 }
 
+func (o *Option) Parse(ctx Ctx) (trees.Tree, error) {
+	result, err := o.Exp.Parse(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 type Choice struct {
 	ModelBase
 	Options []*Option
@@ -22,8 +30,7 @@ func (c *Choice) Parse(ctx Ctx) (trees.Tree, error) {
 	var lastErr error
 	for _, opt := range c.Options {
 		mark := ctx.Mark()
-		exp := opt.Exp
-		result, err := exp.Parse(ctx)
+		result, err := opt.Parse(ctx)
 		if err == nil {
 			return result, nil
 		}

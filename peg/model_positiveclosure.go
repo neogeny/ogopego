@@ -1,9 +1,16 @@
 package peg
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/trees"
+)
 
 type PositiveClosure struct {
 	Closure
+}
+
+func (p *PositiveClosure) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeat(ctx, p.Exp, true)
 }
 
 func (t *PositiveClosure) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }

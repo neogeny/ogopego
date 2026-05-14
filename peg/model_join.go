@@ -1,34 +1,53 @@
 package peg
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/trees"
+)
 
 type Join struct {
 	Box
 	Sep Model
 }
 
+type PositiveJoin struct {
+	Join
+}
+
+type Gather struct {
+	Join
+}
+
+type PositiveGather struct {
+	Gather
+}
+
+func (j *Join) Parse(ctx Ctx) (Tree, error) {
+	return repeatWithSep(ctx, j.Exp, j.Sep, false, true)
+}
+
 func (t *Join) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Join) AsJSON() any                { return t.AsJSONOf(t) }
 func (t *Join) AsJSONStr() string          { return t.AsJSONStrOf(t) }
 
-type PositiveJoin struct {
-	Join
+func (p *PositiveJoin) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, p.Exp, p.Sep, true, true)
 }
 
 func (t *PositiveJoin) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *PositiveJoin) AsJSON() any                { return t.AsJSONOf(t) }
 func (t *PositiveJoin) AsJSONStr() string          { return t.AsJSONStrOf(t) }
 
-type Gather struct {
-	Join
+func (g *Gather) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, g.Exp, g.Sep, false, false)
 }
 
 func (t *Gather) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
 func (t *Gather) AsJSON() any                { return t.AsJSONOf(t) }
 func (t *Gather) AsJSONStr() string          { return t.AsJSONStrOf(t) }
 
-type PositiveGather struct {
-	Gather
+func (p *PositiveGather) Parse(ctx Ctx) (trees.Tree, error) {
+	return repeatWithSep(ctx, p.Exp, p.Sep, true, false)
 }
 
 func (t *PositiveGather) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }

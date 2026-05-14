@@ -8,6 +8,9 @@ import (
 type Ctx = context.Ctx
 type ParseFailure = context.ParseFailure
 type MemoKey = context.MemoKey
+type Tree = trees.Tree
+
+var NIL = trees.NIL
 
 type Model interface {
 	Parse(ctx Ctx) (trees.Tree, error)

@@ -1,9 +1,21 @@
 package peg
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+)
 
 type SkipTo struct {
 	Box
+}
+
+func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
+	for {
+		_, err := s.Exp.Parse(ctx)
+		if err == nil {
+			return NIL, nil
+		}
+		return nil, err
+	}
 }
 
 func (t *SkipTo) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }

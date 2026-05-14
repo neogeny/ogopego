@@ -6,14 +6,6 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
-func (c *Closure) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeat(ctx, c.Exp, false)
-}
-
-func (p *PositiveClosure) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeat(ctx, p.Exp, true)
-}
-
 func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 	var items []trees.Tree
 
@@ -73,7 +65,6 @@ func repeatWithSep(
 
 		result, err = exp.Parse(ctx)
 		if err != nil {
-			// NOTE must match afer sep matched
 			return nil, err
 		}
 		if ctx.Mark() == mark {
@@ -85,20 +76,4 @@ func repeatWithSep(
 		items = append(items, result)
 	}
 	return &trees.List{Items: items}, nil
-}
-
-func (j *Join) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeatWithSep(ctx, j.Exp, j.Sep, false, true)
-}
-
-func (p *PositiveJoin) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeatWithSep(ctx, p.Exp, p.Sep, true, true)
-}
-
-func (g *Gather) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeatWithSep(ctx, g.Exp, g.Sep, false, false)
-}
-
-func (g *PositiveGather) Parse(ctx Ctx) (trees.Tree, error) {
-	return repeatWithSep(ctx, g.Exp, g.Sep, true, false)
 }
