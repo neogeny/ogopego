@@ -72,6 +72,7 @@ func (g *Grammar) Initialize() error {
 	if err := g.ValidateLinked(); err != nil {
 		return err
 	}
+	g.markLeftRecursion()
 	g.Analyzed = true
 	return nil
 }
