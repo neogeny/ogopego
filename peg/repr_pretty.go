@@ -90,8 +90,6 @@ func (m *Fail) PrettyPrint() string         { return "!()" }
 func (m *NULL) PrettyPrint() string         { return "" }
 func (m *Void) PrettyPrint() string         { return "()" }
 func (m *EmptyClosure) PrettyPrint() string { return "{}" }
-func (m *Comment) PrettyPrint() string      { return "" }
-func (m *EOLComment) PrettyPrint() string   { return "" }
 
 // Option
 

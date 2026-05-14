@@ -1,5 +1,7 @@
 package peg
 
+import "fmt"
+
 const (
 	stateFirst = iota
 	stateVisiting
@@ -59,7 +61,7 @@ func isNullable(exp Model) bool {
 		return false
 
 	default:
-		return false
+		panic(fmt.Sprintf("isNullable: unhandled model type %T", exp))
 	}
 }
 
@@ -108,8 +110,12 @@ func callableRuleIDs(exp Model, ruleIndex map[*Rule]int) []int {
 		}
 		return result
 
-	default:
+	case *Token, *Pattern, *Dot, *EOF, *EOL, *Void, *Fail,
+		*NULL, *EmptyClosure, *Cut, *Constant, *Alert:
 		return nil
+
+	default:
+		panic(fmt.Sprintf("callableRuleIDs: unhandled model type %T", exp))
 	}
 }
 
@@ -152,7 +158,7 @@ func unboxExp(e Model) Model {
 	case *PositiveGather:
 		return e2.Exp
 	default:
-		return nil
+		panic(fmt.Sprintf("unboxExp: unhandled model type %T", e))
 	}
 }
 

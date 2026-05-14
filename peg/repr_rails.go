@@ -408,5 +408,3 @@ func (m *Gather) Railroads() string            { return rails(walkExp(m)).String
 func (m *PositiveGather) Railroads() string    { return rails(walkExp(m)).String() }
 func (m *Sequence) Railroads() string          { return rails(walkExp(m)).String() }
 func (m *Choice) Railroads() string            { return rails(walkExp(m)).String() }
-func (m *Comment) Railroads() string           { return "" }
-func (m *EOLComment) Railroads() string        { return "" }

@@ -300,9 +300,6 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		}
 		exp = &Closure{Box: Box{Exp: e}}
 
-	case "Comment":
-		exp = &NULL{}
-
 	case "Constant":
 		exp = &Constant{Literal: textValue(inner)}
 
@@ -317,9 +314,6 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 
 	case "EOL", "Eol":
 		exp = &EOL{}
-
-	case "EOLComment":
-		exp = &NULL{}
 
 	case "EmptyClosure":
 		exp = &EmptyClosure{}
