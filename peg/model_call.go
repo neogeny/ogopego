@@ -15,7 +15,7 @@ type Call struct {
 
 func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	if c.Target == nil {
-		return nil, fmt.Errorf("call to %q has not been linked", c.Name)
+		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("call to %q has not been linked", c.Name))
 	}
 
 	name := c.Name

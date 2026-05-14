@@ -8,9 +8,31 @@ import (
 	asjson "github.com/neogeny/ogopego/json"
 )
 
+type TreeCut interface {
+	GetCutSeen() bool
+	TakeCutSeen() bool
+	OrCutSeen(value bool)
+}
+
+type Tree interface {
+	TreeCut
+	tree()
+	fold(gather *treeMerge) Tree
+	AsJSON() any
+}
+
 type TreeBase struct {
 	asjson.AsJSONBase
+	CutSeen bool
 }
+
+func (tb *TreeBase) GetCutSeen() bool { return tb.CutSeen }
+func (tb *TreeBase) TakeCutSeen() bool {
+	v := tb.CutSeen
+	tb.CutSeen = false
+	return v
+}
+func (tb *TreeBase) OrCutSeen(value bool) { tb.CutSeen = tb.CutSeen || value }
 
 func newOM() *asjson.OrderedMap { return orderedmap.New() }
 
@@ -20,12 +42,6 @@ func treeJSONStr(v any) string {
 		return fmt.Sprintf("!json:%v", err)
 	}
 	return string(b)
-}
-
-type Tree interface {
-	tree()
-	fold(gather *treeMerge) Tree
-	AsJSON() any
 }
 
 type treeMerge struct {

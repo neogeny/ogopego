@@ -3,9 +3,14 @@ package peg
 import (
 	"errors"
 
+	"github.com/neogeny/ogopego/context"
 	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
+
+type Option struct {
+	Box
+}
 
 type Choice struct {
 	ModelBase
@@ -17,15 +22,19 @@ func (c *Choice) Parse(ctx Ctx) (trees.Tree, error) {
 	var lastErr error
 	for _, opt := range c.Options {
 		mark := ctx.Mark()
-		result, err := opt.Parse(ctx)
+		exp := opt.Exp
+		result, err := exp.Parse(ctx)
 		if err == nil {
 			return result, nil
 		}
 		ctx.Reset(mark)
+		if context.TakeCut(err) {
+			return nil, err
+		}
 		lastErr = err
 	}
 	if lastErr == nil {
-		lastErr = errors.New("no option matched")
+		lastErr = ctx.Failure(startMark, errors.New("no option matched"))
 	}
 	ctx.Reset(startMark)
 	return nil, lastErr
@@ -36,6 +45,9 @@ func (o *Optional) Parse(ctx Ctx) (trees.Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		ctx.Reset(mark)
+		if context.TakeCut(err) {
+			return nil, err
+		}
 		return &trees.Nil{}, nil
 	}
 	return result, nil

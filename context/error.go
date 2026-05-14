@@ -7,8 +7,6 @@ import (
 	"github.com/neogeny/ogopego/input"
 )
 
-var ErrCut = errors.New("cut")
-
 type ParseFailure struct {
 	Start   int
 	Mark    int
@@ -45,19 +43,6 @@ func (e *DisasterReport) Unwrap() error {
 	return e.Failure
 }
 
-type CutError struct {
-	Err   error
-	Start int
-}
-
-func (e *CutError) Error() string {
-	return fmt.Sprintf("cut after %d: %v", e.Start, e.Err)
-}
-
-func (e *CutError) Unwrap() error {
-	return e.Err
-}
-
 type NoMatch struct {
 	Pos     int
 	Message string
@@ -69,16 +54,35 @@ func (e *NoMatch) Error() string {
 
 var ErrNoMatch = &NoMatch{Pos: -1, Message: "no match"}
 
+func MarkCut(err error, value bool) error {
+	var pf *ParseFailure
+	ok := errors.As(err, &pf)
+	if !ok {
+		return err
+	}
+	pf.CutSeen = pf.CutSeen || value
+	return pf
+}
+
+func TakeCut(err error) bool {
+	if err == nil {
+		return false
+	}
+	if pf, ok := errors.AsType[*ParseFailure](err); ok && pf.CutSeen {
+		pf.CutSeen = false
+		return true
+	}
+	return false
+}
+
 func IsCut(err error) bool {
 	if err == nil {
 		return false
 	}
-	return errors.Is(err, ErrCut) || isCutType(err)
-}
-
-func isCutType(err error) bool {
-	var ce *CutError
-	return errors.As(err, &ce)
+	if pf, ok := errors.AsType[*ParseFailure](err); ok && pf.CutSeen {
+		return true
+	}
+	return false
 }
 
 func IsNoMatch(err error) bool {
