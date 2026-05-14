@@ -11,7 +11,7 @@ import (
 
 type BaseCtx struct {
 	cfg            Cfg
-	cursor         input.Cursor
+	cursor         Cursor
 	callStack      CallStack
 	tracer         Tracer
 	furthest       *DisasterReport
@@ -22,7 +22,7 @@ type BaseCtx struct {
 	recursionDepth int
 }
 
-func NewCtx(cursor input.Cursor, cfg *Cfg) *BaseCtx {
+func NewCtx(cursor Cursor, cfg *Cfg) *BaseCtx {
 	ctx := BaseCtx{
 		cfg:    cfg.New(),
 		cursor: cursor,
@@ -41,7 +41,7 @@ func (ctx *BaseCtx) SetTracer(tracer Tracer) {
 	ctx.tracer = tracer
 }
 
-func (ctx *BaseCtx) Cursor() input.Cursor { return ctx.cursor }
+func (ctx *BaseCtx) Cursor() Cursor { return ctx.cursor }
 
 func (ctx *BaseCtx) CallStack() CallStack { return ctx.callStack }
 

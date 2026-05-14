@@ -1,6 +1,8 @@
 package peg
 
 import (
+	"errors"
+
 	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
@@ -25,11 +27,15 @@ type Model interface {
 }
 
 type ModelBase struct {
+	Model
 	Node
 }
 
 func (m *ModelBase) followRef() *ModelBase { return m }
 
+func (m *ModelBase) Parse(ctx Ctx) (Tree, error) {
+	return nil, ctx.Failure(ctx.Mark(), errors.New("Parse not implemented"))
+}
 func (m *ModelBase) Link(rules map[string]*Rule) error { return nil }
 func (m *ModelBase) ValidateLinked() error             { return nil }
 func (m *ModelBase) PrettyPrint() string               { return "" }

@@ -1,15 +1,11 @@
 package peg
 
-import (
-	"github.com/neogeny/ogopego/trees"
-)
-
 type NULL struct {
 	ModelBase
 }
 
 func (n *NULL) Parse(ctx Ctx) (Tree, error) {
-	return &trees.Nil{}, nil
+	return NIL, nil
 }
 
 func (t *NULL) PubMap() *OrderedMap { return t.PubMapOf(t) }

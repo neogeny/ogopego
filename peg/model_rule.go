@@ -1,8 +1,9 @@
 package peg
 
 import (
-	"github.com/neogeny/ogopego/trees"
 	"unicode"
+
+	"github.com/neogeny/ogopego/trees"
 )
 
 type Rule struct {
@@ -17,6 +18,20 @@ type Rule struct {
 	NoStak     bool
 	IsMemo     bool
 	IsLrec     bool
+}
+
+func (r *Rule) Parse(ctx Ctx) (Tree, error) {
+	mark := ctx.Mark()
+	result, err := r.Exp.Parse(ctx)
+	if err != nil {
+		ctx.Reset(mark)
+		return nil, err
+	}
+	folded := trees.Fold(result)
+	if len(r.Params) == 0 || r.Params[0] == "bool" {
+		return folded, nil
+	}
+	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
 }
 
 func (r *Rule) IsToken() bool {
@@ -39,20 +54,6 @@ func (r *Rule) IsMemoizable() bool {
 
 func (r *Rule) ShouldTrace() bool {
 	return !r.NoStak && !r.IsToken()
-}
-
-func (r *Rule) Parse(ctx Ctx) (Tree, error) {
-	mark := ctx.Mark()
-	result, err := r.Exp.Parse(ctx)
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
-	folded := trees.Fold(result)
-	if len(r.Params) == 0 || r.Params[0] == "bool" {
-		return folded, nil
-	}
-	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
 }
 
 func (r *Rule) PubMap() *OrderedMap { return r.PubMapOf(r) }
