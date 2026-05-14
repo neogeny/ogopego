@@ -2,6 +2,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/context"
+	"github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -9,11 +10,12 @@ type Ctx = context.Ctx
 type ParseFailure = context.ParseFailure
 type MemoKey = context.MemoKey
 type Tree = trees.Tree
+type OrderedMap = json.OrderedMap
 
 var NIL = trees.NIL
 
 type Model interface {
-	Parse(ctx Ctx) (trees.Tree, error)
+	Parse(ctx Ctx) (Tree, error)
 	Link(rules map[string]*Rule) error
 	ValidateLinked() error
 	followRef() *ModelBase

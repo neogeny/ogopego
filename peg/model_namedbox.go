@@ -1,12 +1,10 @@
 package peg
 
-import asjson "github.com/neogeny/ogopego/json"
-
 type NamedBox struct {
 	Box
 	Name string
 }
 
-func (t *NamedBox) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *NamedBox) AsJSON() any                { return t.AsJSONOf(t) }
-func (t *NamedBox) AsJSONStr() string          { return t.AsJSONStrOf(t) }
+func (t *NamedBox) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *NamedBox) AsJSON() any         { return t.AsJSONOf(t) }
+func (t *NamedBox) AsJSONStr() string   { return t.AsJSONStrOf(t) }

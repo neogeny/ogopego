@@ -2,7 +2,6 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/context"
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -11,9 +10,9 @@ type Sequence struct {
 	Sequence []Model
 }
 
-func (s *Sequence) Parse(ctx Ctx) (trees.Tree, error) {
+func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
-	var items []trees.Tree
+	var items []Tree
 	cutSeen := false
 	for _, el := range s.Sequence {
 		if _, ok := el.(*Cut); ok {
@@ -31,7 +30,7 @@ func (s *Sequence) Parse(ctx Ctx) (trees.Tree, error) {
 			items = append(items, result)
 		}
 	}
-	var tree trees.Tree = trees.NIL
+	var tree Tree = NIL
 	switch len(items) {
 	case 0:
 	case 1:
@@ -43,6 +42,6 @@ func (s *Sequence) Parse(ctx Ctx) (trees.Tree, error) {
 	return tree, nil
 }
 
-func (t *Sequence) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *Sequence) AsJSON() any                { return t.AsJSONOf(t) }
-func (t *Sequence) AsJSONStr() string          { return t.AsJSONStrOf(t) }
+func (t *Sequence) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Sequence) AsJSON() any         { return t.AsJSONOf(t) }
+func (t *Sequence) AsJSONStr() string   { return t.AsJSONStrOf(t) }

@@ -1,7 +1,6 @@
 package peg
 
 import (
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 	"unicode"
 )
@@ -42,7 +41,7 @@ func (r *Rule) ShouldTrace() bool {
 	return !r.NoStak && !r.IsToken()
 }
 
-func (r *Rule) Parse(ctx Ctx) (trees.Tree, error) {
+func (r *Rule) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	result, err := r.Exp.Parse(ctx)
 	if err != nil {
@@ -56,6 +55,6 @@ func (r *Rule) Parse(ctx Ctx) (trees.Tree, error) {
 	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
 }
 
-func (r *Rule) PubMap() *asjson.OrderedMap { return r.PubMapOf(r) }
-func (r *Rule) AsJSON() any                { return r.AsJSONOf(r) }
-func (r *Rule) AsJSONStr() string          { return r.AsJSONStrOf(r) }
+func (r *Rule) PubMap() *OrderedMap { return r.PubMapOf(r) }
+func (r *Rule) AsJSON() any         { return r.AsJSONOf(r) }
+func (r *Rule) AsJSONStr() string   { return r.AsJSONStrOf(r) }
