@@ -10,11 +10,11 @@ run *args:
 
 # Run tests
 test: gofmt-check
-    go test $(find . -name '*_test.go' -not -path '*/fragments/*' -not -path '*/vendor/*' -exec dirname {} \; | sort -u | while read d; do go list -e "./$d" 2>/dev/null; done)
+    gotestsum -- ./api ./config ./context ./input ./json ./peg ./trees ./util/... ./tests/...
 
 # Run tests with verbose output
 test-v:
-    go test -v $(find . -name '*_test.go' -not -path '*/fragments/*' -not -path '*/vendor/*' -exec dirname {} \; | sort -u | while read d; do go list -e "./$d" 2>/dev/null; done)
+    gotestsum --format testname -- -v ./api ./config ./context ./input ./json ./peg ./trees ./util/... ./tests/...
 
 # Run linter
 lint:
