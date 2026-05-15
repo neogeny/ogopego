@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestPrettyGrammar(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: PrettyTest
 		start := 'a'
 		`,
@@ -24,9 +24,9 @@ func TestPrettyGrammar(t *testing.T) {
 }
 
 func TestPrettySlashedPattern(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := ?"[a-z]+/[0-9]+" $
 	`, nil)
-	testutil.AssertJSONStr(t, g, "abc/123", `"abc/123"`)
+	ogopego.AssertJSONStr(t, g, "abc/123", `"abc/123"`)
 }

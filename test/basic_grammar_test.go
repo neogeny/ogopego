@@ -3,19 +3,19 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestSimpleGrammar(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start: 'hello'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "hello", `"hello"`)
+	ogopego.AssertJSONStr(t, g, "hello", `"hello"`)
 }
 
 func TestMultipleRules(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start: choice
 
@@ -24,23 +24,23 @@ func TestMultipleRules(t *testing.T) {
 			| 'b'
 			| 'c'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "a", `"a"`)
-	testutil.AssertJSONStr(t, g, "b", `"b"`)
-	testutil.AssertJSONStr(t, g, "c", `"c"`)
+	ogopego.AssertJSONStr(t, g, "a", `"a"`)
+	ogopego.AssertJSONStr(t, g, "b", `"b"`)
+	ogopego.AssertJSONStr(t, g, "c", `"c"`)
 }
 
 func TestRuleReferences(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start: 'hello' 'world'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "helloworld", `["hello", "world"]`)
+	ogopego.AssertJSONStr(t, g, "helloworld", `["hello", "world"]`)
 }
 
 func TestEmptyInput(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start: 'test'?
 	`, nil)
-	testutil.AssertJSONStr(t, g, "", `null`)
+	ogopego.AssertJSONStr(t, g, "", `null`)
 }

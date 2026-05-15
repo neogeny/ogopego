@@ -3,14 +3,14 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestWhitespaceDirectiveDoubleQuote(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@whitespace :: /[\t ]+/
 		@@grammar :: Test
 		test := "test" $
 	`, nil)
-	testutil.AssertJSONStr(t, g, "test", `"test"`)
+	ogopego.AssertJSONStr(t, g, "test", `"test"`)
 }

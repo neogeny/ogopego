@@ -3,11 +3,11 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestMultilineString(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := longone | shortone $
 		shortone := "short"
@@ -16,5 +16,5 @@ func TestMultilineString(t *testing.T) {
 			is a long "string"
 			"""
 	`, nil)
-	testutil.AssertJSONStr(t, g, "short", `"short"`)
+	ogopego.AssertJSONStr(t, g, "short", `"short"`)
 }

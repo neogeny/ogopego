@@ -3,21 +3,21 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestNamedCapture(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := name='hello'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "hello", `{"name": "hello"}`)
+	ogopego.AssertJSONStr(t, g, "hello", `{"name": "hello"}`)
 }
 
 func TestOverrideSingleton(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start: ='hello'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "hello", `"hello"`)
+	ogopego.AssertJSONStr(t, g, "hello", `"hello"`)
 }

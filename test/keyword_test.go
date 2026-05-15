@@ -3,14 +3,14 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestKeywordsInRuleNames(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start = whitespace
 		whitespace = {'x'}+
 	`, nil)
-	testutil.AssertJSONStr(t, g, "x", `["x"]`)
+	ogopego.AssertJSONStr(t, g, "x", `["x"]`)
 }

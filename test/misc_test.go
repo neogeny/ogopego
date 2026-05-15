@@ -3,11 +3,11 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestMapping(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@whitespace :: /\s+/
 		@@grammar :: Test
 		start = key:key value:value
@@ -15,5 +15,5 @@ func TestMapping(t *testing.T) {
 		value = /\w+/
 	`, nil)
 	// Named items in a sequence are auto-folded into a single map.
-	testutil.AssertJSONStr(t, g, "foo bar", `{"key": "foo", "value": "bar"}`)
+	ogopego.AssertJSONStr(t, g, "foo bar", `{"key": "foo", "value": "bar"}`)
 }

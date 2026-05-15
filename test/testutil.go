@@ -1,4 +1,4 @@
-package testutil
+package ogopego
 
 import (
 	"encoding/json"

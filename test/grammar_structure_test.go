@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/neogeny/ogopego/testutil"
+	"github.com/neogeny/ogopego/test"
 )
 
 func TestGrammarHasRules(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := 'a' | 'b' | 'c'
 	`, nil)
@@ -18,15 +18,15 @@ func TestGrammarHasRules(t *testing.T) {
 }
 
 func TestFirstRuleIsDefault(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := 'a'
 	`, nil)
-	testutil.AssertJSONStr(t, g, "a", `"a"`)
+	ogopego.AssertJSONStr(t, g, "a", `"a"`)
 }
 
 func TestPrettyPrint(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		start := 'a'
 	`, nil)
