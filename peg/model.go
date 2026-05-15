@@ -1,10 +1,11 @@
 package peg
 
 import (
+	gojson "encoding/json"
 	"errors"
 
 	"github.com/neogeny/ogopego/context"
-	"github.com/neogeny/ogopego/json"
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -12,7 +13,7 @@ type Ctx = context.Ctx
 type ParseFailure = context.ParseFailure
 type MemoKey = context.MemoKey
 type Tree = trees.Tree
-type OrderedMap = json.OrderedMap
+type OrderedMap = asjson.OrderedMap
 
 var NIL = trees.NIL
 
@@ -40,3 +41,14 @@ func (m *ModelBase) Link(rules map[string]*Rule) error { return nil }
 func (m *ModelBase) ValidateLinked() error             { return nil }
 func (m *ModelBase) PrettyPrint() string               { return "" }
 func (m *ModelBase) Railroads() string                 { return "" }
+
+func (m *ModelBase) MarshalJSON() ([]byte, error) { return gojson.Marshal(m.AsJSON()) }
+
+// modelMarshalJSON is a helper for model types to implement json.Marshaler
+// by dispatching through AsJSONMixin to the correct AsJSON() override.
+func modelMarshalJSON(v any) ([]byte, error) {
+	if mixin, ok := v.(asjson.AsJSONMixin); ok {
+		return gojson.MarshalIndent(mixin.AsJSON(), "", "  ")
+	}
+	return gojson.Marshal(nil)
+}

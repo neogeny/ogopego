@@ -64,5 +64,20 @@ func TestCLIRun(t *testing.T) {
 	if os.Getenv("XONSH_VERSION") == "" {
 		t.Skip("XONSH_VERSION not set — local test only")
 	}
-	t.Skip("run command not fully wired yet")
+	ebnf := "@@grammar :: Test\nstart := 'hello' ;\n"
+	grm := filepath.Join(t.TempDir(), "test.ebnf")
+	if err := os.WriteFile(grm, []byte(ebnf), 0644); err != nil {
+		t.Fatal(err)
+	}
+	inp := filepath.Join(t.TempDir(), "input.txt")
+	if err := os.WriteFile(inp, []byte("hello"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	out, err := runOgo(t, "run", grm, inp)
+	if err != nil {
+		t.Fatalf("ogo run: %v\n%s", err, out)
+	}
+	if len(out) == 0 {
+		t.Fatal("expected non-empty output")
+	}
 }

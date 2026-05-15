@@ -1,6 +1,8 @@
 package peg
 
 import (
+	"fmt"
+
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -10,11 +12,12 @@ type Token struct {
 }
 
 func (t *Token) Parse(ctx Ctx) (Tree, error) {
-	matched, err := ctx.Token(t.Token)
-	if err != nil {
-		return nil, err
+	mark := ctx.Mark()
+	if !ctx.MatchToken(t.Token) {
+		ctx.Reset(mark)
+		return nil, ctx.Failure(mark, fmt.Errorf("expected: %q", t.Token))
 	}
-	return &trees.Text{Value: matched}, nil
+	return &trees.Text{Value: t.Token}, nil
 }
 
 func (t *Token) PubMap() *OrderedMap { return t.PubMapOf(t) }

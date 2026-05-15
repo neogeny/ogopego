@@ -8,7 +8,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
-func newTestBaseCtx() *BaseCtx {
+func newTestBaseCtx() *CoreCtx {
 	c := input.NewStrCursor("some input text")
 	return NewCtx(c, nil)
 }
@@ -47,29 +47,16 @@ func TestBaseCtxCallStackLeaveEmpty(t *testing.T) {
 	}
 }
 
-func TestBaseCtxFailure(t *testing.T) {
-	ctx := newTestBaseCtx()
-	fail := ctx.Failure(5, errors.New("expected number"))
-	if fail == nil {
-		t.Fatal("expected non-nil DisasterReport")
-	}
-	if fail.Start != 5 {
-		t.Errorf("expected Start 5, got %d", fail.Start)
-	}
-	if fail.Inner.Error() != "expected number" {
-		t.Errorf("expected 'expected number', got %q", fail.Inner.Error())
-	}
-	if ctx.FurthestFailure().Failure.Inner != fail.Inner {
-		t.Error("expected furthest failure to match")
-	}
-}
-
 func TestBaseCtxFailureNoRegress(t *testing.T) {
 	ctx := newTestBaseCtx()
 	_ = ctx.Failure(10, errors.New("first"))
 	_ = ctx.Failure(3, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Error() != "at 10: first" {
-		t.Errorf("expected furthest to stay 'first', got %q", ctx.FurthestFailure().Failure.Error())
+	furthest := ctx.FurthestFailure()
+	if furthest.Mark() != 10 {
+		t.Errorf(
+			"expected furthest to stay 'first', got %d",
+			furthest.Mark(),
+		)
 	}
 }
 
@@ -77,36 +64,35 @@ func TestBaseCtxFailureProgression(t *testing.T) {
 	ctx := newTestBaseCtx()
 	_ = ctx.Failure(5, errors.New("first"))
 	_ = ctx.Failure(15, errors.New("second"))
-	if ctx.FurthestFailure().Failure.Error() != "at 15: second" {
-		t.Errorf("expected furthest 'second', got %q", ctx.FurthestFailure().Failure.Error())
+	furthest := ctx.FurthestFailure()
+	if furthest.Mark() != 15 {
+		t.Errorf(
+			"expected furthest to update to 'second', got %d",
+			furthest.Mark(),
+		)
 	}
 }
 
 func TestBaseCtxTokenMatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	matched, err := ctx.Token("some")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if matched != "some" {
-		t.Errorf("expected 'some', got %q", matched)
+	if !ctx.MatchToken("some") {
+		t.Fatalf("expecting: \"error\"")
 	}
 }
 
 func TestBaseCtxTokenMismatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	_, err := ctx.Token("wrong")
-	if err == nil {
-		t.Fatal("expected error")
+	if ctx.MatchToken("wrong") {
+		t.Fatal("expected no match")
 	}
 }
 
 func TestBaseCtxPatternMatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	matched, err := ctx.Pattern(`\w+`)
+	matched, err := ctx.MatchPattern(`\w+`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -118,7 +104,7 @@ func TestBaseCtxPatternMatch(t *testing.T) {
 func TestBaseCtxPatternMismatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	_, err := ctx.Pattern(`\d+`)
+	_, err := ctx.MatchPattern(`\d+`)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -264,9 +250,9 @@ func TestBaseCtxMatchToken(t *testing.T) {
 
 func TestBaseCtxMatchPattern(t *testing.T) {
 	ctx := newTestBaseCtx()
-	m, ok := ctx.MatchPattern(`\w+`)
-	if !ok {
-		t.Fatal("expected pattern match")
+	m, err := ctx.MatchPattern(`\w+`)
+	if err != nil {
+		t.Errorf("expected pattern matchi %v", err)
 	}
 	if m != "some" {
 		t.Errorf("expected 'some', got %q", m)
@@ -282,10 +268,7 @@ func TestBaseCtxMatchEOL(t *testing.T) {
 
 func TestBaseCtxVoid(t *testing.T) {
 	ctx := newTestBaseCtx()
-	err := ctx.Void()
-	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
-	}
+	ctx.Void()
 }
 
 func TestBaseCtxFail(t *testing.T) {

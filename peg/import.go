@@ -310,7 +310,13 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		}
 		var opts []*Option
 		for _, ih := range items {
-			exp, err := modelFromJSON(ih.getNested("exp"))
+			cls, _ := ih.getClass()
+			var exp Model
+			if cls == "Option" {
+				exp, err = modelFromJSON(ih.getNested("exp"))
+			} else {
+				exp, err = modelFromJSON(ih, nil)
+			}
 			if err != nil {
 				return nil, err
 			}

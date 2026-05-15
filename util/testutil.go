@@ -1,4 +1,4 @@
-package testutil
+package util
 
 import (
 	"encoding/json"
@@ -6,10 +6,11 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
 )
 
-func Compile(t testing.TB, grammar string) *peg.Grammar {
+func Compile(t testing.TB, grammar string, cfg *config.Cfg) *peg.Grammar {
 	t.Helper()
 	g, err := api.Compile(grammar, nil)
 	if err != nil {

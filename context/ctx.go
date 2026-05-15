@@ -19,11 +19,9 @@ type Ctx interface {
 	NextToken()
 	MatchEOL() bool
 	MatchToken(token string) bool
-	MatchPattern(pattern string) (string, bool)
+	MatchPattern(pattern string) (string, error)
 	GetPattern(pattern string) pyre.Pattern
-	Token(token string) (string, error)
-	Pattern(pattern string) (string, error)
-	Void() error
+	Void()
 	Fail() error
 	Eof() bool
 	EofCheck() error
@@ -31,7 +29,7 @@ type Ctx interface {
 	Constant(literal any) (trees.Tree, error)
 	Enter(name string)
 	Leave()
-	Failure(start int, source error) *ParseFailure
+	Failure(start int, source error) *Nope
 	FurthestFailure() *DisasterReport
 	SetFurthestFailure(dis *DisasterReport)
 	IsKeyword(name string) bool

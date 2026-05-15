@@ -7,7 +7,14 @@ import (
 	"github.com/neogeny/ogopego/input"
 )
 
+type Nope struct {
+	error
+	CutSeen bool
+}
+
 type ParseFailure struct {
+	error
+	Msg     string
 	Start   int
 	Mark    int
 	CutSeen bool
@@ -15,10 +22,14 @@ type ParseFailure struct {
 }
 
 type DisasterReport struct {
-	Start   int
+	error
 	CutSeen bool
-	Failure *ParseFailure
+	Inner   error
 	Memento *input.Memento
+}
+
+func (e *Nope) Error() string {
+	return fmt.Sprintf("Scaped Nope %v", e.CutSeen)
 }
 
 func (e *ParseFailure) Error() string {
@@ -33,14 +44,21 @@ func (e *ParseFailure) Unwrap() error {
 }
 
 func (e *DisasterReport) Error() string {
-	if e.Failure != nil {
-		return e.Failure.Error()
+	if e.Memento != nil {
+		return e.Memento.Error()
 	}
-	return fmt.Sprintf("at %d: ParseError", e.Failure.Mark)
+	if e.Inner != nil {
+		return e.Inner.Error()
+	}
+	return fmt.Sprintf("ParseError %v", e)
+}
+
+func (e *DisasterReport) Mark() int {
+	return e.Memento.Mark
 }
 
 func (e *DisasterReport) Unwrap() error {
-	return e.Failure
+	return e.Inner
 }
 
 type NoMatch struct {

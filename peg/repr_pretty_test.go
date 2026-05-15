@@ -112,7 +112,7 @@ func TestPrettyGroup(t *testing.T) {
 }
 
 func TestPrettyGroupMultiLine(t *testing.T) {
-	longTokens := []string{"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"}
+	longTokens := []string{"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa"}
 	items := make([]Model, len(longTokens))
 	for i, s := range longTokens {
 		items[i] = &Token{Token: s}
@@ -311,7 +311,7 @@ func TestPrettyRule(t *testing.T) {
 		},
 	}
 	got := r.PrettyPrint()
-	if !strings.Contains(got, "greeting :=") {
+	if !strings.Contains(got, "greeting:") {
 		t.Errorf("expected rule name in output, got %q", got)
 	}
 	if !strings.Contains(got, `"hello"`) || !strings.Contains(got, `"world"`) {
@@ -353,7 +353,7 @@ func TestPrettyGrammar(t *testing.T) {
 	if !strings.Contains(got, "@@grammar :: Test") {
 		t.Errorf("expected grammar directive, got %q", got)
 	}
-	if !strings.Contains(got, "start :=") {
+	if !strings.Contains(got, "start:") {
 		t.Errorf("expected rule, got %q", got)
 	}
 }

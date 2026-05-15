@@ -37,7 +37,7 @@ func (w *prettyWriter) String() string {
 	return strings.TrimRight(w.buf.String(), "\n")
 }
 
-const prettyWidth = 53
+const pep8llen = 72
 
 // Token
 
@@ -228,7 +228,7 @@ func (m *Sequence) PrettyPrint() string {
 			break
 		}
 	}
-	if !hasMulti && len(single) <= prettyWidth {
+	if !hasMulti && len(single) <= pep8llen {
 		return single
 	}
 	w := newPrettyWriter()
@@ -253,7 +253,7 @@ func (m *Choice) PrettyPrint() string {
 		}
 	}
 	singleLine := strings.Join(opts, " | ")
-	if !hasMulti && len(singleLine) <= prettyWidth {
+	if !hasMulti && len(singleLine) <= pep8llen {
 		return singleLine
 	}
 	w := newPrettyWriter()
@@ -281,11 +281,14 @@ func (m *Rule) PrettyPrint() string {
 		params = fmt.Sprintf("[%s]", strings.Join(m.Params, ", "))
 	}
 	exp := m.Exp.PrettyPrint()
-	sep := " "
 	if strings.ContainsRune(exp, '\n') {
-		sep = ""
+		w.WriteLine(fmt.Sprintf("%s%s:", m.Name, params))
+		w.Indent()
+		w.WriteLine(exp)
+		w.Dedent()
+	} else {
+		w.WriteLine(fmt.Sprintf("%s%s: %s", m.Name, params, exp))
 	}
-	w.WriteLine(fmt.Sprintf("%s%s :=%s%s ;", m.Name, params, sep, exp))
 	return w.String()
 }
 

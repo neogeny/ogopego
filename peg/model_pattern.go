@@ -10,7 +10,7 @@ type Pattern struct {
 }
 
 func (p *Pattern) Parse(ctx Ctx) (Tree, error) {
-	matched, err := ctx.Pattern(p.Pattern)
+	matched, err := ctx.MatchPattern(p.Pattern)
 	if err != nil {
 		return nil, err
 	}

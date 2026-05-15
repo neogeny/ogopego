@@ -3,23 +3,23 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util/testutil"
+	"github.com/neogeny/ogopego/util"
 )
 
 func TestEBNFParsing(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: EBNF
 
-		start := expression $ ;
+		start := expression $
 
-		expression := expression '+' term | expression '-' term | term ;
+		expression := expression '+' term | expression '-' term | term
 
-		term := term '*' factor | term '/' factor | factor ;
+		term := term '*' factor | term '/' factor | factor
 
-		factor := '(' expression ')' | number ;
+		factor := '(' expression ')' | number
 
-		number := /\d+/ ;
-	`)
+		number := /\d+/
+	`, nil)
 	if g.Name != "EBNF" {
 		t.Errorf("expected name 'EBNF', got %q", g.Name)
 	}

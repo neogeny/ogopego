@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/iancoleman/orderedmap"
 )
@@ -173,6 +174,27 @@ func (b *AsJSONBase) AsJSONOf(ref any) any {
 	return out
 }
 
+func PythonizeName(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	var result strings.Builder
+	for i, r := range s {
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				prev := rune(s[i-1])
+				if unicode.IsLower(prev) || (i+1 < len(s) && unicode.IsLower(rune(s[i+1]))) {
+					result.WriteByte('_')
+				}
+			}
+			result.WriteRune(unicode.ToLower(r))
+		} else {
+			result.WriteRune(r)
+		}
+	}
+	return result.String()
+}
+
 func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
 	if ref == nil {
 		return nil
@@ -192,10 +214,10 @@ func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
 	t := v.Type()
 	for i := range t.NumField() {
 		f := t.Field(i)
-		if !f.IsExported() {
+		if !f.IsExported() || f.Anonymous {
 			continue
 		}
-		out.Set(f.Name, v.Field(i).Interface())
+		out.Set(PythonizeName(f.Name), v.Field(i).Interface())
 	}
 	return out
 }

@@ -3,66 +3,66 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util/testutil"
+	"github.com/neogeny/ogopego/util"
 )
 
 func TestCalculatorGrammar(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: CALC
 		@@left_recursion :: True
 		@@whitespace :: /\s+/
 
-		start := expression $ ;
+		start := expression $
 
 		expression
 			:= expression '+' term
 			| expression '-' term
-			| term ;
+			| term
 
 		term
 			:= term '*' factor
 			| term '/' factor
-			| factor ;
+			| factor
 
 		factor
 			:= NUMBER
-			| '(' expression ')' ;
+			| '(' expression ')'
 
-		NUMBER := /\d+/ ;
-	`)
-	result := testutil.ParseJSON(t, g, "3 + 5 * (10 - 20 )")
+		NUMBER := /\d+/
+	`, nil)
+	result := util.ParseJSON(t, g, "3 + 5 * (10 - 20 )")
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
 }
 
 func TestJSONLikeGrammar(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: MiniJSON
 		@@nameguard :: False
 		@@whitespace :: /\s+/
 
-		start := value $ ;
+		start := value $
 
-		value := object | array | string | number | 'true' | 'false' | 'null' ;
+		value := object | array | string | number | 'true' | 'false' | 'null'
 
-		object := '{' members? '}' ;
+		object := '{' members? '}'
 
-		array := '[' elements? ']' ;
+		array := '[' elements? ']'
 
-		members := pair (',' pair)* ;
+		members := pair (',' pair)*
 
-		elements := value (',' value)* ;
+		elements := value (',' value)*
 
-		pair := string ':' value ;
+		pair := string ':' value
 
-		string := '"' CONTENT '"' ;
+		string := '"' CONTENT '"'
 
-		CONTENT := /[^"]*/ ;
+		CONTENT := /[^"]*/
 
-		number := /-?\d+(\.\d+)?/ ;
-	`)
-	result := testutil.ParseJSON(t, g, `{"key": "value"}`)
+		number := /-?\d+(\.\d+)?/
+	`, nil)
+	result := util.ParseJSON(t, g, `{"key": "value"}`)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}

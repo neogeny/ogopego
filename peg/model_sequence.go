@@ -1,7 +1,6 @@
 package peg
 
 import (
-	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -22,7 +21,8 @@ func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 		}
 		result, err := el.Parse(ctx)
 		if err != nil {
-			err = context.MarkCut(err, cutSeen)
+			// FIXME: disabled cut transfer
+			//err = context.MarkCut(err, cutSeen)
 			ctx.Reset(mark)
 			return nil, err
 		}

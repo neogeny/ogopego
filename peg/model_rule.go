@@ -1,6 +1,7 @@
 package peg
 
 import (
+	"encoding/json"
 	"unicode"
 
 	"github.com/neogeny/ogopego/trees"
@@ -59,3 +60,5 @@ func (r *Rule) ShouldTrace() bool {
 func (r *Rule) PubMap() *OrderedMap { return r.PubMapOf(r) }
 func (r *Rule) AsJSON() any         { return r.AsJSONOf(r) }
 func (r *Rule) AsJSONStr() string   { return r.AsJSONStrOf(r) }
+
+func (r *Rule) MarshalJSON() ([]byte, error) { return json.Marshal(r.AsJSON()) }

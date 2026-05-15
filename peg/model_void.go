@@ -5,12 +5,7 @@ type Void struct {
 }
 
 func (v *Void) Parse(ctx Ctx) (Tree, error) {
-	mark := ctx.Mark()
-	err := ctx.Void()
-	if err != nil {
-		ctx.Reset(mark)
-		return nil, err
-	}
+	ctx.Void()
 	return NIL, nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/peg"
 )
 
@@ -86,7 +85,7 @@ func main() {
 			}
 			switch {
 			case CLI.Boot.Json:
-				output = json.AsJSONs(gram)
+				output = peg.SerializeGrammar(gram)
 			case CLI.Boot.Pretty:
 				output = gram.PrettyPrint()
 			case CLI.Boot.Railroads:
@@ -103,7 +102,7 @@ func main() {
 			}
 			switch {
 			case CLI.Grammar.Json:
-				output = json.AsJSONs(gram)
+				output = peg.SerializeGrammar(gram)
 			case CLI.Grammar.Pretty:
 				output = gram.PrettyPrint()
 			case CLI.Grammar.Railroads:

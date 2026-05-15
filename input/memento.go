@@ -13,6 +13,10 @@ const (
 	ansiGrey  = "\033[90m"
 )
 
+func expandTabs(s string) string {
+	return strings.ReplaceAll(s, "\t", "    ")
+}
+
 type Memento struct {
 	InputSource string
 	Msg         string
@@ -50,7 +54,6 @@ func (m *Memento) Error() string {
 	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("%s: %s%s%s\n", errLabel, ansiBold, m.Msg, ansiReset))
 	b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", arrow, m.InputSource, m.Line, m.Col))
-	b.WriteString(fmt.Sprintf("    %s\n", bluePipe))
 
 	lines := strings.Split(m.Text, "\n")
 	markLineIdx := m.Line
@@ -62,13 +65,15 @@ func (m *Memento) Error() string {
 		startLineIdx = markLineIdx - 4
 	}
 
+	b.WriteString(fmt.Sprintf("   %s\n", bluePipe))
 	for i := startLineIdx; i <= markLineIdx; i++ {
+		disp := expandTabs(lines[i])
 		b.WriteString(fmt.Sprintf("%s%2d%s %s %s\n",
-			ansiBlue+ansiBold, i+1, ansiReset, bluePipe, lines[i]))
+			ansiBlue+ansiBold, i+1, ansiReset, bluePipe, disp))
 
 		if i == m.Line {
 			pad := strings.Repeat(" ", m.Col)
-			_, _ = fmt.Fprintf(&b, "    %s %s%s^%s %s%s%s\n",
+			_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
 				bluePipe, pad,
 				ansiBold+ansiRed, ansiReset,
 				ansiRed, m.Msg, ansiReset)
@@ -77,10 +82,10 @@ func (m *Memento) Error() string {
 
 	if len(m.CallStack) > 0 {
 		b.WriteString("\n")
-		for _, call := range m.CallStack {
+		for i := len(m.CallStack) - 1; i >= 0; i-- {
 			b.WriteString(fmt.Sprintf(" %s%s→%s %s%s%s\n",
 				ansiRed, ansiBold, ansiReset,
-				ansiGrey, call, ansiReset))
+				ansiGrey, m.CallStack[i], ansiReset))
 		}
 	}
 

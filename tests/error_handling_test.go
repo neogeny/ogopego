@@ -3,29 +3,31 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util/testutil"
+	"github.com/neogeny/ogopego/util"
 )
 
 func TestInvalidInputFails(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: Test
-		start := 'a' ;
-	`)
-	testutil.ParseFail(t, g, "b")
+		start := 'a'
+	`,
+		nil,
+	)
+	util.ParseFail(t, g, "b")
 }
 
 func TestPartialMatchFails(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: Test
-		start := 'a' 'b' ;
-	`)
-	testutil.ParseFail(t, g, "a")
+		start := 'a' 'b'
+	`, nil)
+	util.ParseFail(t, g, "a")
 }
 
 func TestEmptyInputFailsWhenRequired(t *testing.T) {
-	g := testutil.Compile(t, `
+	g := util.Compile(t, `
 		@@grammar :: Test
-		start := 'a' ;
-	`)
-	testutil.ParseFail(t, g, "")
+		start := 'a'
+	`, nil)
+	util.ParseFail(t, g, "")
 }

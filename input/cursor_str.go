@@ -214,31 +214,32 @@ func (s *StrCursor) Pos() (int, int) {
 	return s.PosAt(s.offset)
 }
 
+func tabDisplayWidth(s string) int {
+	var w int
+	for _, r := range s {
+		if r == '\t' {
+			w += 4
+		} else {
+			w++
+		}
+	}
+	return w
+}
+
 func (s *StrCursor) PosAt(mark int) (int, int) {
 	if mark > len(s.text) {
 		mark = len(s.text)
 	}
-	head := s.text[:mark]
-
-	var lastLine string
-	line := 0
-	start := 0
-	for i, c := range head {
-		if c == '\n' {
-			lastLine = head[start:i]
-			line++
-			start = i + 1
-		}
+	if mark <= 0 {
+		return 0, 0
 	}
-	if start < len(head) {
-		lastLine = head[start:]
-		line++
+	lineno := 0
+	var line string
+	for l := range strings.Lines(s.text[0:mark]) {
+		line = l
+		lineno += 1
 	}
-	if head == "" {
-		line = 0
-	}
-
-	return line, utf8.RuneCountInString(lastLine)
+	return lineno, tabDisplayWidth(line)
 }
 
 func (s *StrCursor) Location() Location {

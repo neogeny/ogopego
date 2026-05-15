@@ -1,6 +1,7 @@
 package peg
 
 import (
+	"encoding/json"
 	"fmt"
 
 	asjson "github.com/neogeny/ogopego/json"
@@ -111,9 +112,18 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 		}
 		rule = g.Rules[0]
 	}
-	return rule.Parse(ctx)
+	result, err := rule.Parse(ctx)
+	if err != nil {
+		if dis := ctx.FurthestFailure(); dis != nil {
+			return nil, dis
+		}
+		return nil, err
+	}
+	return result, nil
 }
 
 func (g *Grammar) PubMap() *asjson.OrderedMap { return g.PubMapOf(g) }
 func (g *Grammar) AsJSON() any                { return g.AsJSONOf(g) }
 func (g *Grammar) AsJSONStr() string          { return g.AsJSONStrOf(g) }
+
+func (g *Grammar) MarshalJSON() ([]byte, error) { return json.Marshal(g.AsJSON()) }

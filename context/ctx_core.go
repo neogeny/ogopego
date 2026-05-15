@@ -9,7 +9,7 @@ import (
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
-type BaseCtx struct {
+type CoreCtx struct {
 	cfg            Cfg
 	cursor         Cursor
 	callStack      CallStack
@@ -22,8 +22,8 @@ type BaseCtx struct {
 	recursionDepth int
 }
 
-func NewCtx(cursor Cursor, cfg *Cfg) *BaseCtx {
-	ctx := BaseCtx{
+func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
+	ctx := CoreCtx{
 		cfg:    cfg.New(),
 		cursor: cursor,
 		tracer: NullTracer{},
@@ -32,32 +32,32 @@ func NewCtx(cursor Cursor, cfg *Cfg) *BaseCtx {
 	return &ctx
 }
 
-func (ctx *BaseCtx) Configure(cfg Cfg) {
+func (ctx *CoreCtx) Configure(cfg Cfg) {
 	ctx.cursor.Configure(cfg)
 	ctx.setKeywords(cfg.Keywords)
 }
 
-func (ctx *BaseCtx) SetTracer(tracer Tracer) {
+func (ctx *CoreCtx) SetTracer(tracer Tracer) {
 	ctx.tracer = tracer
 }
 
-func (ctx *BaseCtx) Cursor() Cursor { return ctx.cursor }
+func (ctx *CoreCtx) Cursor() Cursor { return ctx.cursor }
 
-func (ctx *BaseCtx) CallStack() CallStack { return ctx.callStack }
+func (ctx *CoreCtx) CallStack() CallStack { return ctx.callStack }
 
-func (ctx *BaseCtx) Tracer() Tracer { return ctx.tracer }
+func (ctx *CoreCtx) Tracer() Tracer { return ctx.tracer }
 
-func (ctx *BaseCtx) Mark() int { return ctx.cursor.Mark() }
+func (ctx *CoreCtx) Mark() int { return ctx.cursor.Mark() }
 
-func (ctx *BaseCtx) Reset(mark int) { ctx.cursor.Reset(mark) }
+func (ctx *CoreCtx) Reset(mark int) { ctx.cursor.Reset(mark) }
 
-func (ctx *BaseCtx) AtEnd() bool { return ctx.cursor.AtEnd() }
+func (ctx *CoreCtx) AtEnd() bool { return ctx.cursor.AtEnd() }
 
-func (ctx *BaseCtx) Next() (rune, bool) { return ctx.cursor.Next() }
+func (ctx *CoreCtx) Next() (rune, bool) { return ctx.cursor.Next() }
 
-func (ctx *BaseCtx) Peek() (rune, bool) { return ctx.cursor.Peek() }
+func (ctx *CoreCtx) Peek() (rune, bool) { return ctx.cursor.Peek() }
 
-func (ctx *BaseCtx) Dot() (rune, error) {
+func (ctx *CoreCtx) Dot() (rune, error) {
 	r, ok := ctx.Next()
 	if !ok {
 		return 0, &ParseFailure{
@@ -68,17 +68,17 @@ func (ctx *BaseCtx) Dot() (rune, error) {
 	return r, nil
 }
 
-func (ctx *BaseCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
+func (ctx *CoreCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
 
-func (ctx *BaseCtx) NextToken() { ctx.cursor.NextToken() }
+func (ctx *CoreCtx) NextToken() { ctx.cursor.NextToken() }
 
-func (ctx *BaseCtx) HeartbeatTick() {}
+func (ctx *CoreCtx) HeartbeatTick() {}
 
-func (ctx *BaseCtx) Key(name string, canMemo bool) MemoKey {
+func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 	return MemoKey{Mark: ctx.Mark(), Name: name, CanMemo: canMemo}
 }
 
-func (ctx *BaseCtx) Memo(key MemoKey) (Memo, bool) {
+func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
 	if ctx.memoCache == nil {
 		return Memo{}, false
 	}
@@ -86,7 +86,7 @@ func (ctx *BaseCtx) Memo(key MemoKey) (Memo, bool) {
 	return m, ok
 }
 
-func (ctx *BaseCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
+func (ctx *CoreCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
 	if !key.CanMemo {
 		return
 	}
@@ -96,7 +96,7 @@ func (ctx *BaseCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
 	ctx.memoCache[key] = Memo{Tree: tree, Mark: mark}
 }
 
-func (ctx *BaseCtx) TrackRecursionDepth(key MemoKey) error {
+func (ctx *CoreCtx) TrackRecursionDepth(key MemoKey) error {
 	if key == ctx.recursionKey {
 		ctx.recursionDepth++
 	} else {
@@ -109,7 +109,7 @@ func (ctx *BaseCtx) TrackRecursionDepth(key MemoKey) error {
 	return nil
 }
 
-func (ctx *BaseCtx) Untrack(key MemoKey) {
+func (ctx *CoreCtx) Untrack(key MemoKey) {
 	if key == ctx.recursionKey {
 		ctx.recursionDepth--
 		if ctx.recursionDepth <= 0 {
@@ -119,14 +119,14 @@ func (ctx *BaseCtx) Untrack(key MemoKey) {
 	}
 }
 
-func (ctx *BaseCtx) Intern(s string) string { return s }
+func (ctx *CoreCtx) Intern(s string) string { return s }
 
-func (ctx *BaseCtx) IsKeyword(name string) bool {
+func (ctx *CoreCtx) IsKeyword(name string) bool {
 	_, ok := ctx.keywords[name]
 	return ok
 }
 
-func (ctx *BaseCtx) setKeywords(keywords []string) {
+func (ctx *CoreCtx) setKeywords(keywords []string) {
 	sort.Strings(keywords)
 	set := make(map[string]struct{}, len(keywords))
 	for _, kw := range keywords {
@@ -135,7 +135,7 @@ func (ctx *BaseCtx) setKeywords(keywords []string) {
 	ctx.keywords = set
 }
 
-func (ctx *BaseCtx) GetPattern(pattern string) pyre.Pattern {
+func (ctx *CoreCtx) GetPattern(pattern string) pyre.Pattern {
 	if ctx.patternCache == nil {
 		ctx.patternCache = make(map[string]pyre.Pattern)
 	}
@@ -150,26 +150,32 @@ func (ctx *BaseCtx) GetPattern(pattern string) pyre.Pattern {
 	return p
 }
 
-func (ctx *BaseCtx) MatchToken(token string) bool {
+func (ctx *CoreCtx) MatchToken(token string) bool {
 	ctx.NextToken()
 
-	wordlike := true
-	for _, r := range token {
-		if !isAlphaNum(r) {
-			wordlike = false
-			break
+	wordlike := false
+	if ctx.cursor.NameGuard() {
+		wordlike = true
+		for _, r := range token {
+			if !isAlphaNum(r) {
+				wordlike = false
+				break
+			}
 		}
 	}
 
 	var result bool
-	if wordlike && ctx.cursor.NameGuard() {
+	if wordlike {
 		var pat string
 		if ctx.cursor.IgnoreCase() {
 			pat = token + `\b`
 		} else {
 			pat = `(?i)` + token + `\b`
 		}
-		_, result = ctx.MatchPattern(pat)
+		_, err := ctx.MatchPattern(pat)
+		if err != nil {
+			return false
+		}
 	} else {
 		result = ctx.cursor.MatchToken(token)
 	}
@@ -186,22 +192,17 @@ func isAlphaNum(r rune) bool {
 	return r == '_' || (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')
 }
 
-func (ctx *BaseCtx) MatchPattern(pattern string) (string, bool) {
-	re := ctx.GetPattern(pattern)
-	return ctx.cursor.MatchPattern(re)
-}
-
-func (ctx *BaseCtx) Enter(name string) {
+func (ctx *CoreCtx) Enter(name string) {
 	ctx.callStack = append(ctx.callStack, name)
 }
 
-func (ctx *BaseCtx) Leave() {
+func (ctx *CoreCtx) Leave() {
 	if len(ctx.callStack) > 0 {
 		ctx.callStack = ctx.callStack[:len(ctx.callStack)-1]
 	}
 }
 
-func (ctx *BaseCtx) ParseEOF() bool {
+func (ctx *CoreCtx) ParseEOF() bool {
 	ctx.Enter("__eof__")
 	ctx.NextToken()
 	result := ctx.cursor.AtEnd()
@@ -209,44 +210,28 @@ func (ctx *BaseCtx) ParseEOF() bool {
 	return result
 }
 
-func (ctx *BaseCtx) Failure(start int, source error) *ParseFailure {
+func (ctx *CoreCtx) Failure(start int, source error) *Nope {
 	ctx.Reset(start)
-	nope := &ParseFailure{
-		Start: start,
-		Mark:  ctx.Mark(),
-		Inner: source,
-	}
-	if furthest := ctx.FurthestFailure(); furthest != nil && furthest.Start >= ctx.Mark() {
+	nope := &Nope{}
+	if furthest := ctx.FurthestFailure(); furthest != nil &&
+		furthest.Mark() >= ctx.Mark() {
 		return nope
 	}
 	msg := source.Error()
 	dis := &DisasterReport{
-		Start:   start,
-		Failure: nope,
+		Inner:   source,
+		CutSeen: false,
 		Memento: input.NewMemento(start, msg, ctx.cursor, ctx.callStack),
 	}
 	ctx.SetFurthestFailure(dis)
 	return nope
 }
 
-func (ctx *BaseCtx) FurthestFailure() *DisasterReport { return ctx.furthest }
+func (ctx *CoreCtx) FurthestFailure() *DisasterReport { return ctx.furthest }
 
-func (ctx *BaseCtx) SetFurthestFailure(dis *DisasterReport) { ctx.furthest = dis }
+func (ctx *CoreCtx) SetFurthestFailure(dis *DisasterReport) { ctx.furthest = dis }
 
-func (ctx *BaseCtx) Token(token string) (string, error) {
-	ctx.NextToken()
-	ok := ctx.cursor.MatchToken(token)
-	if !ok {
-		return "", &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("expected %q", token),
-		}
-	}
-	return token, nil
-}
-
-func (ctx *BaseCtx) Pattern(pattern string) (string, error) {
-	ctx.NextToken()
+func (ctx *CoreCtx) MatchPattern(pattern string) (string, error) {
 	re := ctx.GetPattern(pattern)
 	if re == nil {
 		return "", &ParseFailure{
@@ -263,18 +248,18 @@ func (ctx *BaseCtx) Pattern(pattern string) (string, error) {
 	return m, nil
 }
 
-func (ctx *BaseCtx) Void() error {
+func (ctx *CoreCtx) Void() {
 	ctx.NextToken()
-	return nil
 }
 
-func (ctx *BaseCtx) Fail() error {
-	return &ParseFailure{
-		Mark:  ctx.Mark(),
-		Inner: fmt.Errorf("fail")}
+func (ctx *CoreCtx) Fail() error {
+	return ctx.Failure(
+		ctx.Mark(),
+		fmt.Errorf("fail"),
+	)
 }
 
-func (ctx *BaseCtx) EofCheck() error {
+func (ctx *CoreCtx) EofCheck() error {
 	ctx.NextToken()
 	if !ctx.cursor.AtEnd() {
 		return &ParseFailure{
@@ -285,7 +270,7 @@ func (ctx *BaseCtx) EofCheck() error {
 	return nil
 }
 
-func (ctx *BaseCtx) EolCheck() error {
+func (ctx *CoreCtx) EolCheck() error {
 	if !ctx.cursor.MatchEOL() {
 		return &ParseFailure{
 			Mark:  ctx.Mark(),
@@ -295,9 +280,9 @@ func (ctx *BaseCtx) EolCheck() error {
 	return nil
 }
 
-func (ctx *BaseCtx) Eof() bool { return ctx.cursor.AtEnd() }
+func (ctx *CoreCtx) Eof() bool { return ctx.cursor.AtEnd() }
 
-func (ctx *BaseCtx) Constant(literal any) (trees.Tree, error) {
+func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 	switch v := literal.(type) {
 	case string:
 		return &trees.Text{Value: v}, nil
