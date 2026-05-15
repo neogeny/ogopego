@@ -9,6 +9,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
 )
 
@@ -47,7 +48,10 @@ func main() {
 			color.NoColor = true
 		}
 	}
-	_ = useColorOutput
+	cliCfg = &config.Cfg{
+		Trace:    CLI.Trace,
+		Colorize: useColorOutput,
+	}
 
 	var output string
 
@@ -65,7 +69,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "error reading %s: %v\n", path, err)
 					continue
 				}
-				result, err := api.ParseInputToJSONString(gram, string(data), nil)
+				result, err := api.ParseInputToJSONString(gram, string(data), cliCfg)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "error parsing %s: %v\n", path, err)
 					continue
@@ -142,6 +146,6 @@ func loadGrammar(path string) (*peg.Grammar, error) {
 		}
 		return g, nil
 	default:
-		return api.Compile(string(data), nil)
+		return api.Compile(string(data), cliCfg)
 	}
 }

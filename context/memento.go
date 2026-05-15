@@ -21,33 +21,35 @@ func expandTabs(s string) string {
 
 type Memento struct {
 	error
-	InputSource string
-	Msg         string
-	Text        string
-	Start       int
-	Mark        int
-	CallStack   []string
-	Line        int
-	Col         int
-	LA          string
+	Cursor    input.Cursor
+	Msg       string
+	Start     int
+	Mark      int
+	CallStack []string
 }
 
 func NewMemento(start int, msg string, cursor input.Cursor, callstack []string) Memento {
-	line, col := cursor.PosAt(cursor.Mark())
+	cs := make([]string, len(callstack))
+	copy(cs, callstack)
 	return Memento{
-		InputSource: cursor.InputSource(),
-		Msg:         msg,
-		Text:        cursor.AsStr(),
-		Start:       start,
-		Mark:        cursor.Mark(),
-		CallStack:   callstack,
-		Line:        line,
-		Col:         col,
-		LA:          cursor.Lookahead(start),
+		Cursor:    cursor,
+		Msg:       msg,
+		Start:     start,
+		Mark:      cursor.Mark(),
+		CallStack: cs,
 	}
 }
 
+func (m *Memento) InputSource() string {
+	return m.Cursor.InputSource()
+}
+
+func (m *Memento) Text() string {
+	return m.Cursor.AsStr()
+}
+
 func (m *Memento) Error() string {
+	line, col := m.Cursor.PosAt(m.Mark)
 	var b strings.Builder
 
 	errLabel := ansiBold + ansiRed + "error" + ansiReset
@@ -55,32 +57,53 @@ func (m *Memento) Error() string {
 	arrow := ansiBlue + ansiBold + "-->" + ansiReset
 
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("%s: %s%s%s\n", errLabel, ansiBold, m.Msg, ansiReset))
-	b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", arrow, m.InputSource, m.Line, m.Col))
-
-	lines := strings.Split(m.Text, "\n")
-	markLineIdx := m.Line
-	if markLineIdx >= len(lines) {
-		markLineIdx = len(lines) - 1
-	}
-	startLineIdx := 0
-	if markLineIdx > 4 {
-		startLineIdx = markLineIdx - 4
-	}
+	b.WriteString(
+		fmt.Sprintf(
+			"%s: %s%s%s\n",
+			errLabel,
+			ansiBold,
+			m.Msg,
+			ansiReset,
+		),
+	)
+	b.WriteString(
+		fmt.Sprintf(
+			"  %s %s:%d:%d\n",
+			arrow,
+			m.Cursor.InputSource(),
+			line,
+			col,
+		),
+	)
 
 	b.WriteString(fmt.Sprintf("   %s\n", bluePipe))
-	for i := startLineIdx; i <= markLineIdx; i++ {
-		disp := expandTabs(lines[i])
-		b.WriteString(fmt.Sprintf("%s%2d%s %s %s\n",
-			ansiBlue+ansiBold, i+1, ansiReset, bluePipe, disp))
-
-		if i == m.Line {
-			pad := strings.Repeat(" ", m.Col)
+	i := 1
+	for linestr := range strings.Lines(m.Cursor.AsStr()) {
+		if i > line {
+			break
+		}
+		linestr = strings.TrimRight(linestr, "\n\r\t\f")
+		if i >= line-4 {
+			disp := expandTabs(linestr)
+			b.WriteString(
+				fmt.Sprintf(
+					"%s%2d%s %s %s\n",
+					ansiBlue+ansiBold,
+					i,
+					ansiReset,
+					bluePipe,
+					disp,
+				),
+			)
+		}
+		if i == line {
+			pad := strings.Repeat(" ", col)
 			_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
 				bluePipe, pad,
 				ansiBold+ansiRed, ansiReset,
 				ansiRed, m.Msg, ansiReset)
 		}
+		i += 1
 	}
 
 	if len(m.CallStack) > 0 {

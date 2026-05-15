@@ -10,9 +10,14 @@ import (
 	"github.com/neogeny/ogopego/peg"
 )
 
+type Cfg = config.Cfg
+
 func Compile(t testing.TB, grammar string, cfg *config.Cfg) *peg.Grammar {
 	t.Helper()
-	g, err := api.Compile(grammar, nil)
+	g, err := api.Compile(grammar, &Cfg{
+		Trace:    true,
+		Colorize: true,
+	})
 	if err != nil {
 		t.Fatalf("compile: %v", err)
 	}

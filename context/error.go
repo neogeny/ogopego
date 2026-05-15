@@ -3,6 +3,7 @@ package context
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 )
 
 type Location struct {
@@ -36,11 +37,13 @@ func (e *DisasterReport) Error() string {
 
 	memento := e.Memento.Error()
 
-	// This ensures go test prints the full structural context of the DisasterReport
+	filename := filepath.Base(e.location.File)
+	location := fmt.Sprintf("%s@%d", filename, e.location.Line)
+
 	return fmt.Sprintf(
-		"DisasterReport [CutSeen: %t, Loc: %v]: %s\n%s",
+		"\nDisasterReport(\n  CutSeen: %t,\n  Loc: %v,\n  Error: %s,\n%s\n)",
 		e.CutSeen,
-		e.location,
+		location,
 		inner,
 		memento,
 	)

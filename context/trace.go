@@ -3,6 +3,7 @@ package context
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -89,18 +90,19 @@ func (t ConsoleTracer) TraceEvent(ctx Ctx, event Event, msg string) {
 	esym := eventSymbol(event)
 	ssym := stackSymbol(event)
 
-	lookahead := color.New(color.FgBlack, color.Faint).Sprintf(
+	lookahead := color.New(color.FgBlack, color.Bold).Sprintf(
 		"%s",
-		ctx.Cursor().Lookahead(ctx.Mark()),
+		strings.ReplaceAll(ctx.Cursor().Lookahead(ctx.Mark()), " ", "·"),
 	)
 
 	var cs string
+	bold := color.New(color.FgWhite, color.Bold)
 	for _, call := range ctx.CallStack() {
-		cs += color.WhiteString(call) + ssym
+		cs += bold.Sprint(call) + ssym
 	}
 
 	line, col := ctx.Cursor().Pos()
-	pos := color.New(color.FgBlack, color.Faint).Sprintf("[%d:%d]→", line, col)
+	pos := color.New(color.FgBlack, color.Bold).Sprintf("[%d:%d]→", line, col)
 
 	lineMsg := fmt.Sprintf("%s%s %s •\n%s%s",
 		esym, msg, cs, pos, lookahead)

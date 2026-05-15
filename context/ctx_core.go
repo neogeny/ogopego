@@ -2,9 +2,11 @@ package context
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"sort"
 
+	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
@@ -35,6 +37,15 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 func (ctx *CoreCtx) Configure(cfg Cfg) {
 	ctx.cursor.Configure(cfg)
 	ctx.setKeywords(cfg.Keywords)
+	if cfg.Trace {
+		if cfg.Colorize {
+			color.Output = os.Stderr
+			color.NoColor = false
+		}
+		ctx.tracer = ConsoleTracer{}
+	} else {
+		ctx.tracer = NullTracer{}
+	}
 }
 
 func (ctx *CoreCtx) SetTracer(tracer Tracer) {

@@ -111,11 +111,10 @@ func (s *StrCursor) Lookahead(start int) string {
 		return ""
 	}
 	tail := s.text[start:]
-	i := strings.IndexByte(tail, '\n')
-	if i == -1 {
-		return tail
+	for line := range strings.Lines(tail) {
+		return strings.TrimRight(line, "\n\r\t")
 	}
-	return tail[:i]
+	return tail
 }
 
 func (s *StrCursor) AtEnd() bool {

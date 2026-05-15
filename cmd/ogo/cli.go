@@ -6,6 +6,7 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
+	"github.com/neogeny/ogopego/config"
 )
 
 //goland:noinspection GoVetStructTag
@@ -38,7 +39,10 @@ var CLI struct {
 	Trace  bool   `help:"Display a detailed trace of the parsing process." short:"t"`
 }
 
-var useColorOutput bool
+var (
+	useColorOutput bool
+	cliCfg         *config.Cfg
+)
 
 func init() {
 	color.NoColor = false
