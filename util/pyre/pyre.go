@@ -1,11 +1,11 @@
 package pyre
 
 func Compile(pattern string) (Pattern, error) {
-	return NewPCRE2CgoPattern(pattern)
+	return NewRegexp2Pattern(pattern)
 }
 
 func MustCompile(pattern string) Pattern {
-	p, err := NewPCRE2CgoPattern(pattern)
+	p, err := NewRegexp2Pattern(pattern)
 	if err != nil {
 		panic(err)
 	}
