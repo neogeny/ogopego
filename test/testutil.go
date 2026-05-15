@@ -1,4 +1,4 @@
-package ogopego
+package test
 
 import (
 	"encoding/json"
@@ -8,9 +8,14 @@ import (
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
+	"github.com/neogeny/ogopego/util"
 )
 
 type Cfg = config.Cfg
+
+func Dedent(s string) string {
+	return util.Dedent(s)
+}
 
 func Compile(t testing.TB, grammar string, cfg *config.Cfg) *peg.Grammar {
 	t.Helper()

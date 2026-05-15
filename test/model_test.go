@@ -1,25 +1,23 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestChildren(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, Dedent(`
 		@@grammar :: Calc
 		start = expression $
 		expression = term
 		term = 'x'
-	`, nil)
-	ogopego.AssertJSONStr(t, g, "x", `"x"`)
+	`), nil)
+	AssertJSONStr(t, g, "x", `"x"`)
 }
 
 func TestNodeKWArgs(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start = 'value'
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "value", `"value"`)
+	AssertJSONStr(t, g, "value", `"value"`)
 }

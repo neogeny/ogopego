@@ -1,13 +1,11 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestEBNFParsing(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: EBNF
 
 		start := expression $

@@ -1,19 +1,17 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestPositiveJoin(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@whitespace :: /\s+/
 		@@nameguard :: False
 		@@grammar :: Test
 		start := ','%{'x' 'y'}+
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "x y, x y", `[["x", "y"], ",", ["x", "y"]]`)
-	ogopego.AssertJSONStr(t, g, "x y x y", `[["x", "y"]]`)
-	ogopego.ParseFail(t, g, "y x")
+	AssertJSONStr(t, g, "x y, x y", `[["x", "y"], ",", ["x", "y"]]`)
+	AssertJSONStr(t, g, "x y x y", `[["x", "y"]]`)
+	ParseFail(t, g, "y x")
 }

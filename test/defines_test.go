@@ -1,14 +1,11 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
-	"github.com/neogeny/ogopego/util"
 )
 
 func TestNameInOption(t *testing.T) {
-	g := ogopego.Compile(t, util.Dedent(`
+	g := Compile(t, Dedent(`
 		@@grammar :: Test
 		start = expr_range $
 		expr_range =
@@ -16,14 +13,14 @@ func TestNameInOption(t *testing.T) {
 			| expr
 		expr = /[\d]+/
 	`), nil)
-	ogopego.AssertJSONStr(t, g, "1 .. 10", `{"from": "1", "to": "10"}`)
-	ogopego.AssertJSONStr(t, g, "10", `"10"`)
+	AssertJSONStr(t, g, "1 .. 10", `{"from": "1", "to": "10"}`)
+	AssertJSONStr(t, g, "10", `"10"`)
 }
 
 func TestMixedReturn(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := ('a' b='b') 'c' d='d'?
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "a b c", `{"b": "b", "d": null}`)
+	AssertJSONStr(t, g, "a b c", `{"b": "b", "d": null}`)
 }

@@ -1,13 +1,11 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestCalculatorGrammar(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: CALC
 		@@left_recursion :: True
 		@@whitespace :: /\s+/
@@ -30,14 +28,14 @@ func TestCalculatorGrammar(t *testing.T) {
 
 		NUMBER := /\d+/
 	`, nil)
-	result := ogopego.ParseJSON(t, g, "3 + 5 * (10 - 20 )")
+	result := ParseJSON(t, g, "3 + 5 * (10 - 20 )")
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
 }
 
 func TestJSONLikeGrammar(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: MiniJSON
 		@@nameguard :: False
 		@@whitespace :: /\s+/
@@ -62,7 +60,7 @@ func TestJSONLikeGrammar(t *testing.T) {
 
 		number := /-?\d+(\.\d+)?/
 	`, nil)
-	result := ogopego.ParseJSON(t, g, `{"key": "value"}`)
+	result := ParseJSON(t, g, `{"key": "value"}`)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}

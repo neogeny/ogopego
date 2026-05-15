@@ -1,13 +1,11 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestDirectLeftRecursion(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, Dedent(`
 		@@left_recursion :: True
 		@@whitespace :: /\s+/
 		@@grammar :: Test
@@ -15,6 +13,6 @@ func TestDirectLeftRecursion(t *testing.T) {
 		expression = expression '+' factor | expression '-' factor | factor
 		factor = number
 		number = /[0-9]+/
-	`, nil)
-	ogopego.AssertJSONStr(t, g, "10 - 20", `["10", "-", "20"]`)
+	`), nil)
+	AssertJSONStr(t, g, "10 - 20", `["10", "-", "20"]`)
 }

@@ -1,16 +1,14 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestSkipTo(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, Dedent(`
 		@@grammar :: Test
 		start = 'x' ab $
 		ab = 'a' 'b' | -> 'b'
-	`, nil)
-	ogopego.AssertJSONStr(t, g, "x yb", `["x", "b"]`)
+	`), nil)
+	AssertJSONStr(t, g, "x yb", `["x", "b"]`)
 }

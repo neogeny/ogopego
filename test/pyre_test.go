@@ -1,4 +1,4 @@
-package ogopego_test
+package test
 
 import (
 	"testing"

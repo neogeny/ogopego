@@ -1,47 +1,45 @@
-package ogopego_test
+package test
 
 import (
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestSimplePattern(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := /\d+/
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "123", `"123"`)
+	AssertJSONStr(t, g, "123", `"123"`)
 }
 
 func TestPatternWithLetters(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := /[a-z]+/
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "hello", `"hello"`)
+	AssertJSONStr(t, g, "hello", `"hello"`)
 }
 
 func TestPatternWithAnchors(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := /^start/
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "start", `"start"`)
+	AssertJSONStr(t, g, "start", `"start"`)
 }
 
 func TestPatternCaseInsensitive(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := /(?i)hello/
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "HELLO", `"HELLO"`)
+	AssertJSONStr(t, g, "HELLO", `"HELLO"`)
 }
 
 func TestPatternCharacterClasses(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := /[A-Za-z_]\w*/
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "hello_world", `"hello_world"`)
+	AssertJSONStr(t, g, "hello_world", `"hello_world"`)
 }

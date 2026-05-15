@@ -1,14 +1,12 @@
-package ogopego_test
+package test
 
 import (
 	"strings"
 	"testing"
-
-	"github.com/neogeny/ogopego/test"
 )
 
 func TestPrettyGrammar(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: PrettyTest
 		start := 'a'
 		`,
@@ -24,9 +22,9 @@ func TestPrettyGrammar(t *testing.T) {
 }
 
 func TestPrettySlashedPattern(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := Compile(t, `
 		@@grammar :: Test
 		start := ?"[a-z]+/[0-9]+" $
 	`, nil)
-	ogopego.AssertJSONStr(t, g, "abc/123", `"abc/123"`)
+	AssertJSONStr(t, g, "abc/123", `"abc/123"`)
 }
