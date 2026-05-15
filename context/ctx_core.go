@@ -360,3 +360,13 @@ func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
 	}
 }
+func (ctx *CoreCtx) IsCutSeen() bool {
+	return false
+}
+func (ctx *CoreCtx) CutStackPush() {
+
+}
+
+func (ctx *CoreCtx) CutStackPop() bool {
+	return false
+}

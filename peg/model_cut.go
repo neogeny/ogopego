@@ -14,7 +14,6 @@ type Cut struct {
 func (c *Cut) Parse(ctx Ctx) (Tree, error) {
 	ctx.Cut()
 	t := &trees.Nil{}
-	t.OrCutSeen(true)
 	return t, nil
 }
 

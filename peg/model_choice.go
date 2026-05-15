@@ -5,8 +5,6 @@ package peg
 
 import (
 	"errors"
-
-	"github.com/neogeny/ogopego/context"
 )
 
 type Option struct {
@@ -31,12 +29,16 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	var lastErr error
 	for _, opt := range c.Options {
 		mark := ctx.Mark()
+		ctx.CutStackPush()
 		result, err := opt.Parse(ctx)
+		cutSeen := ctx.CutStackPop()
+
 		if err == nil {
 			return result, nil
 		}
+
 		ctx.Reset(mark)
-		if context.TakeCut(err) {
+		if cutSeen {
 			return nil, err
 		}
 		lastErr = err

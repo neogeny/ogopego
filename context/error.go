@@ -1,7 +1,6 @@
 package context
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 )
@@ -13,7 +12,6 @@ type Location struct {
 
 type Nope struct {
 	error
-	CutSeen  bool
 	location Location
 }
 
@@ -26,7 +24,7 @@ type DisasterReport struct {
 }
 
 func (e *Nope) Error() string {
-	return fmt.Sprintf("Scaped Nope %v at [%v]", e.CutSeen, e.location)
+	return fmt.Sprintf("Scaped Nope at %v", e.location)
 }
 
 func (e *DisasterReport) Error() string {
@@ -59,35 +57,4 @@ func (e *DisasterReport) Mark() int {
 
 func (e *DisasterReport) Unwrap() error {
 	return e.Inner
-}
-
-func MarkCut(err error, value bool) error {
-	var pf *Nope
-	ok := errors.As(err, &pf)
-	if !ok {
-		return err
-	}
-	pf.CutSeen = pf.CutSeen || value
-	return pf
-}
-
-func TakeCut(err error) bool {
-	if err == nil {
-		return false
-	}
-	if pf, ok := errors.AsType[*Nope](err); ok && pf.CutSeen {
-		pf.CutSeen = false
-		return true
-	}
-	return false
-}
-
-func IsCut(err error) bool {
-	if err == nil {
-		return false
-	}
-	if pf, ok := errors.AsType[*Nope](err); ok && pf.CutSeen {
-		return true
-	}
-	return false
 }

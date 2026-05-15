@@ -4,7 +4,6 @@
 package peg
 
 import (
-	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -17,7 +16,7 @@ func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		ctx.Reset(mark)
-		if context.TakeCut(err) {
+		if ctx.CutStackPop() {
 			return nil, err
 		}
 		return &trees.Nil{}, nil

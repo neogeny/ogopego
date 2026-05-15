@@ -3,24 +3,12 @@
 
 package peg
 
-import (
-	"github.com/neogeny/ogopego/context"
-)
-
 type Group struct {
 	Box
 }
 
 func (g *Group) Parse(ctx Ctx) (Tree, error) {
-	result, err := g.Exp.Parse(ctx)
-	if err != nil {
-		if pf, ok := err.(*context.Nope); ok {
-			pf.CutSeen = false
-		}
-		return nil, err
-	}
-	result.TakeCutSeen()
-	return result, nil
+	return g.Exp.Parse(ctx)
 }
 
 func (t *Group) PubMap() *OrderedMap { return t.PubMapOf(t) }

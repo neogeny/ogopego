@@ -15,17 +15,9 @@ type Sequence struct {
 func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	var items []Tree
-	cutSeen := false
 	for _, el := range s.Sequence {
-		if _, ok := el.(*Cut); ok {
-			cutSeen = true
-			ctx.Cut()
-			continue
-		}
 		result, err := el.Parse(ctx)
 		if err != nil {
-			// FIXME: disabled cut transfer
-			//err = context.MarkCut(err, cutSeen)
 			ctx.Reset(mark)
 			return nil, err
 		}
@@ -41,7 +33,6 @@ func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 	default:
 		tree = &trees.Seq{Items: items}
 	}
-	tree.OrCutSeen(cutSeen)
 	return tree, nil
 }
 
