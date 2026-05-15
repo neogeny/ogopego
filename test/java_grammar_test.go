@@ -12,10 +12,7 @@ func TestPrivateGrammars(t *testing.T) {
 	if os.Getenv("XONSH_VERSION") == "" {
 		t.Skip("XONSH_VERSION not set — local test only")
 	}
-	dir := os.Getenv("OGOPEGO_PRIVATE_GRAMMARS")
-	if dir == "" {
-		t.Skip("set OGOPEGO_PRIVATE_GRAMMARS to a directory of .ebnf files")
-	}
+	dir := "../grammar"
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		t.Skipf("cannot read %s: %v", dir, err)

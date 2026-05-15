@@ -74,7 +74,6 @@ func TestRoundtripJSON(t *testing.T) {
 }
 
 func TestRoundtripPrettyPrint(t *testing.T) {
-	t.Skip("Pretty uses ':' operator; boot grammar requires '=' / '::=' / ':='")
 	grammar := `
 		@@grammar :: Calc
 		@@left_recursion :: True
