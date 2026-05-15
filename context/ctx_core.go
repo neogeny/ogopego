@@ -111,14 +111,14 @@ func (ctx *CoreCtx) HeartbeatTick() {
 
 func (ctx *CoreCtx) Cut() {
 	ctx.Tracer().TraceCut(ctx)
-	if !ctx.cfg.NoPruneMemosOnCut {
-		cutpoint := ctx.Mark()
-		for k := range ctx.memoCache {
-			if k.Mark < cutpoint {
-				delete(ctx.memoCache, k)
-			}
-		}
+	ctx.pruneCache()
+}
+
+func (ctx *CoreCtx) pruneCache() {
+	if ctx.cfg.NoPruneMemosOnCut {
+		return
 	}
+	ctx.memoCache = pruneCacheWithCopy(ctx.memoCache, ctx.Mark())
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
