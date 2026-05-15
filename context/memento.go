@@ -1,8 +1,10 @@
-package input
+package context
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/neogeny/ogopego/input"
 )
 
 const (
@@ -18,6 +20,7 @@ func expandTabs(s string) string {
 }
 
 type Memento struct {
+	error
 	InputSource string
 	Msg         string
 	Text        string
@@ -29,9 +32,9 @@ type Memento struct {
 	LA          string
 }
 
-func NewMemento(start int, msg string, cursor Cursor, callstack []string) *Memento {
+func NewMemento(start int, msg string, cursor input.Cursor, callstack []string) Memento {
 	line, col := cursor.PosAt(cursor.Mark())
-	return &Memento{
+	return Memento{
 		InputSource: cursor.InputSource(),
 		Msg:         msg,
 		Text:        cursor.AsStr(),

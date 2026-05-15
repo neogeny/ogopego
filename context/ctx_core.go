@@ -2,9 +2,9 @@ package context
 
 import (
 	"fmt"
+	"runtime"
 	"sort"
 
-	"github.com/neogeny/ogopego/input"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/pyre"
 )
@@ -58,12 +58,13 @@ func (ctx *CoreCtx) Next() (rune, bool) { return ctx.cursor.Next() }
 func (ctx *CoreCtx) Peek() (rune, bool) { return ctx.cursor.Peek() }
 
 func (ctx *CoreCtx) Dot() (rune, error) {
+	mark := ctx.Mark()
 	r, ok := ctx.Next()
 	if !ok {
-		return 0, &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("expected any character"),
-		}
+		return 0, ctx.Failure(
+			mark,
+			fmt.Errorf("expected any character"),
+		)
 	}
 	return r, nil
 }
@@ -211,17 +212,23 @@ func (ctx *CoreCtx) ParseEOF() bool {
 }
 
 func (ctx *CoreCtx) Failure(start int, source error) *Nope {
+	loc := Location{}
+	_, loc.File, loc.Line, _ = runtime.Caller(2)
+
 	ctx.Reset(start)
-	nope := &Nope{}
+	nope := &Nope{
+		location: loc,
+	}
 	if furthest := ctx.FurthestFailure(); furthest != nil &&
 		furthest.Start() >= start {
 		return nope
 	}
 	msg := source.Error()
 	dis := &DisasterReport{
-		Inner:   source,
-		CutSeen: false,
-		Memento: input.NewMemento(start, msg, ctx.cursor, ctx.callStack),
+		location: loc,
+		Inner:    source,
+		CutSeen:  false,
+		Memento:  NewMemento(start, msg, ctx.cursor, ctx.callStack),
 	}
 	ctx.SetFurthestFailure(dis)
 	return nope
@@ -232,18 +239,20 @@ func (ctx *CoreCtx) FurthestFailure() *DisasterReport { return ctx.furthest }
 func (ctx *CoreCtx) SetFurthestFailure(dis *DisasterReport) { ctx.furthest = dis }
 
 func (ctx *CoreCtx) MatchPattern(pattern string) (string, error) {
+	mark := ctx.Mark()
 	re := ctx.GetPattern(pattern)
 	if re == nil {
-		return "", &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("invalid pattern %q", pattern)}
+		return "", ctx.Failure(
+			mark,
+			fmt.Errorf("invalid pattern %q", pattern),
+		)
 	}
 	m, ok := ctx.cursor.MatchPattern(re)
 	if !ok {
-		return "", &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("expected pattern %q", pattern),
-		}
+		return "", ctx.Failure(
+			mark,
+			fmt.Errorf("expected pattern %q", pattern),
+		)
 	}
 	return m, nil
 }
@@ -260,22 +269,24 @@ func (ctx *CoreCtx) Fail() error {
 }
 
 func (ctx *CoreCtx) EofCheck() error {
+	mark := ctx.Mark()
 	ctx.NextToken()
 	if !ctx.cursor.AtEnd() {
-		return &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("expected end of text"),
-		}
+		return ctx.Failure(
+			mark,
+			fmt.Errorf("expected end of text"),
+		)
 	}
 	return nil
 }
 
 func (ctx *CoreCtx) EolCheck() error {
+	mark := ctx.Mark()
 	if !ctx.cursor.MatchEOL() {
-		return &ParseFailure{
-			Mark:  ctx.Mark(),
-			Inner: fmt.Errorf("expected end of line"),
-		}
+		return ctx.Failure(
+			mark,
+			fmt.Errorf("expected end of line"),
+		)
 	}
 	return nil
 }

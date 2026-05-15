@@ -11,7 +11,7 @@ type Group struct {
 func (g *Group) Parse(ctx Ctx) (Tree, error) {
 	result, err := g.Exp.Parse(ctx)
 	if err != nil {
-		if pf, ok := err.(*context.ParseFailure); ok {
+		if pf, ok := err.(*context.Nope); ok {
 			pf.CutSeen = false
 		}
 		return nil, err

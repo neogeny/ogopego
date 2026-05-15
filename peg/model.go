@@ -10,7 +10,6 @@ import (
 )
 
 type Ctx = context.Ctx
-type ParseFailure = context.ParseFailure
 type MemoKey = context.MemoKey
 type Tree = trees.Tree
 type OrderedMap = asjson.OrderedMap

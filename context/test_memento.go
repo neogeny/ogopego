@@ -1,18 +1,17 @@
-package input
+package context
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/neogeny/ogopego/input"
 )
 
 func TestMementoNew(t *testing.T) {
-	cursor := NewStrCursor("hello world\nsecond line")
+	cursor := input.NewStrCursor("hello world\nsecond line")
 	cs := []string{"rule1", "rule2"}
 
 	m := NewMemento(0, "expected token", cursor, cs)
-	if m == nil {
-		t.Fatal("expected non-nil Memento")
-	}
 	if m.Msg != "expected token" {
 		t.Errorf("Msg = %q, want %q", m.Msg, "expected token")
 	}
@@ -28,7 +27,7 @@ func TestMementoNew(t *testing.T) {
 }
 
 func TestMementoErrorContainsMsg(t *testing.T) {
-	cursor := NewStrCursor("hello world")
+	cursor := input.NewStrCursor("hello world")
 	m := NewMemento(0, "unexpected character", cursor, nil)
 	err := m.Error()
 	if !strings.Contains(err, "unexpected character") {
@@ -37,7 +36,7 @@ func TestMementoErrorContainsMsg(t *testing.T) {
 }
 
 func TestMementoErrorShowsSourceText(t *testing.T) {
-	cursor := NewStrCursor("hello world")
+	cursor := input.NewStrCursor("hello world")
 	m := NewMemento(0, "test error", cursor, nil)
 	err := m.Error()
 	if !strings.Contains(err, "hello world") {
@@ -46,7 +45,7 @@ func TestMementoErrorShowsSourceText(t *testing.T) {
 }
 
 func TestMementoErrorShowsPosition(t *testing.T) {
-	cursor := NewStrCursor("hello world")
+	cursor := input.NewStrCursor("hello world")
 	// Advance past "hello "
 	for i := 0; i < 6; i++ {
 		cursor.Next()
@@ -59,7 +58,7 @@ func TestMementoErrorShowsPosition(t *testing.T) {
 }
 
 func TestMementoErrorWithCallstack(t *testing.T) {
-	cursor := NewStrCursor("x")
+	cursor := input.NewStrCursor("x")
 	cs := []string{"expr", "term", "factor"}
 	m := NewMemento(0, "parse error", cursor, cs)
 	err := m.Error()
@@ -72,7 +71,7 @@ func TestMementoErrorWithCallstack(t *testing.T) {
 
 func TestMementoErrorMultiLineSource(t *testing.T) {
 	src := "first line\nsecond line\nthird line\nfourth line"
-	cursor := NewStrCursor(src)
+	cursor := input.NewStrCursor(src)
 	// Position at "fourth line" area - byte offset after "third line\n"
 	idx := strings.Index(src, "fourth")
 	cursor.Reset(idx)
@@ -88,7 +87,7 @@ func TestMementoErrorMultiLineSource(t *testing.T) {
 }
 
 func TestMementoString(t *testing.T) {
-	cursor := NewStrCursor("test input")
+	cursor := input.NewStrCursor("test input")
 	m := NewMemento(0, "error msg", cursor, []string{"rule"})
 	if m.String() != m.Error() {
 		t.Error("String() and Error() should match")
@@ -96,7 +95,7 @@ func TestMementoString(t *testing.T) {
 }
 
 func TestMementoEmptyCallstack(t *testing.T) {
-	cursor := NewStrCursor("test")
+	cursor := input.NewStrCursor("test")
 	m := NewMemento(0, "err", cursor, nil)
 	err := m.Error()
 	if !strings.Contains(err, "err") {

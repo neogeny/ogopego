@@ -42,8 +42,7 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 			c.Grammar = s
 		case "whitespace":
 			if s == "" || s == "None" || s == "False" {
-				s2 := ""
-				c.Whitespace = &s2
+				c.Whitespace = new("")
 			} else {
 				c.Whitespace = &s
 			}
