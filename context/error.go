@@ -53,6 +53,10 @@ func (e *DisasterReport) Error() string {
 	return fmt.Sprintf("ParseError %v", e)
 }
 
+func (e *DisasterReport) Start() int {
+	return e.Memento.Start
+}
+
 func (e *DisasterReport) Mark() int {
 	return e.Memento.Mark
 }

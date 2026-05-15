@@ -214,7 +214,7 @@ func (ctx *CoreCtx) Failure(start int, source error) *Nope {
 	ctx.Reset(start)
 	nope := &Nope{}
 	if furthest := ctx.FurthestFailure(); furthest != nil &&
-		furthest.Mark() >= ctx.Mark() {
+		furthest.Start() >= start {
 		return nope
 	}
 	msg := source.Error()
