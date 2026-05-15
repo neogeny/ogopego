@@ -20,9 +20,9 @@ test-v:
 lint:
     golangci-lint run ./...
 
-# Check formatting (including vendor)
+# Format all Go files excluding vendor and fragments
 fmt:
-    gofmt -l -w -s .
+    find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l -w -s {} +
 
 # Format all Go files excluding vendor
 gofmt:
