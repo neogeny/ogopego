@@ -20,7 +20,6 @@ func main() {
 	ctx = kong.Parse(&CLI,
 		kong.Name("ogo"),
 		kong.Description("ogopego: A PEG parser generator in Go"),
-		kong.Help(coloredHelp),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: false,
