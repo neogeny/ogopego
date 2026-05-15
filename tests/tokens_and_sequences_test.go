@@ -3,43 +3,54 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestTokenSequence(t *testing.T) {
-	g := util.Compile(t, `@@whitespace :: /\s+/ @@grammar :: Test start := 'hello' 'world' ;`, nil)
-	util.AssertJSONStr(t, g, "hello world", `["hello", "world"]`)
+	g := testutil.Compile(t, `
+		@@whitespace :: /\s+/
+		start: 'hello' 'world'
+	`, nil)
+	testutil.AssertJSONStr(t, g, "hello world", `["hello", "world"]`)
 }
 
 func TestOptionalToken(t *testing.T) {
-	g := util.Compile(t, `@@whitespace :: /\s+/ @@grammar :: Test start := 'a' 'b'? ;`, nil)
-	util.AssertJSONStr(t, g, "a b", `["a", "b"]`)
-	util.AssertJSONStr(t, g, "a", `"a"`)
+	g := testutil.Compile(t, `
+		@@whitespace :: /\s+/
+		start := 'a' 'b'?
+	`, nil)
+	testutil.AssertJSONStr(t, g, "a b", `["a", "b"]`)
+	testutil.AssertJSONStr(t, g, "a", `"a"`)
 }
 
 func TestClosureTokens(t *testing.T) {
-	g := util.Compile(t, `@@whitespace :: /\s+/ @@grammar :: Test start := 'a'* ;`, nil)
-	util.AssertJSONStr(t, g, "aaa", `["a", "a", "a"]`)
+	g := testutil.Compile(t, `
+		start := 'a'*
+	`, nil)
+	testutil.AssertJSONStr(t, g, "aaa", `["a", "a", "a"]`)
 }
 
 func TestPositiveClosure(t *testing.T) {
-	g := util.Compile(t, `@@whitespace :: /\s+/ @@grammar :: Test start := 'a'+ ;`, nil)
-	util.AssertJSONStr(t, g, "aaa", `["a", "a", "a"]`)
+	g := testutil.Compile(t, `
+		start := 'a'+
+	`, nil)
+	testutil.AssertJSONStr(t, g, "aaa", `["a", "a", "a"]`)
 }
 
 func TestChoiceAlternatives(t *testing.T) {
-	g := util.Compile(t, `@@whitespace :: /\s+/ @@grammar :: Test start := 'a' | 'b' | 'c' ;`, nil)
-	util.AssertJSONStr(t, g, "a", `"a"`)
-	util.AssertJSONStr(t, g, "b", `"b"`)
-	util.AssertJSONStr(t, g, "c", `"c"`)
+	g := testutil.Compile(t, `
+		start := 'a' | 'b' | 'c'
+	`, nil)
+	testutil.AssertJSONStr(t, g, "a", `"a"`)
+	testutil.AssertJSONStr(t, g, "b", `"b"`)
+	testutil.AssertJSONStr(t, g, "c", `"c"`)
 }
 
 func TestMultiLineGrammar(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@whitespace :: /\s+/
 		@@grammar :: Test
-
 		start := 'hello' 'world'
 	`, nil)
-	util.AssertJSONStr(t, g, "hello world", `["hello", "world"]`)
+	testutil.AssertJSONStr(t, g, "hello world", `["hello", "world"]`)
 }

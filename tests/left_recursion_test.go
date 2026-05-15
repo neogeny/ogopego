@@ -3,11 +3,11 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestDirectLeftRecursion(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@left_recursion :: True
 		@@whitespace :: /\s+/
 		@@grammar :: Test
@@ -16,5 +16,5 @@ func TestDirectLeftRecursion(t *testing.T) {
 		factor = number
 		number = /[0-9]+/
 	`, nil)
-	util.AssertJSONStr(t, g, "10 - 20", `["10", "-", "20"]`)
+	testutil.AssertJSONStr(t, g, "10 - 20", `["10", "-", "20"]`)
 }

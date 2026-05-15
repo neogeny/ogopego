@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestPrivateGrammars(t *testing.T) {
@@ -29,7 +29,7 @@ func TestPrivateGrammars(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			g := util.Compile(t, string(data), nil)
+			g := testutil.Compile(t, string(data), nil)
 			if len(g.Rules) == 0 {
 				t.Fatal("expected at least one rule")
 			}

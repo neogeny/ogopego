@@ -3,23 +3,23 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestChildren(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: Calc
 		start = expression $
 		expression = term
 		term = 'x'
 	`, nil)
-	util.AssertJSONStr(t, g, "x", `"x"`)
+	testutil.AssertJSONStr(t, g, "x", `"x"`)
 }
 
 func TestNodeKWArgs(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: Test
 		start = 'value'
 	`, nil)
-	util.AssertJSONStr(t, g, "value", `"value"`)
+	testutil.AssertJSONStr(t, g, "value", `"value"`)
 }

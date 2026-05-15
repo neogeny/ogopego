@@ -4,14 +4,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestPrettyGrammar(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: PrettyTest
 		start := 'a'
-	`)
+		`,
+		nil,
+	)
 	pretty := g.PrettyPrint()
 	if !strings.Contains(pretty, "PrettyTest") {
 		t.Errorf("expected pretty print to contain grammar name")
@@ -22,9 +24,9 @@ func TestPrettyGrammar(t *testing.T) {
 }
 
 func TestPrettySlashedPattern(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: Test
 		start := ?"[a-z]+/[0-9]+" $
 	`, nil)
-	util.AssertJSONStr(t, g, "abc/123", `"abc/123"`)
+	testutil.AssertJSONStr(t, g, "abc/123", `"abc/123"`)
 }

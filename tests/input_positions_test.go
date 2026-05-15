@@ -3,14 +3,14 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestMultiLineInput(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@whitespace :: /\s+/
 		@@grammar :: Test
 		start := 'hello' 'world'
 	`, nil)
-	util.AssertJSONStr(t, g, "hello\nworld", `["hello", "world"]`)
+	testutil.AssertJSONStr(t, g, "hello\nworld", `["hello", "world"]`)
 }

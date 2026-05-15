@@ -3,11 +3,11 @@ package ogopego_test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/util/testutil"
 )
 
 func TestNameInOption(t *testing.T) {
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: Test
 		start = expr_range $
 		expr_range =
@@ -15,15 +15,15 @@ func TestNameInOption(t *testing.T) {
 			| expr
 		expr = /[\d]+/
 	`, nil)
-	util.AssertJSONStr(t, g, "1 .. 10", `{"from": "1", "to": "10"}`)
-	util.AssertJSONStr(t, g, "10", `"10"`)
+	testutil.AssertJSONStr(t, g, "1 .. 10", `{"from": "1", "to": "10"}`)
+	testutil.AssertJSONStr(t, g, "10", `"10"`)
 }
 
 func TestMixedReturn(t *testing.T) {
 	t.Skip("optional named capture folding not yet implemented")
-	g := util.Compile(t, `
+	g := testutil.Compile(t, `
 		@@grammar :: Test
 		start := ('a' b='b') 'c' d='d'?
 	`, nil)
-	util.AssertJSONStr(t, g, "a b c", `{"b": "b", "d": null}`)
+	testutil.AssertJSONStr(t, g, "a b c", `{"b": "b", "d": null}`)
 }
