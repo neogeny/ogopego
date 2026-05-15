@@ -1,6 +1,3 @@
-// Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
-// SPDX-License-Identifier: MIT OR Apache-2.0
-
 package context
 
 import (
@@ -10,12 +7,12 @@ import (
 	"github.com/neogeny/ogopego/input"
 )
 
-func newTestCtx() *BaseCtx {
+func newTestCtx() *CoreCtx {
 	c := input.NewStrCursor("some input text")
 	return NewCtx(c, nil)
 }
 
-func newTestCtxWithTracer(tracer Tracer) *BaseCtx {
+func newTestCtxWithTracer(tracer Tracer) *CoreCtx {
 	c := input.NewStrCursor("some input text")
 	ctx := NewCtx(c, nil)
 	ctx.SetTracer(tracer)

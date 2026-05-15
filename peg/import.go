@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/iancoleman/orderedmap"
 	json2 "github.com/neogeny/ogopego/json"
 )
 
@@ -198,7 +199,7 @@ func grammarFromJSON(h *helper) (*Grammar, error) {
 	return g, nil
 }
 
-func parseDirectives(obj map[string]any) map[string]any {
+func parseDirectives(obj map[string]any) *json2.OrderedMap {
 	raw, ok := obj["directives"]
 	if !ok {
 		return nil
@@ -207,21 +208,21 @@ func parseDirectives(obj map[string]any) map[string]any {
 	if !ok {
 		return nil
 	}
-	result := make(map[string]any, len(dirObj))
+	result := orderedmap.New()
 	for k, v := range dirObj {
 		switch val := v.(type) {
 		case string:
-			result[k] = val
+			result.Set(k, val)
 		case bool:
 			if val {
-				result[k] = "true"
+				result.Set(k, "true")
 			} else {
-				result[k] = "false"
+				result.Set(k, "false")
 			}
 		case float64:
-			result[k] = fmt.Sprintf("%v", val)
+			result.Set(k, fmt.Sprintf("%v", val))
 		default:
-			result[k] = fmt.Sprintf("%v", val)
+			result.Set(k, fmt.Sprintf("%v", val))
 		}
 	}
 	return result
@@ -312,7 +313,13 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		}
 		var opts []*Option
 		for _, ih := range items {
-			exp, err := modelFromJSON(ih.getNested("exp"))
+			cls, _ := ih.getClass()
+			var exp Model
+			if cls == "Option" {
+				exp, err = modelFromJSON(ih.getNested("exp"))
+			} else {
+				exp, err = modelFromJSON(ih, nil)
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -498,6 +505,22 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 
 	case "Void":
 		return &Void{}, nil
+
+	case "Null":
+		return &NULL{}, nil
+
+	case "Fail":
+		return &Fail{}, nil
+
+	case "Dot":
+		return &Dot{}, nil
+
+	case "Synth":
+		exp, err := modelFromJSON(h.getNested("exp"))
+		if err != nil {
+			return nil, err
+		}
+		return &Synth{Box: Box{Exp: exp}}, nil
 
 	case "Cut":
 		return &Cut{}, nil

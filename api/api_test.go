@@ -23,7 +23,6 @@ func TestParseGrammar(t *testing.T) {
 }
 
 func TestCompile(t *testing.T) {
-	t.Skip("pre-existing: failed parsing ENDRULE")
 	src := "@@grammar :: EBNFTest\nstart := expression $\nexpression := expression '+' term | expression '-' term | term\nterm := term '*' factor | term '/' factor | factor\nfactor := '(' expression ')' | number\nnumber := /\\d+/\n"
 	g, err := Compile(src, nil)
 	if err != nil {
@@ -35,8 +34,8 @@ func TestCompile(t *testing.T) {
 	if !g.Analyzed {
 		t.Fatal("expected analyzed grammar")
 	}
-	if len(g.Rules) != 6 {
-		t.Errorf("expected 6 rules, got %d", len(g.Rules))
+	if len(g.Rules) != 5 {
+		t.Errorf("expected 5 rules, got %d", len(g.Rules))
 	}
 }
 

@@ -6,6 +6,9 @@ package peg
 import (
 	"strings"
 	"testing"
+
+	"github.com/iancoleman/orderedmap"
+	asjson "github.com/neogeny/ogopego/json"
 )
 
 func TestPrettyToken(t *testing.T) {
@@ -112,7 +115,7 @@ func TestPrettyGroup(t *testing.T) {
 }
 
 func TestPrettyGroupMultiLine(t *testing.T) {
-	longTokens := []string{"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"}
+	longTokens := []string{"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa"}
 	items := make([]Model, len(longTokens))
 	for i, s := range longTokens {
 		items[i] = &Token{Token: s}
@@ -380,10 +383,12 @@ func TestPrettyGrammarWithKeywords(t *testing.T) {
 func TestPrettyGrammarWithDirectives(t *testing.T) {
 	g := &Grammar{
 		Name: "Test",
-		Directives: map[string]any{
-			"whitespace": `\s+`,
-			"comments":   `#.*`,
-		},
+		Directives: func() *asjson.OrderedMap {
+			om := orderedmap.New()
+			om.Set("whitespace", `\s+`)
+			om.Set("comments", `#.*`)
+			return om
+		}(),
 		Rules: []*Rule{
 			{
 				NamedBox: NamedBox{

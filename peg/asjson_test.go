@@ -22,10 +22,10 @@ func TestNodeAsJSON(t *testing.T) {
 	if cls, _ := om.Get("__class__"); cls != "Node" {
 		t.Errorf("expected __class__ Node, got %v", cls)
 	}
-	if ast, _ := om.Get("Ast"); ast != "test-ast" {
-		t.Errorf("expected Ast test-ast, got %v", ast)
+	if ast, _ := om.Get("ast"); ast != "test-ast" {
+		t.Errorf("expected ast test-ast, got %v", ast)
 	}
-	posRaw, _ := om.Get("Pos")
+	posRaw, _ := om.Get("pos")
 	if posRaw == nil {
 		t.Fatal("expected non-nil Pos")
 	}

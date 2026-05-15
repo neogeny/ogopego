@@ -4,6 +4,7 @@
 package peg
 
 import (
+	"encoding/json"
 	"fmt"
 
 	asjson "github.com/neogeny/ogopego/json"
@@ -13,7 +14,7 @@ import (
 type Grammar struct {
 	ModelBase
 	Name       string
-	Directives map[string]any
+	Directives *asjson.OrderedMap
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
@@ -22,7 +23,12 @@ type Grammar struct {
 func (g *Grammar) CfgFromDirectives() *Cfg {
 	c := Cfg{}
 
-	for name, val := range g.Directives {
+	if g.Directives == nil {
+		return &c
+	}
+
+	for _, name := range g.Directives.Keys() {
+		val, _ := g.Directives.Get(name)
 		s, ok := val.(string)
 		if !ok {
 			continue
@@ -39,7 +45,7 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 			c.Grammar = s
 		case "whitespace":
 			if s == "" || s == "None" || s == "False" {
-				c.Whitespace = nil
+				c.Whitespace = new("")
 			} else {
 				c.Whitespace = &s
 			}
@@ -108,9 +114,18 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 		}
 		rule = g.Rules[0]
 	}
-	return rule.Parse(ctx)
+	result, err := rule.Parse(ctx)
+	if err != nil {
+		if dis := ctx.FurthestFailure(); dis != nil {
+			return nil, dis
+		}
+		return nil, err
+	}
+	return result, nil
 }
 
 func (g *Grammar) PubMap() *asjson.OrderedMap { return g.PubMapOf(g) }
 func (g *Grammar) AsJSON() any                { return g.AsJSONOf(g) }
 func (g *Grammar) AsJSONStr() string          { return g.AsJSONStrOf(g) }
+
+func (g *Grammar) MarshalJSON() ([]byte, error) { return json.Marshal(g.AsJSON()) }

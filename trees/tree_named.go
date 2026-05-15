@@ -19,9 +19,7 @@ func (n *Named) fold(gather *treeMerge) Tree {
 }
 func (n *Named) PubMap() *asjson.OrderedMap { return n.PubMapOf(n) }
 func (n *Named) AsJSON() any {
-	out := newOM()
-	out.Set(n.Name, n.Value.AsJSON())
-	return out
+	return map[string]any{n.Name: n.Value.AsJSON()}
 }
 func (n *Named) AsJSONStr() string { return treeJSONStr(n.AsJSON()) }
 
@@ -39,9 +37,7 @@ func (n *NamedAsList) fold(gather *treeMerge) Tree {
 }
 func (n *NamedAsList) PubMap() *asjson.OrderedMap { return n.PubMapOf(n) }
 func (n *NamedAsList) AsJSON() any {
-	out := newOM()
-	out.Set(n.Name, n.Value.AsJSON())
-	return out
+	return map[string]any{n.Name: n.Value.AsJSON()}
 }
 func (n *NamedAsList) AsJSONStr() string { return treeJSONStr(n.AsJSON()) }
 

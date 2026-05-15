@@ -132,18 +132,18 @@ func TestNodeMarshalJSON(t *testing.T) {
 	if out["__class__"] != "Node" {
 		t.Errorf("expected __class__ Node, got %v", out["__class__"])
 	}
-	if out["Ast"] != "simple" {
-		t.Errorf("expected Ast 'simple', got %v", out["Ast"])
+	if out["ast"] != "simple" {
+		t.Errorf("expected ast 'simple', got %v", out["ast"])
 	}
-	pos, ok := out["Pos"].(map[string]any)
+	pos, ok := out["pos"].(map[string]any)
 	if !ok {
-		t.Fatal("expected Pos map")
+		t.Fatal("expected pos map")
 	}
 	if pos["Source"] != "src" {
 		t.Errorf("expected Source 'src', got %v", pos["Source"])
 	}
-	if out["Children"] != nil {
-		t.Error("expected nil Children")
+	if out["children"] != nil {
+		t.Error("expected nil children")
 	}
 }
 
@@ -173,9 +173,9 @@ func TestNodeMarshalJSONWithChildren(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	children, ok := out["Children"].([]any)
+	children, ok := out["children"].([]any)
 	if !ok {
-		t.Fatal("expected Children array")
+		t.Fatal("expected children array")
 	}
 	if len(children) != 1 {
 		t.Fatalf("expected 1 child, got %d", len(children))
@@ -184,8 +184,8 @@ func TestNodeMarshalJSONWithChildren(t *testing.T) {
 	if !ok {
 		t.Fatal("expected child to be object")
 	}
-	if c["Ast"] != "child" {
-		t.Errorf("expected child Ast 'child', got %v", c["Ast"])
+	if c["ast"] != "child" {
+		t.Errorf("expected child ast 'child', got %v", c["ast"])
 	}
 }
 
@@ -204,9 +204,9 @@ func TestNodeMarshalJSONAstMap(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	ast, ok := out["Ast"].(map[string]any)
+	ast, ok := out["ast"].(map[string]any)
 	if !ok {
-		t.Fatal("expected Ast to be object")
+		t.Fatal("expected ast to be object")
 	}
 	if ast["key"] != "value" {
 		t.Errorf("expected value, got %v", ast["key"])
@@ -228,9 +228,9 @@ func TestNodeMarshalJSONAstSlice(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	ast, ok := out["Ast"].([]any)
+	ast, ok := out["ast"].([]any)
 	if !ok {
-		t.Fatal("expected Ast to be array")
+		t.Fatal("expected ast to be array")
 	}
 	if len(ast) != 3 {
 		t.Fatalf("expected 3 items, got %d", len(ast))

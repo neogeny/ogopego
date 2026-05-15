@@ -4,6 +4,8 @@
 package peg
 
 import (
+	"fmt"
+
 	asjson "github.com/neogeny/ogopego/json"
 )
 
@@ -12,13 +14,21 @@ type SkipTo struct {
 }
 
 func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
-	for {
-		_, err := s.Exp.Parse(ctx)
+	for !ctx.Eof() {
+		mark := ctx.Mark()
+		result, err := s.Exp.Parse(ctx)
 		if err == nil {
-			return NIL, nil
+			return result, nil
 		}
-		return nil, err
+		ctx.Reset(mark)
+		if _, ok := ctx.Next(); !ok {
+			return nil, ctx.Failure(mark, fmt.Errorf("skip_to: target not found"))
+		}
 	}
+	return nil, ctx.Failure(
+		ctx.Mark(),
+		fmt.Errorf("skip_to: target not found"),
+	)
 }
 
 func (t *SkipTo) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }

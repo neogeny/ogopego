@@ -4,6 +4,7 @@
 package api
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/neogeny/ogopego"
@@ -22,6 +23,9 @@ var (
 	bootOnce sync.Once
 	bootGram *peg.Grammar
 	bootErr  error
+
+	compileMu    sync.RWMutex
+	compileCache = make(map[string]*peg.Grammar)
 )
 
 func bootGrammar() (*peg.Grammar, error) {
@@ -36,6 +40,7 @@ func BootGrammar() (*peg.Grammar, error) {
 }
 
 func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
+	grammar = strings.TrimRight(grammar, " \t\r\n")
 	boot, err := bootGrammar()
 	if err != nil {
 		return nil, err
@@ -66,11 +71,26 @@ func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
 }
 
 func Compile(grammar string, cfg *Cfg) (*peg.Grammar, error) {
+	compileMu.RLock()
+	if g, ok := compileCache[grammar]; ok {
+		compileMu.RUnlock()
+		return g, nil
+	}
+	compileMu.RUnlock()
+
 	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
 		return nil, err
 	}
-	return peg.CompileGrammar(tree)
+	g, err := peg.CompileGrammar(tree)
+	if err != nil {
+		return nil, err
+	}
+
+	compileMu.Lock()
+	compileCache[grammar] = g
+	compileMu.Unlock()
+	return g, nil
 }
 
 func CompileToJSON(grammar string, cfg *Cfg) (any, error) {

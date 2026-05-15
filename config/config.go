@@ -22,7 +22,8 @@ type Cfg struct {
 	NoPruneMemosOnCut bool
 	PerLineMemos      float64
 
-	Trace bool
+	Trace    bool
+	Colorize bool
 
 	Grammar         string
 	NoLeftRecursion bool
@@ -56,15 +57,17 @@ func eitherSlice[T any](userVal, defaultVal []T) []T {
 }
 
 func DefaultCfg() Cfg {
+	ws := `(?m)\s+`
 	return Cfg{
 		NoMemo:            false,
 		NoPruneMemosOnCut: false,
 		PerLineMemos:      DefaultPerlinememos,
 		Trace:             false,
+		Colorize:          false,
 		NoLeftRecursion:   false,
 		IgnoreCase:        false,
 		NameGuard:         false,
-		Whitespace:        nil,
+		Whitespace:        &ws,
 		Keywords:          nil,
 		ParseInfo:         false,
 	}
@@ -87,6 +90,7 @@ func (cfg Cfg) Override(other *Cfg) Cfg {
 		NoPruneMemosOnCut: Either(other.NoPruneMemosOnCut, cfg.NoPruneMemosOnCut),
 		PerLineMemos:      Either(other.PerLineMemos, cfg.PerLineMemos),
 		Trace:             Either(other.Trace, cfg.Trace),
+		Colorize:          Either(other.Colorize, cfg.Colorize),
 		Grammar:           Either(other.Grammar, cfg.Grammar),
 		NoLeftRecursion:   Either(other.NoLeftRecursion, cfg.NoLeftRecursion),
 		IgnoreCase:        Either(other.IgnoreCase, cfg.IgnoreCase),

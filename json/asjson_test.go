@@ -203,8 +203,8 @@ func TestAsJSONMixin(t *testing.T) {
 	if cls, _ := om.Get("__class__"); cls != "mixinStruct" {
 		t.Errorf("expected __class__ mixinStruct, got %v", cls)
 	}
-	if g, _ := om.Get("Greeting"); g != "hello" {
-		t.Errorf("expected Greeting hello, got %v", g)
+	if g, _ := om.Get("greeting"); g != "hello" {
+		t.Errorf("expected greeting hello, got %v", g)
 	}
 }
 
