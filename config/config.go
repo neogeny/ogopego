@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 package config
 
 import (
@@ -104,6 +107,7 @@ func (cfg Cfg) Override(other *Cfg) Cfg {
 		EolComments:       Either(other.EolComments, cfg.EolComments),
 		Keywords:          eitherSlice(other.Keywords, cfg.Keywords),
 		ParseInfo:         Either(other.ParseInfo, cfg.ParseInfo),
+		Heartbeat:         Either(other.Heartbeat, cfg.Heartbeat),
 	}
 
 	if other.Grammar != "" {

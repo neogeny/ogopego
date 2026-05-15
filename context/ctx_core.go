@@ -5,9 +5,11 @@ import (
 	"os"
 	"runtime"
 	"sort"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util/heartbeat"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
@@ -22,13 +24,16 @@ type CoreCtx struct {
 	memoCache      map[MemoKey]Memo
 	recursionKey   MemoKey
 	recursionDepth int
+	heartbeat      heartbeat.Heartbeat
+	heartbeatTime  time.Time
 }
 
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	ctx := CoreCtx{
-		cfg:    cfg.New(),
-		cursor: cursor,
-		tracer: NullTracer{},
+		cfg:       cfg.New(),
+		cursor:    cursor,
+		tracer:    NullTracer{},
+		heartbeat: heartbeat.NullHeartbeat{},
 	}
 	ctx.cursor.Configure(ctx.cfg)
 	return &ctx
@@ -45,6 +50,9 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 		ctx.tracer = ConsoleTracer{}
 	} else {
 		ctx.tracer = NullTracer{}
+	}
+	if cfg.Heartbeat != nil {
+		ctx.heartbeat = cfg.Heartbeat
 	}
 }
 
@@ -88,7 +96,18 @@ func (ctx *CoreCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
 
 func (ctx *CoreCtx) NextToken() { ctx.cursor.NextToken() }
 
-func (ctx *CoreCtx) HeartbeatTick() {}
+func (ctx *CoreCtx) HeartbeatTick() {
+	if time.Since(ctx.heartbeatTime) < 128*time.Millisecond {
+		return
+	}
+	mark := ctx.Mark()
+	total := len(ctx.cursor.AsStr())
+	if total == 0 {
+		return
+	}
+	ctx.heartbeat.Tick(mark, total)
+	ctx.heartbeatTime = time.Now()
+}
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 	return MemoKey{Mark: ctx.Mark(), Name: name, CanMemo: canMemo}
