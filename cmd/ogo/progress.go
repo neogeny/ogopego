@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/neogeny/ogopego/util/heartbeat"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
@@ -29,7 +31,7 @@ type LoadProgress struct {
 
 func NewLoadProgress(p *mpb.Progress, msg string) *LoadProgress {
 	bar := p.New(0,
-		mpb.SpinnerStyle("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏").Build(),
+		mpb.SpinnerStyle("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"),
 		mpb.AppendDecorators(decor.Name(msg)),
 		mpb.BarRemoveOnComplete(),
 	)
@@ -52,9 +54,9 @@ type FileProgress struct {
 
 func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 	bar := p.New(0,
-		mpb.BarStyle().Build(),
+		mpb.BarStyle(),
 		mpb.PrependDecorators(
-			decor.Name(name, decor.WC{W: 40, C: decor.DidentRight}),
+			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
 		),
 		mpb.AppendDecorators(
 			decor.Percentage(),
@@ -88,10 +90,10 @@ type ProgressUI struct {
 }
 
 func NewProgressUI(total int) *ProgressUI {
-	p := mpb.New(mpb.WithOutput(nil))
+	p := mpb.New(mpb.WithOutput(os.Stderr))
 
 	files := p.New(int64(total),
-		mpb.BarStyle().Build(),
+		mpb.BarStyle(),
 		mpb.PrependDecorators(
 			decor.CountersNoUnit("%d/%d files"),
 		),

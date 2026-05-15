@@ -71,6 +71,7 @@ func main() {
 				fmt.Fprintln(os.Stderr, "\nerror:", err)
 				os.Exit(1)
 			}
+			var errcount int
 			for _, path := range CLI.Run.Inputs {
 				name := filepath.Base(path)
 				fp := prog.AddFile(name)
@@ -78,6 +79,7 @@ func main() {
 				data, err := os.ReadFile(path)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
+					errcount++
 					prog.IncFiles()
 					continue
 				}
@@ -88,6 +90,7 @@ func main() {
 				result, err := api.ParseInputToJSONString(gram, string(data), &fileCfg)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "\nerror parsing %s: %v\n", path, err)
+					errcount++
 					fp.Fail()
 				} else {
 					fp.Success()
@@ -100,6 +103,12 @@ func main() {
 				prog.IncFiles()
 			}
 			prog.Finish()
+			passed := len(CLI.Run.Inputs) - errcount
+			fmt.Fprintf(os.Stderr, "%s %s %s\n",
+				color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(CLI.Run.Inputs)),
+				color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
+				color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
+			)
 
 		case "boot":
 			gram, err := api.BootGrammar()
