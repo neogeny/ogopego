@@ -1,6 +1,14 @@
 // Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+// Package api provides the public API for compiling grammars and parsing input.
+//
+// Most users will call Compile to create a Grammar from an EBNF string, then
+// ParseInput to parse text with it. The cfg parameter controls tracing,
+// colorization, whitespace handling, keywords, and other options.
+//
+// The JSON variant functions produce JSON-compatible output (map[string]any,
+// []any, string, float64, bool, nil) suitable for json.Marshal.
 package api
 
 import (
@@ -17,6 +25,9 @@ import (
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
+// Cfg is an alias for config.Cfg. It controls parsing behavior including
+// tracing, colorization, whitespace handling, keywords, and more.
+// Pass nil to use defaults.
 type Cfg = config.Cfg
 
 var (
@@ -35,10 +46,14 @@ func bootGrammar() (*peg.Grammar, error) {
 	return bootGram, bootErr
 }
 
+// BootGrammar returns the internal boot grammar that is used to parse EBNF
+// grammar strings. The result is cached after the first call.
 func BootGrammar() (*peg.Grammar, error) {
 	return bootGrammar()
 }
 
+// ParseGrammar parses a grammar string using the boot grammar and returns
+// the raw parse tree. Use Compile instead to get a usable Grammar object.
 func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	grammar = strings.TrimRight(grammar, " \t\r\n")
 	boot, err := bootGrammar()
@@ -54,6 +69,8 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	return boot.Parse(context.NewCtx(c, cfg), cfg)
 }
 
+// ParseGrammarToJSON parses a grammar string and returns the raw parse tree
+// as a JSON-compatible value.
 func ParseGrammarToJSON(grammar string, cfg *Cfg) (any, error) {
 	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
@@ -62,6 +79,8 @@ func ParseGrammarToJSON(grammar string, cfg *Cfg) (any, error) {
 	return json.AsJSON(tree), nil
 }
 
+// ParseGrammarToJSONString is like ParseGrammarToJSON but returns a JSON
+// string.
 func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
 	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
@@ -70,6 +89,8 @@ func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
 	return json.AsJSONs(tree), nil
 }
 
+// Compile parses a grammar string and returns a compiled Grammar ready for
+// parsing input. Results are cached by grammar string.
 func Compile(grammar string, cfg *Cfg) (*peg.Grammar, error) {
 	compileMu.RLock()
 	if g, ok := compileCache[grammar]; ok {
@@ -93,6 +114,8 @@ func Compile(grammar string, cfg *Cfg) (*peg.Grammar, error) {
 	return g, nil
 }
 
+// CompileToJSON parses a grammar string and returns the compiled Grammar as a
+// JSON-compatible value.
 func CompileToJSON(grammar string, cfg *Cfg) (any, error) {
 	g, err := Compile(grammar, cfg)
 	if err != nil {
@@ -101,6 +124,7 @@ func CompileToJSON(grammar string, cfg *Cfg) (any, error) {
 	return json.AsJSON(g), nil
 }
 
+// CompileToJSONString is like CompileToJSON but returns a JSON string.
 func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 	g, err := Compile(grammar, cfg)
 	if err != nil {
@@ -109,11 +133,15 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 	return json.AsJSONs(g), nil
 }
 
+// ParseInput parses the given text using a compiled Grammar and returns the
+// resulting AST as a Tree value.
 func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
 	ctx := context.NewCtx(input.NewStrCursor(text), cfg)
 	return parser.Parse(ctx, cfg)
 }
 
+// ParseInputToJSON parses input text and returns the resulting AST as a
+// JSON-compatible value.
 func ParseInputToJSON(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
 	tree, err := ParseInput(parser, text, cfg)
 	if err != nil {
@@ -122,6 +150,7 @@ func ParseInputToJSON(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
 	return json.AsJSON(tree), nil
 }
 
+// ParseInputToJSONString is like ParseInputToJSON but returns a JSON string.
 func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string, error) {
 	tree, err := ParseInput(parser, text, cfg)
 	if err != nil {
@@ -129,6 +158,8 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 	}
 	return json.AsJSONs(tree), nil
 }
+// LoadGrammarFromJSON deserializes a Grammar from JSON output produced by
+// CompileToJSON or peg.SerializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 	return peg.ParseGrammar(data)
 }

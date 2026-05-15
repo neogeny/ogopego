@@ -15,36 +15,39 @@ type Configurable interface {
 	Configure(cfg Cfg)
 }
 
+// Cfg configures grammar compilation and input parsing. Use DefaultCfg() or
+// pass nil to API functions for defaults. Individual fields override
+// grammar-level @@directives.
 type Cfg struct {
-	Name   string
-	Source string
-	Start  string
+	Name   string // grammar name (overrides @@grammar)
+	Source string // source description for error messages
+	Start  string // start rule name (default: "start")
 
-	Semantics any
+	Semantics any // reserved for future use
 
-	NoMemo            bool
-	NoPruneMemosOnCut bool
-	PerLineMemos      float64
+	NoMemo            bool    // disable memoization
+	NoPruneMemosOnCut bool    // disable pruning memos on cut (~)
+	PerLineMemos      float64 // memo entries per input line
 
-	Trace    bool
-	Colorize bool
+	Trace    bool // enable parse trace output to stderr
+	Colorize bool // colorize trace output
 
-	Grammar         string
-	NoLeftRecursion bool
+	Grammar         string // grammar text (overrides @@grammar body)
+	NoLeftRecursion bool   // disable left-recursion support
 
-	IgnoreCase bool
-	NameChars  string
-	NameGuard  bool
+	IgnoreCase bool   // case-insensitive matching
+	NameChars  string // additional name characters (implies NameGuard)
+	NameGuard  bool   // enforce word boundaries on names
 
-	Whitespace  *string
-	Comments    string
-	EolComments string
+	Whitespace  *string // whitespace pattern (nil = default, &"" = none)
+	Comments    string  // comment pattern
+	EolComments string  // end-of-line comment pattern
 
-	Keywords []string
+	Keywords []string // reserved words
 
-	ParseInfo bool
+	ParseInfo bool // attach source position info to AST nodes
 
-	Heartbeat heartbeat.Heartbeat
+	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
 }
 
 func Either[T comparable](userVal, defaultVal T) T {
@@ -62,6 +65,8 @@ func eitherSlice[T any](userVal, defaultVal []T) []T {
 	return defaultVal
 }
 
+// DefaultCfg returns the default configuration. Pass nil to API functions
+// to use these defaults.
 func DefaultCfg() Cfg {
 	ws := `(?m)\s+`
 	return Cfg{
@@ -83,6 +88,8 @@ func (cfg *Cfg) New() Cfg {
 	return DefaultCfg().Override(cfg)
 }
 
+// Override merges an optional cfg over the receiver. Fields set on other
+// override the receiver's values. Returns the receiver if other is nil.
 func (cfg Cfg) Override(other *Cfg) Cfg {
 	if other == nil {
 		return cfg
