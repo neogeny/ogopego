@@ -19,7 +19,7 @@ func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 	for _, el := range s.Sequence {
 		if _, ok := el.(*Cut); ok {
 			cutSeen = true
-			ctx.Tracer().TraceCut(ctx)
+			ctx.Cut()
 			continue
 		}
 		result, err := el.Parse(ctx)

@@ -158,6 +158,7 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 	}
 	return json.AsJSONs(tree), nil
 }
+
 // LoadGrammarFromJSON deserializes a Grammar from JSON output produced by
 // CompileToJSON or peg.SerializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {

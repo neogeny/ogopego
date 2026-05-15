@@ -109,6 +109,18 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	ctx.heartbeatTime = time.Now()
 }
 
+func (ctx *CoreCtx) Cut() {
+	ctx.Tracer().TraceCut(ctx)
+	if !ctx.cfg.NoPruneMemosOnCut {
+		cutpoint := ctx.Mark()
+		for k := range ctx.memoCache {
+			if k.Mark < cutpoint {
+				delete(ctx.memoCache, k)
+			}
+		}
+	}
+}
+
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 	return MemoKey{Mark: ctx.Mark(), Name: name, CanMemo: canMemo}
 }

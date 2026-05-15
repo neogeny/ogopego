@@ -36,6 +36,7 @@ type Ctx interface {
 	Intern(s string) string
 	ParseEOF() bool
 	HeartbeatTick()
+	Cut()
 	Key(name string, canMemo bool) MemoKey
 	Memo(key MemoKey) (Memo, bool)
 	Memoize(key MemoKey, tree trees.Tree, mark int)
