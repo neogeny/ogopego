@@ -58,8 +58,12 @@ func (s *StrCursor) Configure(cfg Cfg) {
 	}
 
 	if cfg.Whitespace != nil {
-		if pat, err := pyre.Compile(*cfg.Whitespace); err == nil {
-			s.heavy.Patterns.Wsp = pat
+		if *cfg.Whitespace != "" {
+			if pat, err := pyre.Compile(*cfg.Whitespace); err == nil {
+				s.heavy.Patterns.Wsp = pat
+			}
+		} else {
+			s.heavy.Patterns.Wsp = nil
 		}
 	}
 	if cfg.Comments != "" {

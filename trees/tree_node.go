@@ -13,32 +13,16 @@ func (r *Node) fold(gather *treeMerge) Tree { return r }
 func (r *Node) PubMap() *asjson.OrderedMap  { return r.PubMapOf(r) }
 func (r *Node) AsJSON() any {
 	child := r.Tree.AsJSON()
-	if om, ok := child.(*asjson.OrderedMap); ok {
-		if _, has := om.Get("__class__"); !has {
-			out := newOM()
-			out.Set("__class__", r.TypeName)
-			for _, k := range om.Keys() {
-				v, _ := om.Get(k)
-				out.Set(k, v)
-			}
-			out.Set("__class__", r.TypeName)
-			return out
-		}
-	}
 	if m, ok := child.(map[string]any); ok {
 		if _, has := m["__class__"]; !has {
-			out := newOM()
-			out.Set("__class__", r.TypeName)
+			out := make(map[string]any, len(m)+1)
+			out["__class__"] = r.TypeName
 			for k, v := range m {
-				out.Set(k, v)
+				out[k] = v
 			}
-			out.Set("__class__", r.TypeName)
 			return out
 		}
 	}
-	out := newOM()
-	out.Set("__class__", r.TypeName)
-	out.Set("ast", child)
-	return out
+	return map[string]any{"__class__": r.TypeName, "ast": child}
 }
 func (r *Node) AsJSONStr() string { return treeJSONStr(r.AsJSON()) }

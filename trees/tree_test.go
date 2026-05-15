@@ -253,14 +253,14 @@ func TestNumberAsJSON(t *testing.T) {
 
 func TestNodeAsJSONTree(t *testing.T) {
 	result := asjson.AsJSON(&Node{TypeName: "expr", Tree: text("42")})
-	om, ok := result.(*asjson.OrderedMap)
+	m, ok := result.(map[string]any)
 	if !ok {
-		t.Fatalf("expected *OrderedMap, got %T", result)
+		t.Fatalf("expected map[string]any, got %T", result)
 	}
-	if cls, _ := om.Get("__class__"); cls != "expr" {
+	if cls := m["__class__"]; cls != "expr" {
 		t.Errorf("expected __class__=expr, got %v", cls)
 	}
-	if ast, _ := om.Get("ast"); ast != "42" {
+	if ast := m["ast"]; ast != "42" {
 		t.Errorf("expected ast='42', got %v", ast)
 	}
 }

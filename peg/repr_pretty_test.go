@@ -3,6 +3,9 @@ package peg
 import (
 	"strings"
 	"testing"
+
+	"github.com/iancoleman/orderedmap"
+	asjson "github.com/neogeny/ogopego/json"
 )
 
 func TestPrettyToken(t *testing.T) {
@@ -308,7 +311,7 @@ func TestPrettyRule(t *testing.T) {
 		},
 	}
 	got := r.PrettyPrint()
-	if !strings.Contains(got, "greeting:") {
+	if !strings.Contains(got, "greeting :=") {
 		t.Errorf("expected rule name in output, got %q", got)
 	}
 	if !strings.Contains(got, `"hello"`) || !strings.Contains(got, `"world"`) {
@@ -350,7 +353,7 @@ func TestPrettyGrammar(t *testing.T) {
 	if !strings.Contains(got, "@@grammar :: Test") {
 		t.Errorf("expected grammar directive, got %q", got)
 	}
-	if !strings.Contains(got, "start:") {
+	if !strings.Contains(got, "start :=") {
 		t.Errorf("expected rule, got %q", got)
 	}
 }
@@ -377,10 +380,12 @@ func TestPrettyGrammarWithKeywords(t *testing.T) {
 func TestPrettyGrammarWithDirectives(t *testing.T) {
 	g := &Grammar{
 		Name: "Test",
-		Directives: map[string]any{
-			"whitespace": `\s+`,
-			"comments":   `#.*`,
-		},
+		Directives: func() *asjson.OrderedMap {
+			om := orderedmap.New()
+			om.Set("whitespace", `\s+`)
+			om.Set("comments", `#.*`)
+			return om
+		}(),
 		Rules: []*Rule{
 			{
 				NamedBox: NamedBox{

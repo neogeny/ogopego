@@ -10,7 +10,7 @@ import (
 type Grammar struct {
 	ModelBase
 	Name       string
-	Directives map[string]any
+	Directives *asjson.OrderedMap
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
@@ -19,7 +19,12 @@ type Grammar struct {
 func (g *Grammar) CfgFromDirectives() *Cfg {
 	c := Cfg{}
 
-	for name, val := range g.Directives {
+	if g.Directives == nil {
+		return &c
+	}
+
+	for _, name := range g.Directives.Keys() {
+		val, _ := g.Directives.Get(name)
 		s, ok := val.(string)
 		if !ok {
 			continue
@@ -36,7 +41,8 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 			c.Grammar = s
 		case "whitespace":
 			if s == "" || s == "None" || s == "False" {
-				c.Whitespace = nil
+				s2 := ""
+				c.Whitespace = &s2
 			} else {
 				c.Whitespace = &s
 			}

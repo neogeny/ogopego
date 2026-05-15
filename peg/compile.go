@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -127,9 +128,6 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 	if n, ok := mn.Entries["name"]; ok {
 		name = textValue(n)
 	}
-	if name == "" {
-		name = "__COMPILED__"
-	}
 
 	var rules []*Rule
 
@@ -148,7 +146,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 		}
 	}
 
-	directives := make(map[string]any)
+	directives := orderedmap.New()
 	if dirsTree, ok := mn.Entries["directives"]; ok {
 		dirList := listValue(dirsTree)
 		for _, d := range dirList {
@@ -159,9 +157,16 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 			n := textValue(dm.Entries["name"])
 			v := textValue(dm.Entries["value"])
 			if n != "" {
-				directives[n] = v
+				directives.Set(n, v)
+				if n == "grammar" && name == "" {
+					name = v
+				}
 			}
 		}
+	}
+
+	if name == "" {
+		name = "__COMPILED__"
 	}
 
 	var keywords []string

@@ -9,9 +9,12 @@ type EOF struct {
 }
 
 func (e *EOF) Parse(ctx Ctx) (Tree, error) {
+	mark := ctx.Mark()
+	ctx.NextToken()
 	if !ctx.Eof() {
+		ctx.Reset(mark)
 		return nil, ctx.Failure(
-			ctx.Mark(),
+			mark,
 			fmt.Errorf("expected EOF"),
 		)
 	}

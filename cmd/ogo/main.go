@@ -55,9 +55,28 @@ func main() {
 	if cmd != nil {
 		switch cmd.Name {
 		case "run":
-			err := fmt.Errorf("run command not fully wired yet")
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(1)
+			gram, err := loadGrammar(CLI.Run.Grammar)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(1)
+			}
+			for _, path := range CLI.Run.Inputs {
+				data, err := os.ReadFile(path)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error reading %s: %v\n", path, err)
+					continue
+				}
+				result, err := api.ParseInputToJSONString(gram, string(data), nil)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error parsing %s: %v\n", path, err)
+					continue
+				}
+				if CLI.Run.Json {
+					output += result + "\n"
+				} else {
+					output += result + "\n"
+				}
+			}
 
 		case "boot":
 			gram, err := api.BootGrammar()
@@ -115,7 +134,14 @@ func loadGrammar(path string) (*peg.Grammar, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
 	case ".json":
-		return api.LoadGrammarFromJSON(data)
+		g, err := peg.ParseGrammar(data)
+		if err != nil {
+			return nil, err
+		}
+		if err := g.Initialize(); err != nil {
+			return nil, err
+		}
+		return g, nil
 	default:
 		return api.Compile(string(data), nil)
 	}

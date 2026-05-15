@@ -53,6 +53,7 @@ func eitherSlice[T any](userVal, defaultVal []T) []T {
 }
 
 func DefaultCfg() Cfg {
+	ws := `(?m)\s+`
 	return Cfg{
 		NoMemo:            false,
 		NoPruneMemosOnCut: false,
@@ -61,7 +62,7 @@ func DefaultCfg() Cfg {
 		NoLeftRecursion:   false,
 		IgnoreCase:        false,
 		NameGuard:         false,
-		Whitespace:        nil,
+		Whitespace:        &ws,
 		Keywords:          nil,
 		ParseInfo:         false,
 	}

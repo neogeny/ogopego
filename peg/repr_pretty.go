@@ -2,8 +2,9 @@ package peg
 
 import (
 	"fmt"
-	"sort"
 	"strings"
+
+	"github.com/iancoleman/orderedmap"
 )
 
 type prettyWriter struct {
@@ -212,9 +213,12 @@ func (m *PositiveGather) PrettyPrint() string {
 // Sequence
 
 func (m *Sequence) PrettyPrint() string {
-	items := make([]string, len(m.Sequence))
-	for i, exp := range m.Sequence {
-		items[i] = exp.PrettyPrint()
+	items := make([]string, 0, len(m.Sequence))
+	for _, exp := range m.Sequence {
+		if _, ok := exp.(*EOF); ok {
+			continue
+		}
+		items = append(items, exp.PrettyPrint())
 	}
 	single := strings.Join(items, " ")
 	hasMulti := false
@@ -281,7 +285,7 @@ func (m *Rule) PrettyPrint() string {
 	if strings.ContainsRune(exp, '\n') {
 		sep = ""
 	}
-	w.WriteLine(fmt.Sprintf("%s%s:%s%s", m.Name, params, sep, exp))
+	w.WriteLine(fmt.Sprintf("%s%s :=%s%s ;", m.Name, params, sep, exp))
 	return w.String()
 }
 
@@ -305,60 +309,61 @@ func (m *Grammar) PrettyPrint() string {
 	w := newPrettyWriter()
 	w.WriteLine(fmt.Sprintf("@@grammar :: %s", m.Name))
 
-	if dir, ok := m.Directives["whitespace"]; ok {
+	if m.Directives == nil {
+		m.Directives = orderedmap.New()
+	}
+
+	knownDir := func(k string) (any, bool) { return m.Directives.Get(k) }
+
+	if dir, ok := knownDir("whitespace"); ok {
 		w.WriteLine(fmt.Sprintf("@@whitespace :: /%s/", directiveValue(dir)))
 	}
-	if dir, ok := m.Directives["comments"]; ok {
+	if dir, ok := knownDir("comments"); ok {
 		w.WriteLine(fmt.Sprintf("@@comments :: /%s/", directiveValue(dir)))
 	}
-	if dir, ok := m.Directives["eol_comments"]; ok {
+	if dir, ok := knownDir("eol_comments"); ok {
 		w.WriteLine(fmt.Sprintf("@@eol_comments :: /%s/", directiveValue(dir)))
 	}
-	if dir, ok := m.Directives["namechars"]; ok {
+	if dir, ok := knownDir("namechars"); ok {
 		w.WriteLine(fmt.Sprintf("@@namechars :: \"%s\"", directiveValue(dir)))
 	}
-	if dir, ok := m.Directives["ignorecase"]; ok {
+	if dir, ok := knownDir("ignorecase"); ok {
 		if v, ok := dir.(bool); ok && v {
 			w.WriteLine("@@ignorecase :: True")
 		}
 	}
-	if dir, ok := m.Directives["nameguard"]; ok {
+	if dir, ok := knownDir("nameguard"); ok {
 		if v, ok := dir.(bool); ok && v {
 			w.WriteLine("@@nameguard :: True")
 		}
 	}
-	if dir, ok := m.Directives["left_recursion"]; ok {
+	if dir, ok := knownDir("left_recursion"); ok {
 		if v, ok := dir.(bool); ok && !v {
 			w.WriteLine("@@left_recursion :: False")
 		}
 	}
-	if dir, ok := m.Directives["parseinfo"]; ok {
+	if dir, ok := knownDir("parseinfo"); ok {
 		if v, ok := dir.(bool); ok && !v {
 			w.WriteLine("@@parseinfo :: False")
 		}
 	}
-	if dir, ok := m.Directives["memoization"]; ok {
+	if dir, ok := knownDir("memoization"); ok {
 		if v, ok := dir.(bool); ok && !v {
 			w.WriteLine("@@memoization :: False")
 		}
 	}
 
-	unknown := make([]string, 0, len(m.Directives))
-	for k := range m.Directives {
-		switch k {
-		case "grammar", "whitespace", "comments", "eol_comments",
-			"namechars", "ignorecase", "nameguard",
-			"left_recursion", "parseinfo", "memoization":
-			continue
-		default:
-			unknown = append(unknown, k)
-		}
+	known := map[string]bool{
+		"grammar": true, "whitespace": true, "comments": true, "eol_comments": true,
+		"namechars": true, "ignorecase": true, "nameguard": true,
+		"left_recursion": true, "parseinfo": true, "memoization": true,
 	}
-	if len(unknown) > 0 {
-		sort.Strings(unknown)
-		for _, k := range unknown {
-			w.WriteLine(fmt.Sprintf("@@%s :: %s", k, directiveValue(m.Directives[k])))
+	for _, k := range m.Directives.Keys() {
+		if known[k] {
+			continue
 		}
+		v, _ := m.Directives.Get(k)
+		w.WriteLine(fmt.Sprintf("@@%s :: %s", k, directiveValue(v)))
 	}
 
 	if len(m.Keywords) > 0 {
