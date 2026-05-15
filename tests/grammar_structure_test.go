@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/neogeny/ogopego/util/testutil"
+	"github.com/neogeny/ogopego/testutil"
 )
 
 func TestGrammarHasRules(t *testing.T) {
