@@ -1,3 +1,5 @@
+//go:build pyre_cgo
+
 package pyre
 
 import (

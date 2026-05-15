@@ -1,6 +1,10 @@
 package config
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/neogeny/ogopego/util/heartbeat"
+)
 
 const DefaultPerlinememos = 8
 
@@ -36,6 +40,8 @@ type Cfg struct {
 	Keywords []string
 
 	ParseInfo bool
+
+	Heartbeat heartbeat.Heartbeat
 }
 
 func Either[T comparable](userVal, defaultVal T) T {

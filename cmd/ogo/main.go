@@ -58,28 +58,45 @@ func main() {
 	if cmd != nil {
 		switch cmd.Name {
 		case "run":
-			gram, err := loadGrammar(CLI.Run.Grammar)
+			prog := NewProgressUI(len(CLI.Run.Inputs))
+			loader := prog.Loading("loading grammar")
+			loadCfg := *cliCfg
+			loadCfg.Heartbeat = loader.Heartbeat()
+			gram, err := loadGrammar(CLI.Run.Grammar, &loadCfg)
+			loader.Finish()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "error:", err)
+				fmt.Fprintln(os.Stderr, "\nerror:", err)
 				os.Exit(1)
 			}
 			for _, path := range CLI.Run.Inputs {
+				name := filepath.Base(path)
+				fp := prog.AddFile(name)
+
 				data, err := os.ReadFile(path)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error reading %s: %v\n", path, err)
+					fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
+					prog.IncFiles()
 					continue
 				}
-				result, err := api.ParseInputToJSONString(gram, string(data), cliCfg)
+				fp.SetLength(len(data))
+
+				fileCfg := *cliCfg
+				fileCfg.Heartbeat = fp.Heartbeat()
+				result, err := api.ParseInputToJSONString(gram, string(data), &fileCfg)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error parsing %s: %v\n", path, err)
-					continue
-				}
-				if CLI.Run.Json {
-					output += result + "\n"
+					fmt.Fprintf(os.Stderr, "\nerror parsing %s: %v\n", path, err)
+					fp.Fail()
 				} else {
-					output += result + "\n"
+					fp.Success()
+					if CLI.Run.Json {
+						output += result + "\n"
+					} else {
+						output += result + "\n"
+					}
 				}
+				prog.IncFiles()
 			}
+			prog.Finish()
 
 		case "boot":
 			gram, err := api.BootGrammar()
@@ -99,7 +116,7 @@ func main() {
 			}
 
 		case "grammar":
-			gram, err := loadGrammar(CLI.Grammar.Grammar)
+			gram, err := loadGrammar(CLI.Grammar.Grammar, cliCfg)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "error:", err)
 				os.Exit(1)
@@ -129,7 +146,7 @@ func main() {
 	}
 }
 
-func loadGrammar(path string) (*peg.Grammar, error) {
+func loadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading %s: %w", path, err)
@@ -146,6 +163,6 @@ func loadGrammar(path string) (*peg.Grammar, error) {
 		}
 		return g, nil
 	default:
-		return api.Compile(string(data), cliCfg)
+		return api.Compile(string(data), cfg)
 	}
 }
