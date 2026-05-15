@@ -879,7 +879,7 @@ func (m *Matcher) Groups() int {
 // can be present and match the empty string.
 func (m *Matcher) Present(group int) bool {
 	m.mData.ensureNotFreed()
-	return int(m.mData.ovector[2*group]) >= 0 && int(m.mData.ovector[2*group]) != UNSET
+	return m.mData.ovector[2*group] >= 0 && m.mData.ovector[2*group] != UNSET
 }
 
 // Group returns the numbered capture group of the last match (performed by
