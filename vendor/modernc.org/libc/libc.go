@@ -1218,9 +1218,8 @@ func Xreadv(t *TLS, fd int32, iov uintptr, iovcnt int32) types.Ssize_t {
 }
 
 // int openpty(int *amaster, int *aslave, char *name,
-//
-//	const struct termios *termp,
-//	const struct winsize *winp);
+//                    const struct termios *termp,
+//                    const struct winsize *winp);
 func Xopenpty(t *TLS, amaster, aslave, name, termp, winp uintptr) int32 {
 	panic(todo(""))
 }
@@ -1231,9 +1230,8 @@ func Xsetsid(t *TLS) types.Pid_t {
 }
 
 // int pselect(int nfds, fd_set *readfds, fd_set *writefds,
-//
-//	fd_set *exceptfds, const struct timespec *timeout,
-//	const sigset_t *sigmask);
+//                    fd_set *exceptfds, const struct timespec *timeout,
+//                    const sigset_t *sigmask);
 func Xpselect(t *TLS, nfds int32, readfds, writefds, exceptfds, timeout, sigmask uintptr) int32 {
 	panic(todo(""))
 }

@@ -499,12 +499,10 @@ func Xaccept(t *TLS, sockfd uint64, addr uintptr, addrlen uintptr) uint64 {
 }
 
 // LRESULT LRESULT DefWindowProcW(
-//
-//	HWND   hWnd,
-//	UINT   Msg,
-//	WPARAM wParam,
-//	LPARAM lParam
-//
+//   HWND   hWnd,
+//   UINT   Msg,
+//   WPARAM wParam,
+//   LPARAM lParam
 // );
 func XDefWindowProcW(t *TLS, _ ...interface{}) int64 {
 	panic(todo(""))
