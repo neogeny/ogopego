@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/test"
+	"github.com/neogeny/ogopego/util"
 )
 
 func TestEscapeSequences(t *testing.T) {
@@ -16,7 +17,6 @@ func TestEscapeSequences(t *testing.T) {
 }
 
 func TestStart(t *testing.T) {
-	t.Skip("constant evaluation (backtick syntax) not yet implemented")
 	const grammar = "@@grammar :: Test\n" +
 		"true = 'test' @:`True` $ ;\n"
 	g := ogopego.Compile(t, grammar, nil)
@@ -24,20 +24,19 @@ func TestStart(t *testing.T) {
 }
 
 func TestSkipWhitespace(t *testing.T) {
-	g := ogopego.Compile(t, `
+	g := ogopego.Compile(t, util.Dedent(`
 		@@whitespace :: /\s+/
 		@@grammar :: Test
 		statement = 'FOO' subject $
 		subject = name:id
 		id = /[a-z]+/
-	`, nil)
+	`), nil)
 	ogopego.ParseJSON(t, g, "FOO something")
 	ogopego.ParseFail(t, g, "something")
 	ogopego.ParseFail(t, g, "FOO")
 }
 
 func TestNodeParseInfo(t *testing.T) {
-	t.Skip("parseinfo directive not yet implemented")
 	g := ogopego.Compile(t, `
 		@@grammar :: Test
 		@@parseinfo :: True

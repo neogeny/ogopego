@@ -14,10 +14,7 @@ type Cfg = config.Cfg
 
 func Compile(t testing.TB, grammar string, cfg *config.Cfg) *peg.Grammar {
 	t.Helper()
-	g, err := api.Compile(grammar, &Cfg{
-		Trace:    true,
-		Colorize: true,
-	})
+	g, err := api.Compile(grammar, cfg)
 	if err != nil {
 		t.Fatalf("compile: %v", err)
 	}

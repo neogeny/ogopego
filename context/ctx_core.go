@@ -54,7 +54,11 @@ func (ctx *CoreCtx) SetTracer(tracer Tracer) {
 
 func (ctx *CoreCtx) Cursor() Cursor { return ctx.cursor }
 
-func (ctx *CoreCtx) CallStack() CallStack { return ctx.callStack }
+func (ctx *CoreCtx) CallStack() CallStack {
+	cs := make([]string, len(ctx.callStack))
+	copy(cs, ctx.callStack)
+	return cs
+}
 
 func (ctx *CoreCtx) Tracer() Tracer { return ctx.tracer }
 
@@ -239,7 +243,12 @@ func (ctx *CoreCtx) Failure(start int, source error) *Nope {
 		location: loc,
 		Inner:    source,
 		CutSeen:  false,
-		Memento:  NewMemento(start, msg, ctx.cursor, ctx.callStack),
+		Memento: NewMemento(
+			start,
+			msg,
+			ctx.cursor,
+			ctx.CallStack(),
+		),
 	}
 	ctx.SetFurthestFailure(dis)
 	return nope

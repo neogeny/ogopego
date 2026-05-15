@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/neogeny/ogopego/input"
+	"github.com/neogeny/ogopego/util"
 )
 
 const (
@@ -14,10 +15,6 @@ const (
 	ansiReset = "\033[0m"
 	ansiGrey  = "\033[90m"
 )
-
-func expandTabs(s string) string {
-	return strings.ReplaceAll(s, "\t", "    ")
-}
 
 type Memento struct {
 	error
@@ -84,7 +81,7 @@ func (m *Memento) Error() string {
 		}
 		linestr = strings.TrimRight(linestr, "\n\r\t\f")
 		if i >= line-4 {
-			disp := expandTabs(linestr)
+			disp := util.ExpandTabs(linestr)
 			b.WriteString(
 				fmt.Sprintf(
 					"%s%2d%s %s %s\n",

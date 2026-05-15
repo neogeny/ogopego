@@ -48,7 +48,6 @@ func TestDot(t *testing.T) {
 }
 
 func TestConstant(t *testing.T) {
-	t.Skip("constant not yet implemented")
 	const grammar = "@@grammar :: Test\nstart := `constant` ;\n"
 	g := ogopego.Compile(t, grammar, nil)
 	ogopego.AssertJSONStr(t, g, "", `"constant"`)
