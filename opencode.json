@@ -1,29 +1,41 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "project": {
-    "name": "ogopego",
-    "description": "Go port of TatSu PEG parser generator"
-  },
-  "permission": {
-    "read": "allow",
-    "edit": "allow",
-    "grep": "allow",
-    "glob": "allow",
-    "lsp": "allow",
-    "skill": "allow",
-    "todowrite": "allow",
-    "webfetch": "allow",
-    "websearch": "allow",
-    "question": "allow",
-    "bash": {
-      "git *": "allow",
-      "go test *": "allow",
-      "go build *": "allow",
-      "rm -rf *": "deny",
-      "*": "ask"
-    },
-    "external_directory": {
-      "~/projects/**": "allow"
+  "provider": {
+    "lmstudio": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LM Studio (local)",
+      "options": {
+        "baseURL": "http://localhost:1234/v1"
+      },
+      "models": {
+        "qwen/qwen3.5-9b": {
+          "name": "DeepSeek V4 (Local)"
+        }
+      }
     }
+  },
+  "model": "qwen/qwen3.5-9b",
+  "permission": {
+    "bash": {
+      "git checkout *": "deny",
+      "git reset --hard *": "deny",
+      "git clean *": "deny",
+      "git push * --force": "deny",
+      "git *": "allow",
+      "*": "allow"
+    }
+  },
+  "tools": {
+    "read": true,
+    "edit": true,
+    "write": true,
+    "grep": true,
+    "glob": true,
+    "lsp": true,
+    "skill": true,
+    "todowrite": true,
+    "websearch": true,
+    "webfetch": true,
+    "question": true
   }
 }

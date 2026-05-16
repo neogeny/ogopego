@@ -38,3 +38,4 @@ x/
 corpus/
 tmp/
 grammar/
+.aider*
