@@ -31,16 +31,16 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 		mark := ctx.Mark()
 		ctx.CutStackPush()
 		result, err := opt.Parse(ctx)
-		cutSeen := ctx.CutStackPop()
+		ctx.CutStackPop()
 
 		if err == nil {
 			return result, nil
 		}
 
 		ctx.Reset(mark)
-		if cutSeen {
-			return nil, err
-		}
+		//if cutSeen {
+		//	return nil, err
+		//}
 		lastErr = err
 	}
 	if lastErr == nil {

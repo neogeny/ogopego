@@ -13,7 +13,9 @@ func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 	var items []trees.Tree
 
 	if positive {
+		ctx.CutStackPush()
 		first, err := exp.Parse(ctx)
+		ctx.CutStackPop()
 		if err != nil {
 			return nil, err
 		}
@@ -22,8 +24,13 @@ func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 
 	for {
 		mark := ctx.Mark()
+		ctx.CutStackPush()
 		result, err := exp.Parse(ctx)
+		cutSeen := ctx.CutStackPop()
 		if err != nil {
+			if cutSeen {
+				return nil, err
+			}
 			break
 		}
 		if ctx.Mark() == mark {
@@ -47,7 +54,9 @@ func repeatWithSep(
 ) (trees.Tree, error) {
 	var items []trees.Tree
 
+	ctx.CutStackPush()
 	first, err := exp.Parse(ctx)
+	ctx.CutStackPop()
 	if err != nil {
 		if positive {
 			return nil, err
@@ -58,15 +67,25 @@ func repeatWithSep(
 
 	for {
 		mark := ctx.Mark()
+
+		ctx.CutStackPush()
 		result, err := sep.Parse(ctx)
+		cutSeen := ctx.CutStackPop()
+
 		if err != nil {
+			if cutSeen {
+				return nil, err
+			}
 			break
 		}
 		if keepsep {
 			items = append(items, result)
 		}
 
+		ctx.CutStackPush()
 		result, err = exp.Parse(ctx)
+		ctx.CutStackPop()
+
 		if err != nil {
 			return nil, err
 		}

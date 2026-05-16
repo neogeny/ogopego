@@ -43,6 +43,7 @@ type Ctx interface {
 	Untrack(key MemoKey)
 
 	Cut()
+	SetCut()
 	IsCutSeen() bool
 	CutStackPush()
 	CutStackPop() bool

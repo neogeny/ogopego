@@ -17,6 +17,7 @@ type CoreCtx struct {
 	cfg            Cfg
 	cursor         Cursor
 	callStack      CallStack
+	cutStack       []bool
 	tracer         Tracer
 	furthest       *DisasterReport
 	patternCache   map[string]pyre.Pattern
@@ -29,11 +30,14 @@ type CoreCtx struct {
 }
 
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
+	cap := 64
 	ctx := CoreCtx{
 		cfg:       cfg.New(),
 		cursor:    cursor,
 		tracer:    NullTracer{},
 		heartbeat: heartbeat.NullHeartbeat{},
+		callStack: make(CallStack, 0, cap),
+		cutStack:  make([]bool, 1, cap),
 	}
 	ctx.cursor.Configure(ctx.cfg)
 	return &ctx
@@ -107,11 +111,6 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	}
 	ctx.heartbeat.Tick(mark, total)
 	ctx.heartbeatTime = time.Now()
-}
-
-func (ctx *CoreCtx) Cut() {
-	ctx.Tracer().TraceCut(ctx)
-	ctx.pruneCache()
 }
 
 func (ctx *CoreCtx) pruneCache() {
@@ -273,7 +272,7 @@ func (ctx *CoreCtx) Failure(start int, source error) *Nope {
 	dis := &DisasterReport{
 		location: loc,
 		Inner:    source,
-		CutSeen:  false,
+		CutSeen:  ctx.IsCutSeen(),
 		Memento: NewMemento(
 			start,
 			msg,
@@ -360,13 +359,26 @@ func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
 	}
 }
+
+func (ctx *CoreCtx) Cut() {
+	ctx.cutStack[len(ctx.cutStack)-1] = true
+	ctx.Tracer().TraceCut(ctx)
+	ctx.pruneCache()
+}
+
+func (ctx *CoreCtx) SetCut() {
+	ctx.cutStack[len(ctx.cutStack)-1] = true
+}
+
 func (ctx *CoreCtx) IsCutSeen() bool {
-	return false
+	return ctx.cutStack[len(ctx.cutStack)-1]
 }
 func (ctx *CoreCtx) CutStackPush() {
-
+	ctx.cutStack = append(ctx.cutStack, false)
 }
 
 func (ctx *CoreCtx) CutStackPop() bool {
-	return false
+	cutSeen := ctx.IsCutSeen()
+	ctx.cutStack = ctx.cutStack[:len(ctx.cutStack)-1]
+	return cutSeen
 }

@@ -13,10 +13,14 @@ type Optional struct {
 
 func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
+
+	ctx.CutStackPush()
 	result, err := o.Exp.Parse(ctx)
+	cutSeen := ctx.CutStackPop()
+
 	if err != nil {
 		ctx.Reset(mark)
-		if ctx.CutStackPop() {
+		if cutSeen {
 			return nil, err
 		}
 		return &trees.Nil{}, nil
