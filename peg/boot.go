@@ -9,7 +9,7 @@ var bootGrammar *Grammar
 
 func BootGrammar() (*Grammar, error) {
 	if bootGrammar == nil {
-		boot, err := LoadBootGrammar()
+		boot, err := loadBootGrammar()
 		if err != nil {
 			return nil, err
 		}
@@ -18,8 +18,8 @@ func BootGrammar() (*Grammar, error) {
 	return bootGrammar, nil
 }
 
-// LoadBootGrammar parses and initializes a boot grammar from JSON bytes.
-func LoadBootGrammar() (*Grammar, error) {
+// loadBootGrammar parses and initializes a boot grammar from JSON bytes.
+func loadBootGrammar() (*Grammar, error) {
 	g, err := ParseGrammar(ogopego.TatSuGrammarJSON)
 	if err != nil {
 		return nil, err
