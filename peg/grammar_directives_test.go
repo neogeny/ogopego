@@ -4,16 +4,11 @@
 package peg
 
 import (
-	"os"
 	"testing"
 )
 
 func TestBootGrammarCfgFromDirectives(t *testing.T) {
-	data, err := os.ReadFile("../grammar/tatsu.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	g, err := LoadBootGrammar(data)
+	g, err := BootGrammar()
 	if err != nil {
 		t.Fatalf("LoadBootGrammar: %v", err)
 	}
