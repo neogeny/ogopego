@@ -5,6 +5,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Dot matches any single rune (a dot in PEG) and returns it as text.
@@ -24,7 +25,7 @@ func (d *Dot) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Dot's public fields.
-func (t *Dot) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Dot) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Dot.
 func (t *Dot) AsJSON() any { return t.AsJSONOf(t) }

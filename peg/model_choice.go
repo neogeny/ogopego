@@ -5,6 +5,8 @@ package peg
 
 import (
 	"errors"
+
+	"github.com/neogeny/ogopego/util"
 )
 
 // Option represents a single alternative within a Choice expression.
@@ -55,7 +57,7 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Choice's public fields.
-func (c *Choice) PubMap() *OrderedMap { return c.PubMapOf(c) }
+func (c *Choice) PubMap() *OrderedMap { return util.PubMapOf(c) }
 
 // AsJSON returns a JSON-compatible representation of the Choice.
 func (c *Choice) AsJSON() any { return c.AsJSONOf(c) }
@@ -64,7 +66,7 @@ func (c *Choice) AsJSON() any { return c.AsJSONOf(c) }
 func (c *Choice) AsJSONStr() string { return c.AsJSONStrOf(c) }
 
 // PubMap returns an ordered map of the Option's public fields.
-func (o *Option) PubMap() *OrderedMap { return o.PubMapOf(o) }
+func (o *Option) PubMap() *OrderedMap { return util.PubMapOf(o) }
 
 // AsJSON returns a JSON-compatible representation of the Option.
 func (o *Option) AsJSON() any { return o.AsJSONOf(o) }

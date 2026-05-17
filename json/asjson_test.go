@@ -6,6 +6,8 @@ package json
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/neogeny/ogopego/util"
 )
 
 func TestAsJSONPrimitives(t *testing.T) {
@@ -184,7 +186,7 @@ type mixinStruct struct {
 }
 
 func (s *mixinStruct) PubMap() *OrderedMap {
-	return s.AsJSONBase.PubMapOf(s)
+	return util.PubMapOf(s)
 }
 
 func (s *mixinStruct) AsJSON() any {

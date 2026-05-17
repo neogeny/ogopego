@@ -5,6 +5,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Named wraps an expression result with a name, producing a Named tree node.
@@ -36,7 +37,7 @@ func (n *NamedList) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Named's public fields.
-func (t *Named) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Named) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Named.
 func (t *Named) AsJSON() any { return t.AsJSONOf(t) }
@@ -45,7 +46,7 @@ func (t *Named) AsJSON() any { return t.AsJSONOf(t) }
 func (t *Named) AsJSONStr() string { return t.AsJSONStrOf(t) }
 
 // PubMap returns an ordered map of the NamedList's public fields.
-func (t *NamedList) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *NamedList) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the NamedList.
 func (t *NamedList) AsJSON() any { return t.AsJSONOf(t) }

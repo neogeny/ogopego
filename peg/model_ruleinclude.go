@@ -5,6 +5,8 @@ package peg
 
 import (
 	"fmt"
+
+	"github.com/neogeny/ogopego/util"
 )
 
 // RuleInclude represents a reference to another rule whose expression is
@@ -24,7 +26,7 @@ func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the RuleInclude's public fields.
-func (t *RuleInclude) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *RuleInclude) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the RuleInclude.
 func (t *RuleInclude) AsJSON() any { return t.AsJSONOf(t) }

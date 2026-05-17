@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Fail represents a parsing failure.
 type Fail struct {
 	ModelBase
@@ -14,7 +16,7 @@ func (f *Fail) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Fail's public fields.
-func (t *Fail) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Fail) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Fail.
 func (t *Fail) AsJSON() any { return t.AsJSONOf(t) }

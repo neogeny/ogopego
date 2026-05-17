@@ -5,6 +5,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Override marks an expression whose value overrides surrounding values.
@@ -37,7 +38,7 @@ func (o *OverrideList) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Override's public fields.
-func (t *Override) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Override) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Override.
 func (t *Override) AsJSON() any { return t.AsJSONOf(t) }
@@ -46,7 +47,7 @@ func (t *Override) AsJSON() any { return t.AsJSONOf(t) }
 func (t *Override) AsJSONStr() string { return t.AsJSONStrOf(t) }
 
 // PubMap returns an ordered map of the OverrideList's public fields.
-func (t *OverrideList) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *OverrideList) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the OverrideList.
 func (t *OverrideList) AsJSON() any { return t.AsJSONOf(t) }

@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/orderedmap"
+	"github.com/neogeny/ogopego/util"
 )
 
 type OrderedMap = orderedmap.OrderedMap
@@ -163,7 +164,7 @@ func (b *AsJSONBase) AsJSONStrOf(ref any) string {
 
 // AsJSONOf returns a JSON-compatible representation of the given reference's public fields.
 func (b *AsJSONBase) AsJSONOf(ref any) any {
-	pub := b.PubMapOf(ref)
+	pub := util.PubMapOf(ref)
 	if pub == nil {
 		return nil
 	}
@@ -181,7 +182,7 @@ func (b *AsJSONBase) AsJSONOf(ref any) any {
 			continue
 		}
 		val, _ := pub.Get(k)
-		out.Set(k, val)
+		out.Set(PythonizeName(k), val)
 	}
 	return out
 }
@@ -206,34 +207,6 @@ func PythonizeName(s string) string {
 		}
 	}
 	return result.String()
-}
-
-// PubMapOf returns an OrderedMap containing the public fields of the given reference.
-func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
-	if ref == nil {
-		return nil
-	}
-	v := reflect.ValueOf(ref)
-	for v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return nil
-		}
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return nil
-	}
-
-	out := orderedmap.New()
-	t := v.Type()
-	for i := range t.NumField() {
-		f := t.Field(i)
-		if !f.IsExported() || f.Anonymous {
-			continue
-		}
-		out.Set(PythonizeName(f.Name), v.Field(i).Interface())
-	}
-	return out
 }
 
 func asjson(val reflect.Value, seen map[uintptr]bool) any {

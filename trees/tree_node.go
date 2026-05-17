@@ -3,7 +3,11 @@
 
 package trees
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+
+	util "github.com/neogeny/ogopego/util"
+)
 
 type Node struct {
 	TreeBase
@@ -13,7 +17,7 @@ type Node struct {
 
 func (*Node) tree()                         {}
 func (r *Node) fold(gather *treeMerge) Tree { return r }
-func (r *Node) PubMap() *asjson.OrderedMap  { return r.PubMapOf(r) }
+func (r *Node) PubMap() *asjson.OrderedMap  { return util.PubMapOf(r) }
 func (r *Node) AsJSON() any {
 	child := r.Tree.AsJSON()
 	if m, ok := child.(map[string]any); ok {

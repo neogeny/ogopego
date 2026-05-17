@@ -9,6 +9,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
 )
 
 // ParseInfo holds parse position information.
@@ -85,7 +86,7 @@ func (n *Node) PubMap() *asjson.OrderedMap {
 	if n == nil {
 		return nil
 	}
-	pub := n.AsJSONBase.PubMapOf(n)
+	pub := util.PubMapOf(n)
 	if val, ok := pub.Get("parse_info"); ok {
 		if val == nil {
 			pub.Delete("parse_info")

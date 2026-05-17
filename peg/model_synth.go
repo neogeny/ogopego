@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Synth synthesizes a value from its nested expression; it is a thin wrapper
 // around the nested expression used for model-level transformations.
 type Synth struct {
@@ -15,7 +17,7 @@ func (s *Synth) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Synth's public fields.
-func (t *Synth) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Synth) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Synth.
 func (t *Synth) AsJSON() any { return t.AsJSONOf(t) }

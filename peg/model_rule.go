@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Rule represents a named grammar rule with optional parameters and
@@ -78,7 +79,7 @@ func (r *Rule) ShouldTrace() bool {
 }
 
 // PubMap returns an ordered map of the Rule's public fields.
-func (r *Rule) PubMap() *OrderedMap { return r.PubMapOf(r) }
+func (r *Rule) PubMap() *OrderedMap { return util.PubMapOf(r) }
 
 // AsJSON returns a JSON-compatible representation of the Rule.
 func (r *Rule) AsJSON() any { return r.AsJSONOf(r) }

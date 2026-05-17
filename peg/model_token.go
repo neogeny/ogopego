@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Token matches a literal string token.
@@ -26,7 +27,7 @@ func (t *Token) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Token's public fields.
-func (t *Token) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Token) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Token.
 func (t *Token) AsJSON() any { return t.AsJSONOf(t) }

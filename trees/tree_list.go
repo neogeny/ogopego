@@ -3,7 +3,11 @@
 
 package trees
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+
+	util "github.com/neogeny/ogopego/util"
+)
 
 // Seq represents a sequence node whose items are merged when folding.
 type Seq struct {
@@ -19,7 +23,7 @@ func (s *Seq) fold(gather *treeMerge) Tree {
 	}
 	return out
 }
-func (s *Seq) PubMap() *asjson.OrderedMap { return s.PubMapOf(s) }
+func (s *Seq) PubMap() *asjson.OrderedMap { return util.PubMapOf(s) }
 func (s *Seq) AsJSON() any {
 	items := make([]any, len(s.Items))
 	for i, item := range s.Items {
@@ -43,7 +47,7 @@ func (l *List) fold(gather *treeMerge) Tree {
 	}
 	return &List{Items: items}
 }
-func (l *List) PubMap() *asjson.OrderedMap { return l.PubMapOf(l) }
+func (l *List) PubMap() *asjson.OrderedMap { return util.PubMapOf(l) }
 func (l *List) AsJSON() any {
 	items := make([]any, len(l.Items))
 	for i, item := range l.Items {

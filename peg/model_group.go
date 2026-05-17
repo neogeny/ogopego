@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Group represents an explicit grouping of an expression; it has no
 // semantics beyond grouping (used for precedence and organization).
 type Group struct {
@@ -15,7 +17,7 @@ func (g *Group) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Group's public fields.
-func (t *Group) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Group) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Group.
 func (t *Group) AsJSON() any { return t.AsJSONOf(t) }

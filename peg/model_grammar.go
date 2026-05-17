@@ -9,6 +9,7 @@ import (
 
 	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Grammar represents a parsed PEG grammar, containing rules, directives, and keywords.
@@ -130,7 +131,7 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 }
 
 // PubMap returns an ordered map of the Grammar's public fields.
-func (g *Grammar) PubMap() *asjson.OrderedMap { return g.PubMapOf(g) }
+func (g *Grammar) PubMap() *asjson.OrderedMap { return util.PubMapOf(g) }
 
 // AsJSON returns a JSON-compatible representation of the Grammar.
 func (g *Grammar) AsJSON() any { return g.AsJSONOf(g) }

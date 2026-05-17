@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Join represents a sequence joined by a separator expression (e.g. a list
 // of elements with separators).
 type Join struct {
@@ -32,7 +34,7 @@ func (j *Join) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Join's public fields.
-func (t *Join) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Join) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Join.
 func (t *Join) AsJSON() any { return t.AsJSONOf(t) }
@@ -46,7 +48,7 @@ func (p *PositiveJoin) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the PositiveJoin's public fields.
-func (t *PositiveJoin) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *PositiveJoin) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the PositiveJoin.
 func (t *PositiveJoin) AsJSON() any { return t.AsJSONOf(t) }
@@ -60,7 +62,7 @@ func (g *Gather) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Gather's public fields.
-func (t *Gather) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Gather) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Gather.
 func (t *Gather) AsJSON() any { return t.AsJSONOf(t) }
@@ -74,7 +76,7 @@ func (p *PositiveGather) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the PositiveGather's public fields.
-func (t *PositiveGather) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *PositiveGather) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the PositiveGather.
 func (t *PositiveGather) AsJSON() any { return t.AsJSONOf(t) }

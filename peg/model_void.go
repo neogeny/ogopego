@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Void represents a model node that consumes no value but indicates a
 // voided/ignored result (used for suppressed nodes).
 type Void struct {
@@ -16,7 +18,7 @@ func (v *Void) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Void's public fields.
-func (t *Void) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Void) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Void.
 func (t *Void) AsJSON() any { return t.AsJSONOf(t) }

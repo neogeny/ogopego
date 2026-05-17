@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // Box is a model wrapper that contains a nested expression (Exp).
 type Box struct {
 	ModelBase
@@ -16,7 +18,7 @@ type NamedBox struct {
 }
 
 // PubMap returns an ordered map of the Box's public fields.
-func (t *Box) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Box) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Box.
 func (t *Box) AsJSON() any { return t.AsJSONOf(t) }
@@ -25,7 +27,7 @@ func (t *Box) AsJSON() any { return t.AsJSONOf(t) }
 func (t *Box) AsJSONStr() string { return t.AsJSONStrOf(t) }
 
 // PubMap returns an ordered map of the NamedBox's public fields.
-func (t *NamedBox) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *NamedBox) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the NamedBox.
 func (t *NamedBox) AsJSON() any { return t.AsJSONOf(t) }

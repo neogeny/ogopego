@@ -3,7 +3,11 @@
 
 package peg
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/neogeny/ogopego/util"
+)
 
 // Lookahead performs a positive lookahead: it succeeds if the nested
 // expression matches without consuming input.
@@ -45,7 +49,7 @@ func (n *NegativeLookahead) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Lookahead's public fields.
-func (t *Lookahead) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Lookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Lookahead.
 func (t *Lookahead) AsJSON() any { return t.AsJSONOf(t) }
@@ -54,7 +58,7 @@ func (t *Lookahead) AsJSON() any { return t.AsJSONOf(t) }
 func (t *Lookahead) AsJSONStr() string { return t.AsJSONStrOf(t) }
 
 // PubMap returns an ordered map of the NegativeLookahead's public fields.
-func (t *NegativeLookahead) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *NegativeLookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the NegativeLookahead.
 func (t *NegativeLookahead) AsJSON() any { return t.AsJSONOf(t) }

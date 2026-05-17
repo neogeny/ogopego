@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // EOL matches an end-of-line sequence.
@@ -26,7 +27,7 @@ func (e *EOL) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the EOL's public fields.
-func (t *EOL) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *EOL) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the EOL.
 func (t *EOL) AsJSON() any { return t.AsJSONOf(t) }

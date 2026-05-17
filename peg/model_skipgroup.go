@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // SkipGroup represents a group that is parsed but whose result is discarded.
 type SkipGroup struct {
 	Box
@@ -18,7 +20,7 @@ func (s *SkipGroup) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the SkipGroup's public fields.
-func (t *SkipGroup) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *SkipGroup) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the SkipGroup.
 func (t *SkipGroup) AsJSON() any { return t.AsJSONOf(t) }

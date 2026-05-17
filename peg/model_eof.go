@@ -5,6 +5,8 @@ package peg
 
 import (
 	"fmt"
+
+	"github.com/neogeny/ogopego/util"
 )
 
 // EOF matches the end of input.
@@ -27,7 +29,7 @@ func (e *EOF) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the EOF's public fields.
-func (t *EOF) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *EOF) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the EOF.
 func (t *EOF) AsJSON() any { return t.AsJSONOf(t) }

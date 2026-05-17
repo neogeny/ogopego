@@ -5,6 +5,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Optional represents an optional expression that may succeed with a
@@ -32,7 +33,7 @@ func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Optional's public fields.
-func (t *Optional) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Optional) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Optional.
 func (t *Optional) AsJSON() any { return t.AsJSONOf(t) }

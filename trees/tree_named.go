@@ -3,7 +3,11 @@
 
 package trees
 
-import asjson "github.com/neogeny/ogopego/json"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+
+	util "github.com/neogeny/ogopego/util"
+)
 
 // Named represents a named key/value pair folded from the parse tree.
 type Named struct {
@@ -18,7 +22,7 @@ func (n *Named) fold(gather *treeMerge) Tree {
 	gather.insert(n.Name, val)
 	return val
 }
-func (n *Named) PubMap() *asjson.OrderedMap { return n.PubMapOf(n) }
+func (n *Named) PubMap() *asjson.OrderedMap { return util.PubMapOf(n) }
 func (n *Named) AsJSON() any {
 	return map[string]any{n.Name: n.Value.AsJSON()}
 }
@@ -37,7 +41,7 @@ func (n *NamedAsList) fold(gather *treeMerge) Tree {
 	gather.insertAsList(n.Name, val)
 	return val
 }
-func (n *NamedAsList) PubMap() *asjson.OrderedMap { return n.PubMapOf(n) }
+func (n *NamedAsList) PubMap() *asjson.OrderedMap { return util.PubMapOf(n) }
 func (n *NamedAsList) AsJSON() any {
 	return map[string]any{n.Name: n.Value.AsJSON()}
 }
@@ -56,7 +60,7 @@ func (o *Override) fold(gather *treeMerge) Tree {
 	gather.Root = appendTree(gather.Root, val)
 	return val
 }
-func (o *Override) PubMap() *asjson.OrderedMap { return o.PubMapOf(o) }
+func (o *Override) PubMap() *asjson.OrderedMap { return util.PubMapOf(o) }
 func (o *Override) AsJSON() any                { return o.Value.AsJSON() }
 func (o *Override) AsJSONStr() string          { return treeJSONStr(o.AsJSON()) }
 
@@ -72,6 +76,6 @@ func (o *OverrideAsList) fold(gather *treeMerge) Tree {
 	gather.Root = appendAsList(gather.Root, val)
 	return val
 }
-func (o *OverrideAsList) PubMap() *asjson.OrderedMap { return o.PubMapOf(o) }
+func (o *OverrideAsList) PubMap() *asjson.OrderedMap { return util.PubMapOf(o) }
 func (o *OverrideAsList) AsJSON() any                { return o.Value.AsJSON() }
 func (o *OverrideAsList) AsJSONStr() string          { return treeJSONStr(o.AsJSON()) }

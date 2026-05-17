@@ -6,8 +6,6 @@ package trees
 import (
 	"encoding/json"
 	"fmt"
-
-	asjson "github.com/neogeny/ogopego/json"
 )
 
 type Tree interface {
@@ -16,9 +14,7 @@ type Tree interface {
 	AsJSON() any
 }
 
-type TreeBase struct {
-	asjson.AsJSONBase
-}
+type TreeBase struct{}
 
 func treeJSONStr(v any) string {
 	b, err := json.MarshalIndent(v, "", "  ")

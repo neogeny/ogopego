@@ -3,6 +3,8 @@
 
 package peg
 
+import "github.com/neogeny/ogopego/util"
+
 // NULL represents a parse model node that always succeeds without consuming
 // input and yields a nil-ish tree value.
 type NULL struct {
@@ -15,7 +17,7 @@ func (n *NULL) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the NULL's public fields.
-func (t *NULL) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *NULL) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the NULL.
 func (t *NULL) AsJSON() any { return t.AsJSONOf(t) }

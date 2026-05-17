@@ -5,6 +5,7 @@ package peg
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Sequence represents an ordered sequence of model elements.
@@ -39,7 +40,7 @@ func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
 }
 
 // PubMap returns an ordered map of the Sequence's public fields.
-func (t *Sequence) PubMap() *OrderedMap { return t.PubMapOf(t) }
+func (t *Sequence) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Sequence.
 func (t *Sequence) AsJSON() any { return t.AsJSONOf(t) }
