@@ -139,6 +139,8 @@ func main() {
 				output = gram.PrettyPrint()
 			case CLI.Grammar.Railroads:
 				output = gram.Railroads()
+			case CLI.Grammar.Model:
+				output = fmt.Sprintf("%#v", gram)
 			default:
 				output = gram.PrettyPrint()
 			}

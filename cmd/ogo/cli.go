@@ -34,11 +34,11 @@ var CLI struct {
 
 	// Grammar subcommand provides transformations and information about a grammar.
 	Grammar struct {
-		Grammar string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)"`
-		Json    bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
-		//Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
-		Pretty    bool `help:"Pretty-print the grammar (EBNF)" short:"p" group:"format"`
-		Railroads bool `help:"Print a railroad diagram" short:"r" group:"format"`
+		Grammar   string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)"`
+		Json      bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
+		Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
+		Pretty    bool   `help:"Pretty-print the grammar (EBNF)" short:"p" group:"format"`
+		Railroads bool   `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"grammar" help:"Grammar transformations"`
 
 	// Output specifies a file to write output to instead of stdout.
@@ -98,9 +98,9 @@ func validateExclusive(groups ...string) error {
 				if CLI.Grammar.Json {
 					set = append(set, "--json")
 				}
-				//if CLI.Grammar.Model {
-				//	set = append(set, "--model")
-				//}
+				if CLI.Grammar.Model {
+					set = append(set, "--model")
+				}
 				if CLI.Grammar.Pretty {
 					set = append(set, "--pretty")
 				}
