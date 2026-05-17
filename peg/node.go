@@ -4,11 +4,9 @@
 package peg
 
 import (
-	"encoding/json"
 	"weak"
 
 	"github.com/davecgh/go-spew/spew"
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -80,39 +78,6 @@ func (n *Node) Path() []*Node {
 	return ancestors
 }
 
-// PubMap returns an ordered map of the node's public fields.
-func (n *Node) PubMap() *asjson.OrderedMap {
-	if n == nil {
-		return nil
-	}
-	pub := util.PubMapOf(n)
-	if val, ok := pub.Get("parse_info"); ok {
-		if val == nil {
-			pub.Delete("parse_info")
-		}
-	}
-	if len(pub.Keys()) > 1 {
-		pub.Delete("Ast")
-	}
-	return pub
-}
-
-// AsJSON returns a JSON-compatible representation of the node.
-func (n *Node) AsJSON() any {
-	if n == nil {
-		return nil
-	}
-	return asjson.AsJSONOf(n)
-}
-
-// AsJSONStr returns a JSON string representation of the node.
-func (n *Node) AsJSONStr() string { return asjson.AsJSONStr(n.AsJSON()) }
-
-// MarshalJSON marshals the node to JSON.
-func (n *Node) MarshalJSON() ([]byte, error) {
-	return json.Marshal(n.AsJSON())
-}
-
 // Children returns the children of the current node.
 func (n *Node) Children() []*Node {
 	if n == nil {
@@ -128,8 +93,7 @@ func (n *Node) getChildren() []*Node {
 	if n == nil {
 		return nil
 	}
-	pub := n.PubMap()
-	children := make([]*Node, 0, len(pub.Keys()))
+	children := make([]*Node, 0)
 
 	dfs := func(obj any) {}
 	dfs = func(obj any) {
@@ -161,8 +125,11 @@ func (n *Node) getChildren() []*Node {
 		}
 	}
 	dfs(n.Ast)
-	for obj := range pub.Values() {
-		dfs(obj)
+	pub := util.PubMapOf(n)
+	if m, ok := pub.(OrderedMap); ok {
+		for obj := range m.Values() {
+			dfs(obj)
+		}
 	}
 	return children
 }

@@ -4,9 +4,7 @@
 package peg
 
 import (
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util"
 )
 
 // Pattern matches input according to a configured pattern and returns text.
@@ -23,12 +21,3 @@ func (p *Pattern) Parse(ctx Ctx) (Tree, error) {
 	}
 	return &trees.Text{Value: matched}, nil
 }
-
-// PubMap returns an ordered map of the Pattern's public fields.
-func (t *Pattern) PubMap() *OrderedMap { return util.PubMapOf(t) }
-
-// AsJSON returns a JSON-compatible representation of the Pattern.
-func (t *Pattern) AsJSON() any { return asjson.AsJSONOf(t) }
-
-// AsJSONStr returns a JSON string representation of the Pattern.
-func (t *Pattern) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

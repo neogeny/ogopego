@@ -6,6 +6,8 @@ package peg
 import (
 	"encoding/json"
 	"testing"
+
+	asjson "github.com/neogeny/ogopego/json"
 )
 
 func TestNodeNilSafety(t *testing.T) {
@@ -23,7 +25,7 @@ func TestNodeNilSafety(t *testing.T) {
 	if p := n.Path(); p != nil {
 		t.Error("expected nil path")
 	}
-	b, err := n.MarshalJSON()
+	b, err := json.Marshal(asjson.AsJSON(n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +129,7 @@ func TestNodeMarshalJSON(t *testing.T) {
 			Line:   1,
 		},
 	}
-	b, err := n.MarshalJSON()
+	b, err := json.Marshal(asjson.AsJSON(n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,14 +148,14 @@ func TestNodeMarshalJSON(t *testing.T) {
 	if !ok {
 		t.Errorf("expected pos map")
 	}
-	if parseInfo["Source"] != "src" {
+	if parseInfo["source"] != "src" {
 		t.Errorf("expected Source 'src', got %v", parseInfo["Source"])
 	}
 }
 
 func TestNodeMarshalJSONNil(t *testing.T) {
 	var n *Node
-	b, err := n.MarshalJSON()
+	b, err := json.Marshal(asjson.AsJSON(n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +171,7 @@ func TestNodeMarshalJSONAstMap(t *testing.T) {
 			"num": float64(42),
 		},
 	}
-	b, err := n.MarshalJSON()
+	b, err := json.Marshal(asjson.AsJSON(n))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +195,7 @@ func TestNodeMarshalJSONAstSlice(t *testing.T) {
 	n := &Node{
 		Ast: []any{"a", "b", 3},
 	}
-	b, err := n.MarshalJSON()
+	b, err := json.Marshal(asjson.AsJSON(n))
 	if err != nil {
 		t.Fatal(err)
 	}

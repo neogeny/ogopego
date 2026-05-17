@@ -5,9 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	asjson "github.com/neogeny/ogopego/json"
-	"github.com/neogeny/ogopego/util"
 )
 
 // SkipTo scans forward until the nested expression matches, returning the
@@ -34,12 +31,3 @@ func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
 		fmt.Errorf("skip_to: target not found"),
 	)
 }
-
-// PubMap returns an ordered map of the SkipTo's public fields.
-func (t *SkipTo) PubMap() *asjson.OrderedMap { return util.PubMapOf(t) }
-
-// AsJSON returns a JSON-compatible representation of the SkipTo.
-func (t *SkipTo) AsJSON() any { return asjson.AsJSONOf(t) }
-
-// AsJSONStr returns a JSON string representation of the SkipTo.
-func (t *SkipTo) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

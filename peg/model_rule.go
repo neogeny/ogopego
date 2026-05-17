@@ -4,12 +4,9 @@
 package peg
 
 import (
-	"encoding/json"
 	"unicode"
 
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util"
 )
 
 // Rule represents a named grammar rule with optional parameters and
@@ -78,15 +75,3 @@ func (r *Rule) IsMemoizable() bool {
 func (r *Rule) ShouldTrace() bool {
 	return !r.NoStak && !r.IsToken()
 }
-
-// PubMap returns an ordered map of the Rule's public fields.
-func (r *Rule) PubMap() *OrderedMap { return util.PubMapOf(r) }
-
-// AsJSON returns a JSON-compatible representation of the Rule.
-func (r *Rule) AsJSON() any { return asjson.AsJSONOf(r) }
-
-// AsJSONStr returns a JSON string representation of the Rule.
-func (r *Rule) AsJSONStr() string { return asjson.AsJSONStr(r.AsJSON()) }
-
-// MarshalJSON marshals the Rule to JSON.
-func (r *Rule) MarshalJSON() ([]byte, error) { return json.Marshal(r.AsJSON()) }

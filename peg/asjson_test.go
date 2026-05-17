@@ -22,19 +22,16 @@ func TestNodeAsJSON(t *testing.T) {
 		},
 	}
 	result := asjson.AsJSON(n)
-	om, ok := result.(*asjson.OrderedMap)
+	om, ok := result.(map[string]any)
 	if !ok {
-		t.Fatalf("expected *OrderedMap, got %T", result)
+		t.Fatalf("expected map, got %T", result)
 	}
-	if cls, _ := om.Get("__class__"); cls != "Node" {
+	if cls, _ := om["__class__"]; cls != "Node" {
 		t.Errorf("expected __class__ Node, got %v", cls)
 	}
-	// FIXME
-	//if ast, hasAst := om.Get("ast"); hasAst {
-	//	t.Errorf("expected no 'ast', got %v", ast)
-	//}
-	parseinfoRaw, _ := om.Get("parse_info")
-	if parseinfoRaw == nil {
+	parseinfoRaw, hasPI := om["parse_info"]
+	if !hasPI {
 		t.Fatal("expected non-nil ParseInfo")
 	}
+	_ = parseinfoRaw
 }

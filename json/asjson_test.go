@@ -6,8 +6,6 @@ package json
 import (
 	"encoding/json"
 	"testing"
-
-	"github.com/neogeny/ogopego/util"
 )
 
 func TestAsJSONPrimitives(t *testing.T) {
@@ -84,10 +82,10 @@ func TestAsJSONStruct(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	if out["Name"] != "foo" {
+	if out["name"] != "foo" {
 		t.Errorf("expected foo, got %v", out["Name"])
 	}
-	if out["Value"] != float64(42) {
+	if out["value"] != float64(42) {
 		t.Errorf("expected 42, got %v", out["Value"])
 	}
 	if _, ok := out["hidden"]; ok {
@@ -136,19 +134,19 @@ func TestAsJSONCycle(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected map, got %T", result)
 	}
-	if m["Name"] != "a" {
+	if m["name"] != "a" {
 		t.Errorf("expected 'a', got %v", m["Name"])
 	}
 	// The cycle reference should produce a string marker, not a recursive struct
-	next, ok := m["Next"].(map[string]any)
+	next, ok := m["next"].(map[string]any)
 	if !ok {
 		t.Fatalf("expected map for Next, got %T", m["Next"])
 	}
-	if next["Name"] != "b" {
+	if next["name"] != "b" {
 		t.Errorf("expected 'b', got %v", next["Name"])
 	}
 	// b.Next should be a cycle marker string
-	cycle, ok := next["Next"].(string)
+	cycle, ok := next["next"].(string)
 	if !ok {
 		t.Fatalf("expected string cycle marker, got %T", next["Next"])
 	}
@@ -176,50 +174,5 @@ func TestAsJSONChanFunc(t *testing.T) {
 	}
 	if string(b) != `[null,null]` {
 		t.Errorf("expected [null,null], got %s", string(b))
-	}
-}
-
-type mixinStruct struct {
-	Greeting string
-	Count    int
-}
-
-func (s *mixinStruct) PubMap() *OrderedMap {
-	return util.PubMapOf(s)
-}
-
-func (s *mixinStruct) AsJSON() any {
-	return AsJSONOf(s)
-}
-
-func (s *mixinStruct) AsJSONStr() string { return AsJSONStr(s.AsJSON()) }
-
-func TestAsJSONMixin(t *testing.T) {
-	s := &mixinStruct{Greeting: "hello", Count: 42}
-	result := AsJSON(s)
-	om, ok := result.(*OrderedMap)
-	if !ok {
-		t.Fatalf("expected *OrderedMap, got %T", result)
-	}
-	if cls, _ := om.Get("__class__"); cls != "mixinStruct" {
-		t.Errorf("expected __class__ mixinStruct, got %v", cls)
-	}
-	if g, _ := om.Get("greeting"); g != "hello" {
-		t.Errorf("expected greeting hello, got %v", g)
-	}
-}
-
-func TestAsJSONMixinPriority(t *testing.T) {
-	// Verify AsJSONMixin is checked before json.Marshaler
-	// mixinStruct doesn't implement MarshalJSON, but if it did,
-	// the AsJSONMixin path should still be taken
-	s := &mixinStruct{Greeting: "mixin", Count: 1}
-	result := AsJSON(s)
-	om, ok := result.(*OrderedMap)
-	if !ok {
-		t.Fatalf("expected *OrderedMap, got %T", result)
-	}
-	if cls, _ := om.Get("__class__"); cls != "mixinStruct" {
-		t.Errorf("expected __class__ mixinStruct, got %v", cls)
 	}
 }

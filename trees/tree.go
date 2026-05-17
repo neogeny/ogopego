@@ -11,17 +11,74 @@ import (
 type Tree interface {
 	tree()
 	fold(gather *treeMerge) Tree
-	AsJSON() any
 }
 
 type TreeBase struct{}
 
-func treeJSONStr(v any) string {
+// TreeToJSONStr returns the JSON string representation of a tree.
+func TreeToJSONStr(t Tree) string {
+	v := TreeToJSON(t)
 	b, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return fmt.Sprintf("!json:%v", err)
 	}
 	return string(b)
+}
+
+func TreeToJSON(t Tree) any {
+	switch v := t.(type) {
+	case *Text:
+		return v.Value
+	case *Number:
+		return v.Value
+	case *Bool:
+		return v.Value
+	case *Nil:
+		return nil
+	case *Bottom:
+		return nil
+	case *Seq:
+		items := make([]any, len(v.Items))
+		for i, item := range v.Items {
+			items[i] = TreeToJSON(item)
+		}
+		return items
+	case *List:
+		items := make([]any, len(v.Items))
+		for i, item := range v.Items {
+			items[i] = TreeToJSON(item)
+		}
+		return items
+	case *MapNode:
+		out := make(map[string]any, len(v.Entries))
+		for k, val := range v.Entries {
+			out[k] = TreeToJSON(val)
+		}
+		return out
+	case *Named:
+		return map[string]any{v.Name: TreeToJSON(v.Value)}
+	case *NamedAsList:
+		return map[string]any{v.Name: TreeToJSON(v.Value)}
+	case *Override:
+		return TreeToJSON(v.Value)
+	case *OverrideAsList:
+		return TreeToJSON(v.Value)
+	case *Node:
+		child := TreeToJSON(v.Tree)
+		if m, ok := child.(map[string]any); ok {
+			if _, has := m["__class__"]; !has {
+				out := make(map[string]any, len(m)+1)
+				out["__class__"] = v.TypeName
+				for k, val := range m {
+					out[k] = val
+				}
+				return out
+			}
+		}
+		return map[string]any{"__class__": v.TypeName, "ast": child}
+	default:
+		return nil
+	}
 }
 
 type treeMerge struct {

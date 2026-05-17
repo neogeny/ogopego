@@ -6,9 +6,7 @@ package peg
 import (
 	"fmt"
 
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util"
 )
 
 // Call represents a call to a grammar rule.
@@ -128,12 +126,3 @@ func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, star
 	}
 	return lastTree, nil
 }
-
-// PubMap returns an ordered map of the Call's public fields.
-func (c *Call) PubMap() *asjson.OrderedMap { return util.PubMapOf(c) }
-
-// AsJSON returns a JSON-compatible representation of the Call.
-func (c *Call) AsJSON() any { return asjson.AsJSONOf(c) }
-
-// AsJSONStr returns a JSON string representation of the Call.
-func (c *Call) AsJSONStr() string { return asjson.AsJSONStr(c.AsJSON()) }

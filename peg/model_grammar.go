@@ -4,12 +4,10 @@
 package peg
 
 import (
-	"encoding/json"
 	"fmt"
 
 	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util"
 )
 
 // Grammar represents a parsed PEG grammar, containing rules, directives, and keywords.
@@ -77,11 +75,17 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 	return &c
 }
 
+func (g *Grammar) RuleMap() map[string]*Rule {
+	m := make(map[string]*Rule, len(g.Rules))
+	for _, rule := range g.Rules {
+		m[rule.Name] = rule
+	}
+	return m
+}
+
 // Initialize links and validates the grammar, and marks left-recursive rules.
 func (g *Grammar) Initialize() error {
-	if err := g.Link(); err != nil {
-		return err
-	}
+	g.LinkGrammar()
 	if err := g.ValidateLinked(); err != nil {
 		return err
 	}
@@ -100,8 +104,8 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 	return nil, fmt.Errorf("rule %q not found", name)
 }
 
-// Parse parses the input using the grammar, starting from the specified rule.
-func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
+// ParseAt parses the input using the grammar, starting from the specified rule.
+func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 	acfg := g.CfgFromDirectives().New()
 	acfg = acfg.Override(cfg)
 	ctx.Configure(acfg)
@@ -129,15 +133,3 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 	}
 	return result, nil
 }
-
-// PubMap returns an ordered map of the Grammar's public fields.
-func (g *Grammar) PubMap() *asjson.OrderedMap { return util.PubMapOf(g) }
-
-// AsJSON returns a JSON-compatible representation of the Grammar.
-func (g *Grammar) AsJSON() any { return asjson.AsJSONOf(g) }
-
-// AsJSONStr returns a JSON string representation of the Grammar.
-func (g *Grammar) AsJSONStr() string { return asjson.AsJSONStr(g.AsJSON()) }
-
-// MarshalJSON marshals the Grammar to JSON.
-func (g *Grammar) MarshalJSON() ([]byte, error) { return json.Marshal(g.AsJSON()) }

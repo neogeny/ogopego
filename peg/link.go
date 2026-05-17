@@ -63,12 +63,12 @@ func (r *RuleInclude) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+func (g *Grammar) LinkGrammar() error {
+	return g.Link(g.RuleMap())
+}
+
 // Link resolves all rule references within the grammar.
-func (g *Grammar) Link() error {
-	rules := make(map[string]*Rule, len(g.Rules))
-	for _, rule := range g.Rules {
-		rules[rule.Name] = rule
-	}
+func (g *Grammar) Link(rules map[string]*Rule) error {
 	for _, rule := range g.Rules {
 		if err := rule.Exp.Link(rules); err != nil {
 			return err

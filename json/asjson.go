@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+	"unsafe"
 
 	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/util"
@@ -17,15 +18,36 @@ import (
 
 type OrderedMap = orderedmap.OrderedMap
 
-// AsJSONMixin defines an interface for types that can be converted to JSON-compatible structures.
-type AsJSONMixin interface {
-	// AsJSON returns a JSON-compatible representation of the object.
-	AsJSON() any
+// Id returns a unique uintptr identifier for any Go value,
+// mimicking Python's id() without panicking on unhashable types.
+func Id(val any) uintptr {
+	if val == nil {
+		return 0
+	}
+
+	v := reflect.ValueOf(val)
+
+	switch v.Kind() {
+	// Reference types natively hold a pointer to their data block.
+	// v.Pointer() extracts it safely without panicking.
+	case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Chan, reflect.UnsafePointer:
+		return v.Pointer()
+
+	default:
+		// For structs, arrays, and primitive scalars, we take the address
+		// of the underlying concrete value held by the interface.
+		if v.CanAddr() {
+			return v.UnsafeAddr()
+		}
+
+		// Fallback for unaddressable values: extract the address of the
+		// interface wrapper's data segment directly via unsafe.
+		return uintptr(unsafe.Pointer(&val))
+	}
 }
 
 func AsJSON(v any) any {
-	seen := make(map[uintptr]bool)
-	return asjson(reflect.ValueOf(v), seen)
+	return toJSONValue(v, make(map[uintptr]bool))
 }
 
 // AsJSONStr returns a JSON string representation of the given value.
@@ -40,6 +62,77 @@ func AsJSONStr(v any) string {
 // ToJSONString converts a Go value to a JSON string with optional prefix and indent.
 func ToJSONString(v any) string {
 	return toJSONString(v, "", "  ")
+}
+
+func toJSONValue(v any, seen map[uintptr]bool) any {
+	id := Id(v)
+	if in, ok := seen[id]; ok && in {
+		return fmt.Sprintf("%T@%p", v, v)
+	}
+	seen[id] = true
+	defer func() {
+		seen[id] = false
+	}()
+
+	v = util.PubMapOf(v)
+	switch val := v.(type) {
+	// --- Fast-Path: Complex Types ---
+	case *OrderedMap:
+		out := make(map[string]any, len(val.Keys()))
+		for _, k := range val.Keys() {
+			item, _ := val.Get(k)
+			out[PythonizeName(k)] = toJSONValue(item, seen)
+		}
+		return out
+
+	case map[string]any:
+		out := make(map[string]any, len(val))
+		for k, item := range val {
+			out[PythonizeName(k)] = toJSONValue(item, seen)
+		}
+		return out
+
+	case []any:
+		out := make([]any, 0, len(val))
+		for _, item := range val {
+			out = append(out, toJSONValue(item, seen))
+		}
+		return out
+
+	// --- Fast-Path: Safe Primitives (No reflection needed) ---
+	case string, bool, nil,
+		int, int8, int16, int32, int64,
+		uint, uint8, uint16, uint32, uint64, uintptr,
+		float32, float64:
+		return val
+
+	// --- Fallback: Go-Specific and Dynamic Sequences ---
+	default:
+		rv := reflect.ValueOf(v)
+		if !rv.IsValid() {
+			return nil
+		}
+
+		switch rv.Kind() {
+		case reflect.Chan, reflect.Func:
+			// Safely intervene on channels and functions before JSON marshalling fails
+			//return fmt.Sprintf("%T(%p)", v, v)
+			return nil
+
+		case reflect.Slice, reflect.Array:
+			// Unpack typed slices/arrays (e.g., []func(), []chan string, []MyStruct)
+			length := rv.Len()
+			out := make([]any, 0, length)
+			for i := range length {
+				out = append(out, toJSONValue(rv.Index(i).Interface(), seen))
+			}
+			return out
+
+		default:
+			// Catch-all for underlying structs that escaped PubMapOf or custom types
+			return val
+		}
+	}
 }
 
 func toJSONString(v any, prefix, indent string) string {
@@ -143,31 +236,6 @@ func ToGoMap(v any) any {
 	}
 }
 
-// AsJSONOf returns a JSON-compatible representation of the given reference's public fields.
-func AsJSONOf(ref any) any {
-	pub := util.PubMapOf(ref)
-	if pub == nil {
-		return nil
-	}
-
-	t := reflect.TypeOf(ref)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-
-	typename := t.Name()
-	out := orderedmap.New()
-	out.Set("__class__", typename)
-	for _, k := range pub.Keys() {
-		if k == "__class__" {
-			continue
-		}
-		val, _ := pub.Get(k)
-		out.Set(PythonizeName(k), val)
-	}
-	return out
-}
-
 // PythonizeName converts a Go field name to a Python-style snake_case name.
 func PythonizeName(s string) string {
 	if len(s) == 0 {
@@ -201,9 +269,6 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 		if v.IsNil() {
 			return nil
 		}
-		if m, ok := v.Interface().(AsJSONMixin); ok {
-			return mixinToJSON(m, seen, v.Type().Elem().Name())
-		}
 		if m, ok := v.Interface().(json.Marshaler); ok {
 			return marshalToAny(m)
 		}
@@ -211,9 +276,6 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 
 	case reflect.Struct:
 		if v.CanAddr() {
-			if m, ok := v.Addr().Interface().(AsJSONMixin); ok {
-				return mixinToJSON(m, seen, v.Type().Name())
-			}
 			if m, ok := v.Addr().Interface().(json.Marshaler); ok {
 				return marshalToAny(m)
 			}
@@ -264,10 +326,6 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 	default:
 		return fmt.Sprint(v.Interface())
 	}
-}
-
-func mixinToJSON(m AsJSONMixin, seen map[uintptr]bool, className string) any {
-	return m.AsJSON()
 }
 
 func marshalToAny(m json.Marshaler) any {

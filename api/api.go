@@ -54,7 +54,7 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	}
 	c := input.NewStrCursor(grammar)
 	c.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
-	return boot.Parse(context.NewCtx(c, cfg), cfg)
+	return boot.ParseAt(context.NewCtx(c, cfg), cfg)
 }
 
 // ParseGrammarToJSON parses a grammar string and returns the raw parse tree
@@ -125,7 +125,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 // resulting AST as a Tree value.
 func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
 	ctx := context.NewCtx(input.NewStrCursor(text), cfg)
-	return parser.Parse(ctx, cfg)
+	return parser.ParseAt(ctx, cfg)
 }
 
 // ParseInputToJSON parses input text and returns the resulting AST as a
@@ -135,7 +135,7 @@ func ParseInputToJSON(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.AsJSON(tree), nil
+	return trees.TreeToJSON(tree), nil
 }
 
 // ParseInputToJSONString is like ParseInputToJSON but returns a JSON string.
@@ -144,11 +144,11 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONStr(tree), nil
+	return trees.TreeToJSONStr(tree), nil
 }
 
 // LoadGrammarFromJSON deserializes a Grammar from JSON output produced by
-// CompileToJSON or peg.SerializeGrammar.
+// CompileToJSON or peg.serializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 	return peg.ParseGrammar(data)
 }

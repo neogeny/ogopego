@@ -3,12 +3,6 @@
 
 package trees
 
-import (
-	asjson "github.com/neogeny/ogopego/json"
-
-	util "github.com/neogeny/ogopego/util"
-)
-
 // MapNode represents a keyed mapping of entries produced during folding.
 type MapNode struct {
 	TreeBase
@@ -17,12 +11,3 @@ type MapNode struct {
 
 func (*MapNode) tree()                         {}
 func (m *MapNode) fold(gather *treeMerge) Tree { return m }
-func (m *MapNode) PubMap() *asjson.OrderedMap  { return util.PubMapOf(m) }
-func (m *MapNode) AsJSON() any {
-	out := make(map[string]any, len(m.Entries))
-	for k, v := range m.Entries {
-		out[k] = v.AsJSON()
-	}
-	return out
-}
-func (m *MapNode) AsJSONStr() string { return treeJSONStr(m.AsJSON()) }

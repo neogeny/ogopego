@@ -5,9 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	asjson "github.com/neogeny/ogopego/json"
-	"github.com/neogeny/ogopego/util"
 )
 
 // EOF matches the end of input.
@@ -28,12 +25,3 @@ func (e *EOF) Parse(ctx Ctx) (Tree, error) {
 	}
 	return NIL, nil
 }
-
-// PubMap returns an ordered map of the EOF's public fields.
-func (t *EOF) PubMap() *OrderedMap { return util.PubMapOf(t) }
-
-// AsJSON returns a JSON-compatible representation of the EOF.
-func (t *EOF) AsJSON() any { return asjson.AsJSONOf(t) }
-
-// AsJSONStr returns a JSON string representation of the EOF.
-func (t *EOF) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

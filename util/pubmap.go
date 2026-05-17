@@ -11,32 +11,32 @@ import (
 
 type OrderedMap = orderedmap.OrderedMap
 
-type PubMapper interface {
-	PubMap() *OrderedMap
-}
-
-func NewOrderedMap() *OrderedMap {
-	return orderedmap.New()
-}
-
 // PubMapOf returns an OrderedMap containing the public fields of the given reference.
-func PubMapOf(ref any) *OrderedMap {
+func PubMapOf(ref any) any {
 	if ref == nil {
 		return nil
 	}
+
+	depth := 0
 	v := reflect.ValueOf(ref)
 	for v.Kind() == reflect.Ptr {
 		if v.IsNil() {
 			return nil
 		}
 		v = v.Elem()
+		depth += 1
+		if depth > 4 {
+			panic(v)
+		}
 	}
 	if v.Kind() != reflect.Struct {
-		return nil
+		return ref
 	}
 
-	out := orderedmap.New()
 	t := v.Type()
+	typeName := t.Name()
+	out := orderedmap.New()
+	out.Set("__class__", typeName)
 	for i := range t.NumField() {
 		f := t.Field(i)
 		if !f.IsExported() || f.Anonymous {

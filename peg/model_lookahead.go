@@ -5,9 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	asjson "github.com/neogeny/ogopego/json"
-	"github.com/neogeny/ogopego/util"
 )
 
 // Lookahead performs a positive lookahead: it succeeds if the nested
@@ -48,21 +45,3 @@ func (n *NegativeLookahead) Parse(ctx Ctx) (Tree, error) {
 	}
 	return NIL, nil
 }
-
-// PubMap returns an ordered map of the Lookahead's public fields.
-func (t *Lookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
-
-// AsJSON returns a JSON-compatible representation of the Lookahead.
-func (t *Lookahead) AsJSON() any { return asjson.AsJSONOf(t) }
-
-// AsJSONStr returns a JSON string representation of the Lookahead.
-func (t *Lookahead) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
-
-// PubMap returns an ordered map of the NegativeLookahead's public fields.
-func (t *NegativeLookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
-
-// AsJSON returns a JSON-compatible representation of the NegativeLookahead.
-func (t *NegativeLookahead) AsJSON() any { return asjson.AsJSONOf(t) }
-
-// AsJSONStr returns a JSON string representation of the NegativeLookahead.
-func (t *NegativeLookahead) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

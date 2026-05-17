@@ -4,7 +4,6 @@
 package peg
 
 import (
-	gojson "encoding/json"
 	"errors"
 
 	"github.com/neogeny/ogopego/context"
@@ -70,15 +69,3 @@ func (m *ModelBase) PrettyPrint() string { return "" }
 
 // Railroads is a placeholder for Model implementations.
 func (m *ModelBase) Railroads() string { return "" }
-
-// MarshalJSON marshals the ModelBase to JSON.
-func (m *ModelBase) MarshalJSON() ([]byte, error) { return gojson.Marshal(m.AsJSON()) }
-
-// modelMarshalJSON is a helper for model types to implement json.Marshaler
-// by dispatching through AsJSONMixin to the correct AsJSON() override.
-func modelMarshalJSON(v any) ([]byte, error) {
-	if mixin, ok := v.(asjson.AsJSONMixin); ok {
-		return gojson.MarshalIndent(mixin.AsJSON(), "", "  ")
-	}
-	return gojson.Marshal(nil)
-}

@@ -6,13 +6,21 @@ import (
 	"github.com/iancoleman/orderedmap"
 )
 
-// serializeModel returns an any that can be serialized to JSON,
+func ModelToJSONStr(v Model) string {
+	out := ModelToJSON(v)
+	b, _ := json.MarshalIndent(out, "", "  ")
+	return string(b)
+}
+
+// ModelToJSON returns an any that can be serialized to JSON,
 // matching the format expected by modelFromJSON in import.go.
-func serializeModel(v Model) any {
+func ModelToJSON(v Model) any {
 	switch m := v.(type) {
 	case nil:
 		return nil
 
+	case *Grammar:
+		return serializeGrammar(m)
 	case *Token:
 		return mapClass("Token", "token", m.Token)
 	case *Pattern:
@@ -36,62 +44,62 @@ func serializeModel(v Model) any {
 	case *Cut:
 		return mapClass("Cut")
 	case *Synth:
-		return mapClass("Synth", "exp", serializeModel(m.Exp))
+		return mapClass("Synth", "exp", ModelToJSON(m.Exp))
 	case *EmptyClosure:
 		return mapClass("EmptyClosure")
 	case *SkipTo:
-		return mapClass("SkipTo", "exp", serializeModel(m.Exp))
+		return mapClass("SkipTo", "exp", ModelToJSON(m.Exp))
 
 	case *Call:
 		return mapClass("Call", "name", m.Name)
 	case *RuleInclude:
-		return mapClass("RuleInclude", "name", m.Name, "exp", serializeModel(m.Exp))
+		return mapClass("RuleInclude", "name", m.Name, "exp", ModelToJSON(m.Exp))
 
 	case *Group:
-		return mapClass("Group", "exp", serializeModel(m.Exp))
+		return mapClass("Group", "exp", ModelToJSON(m.Exp))
 	case *SkipGroup:
-		return mapClass("SkipGroup", "exp", serializeModel(m.Exp))
+		return mapClass("SkipGroup", "exp", ModelToJSON(m.Exp))
 	case *Lookahead:
-		return mapClass("Lookahead", "exp", serializeModel(m.Exp))
+		return mapClass("Lookahead", "exp", ModelToJSON(m.Exp))
 	case *NegativeLookahead:
-		return mapClass("NegativeLookahead", "exp", serializeModel(m.Exp))
+		return mapClass("NegativeLookahead", "exp", ModelToJSON(m.Exp))
 	case *Override:
-		return mapClass("Override", "exp", serializeModel(m.Exp))
+		return mapClass("Override", "exp", ModelToJSON(m.Exp))
 	case *OverrideList:
-		return mapClass("OverrideList", "exp", serializeModel(m.Exp))
+		return mapClass("OverrideList", "exp", ModelToJSON(m.Exp))
 	case *Option:
-		return mapClass("Option", "exp", serializeModel(m.Exp))
+		return mapClass("Option", "exp", ModelToJSON(m.Exp))
 	case *Optional:
-		return mapClass("Optional", "exp", serializeModel(m.Exp))
+		return mapClass("Optional", "exp", ModelToJSON(m.Exp))
 	case *Closure:
-		return mapClass("Closure", "exp", serializeModel(m.Exp))
+		return mapClass("Closure", "exp", ModelToJSON(m.Exp))
 	case *PositiveClosure:
-		return mapClass("PositiveClosure", "exp", serializeModel(m.Exp))
+		return mapClass("PositiveClosure", "exp", ModelToJSON(m.Exp))
 
 	case *Named:
-		return mapClass("Named", "name", m.Name, "exp", serializeModel(m.Exp))
+		return mapClass("Named", "name", m.Name, "exp", ModelToJSON(m.Exp))
 	case *NamedList:
-		return mapClass("NamedList", "name", m.Name, "exp", serializeModel(m.Exp))
+		return mapClass("NamedList", "name", m.Name, "exp", ModelToJSON(m.Exp))
 
 	case *Join:
-		return mapClass("Join", "exp", serializeModel(m.Exp), "sep", serializeModel(m.Sep))
+		return mapClass("Join", "exp", ModelToJSON(m.Exp), "sep", ModelToJSON(m.Sep))
 	case *PositiveJoin:
-		return mapClass("PositiveJoin", "exp", serializeModel(m.Exp), "sep", serializeModel(m.Sep))
+		return mapClass("PositiveJoin", "exp", ModelToJSON(m.Exp), "sep", ModelToJSON(m.Sep))
 	case *Gather:
-		return mapClass("Gather", "exp", serializeModel(m.Exp), "sep", serializeModel(m.Sep))
+		return mapClass("Gather", "exp", ModelToJSON(m.Exp), "sep", ModelToJSON(m.Sep))
 	case *PositiveGather:
-		return mapClass("PositiveGather", "exp", serializeModel(m.Exp), "sep", serializeModel(m.Sep))
+		return mapClass("PositiveGather", "exp", ModelToJSON(m.Exp), "sep", ModelToJSON(m.Sep))
 
 	case *Sequence:
 		items := make([]any, len(m.Sequence))
 		for i, item := range m.Sequence {
-			items[i] = serializeModel(item)
+			items[i] = ModelToJSON(item)
 		}
 		return mapClass("Sequence", "sequence", items)
 	case *Choice:
 		opts := make([]any, len(m.Options))
 		for i, opt := range m.Options {
-			opts[i] = serializeModel(opt)
+			opts[i] = ModelToJSON(opt)
 		}
 		return mapClass("Choice", "options", opts)
 
@@ -111,9 +119,9 @@ func mapClass(class string, kv ...any) *orderedmap.OrderedMap {
 	return out
 }
 
-// SerializeGrammar returns a JSON string representation of g
+// serializeGrammar returns a JSON string representation of g
 // that can be read back by ParseGrammar.
-func SerializeGrammar(g *Grammar) string {
+func serializeGrammar(g *Grammar) any {
 	out := orderedmap.New()
 	out.Set("__class__", "Grammar")
 	out.Set("name", g.Name)
@@ -136,9 +144,7 @@ func SerializeGrammar(g *Grammar) string {
 		rules[i] = serializeRule(rule)
 	}
 	out.Set("rules", rules)
-
-	b, _ := json.MarshalIndent(out, "", "  ")
-	return string(b)
+	return out
 }
 
 func serializeRule(r *Rule) *orderedmap.OrderedMap {
@@ -156,6 +162,6 @@ func serializeRule(r *Rule) *orderedmap.OrderedMap {
 	out.Set("no_stak", r.NoStak)
 	out.Set("is_memo", r.IsMemo)
 	out.Set("is_lrec", r.IsLrec)
-	out.Set("exp", serializeModel(r.Exp))
+	out.Set("exp", ModelToJSON(r.Exp))
 	return out
 }

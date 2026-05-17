@@ -360,7 +360,7 @@ func TestParseGrammar(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx, nil)
+	result, err := expr.ParseAt(ctx, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -394,7 +394,7 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 			},
 		},
 	}
-	result, err := expr.Parse(ctx, nil)
+	result, err := expr.ParseAt(ctx, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

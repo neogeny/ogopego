@@ -5,8 +5,6 @@ package trees
 
 import (
 	"testing"
-
-	asjson "github.com/neogeny/ogopego/json"
 )
 
 func text(s string) *Text      { return &Text{Value: s} }
@@ -248,38 +246,24 @@ func TestFoldSeqWithNil(t *testing.T) {
 }
 
 func TestTextAsJSON(t *testing.T) {
-	result := asjson.AsJSON(&Text{Value: "hello"})
-	s, ok := result.(string)
-	if !ok {
-		t.Fatalf("expected string, got %T", result)
-	}
-	if s != "hello" {
-		t.Errorf("expected 'hello', got %v", s)
+	result := TreeToJSONStr(&Text{Value: "hello"})
+	if result != `"hello"` {
+		t.Errorf("got %s", result)
 	}
 }
 
 func TestNumberAsJSON(t *testing.T) {
-	result := asjson.AsJSON(&Number{Value: 42.5})
-	f, ok := result.(float64)
-	if !ok {
-		t.Fatalf("expected float64, got %T", result)
-	}
-	if f != 42.5 {
-		t.Errorf("expected 42.5, got %v", f)
+	result := TreeToJSONStr(&Number{Value: 42.5})
+	if result != "42.5" {
+		t.Errorf("got %s", result)
 	}
 }
 
 func TestNodeAsJSONTree(t *testing.T) {
-	result := asjson.AsJSON(&Node{TypeName: "expr", Tree: text("42")})
-	m, ok := result.(map[string]any)
-	if !ok {
-		t.Fatalf("expected map[string]any, got %T", result)
-	}
-	if cls := m["__class__"]; cls != "expr" {
-		t.Errorf("expected __class__=expr, got %v", cls)
-	}
-	if ast := m["ast"]; ast != "42" {
-		t.Errorf("expected ast='42', got %v", ast)
+	result := TreeToJSONStr(&Node{TypeName: "expr", Tree: text("42")})
+	want := "{\n  \"__class__\": \"expr\",\n  \"ast\": \"42\"\n}"
+	if result != want {
+		t.Errorf("got:\n%s\nwant:\n%s", result, want)
 	}
 }
 

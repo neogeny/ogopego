@@ -9,7 +9,7 @@ import (
 
 func mustLink(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.Link(); err != nil {
+	if err := g.LinkGrammar(); err != nil {
 		t.Fatalf("Link() error: %v", err)
 	}
 }
@@ -23,7 +23,7 @@ func mustValidateLinked(t *testing.T, g *Grammar) {
 
 func expectLinkError(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.Link(); err == nil {
+	if err := g.LinkGrammar(); err == nil {
 		t.Fatal("expected Link() error, got nil")
 	}
 }
