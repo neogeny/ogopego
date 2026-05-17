@@ -106,7 +106,7 @@ func (n *Node) AsJSON() any {
 }
 
 // AsJSONStr returns a JSON string representation of the node.
-func (n *Node) AsJSONStr() string { return asjson.AsJSONStrOf(n) }
+func (n *Node) AsJSONStr() string { return asjson.AsJSONStr(n.AsJSON()) }
 
 // MarshalJSON marshals the node to JSON.
 func (n *Node) MarshalJSON() ([]byte, error) {

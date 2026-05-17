@@ -32,7 +32,7 @@ func (t *Constant) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Constant) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Constant.
-func (t *Constant) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Constant) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // Parse implements the Model interface for Alert.
 func (a *Alert) Parse(ctx Ctx) (Tree, error) {
@@ -46,4 +46,4 @@ func (t *Alert) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Alert) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Alert.
-func (t *Alert) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Alert) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

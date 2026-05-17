@@ -42,4 +42,4 @@ func (t *SkipTo) PubMap() *asjson.OrderedMap { return util.PubMapOf(t) }
 func (t *SkipTo) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the SkipTo.
-func (t *SkipTo) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *SkipTo) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

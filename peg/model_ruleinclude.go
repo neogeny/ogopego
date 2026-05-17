@@ -33,4 +33,4 @@ func (t *RuleInclude) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *RuleInclude) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the RuleInclude.
-func (t *RuleInclude) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *RuleInclude) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

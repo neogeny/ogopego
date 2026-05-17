@@ -136,4 +136,4 @@ func (c *Call) PubMap() *asjson.OrderedMap { return util.PubMapOf(c) }
 func (c *Call) AsJSON() any { return asjson.AsJSONOf(c) }
 
 // AsJSONStr returns a JSON string representation of the Call.
-func (c *Call) AsJSONStr() string { return asjson.AsJSONStrOf(c) }
+func (c *Call) AsJSONStr() string { return asjson.AsJSONStr(c.AsJSON()) }

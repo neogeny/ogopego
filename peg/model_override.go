@@ -45,7 +45,7 @@ func (t *Override) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Override) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Override.
-func (t *Override) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Override) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // PubMap returns an ordered map of the OverrideList's public fields.
 func (t *OverrideList) PubMap() *OrderedMap { return util.PubMapOf(t) }
@@ -54,4 +54,4 @@ func (t *OverrideList) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *OverrideList) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the OverrideList.
-func (t *OverrideList) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *OverrideList) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

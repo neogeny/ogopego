@@ -26,4 +26,4 @@ func (t *NULL) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *NULL) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the NULL.
-func (t *NULL) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *NULL) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

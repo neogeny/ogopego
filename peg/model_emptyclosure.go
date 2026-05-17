@@ -26,4 +26,4 @@ func (t *EmptyClosure) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *EmptyClosure) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the EmptyClosure.
-func (t *EmptyClosure) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *EmptyClosure) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

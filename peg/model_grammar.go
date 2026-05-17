@@ -137,7 +137,7 @@ func (g *Grammar) PubMap() *asjson.OrderedMap { return util.PubMapOf(g) }
 func (g *Grammar) AsJSON() any { return asjson.AsJSONOf(g) }
 
 // AsJSONStr returns a JSON string representation of the Grammar.
-func (g *Grammar) AsJSONStr() string { return asjson.AsJSONStrOf(g) }
+func (g *Grammar) AsJSONStr() string { return asjson.AsJSONStr(g.AsJSON()) }
 
 // MarshalJSON marshals the Grammar to JSON.
 func (g *Grammar) MarshalJSON() ([]byte, error) { return json.Marshal(g.AsJSON()) }

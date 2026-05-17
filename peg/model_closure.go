@@ -36,7 +36,7 @@ func (t *Closure) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Closure) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Closure.
-func (t *Closure) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Closure) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // PubMap returns an ordered map of the PositiveClosure's public fields.
 func (t *PositiveClosure) PubMap() *OrderedMap { return util.PubMapOf(t) }
@@ -45,4 +45,4 @@ func (t *PositiveClosure) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *PositiveClosure) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the PositiveClosure.
-func (t *PositiveClosure) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *PositiveClosure) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

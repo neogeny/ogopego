@@ -32,4 +32,4 @@ func (t *Dot) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Dot) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Dot.
-func (t *Dot) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Dot) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

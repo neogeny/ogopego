@@ -28,4 +28,4 @@ func (t *Cut) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Cut) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Cut.
-func (t *Cut) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Cut) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

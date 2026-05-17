@@ -47,4 +47,4 @@ func (t *Sequence) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Sequence) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Sequence.
-func (t *Sequence) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Sequence) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

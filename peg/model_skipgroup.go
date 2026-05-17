@@ -29,4 +29,4 @@ func (t *SkipGroup) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *SkipGroup) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the SkipGroup.
-func (t *SkipGroup) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *SkipGroup) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

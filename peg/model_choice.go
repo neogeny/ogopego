@@ -64,7 +64,7 @@ func (c *Choice) PubMap() *OrderedMap { return util.PubMapOf(c) }
 func (c *Choice) AsJSON() any { return asjson.AsJSONOf(c) }
 
 // AsJSONStr returns a JSON string representation of the Choice.
-func (c *Choice) AsJSONStr() string { return asjson.AsJSONStrOf(c) }
+func (c *Choice) AsJSONStr() string { return asjson.AsJSONStr(c.AsJSON()) }
 
 // PubMap returns an ordered map of the Option's public fields.
 func (o *Option) PubMap() *OrderedMap { return util.PubMapOf(o) }
@@ -73,4 +73,4 @@ func (o *Option) PubMap() *OrderedMap { return util.PubMapOf(o) }
 func (o *Option) AsJSON() any { return asjson.AsJSONOf(o) }
 
 // AsJSONStr returns a JSON string representation of the Option.
-func (o *Option) AsJSONStr() string { return asjson.AsJSONStrOf(o) }
+func (o *Option) AsJSONStr() string { return asjson.AsJSONStr(o.AsJSON()) }

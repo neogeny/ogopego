@@ -56,7 +56,7 @@ func (t *Lookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Lookahead) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Lookahead.
-func (t *Lookahead) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Lookahead) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // PubMap returns an ordered map of the NegativeLookahead's public fields.
 func (t *NegativeLookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
@@ -65,4 +65,4 @@ func (t *NegativeLookahead) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *NegativeLookahead) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the NegativeLookahead.
-func (t *NegativeLookahead) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *NegativeLookahead) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

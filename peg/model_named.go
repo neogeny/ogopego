@@ -44,7 +44,7 @@ func (t *Named) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Named) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Named.
-func (t *Named) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Named) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // PubMap returns an ordered map of the NamedList's public fields.
 func (t *NamedList) PubMap() *OrderedMap { return util.PubMapOf(t) }
@@ -53,4 +53,4 @@ func (t *NamedList) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *NamedList) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the NamedList.
-func (t *NamedList) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *NamedList) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

@@ -27,7 +27,7 @@ func (t *Box) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Box) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Box.
-func (t *Box) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Box) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // PubMap returns an ordered map of the NamedBox's public fields.
 func (t *NamedBox) PubMap() *OrderedMap { return util.PubMapOf(t) }
@@ -36,4 +36,4 @@ func (t *NamedBox) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *NamedBox) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the NamedBox.
-func (t *NamedBox) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *NamedBox) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

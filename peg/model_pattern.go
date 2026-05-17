@@ -31,4 +31,4 @@ func (t *Pattern) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Pattern) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Pattern.
-func (t *Pattern) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Pattern) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

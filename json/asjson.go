@@ -146,13 +146,12 @@ func ToGoMap(v any) any {
 	}
 }
 
-// AsJSONStrOf returns a JSON string representation of the given reference's public fields.
-func AsJSONStrOf(ref any) string {
-	val := AsJSONOf(ref)
-	if val == nil {
+// AsJSONStr returns a JSON string representation of the given value.
+func AsJSONStr(v any) string {
+	if v == nil {
 		return ""
 	}
-	bts, err := json.MarshalIndent(val, "", "  ")
+	bts, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return fmt.Sprintf("!json:%v", err)
 	}

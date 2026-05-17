@@ -43,7 +43,7 @@ func (t *Join) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Join) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Join.
-func (t *Join) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Join) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // Parse implements the Model interface for PositiveJoin.
 func (p *PositiveJoin) Parse(ctx Ctx) (Tree, error) {
@@ -57,7 +57,7 @@ func (t *PositiveJoin) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *PositiveJoin) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the PositiveJoin.
-func (t *PositiveJoin) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *PositiveJoin) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // Parse implements the Model interface for Gather.
 func (g *Gather) Parse(ctx Ctx) (Tree, error) {
@@ -71,7 +71,7 @@ func (t *Gather) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *Gather) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Gather.
-func (t *Gather) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *Gather) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }
 
 // Parse implements the Model interface for PositiveGather.
 func (p *PositiveGather) Parse(ctx Ctx) (Tree, error) {
@@ -85,4 +85,4 @@ func (t *PositiveGather) PubMap() *OrderedMap { return util.PubMapOf(t) }
 func (t *PositiveGather) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the PositiveGather.
-func (t *PositiveGather) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
+func (t *PositiveGather) AsJSONStr() string { return asjson.AsJSONStr(t.AsJSON()) }

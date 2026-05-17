@@ -86,7 +86,7 @@ func (r *Rule) PubMap() *OrderedMap { return util.PubMapOf(r) }
 func (r *Rule) AsJSON() any { return asjson.AsJSONOf(r) }
 
 // AsJSONStr returns a JSON string representation of the Rule.
-func (r *Rule) AsJSONStr() string { return asjson.AsJSONStrOf(r) }
+func (r *Rule) AsJSONStr() string { return asjson.AsJSONStr(r.AsJSON()) }
 
 // MarshalJSON marshals the Rule to JSON.
 func (r *Rule) MarshalJSON() ([]byte, error) { return json.Marshal(r.AsJSON()) }
