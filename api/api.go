@@ -15,7 +15,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/neogeny/ogopego"
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/input"
@@ -31,32 +30,21 @@ import (
 type Cfg = config.Cfg
 
 var (
-	bootOnce sync.Once
-	bootGram *peg.Grammar
-	bootErr  error
-
 	compileMu    sync.RWMutex
 	compileCache = make(map[string]*peg.Grammar)
 )
 
-func bootGrammar() (*peg.Grammar, error) {
-	bootOnce.Do(func() {
-		bootGram, bootErr = peg.LoadBootGrammar(ogopego.TatSuGrammarJSON)
-	})
-	return bootGram, bootErr
-}
-
 // BootGrammar returns the internal boot grammar that is used to parse EBNF
 // grammar strings. The result is cached after the first call.
 func BootGrammar() (*peg.Grammar, error) {
-	return bootGrammar()
+	return peg.BootGrammar()
 }
 
 // ParseGrammar parses a grammar string using the boot grammar and returns
 // the raw parse tree. Use Compile instead to get a usable Grammar object.
 func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	grammar = strings.TrimRight(grammar, " \t\r\n")
-	boot, err := bootGrammar()
+	boot, err := BootGrammar()
 	if err != nil {
 		return nil, err
 	}
