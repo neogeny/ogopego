@@ -73,6 +73,21 @@ func TestFoldSeqToSeq(t *testing.T) {
 	}
 }
 
+func TestFoldListToList(t *testing.T) {
+	// Seq with no Named/Override becomes List after fold (closed)
+	result := Fold(list(text("a"), text("b"), text("c")))
+	l, ok := result.(*List)
+	if !ok {
+		t.Fatalf("expected List, got %T", result)
+	}
+	if len(l.Items) != 3 {
+		t.Fatalf("expected 3 items, got %d", len(l.Items))
+	}
+	if l.Items[0].(*Text).Value != "a" {
+		t.Errorf("expected 'a', got %v", l.Items[0])
+	}
+}
+
 func TestFoldNamedToMap(t *testing.T) {
 	result := Fold(&Named{Name: "x", Value: text("hello")})
 	m, ok := result.(*MapNode)
