@@ -9,11 +9,17 @@ type Void struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for Void.
 func (v *Void) Parse(ctx Ctx) (Tree, error) {
 	ctx.Void()
 	return NIL, nil
 }
 
+// PubMap returns an ordered map of the Void's public fields.
 func (t *Void) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Void) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Void) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Void.
+func (t *Void) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Void.
+func (t *Void) AsJSONStr() string { return t.AsJSONStrOf(t) }

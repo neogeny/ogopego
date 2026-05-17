@@ -11,10 +11,12 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// comp is a helper struct for compiling grammar trees.
 type comp struct {
 	path []string
 }
 
+// push adds a label to the compilation path.
 func (c *comp) push(label string) *comp {
 	p := make([]string, len(c.path)+1)
 	copy(p, c.path)
@@ -22,6 +24,7 @@ func (c *comp) push(label string) *comp {
 	return &comp{path: p}
 }
 
+// error creates a formatted error message with the compilation path.
 func (c *comp) error(msg string) error {
 	if len(c.path) == 0 {
 		return fmt.Errorf("compile: %s", msg)
@@ -29,6 +32,7 @@ func (c *comp) error(msg string) error {
 	return fmt.Errorf("compile: %s at %s", msg, strings.Join(c.path, " -> "))
 }
 
+// CompileGrammar compiles a parse tree into a Grammar object.
 func CompileGrammar(tree trees.Tree) (*Grammar, error) {
 	c := &comp{}
 	g, err := c.compileGrammar(tree)
@@ -38,6 +42,7 @@ func CompileGrammar(tree trees.Tree) (*Grammar, error) {
 	return g, nil
 }
 
+// node extracts the type name and inner tree from a RuleNode.
 func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {
 	rn, ok := tree.(*trees.Node)
 	if !ok {
@@ -46,6 +51,7 @@ func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {
 	return rn.TypeName, rn.Tree, nil
 }
 
+// nodeCheck checks if a tree is a RuleNode of a specific type.
 func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
 	name, inner, err := c.node(tree)
 	if err != nil {
@@ -57,6 +63,7 @@ func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
 	return inner, nil
 }
 
+// mapGet retrieves a value from a MapNode by key.
 func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
 	mn, ok := tree.(*trees.MapNode)
 	if !ok {
@@ -69,6 +76,7 @@ func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
 	return val, nil
 }
 
+// mapGetDefault retrieves a value from a MapNode by key, returning a default if not found.
 func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
 	mn, ok := tree.(*trees.MapNode)
 	if !ok {
@@ -81,6 +89,7 @@ func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
 	return textValue(val)
 }
 
+// textValue extracts the string value from a Text tree node.
 func textValue(tree trees.Tree) string {
 	t, ok := tree.(*trees.Text)
 	if ok {
@@ -89,6 +98,7 @@ func textValue(tree trees.Tree) string {
 	return ""
 }
 
+// listValue extracts a slice of trees from a Seq or List tree node.
 func listValue(tree trees.Tree) []trees.Tree {
 	switch t := tree.(type) {
 	case *trees.Seq:
@@ -100,6 +110,7 @@ func listValue(tree trees.Tree) []trees.Tree {
 	}
 }
 
+// strListValue extracts a slice of strings from a list of Text tree nodes.
 func strListValue(tree trees.Tree) []string {
 	items := listValue(tree)
 	if items == nil {
@@ -115,6 +126,7 @@ func strListValue(tree trees.Tree) []string {
 	return out
 }
 
+// compileGrammar compiles a "Grammar" tree node into a Grammar object.
 func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 	cc := c.push("Grammar")
 	inner, err := cc.nodeCheck(tree, "Grammar")
@@ -203,6 +215,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 	return g, nil
 }
 
+// compileRule compiles a "Rule" tree node into a Rule object.
 func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 	inner, err := c.nodeCheck(tree, "Rule")
 	if err != nil {
@@ -244,6 +257,7 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 	return r, nil
 }
 
+// compileExp compiles an expression tree node into a Model object.
 func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 	typename, inner, err := c.node(tree)
 	if err != nil {

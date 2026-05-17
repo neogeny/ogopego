@@ -7,15 +7,18 @@ import (
 	"errors"
 )
 
+// Option represents a single alternative within a Choice expression.
 type Option struct {
 	Box
 }
 
+// Choice represents a PEG choice expression (ordered choice).
 type Choice struct {
 	ModelBase
 	Options []*Option
 }
 
+// Parse implements the Model interface for Option.
 func (o *Option) Parse(ctx Ctx) (Tree, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
@@ -24,6 +27,7 @@ func (o *Option) Parse(ctx Ctx) (Tree, error) {
 	return result, nil
 }
 
+// Parse implements the Model interface for Choice.
 func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	startMark := ctx.Mark()
 	var lastErr error
@@ -50,10 +54,20 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	return nil, lastErr
 }
 
+// PubMap returns an ordered map of the Choice's public fields.
 func (c *Choice) PubMap() *OrderedMap { return c.PubMapOf(c) }
-func (c *Choice) AsJSON() any         { return c.AsJSONOf(c) }
-func (c *Choice) AsJSONStr() string   { return c.AsJSONStrOf(c) }
 
+// AsJSON returns a JSON-compatible representation of the Choice.
+func (c *Choice) AsJSON() any { return c.AsJSONOf(c) }
+
+// AsJSONStr returns a JSON string representation of the Choice.
+func (c *Choice) AsJSONStr() string { return c.AsJSONStrOf(c) }
+
+// PubMap returns an ordered map of the Option's public fields.
 func (o *Option) PubMap() *OrderedMap { return o.PubMapOf(o) }
-func (o *Option) AsJSON() any         { return o.AsJSONOf(o) }
-func (o *Option) AsJSONStr() string   { return o.AsJSONStrOf(o) }
+
+// AsJSON returns a JSON-compatible representation of the Option.
+func (o *Option) AsJSON() any { return o.AsJSONOf(o) }
+
+// AsJSONStr returns a JSON string representation of the Option.
+func (o *Option) AsJSONStr() string { return o.AsJSONStrOf(o) }

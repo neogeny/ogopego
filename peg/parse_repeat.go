@@ -9,6 +9,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// repeat parses an expression zero or more times (or one or more if positive is true).
 func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 	var items []trees.Tree
 
@@ -45,6 +46,7 @@ func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 	return &trees.List{Items: items}, nil
 }
 
+// repeatWithSep parses an expression separated by another expression.
 func repeatWithSep(
 	ctx Ctx,
 	exp Model,

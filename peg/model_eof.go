@@ -12,6 +12,7 @@ type EOF struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for EOF.
 func (e *EOF) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	ctx.NextToken()
@@ -25,6 +26,11 @@ func (e *EOF) Parse(ctx Ctx) (Tree, error) {
 	return NIL, nil
 }
 
+// PubMap returns an ordered map of the EOF's public fields.
 func (t *EOF) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *EOF) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *EOF) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the EOF.
+func (t *EOF) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the EOF.
+func (t *EOF) AsJSONStr() string { return t.AsJSONStrOf(t) }

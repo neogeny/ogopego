@@ -3,28 +3,42 @@
 
 package peg
 
+// Constant represents a literal constant value.
 type Constant struct {
 	ModelBase
 	Literal string
 }
 
+// Alert represents an alert with a literal message and a level.
 type Alert struct {
 	Constant
 	Level int
 }
 
+// Parse implements the Model interface for Constant.
 func (c *Constant) Parse(ctx Ctx) (Tree, error) {
 	return ctx.Constant(c.Literal)
 }
 
+// PubMap returns an ordered map of the Constant's public fields.
 func (t *Constant) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Constant) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Constant) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Constant.
+func (t *Constant) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Constant.
+func (t *Constant) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// Parse implements the Model interface for Alert.
 func (a *Alert) Parse(ctx Ctx) (Tree, error) {
 	return ctx.Constant(a.Literal)
 }
 
+// PubMap returns an ordered map of the Alert's public fields.
 func (t *Alert) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Alert) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Alert) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Alert.
+func (t *Alert) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Alert.
+func (t *Alert) AsJSONStr() string { return t.AsJSONStrOf(t) }

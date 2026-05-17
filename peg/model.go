@@ -29,33 +29,49 @@ var NIL = trees.NIL
 
 // Model is the interface implemented by all grammar model nodes.
 type Model interface {
+	// Parse attempts to parse the input using the model.
 	Parse(ctx Ctx) (Tree, error)
+	// Link resolves rule references within the model.
 	Link(rules map[string]*Rule) error
+	// ValidateLinked checks if all rule references are resolved.
 	ValidateLinked() error
+	// followRef returns the underlying ModelBase.
 	followRef() *ModelBase
 
+	// PrettyPrint returns a pretty-printed string representation of the model.
 	PrettyPrint() string
+	// Railroads returns a railroad diagram representation of the model.
 	Railroads() string
 }
 
+// ModelBase provides common embedding for model nodes to carry identity and
+// node data.
 type ModelBase struct {
 	Model
 	Node
 }
 
-// ModelBase provides common embedding for model nodes to carry identity and
-// node data.
-
+// followRef returns the underlying ModelBase.
 func (m *ModelBase) followRef() *ModelBase { return m }
 
+// Parse is a placeholder for Model implementations.
 func (m *ModelBase) Parse(ctx Ctx) (Tree, error) {
 	return nil, ctx.Failure(ctx.Mark(), errors.New("Parse not implemented"))
 }
-func (m *ModelBase) Link(rules map[string]*Rule) error { return nil }
-func (m *ModelBase) ValidateLinked() error             { return nil }
-func (m *ModelBase) PrettyPrint() string               { return "" }
-func (m *ModelBase) Railroads() string                 { return "" }
 
+// Link is a placeholder for Model implementations.
+func (m *ModelBase) Link(rules map[string]*Rule) error { return nil }
+
+// ValidateLinked is a placeholder for Model implementations.
+func (m *ModelBase) ValidateLinked() error { return nil }
+
+// PrettyPrint is a placeholder for Model implementations.
+func (m *ModelBase) PrettyPrint() string { return "" }
+
+// Railroads is a placeholder for Model implementations.
+func (m *ModelBase) Railroads() string { return "" }
+
+// MarshalJSON marshals the ModelBase to JSON.
 func (m *ModelBase) MarshalJSON() ([]byte, error) { return gojson.Marshal(m.AsJSON()) }
 
 // modelMarshalJSON is a helper for model types to implement json.Marshaler

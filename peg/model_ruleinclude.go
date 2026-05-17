@@ -15,6 +15,7 @@ type RuleInclude struct {
 	Exp  Model
 }
 
+// Parse implements the Model interface for RuleInclude.
 func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
 	if r.Exp == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("RuleInclude %q has not been resolved", r.Name))
@@ -22,6 +23,11 @@ func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
 	return r.Exp.Parse(ctx)
 }
 
+// PubMap returns an ordered map of the RuleInclude's public fields.
 func (t *RuleInclude) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *RuleInclude) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *RuleInclude) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the RuleInclude.
+func (t *RuleInclude) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the RuleInclude.
+func (t *RuleInclude) AsJSONStr() string { return t.AsJSONStrOf(t) }

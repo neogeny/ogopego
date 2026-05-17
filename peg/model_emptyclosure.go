@@ -7,14 +7,21 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// EmptyClosure represents a closure that always matches an empty sequence, yielding an empty list.
 type EmptyClosure struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for EmptyClosure.
 func (e *EmptyClosure) Parse(ctx Ctx) (Tree, error) {
 	return &trees.List{Items: nil}, nil
 }
 
+// PubMap returns an ordered map of the EmptyClosure's public fields.
 func (t *EmptyClosure) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *EmptyClosure) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *EmptyClosure) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the EmptyClosure.
+func (t *EmptyClosure) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the EmptyClosure.
+func (t *EmptyClosure) AsJSONStr() string { return t.AsJSONStrOf(t) }

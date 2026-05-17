@@ -16,12 +16,17 @@ import (
 
 type OrderedMap = orderedmap.OrderedMap
 
+// AsJSONMixin defines an interface for types that can be converted to JSON-compatible structures.
 type AsJSONMixin interface {
+	// PubMap returns an ordered map of public fields.
 	PubMap() *OrderedMap
+	// AsJSON returns a JSON-compatible representation of the object.
 	AsJSON() any
+	// AsJSONStr returns a JSON string representation of the object.
 	AsJSONStr() string
 }
 
+// AsJSONBase provides common functionality for AsJSONMixin implementations.
 type AsJSONBase struct{}
 
 func AsJSON(v any) any {
@@ -37,6 +42,7 @@ func AsJSONs(v any) string {
 	return string(b)
 }
 
+// ToJSONString converts a Go value to a JSON string with optional prefix and indent.
 func ToJSONString(v any) string {
 	return toJSONString(v, "", "  ")
 }
@@ -121,6 +127,7 @@ func toJSONString(v any, prefix, indent string) string {
 	}
 }
 
+// ToGoMap converts an OrderedMap or slice of any to a standard Go map or slice recursively.
 func ToGoMap(v any) any {
 	switch val := v.(type) {
 	case *orderedmap.OrderedMap:
@@ -141,6 +148,7 @@ func ToGoMap(v any) any {
 	}
 }
 
+// AsJSONStrOf returns a JSON string representation of the given reference's public fields.
 func (b *AsJSONBase) AsJSONStrOf(ref any) string {
 	val := b.AsJSONOf(ref)
 	if val == nil {
@@ -153,6 +161,7 @@ func (b *AsJSONBase) AsJSONStrOf(ref any) string {
 	return string(bts)
 }
 
+// AsJSONOf returns a JSON-compatible representation of the given reference's public fields.
 func (b *AsJSONBase) AsJSONOf(ref any) any {
 	pub := b.PubMapOf(ref)
 	if pub == nil {
@@ -177,6 +186,7 @@ func (b *AsJSONBase) AsJSONOf(ref any) any {
 	return out
 }
 
+// PythonizeName converts a Go field name to a Python-style snake_case name.
 func PythonizeName(s string) string {
 	if len(s) == 0 {
 		return s
@@ -198,6 +208,7 @@ func PythonizeName(s string) string {
 	return result.String()
 }
 
+// PubMapOf returns an OrderedMap containing the public fields of the given reference.
 func (b *AsJSONBase) PubMapOf(ref any) *OrderedMap {
 	if ref == nil {
 		return nil

@@ -55,9 +55,9 @@ func TakeLinebreakLen(text string, start int) int {
 	return n - start
 }
 
-// BlankLine matches two consecutive whitespace-only lines.
+// TakeBlankLineLen matches two consecutive whitespace-only lines.
 // Returns the total byte length consumed, or -1 if not found.
-func BlankLine(text string, start int) int {
+func TakeBlankLineLen(text string, start int) int {
 	off1 := TakeLinebreakLen(text, start)
 	if off1 < 0 {
 		return -1
@@ -69,9 +69,9 @@ func BlankLine(text string, start int) int {
 	return off1 + off2
 }
 
-// IndentLen returns the byte length of leading whitespace on the line at start.
+// TakeIndentLen returns the byte length of leading whitespace on the line at start.
 // Returns 0 if start is at or past end of text (EOT is treated as zero margin).
-func IndentLen(text string, start int) int {
+func TakeIndentLen(text string, start int) int {
 	n := len(text)
 	if start >= n {
 		return 0
@@ -98,14 +98,14 @@ func IndentLen(text string, start int) int {
 	return -1
 }
 
-// Dedent detects a line break that returns to the zero margin.
+// TakeDedentLen detects a line break that returns to the zero margin.
 // Returns the byte offset consumed, or -1 if not found.
-func Dedent(text string, start int) int {
+func TakeDedentLen(text string, start int) int {
 	offset := TakeLinebreakLen(text, start)
 	if offset < 0 {
 		return -1
 	}
-	if IndentLen(text, start+offset) == 0 {
+	if TakeIndentLen(text, start+offset) == 0 {
 		return offset
 	}
 	return -1

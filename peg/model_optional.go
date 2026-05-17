@@ -13,6 +13,7 @@ type Optional struct {
 	Box
 }
 
+// Parse implements the Model interface for Optional.
 func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 
@@ -30,6 +31,11 @@ func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 	return result, nil
 }
 
+// PubMap returns an ordered map of the Optional's public fields.
 func (t *Optional) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Optional) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Optional) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Optional.
+func (t *Optional) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Optional.
+func (t *Optional) AsJSONStr() string { return t.AsJSONStrOf(t) }

@@ -14,6 +14,7 @@ type EOL struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for EOL.
 func (e *EOL) Parse(ctx Ctx) (Tree, error) {
 	if !ctx.MatchEOL() {
 		return nil, ctx.Failure(
@@ -24,6 +25,11 @@ func (e *EOL) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Nil{}, nil
 }
 
+// PubMap returns an ordered map of the EOL's public fields.
 func (t *EOL) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *EOL) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *EOL) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the EOL.
+func (t *EOL) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the EOL.
+func (t *EOL) AsJSONStr() string { return t.AsJSONStrOf(t) }

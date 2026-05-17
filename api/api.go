@@ -41,7 +41,7 @@ var (
 
 func bootGrammar() (*peg.Grammar, error) {
 	bootOnce.Do(func() {
-		bootGram, bootErr = peg.LoadBootGrammar(ogopego.TatsuGrammarJSON)
+		bootGram, bootErr = peg.LoadBootGrammar(ogopego.TatSuGrammarJSON)
 	})
 	return bootGram, bootErr
 }

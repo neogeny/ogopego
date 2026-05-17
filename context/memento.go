@@ -16,8 +16,8 @@ const (
 	ansiGrey  = "\033[90m"
 )
 
+// Memento captures the state of the parser at a specific point for error reporting.
 type Memento struct {
-	error
 	Cursor    input.Cursor
 	Msg       string
 	Start     int
@@ -39,14 +39,17 @@ func NewMemento(start int, msg string, cursor input.Cursor, callstack []string) 
 	}
 }
 
+// InputSource returns the name of the input source.
 func (m *Memento) InputSource() string {
 	return m.Cursor.InputSource()
 }
 
+// Text returns the full text of the input.
 func (m *Memento) Text() string {
 	return m.Cursor.AsStr()
 }
 
+// Error returns a formatted string representation of the Memento, suitable for error messages.
 func (m *Memento) Error() string {
 	line, col := m.Cursor.PosAt(m.Mark)
 	var b strings.Builder
@@ -67,7 +70,7 @@ func (m *Memento) Error() string {
 	)
 	b.WriteString(
 		fmt.Sprintf(
-			"  %s %s:%d:%d\n",
+			"  %s %s@[%d:%d]\n",
 			arrow,
 			m.Cursor.InputSource(),
 			line,
@@ -76,7 +79,7 @@ func (m *Memento) Error() string {
 	)
 
 	b.WriteString(fmt.Sprintf("   %s\n", bluePipe))
-	i := 1
+	i := 0
 	for linestr := range strings.Lines(m.Cursor.AsStr()) {
 		if i > line {
 			break
@@ -95,15 +98,13 @@ func (m *Memento) Error() string {
 				),
 			)
 		}
-		if i == line {
-			pad := strings.Repeat(" ", col)
-			_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
-				bluePipe, pad,
-				ansiBold+ansiRed, ansiReset,
-				ansiRed, m.Msg, ansiReset)
-		}
 		i += 1
 	}
+	pad := strings.Repeat(" ", col)
+	_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
+		bluePipe, pad,
+		ansiBold+ansiRed, ansiReset,
+		ansiRed, m.Msg, ansiReset)
 
 	if len(m.CallStack) > 0 {
 		b.WriteString("\n")
@@ -117,6 +118,7 @@ func (m *Memento) Error() string {
 	return b.String()
 }
 
+// String returns a formatted string representation of the Memento.
 func (m *Memento) String() string {
 	return m.Error()
 }

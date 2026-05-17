@@ -12,6 +12,7 @@ type Dot struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for Dot.
 func (d *Dot) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	r, err := ctx.Dot()
@@ -22,6 +23,11 @@ func (d *Dot) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Text{Value: string(r)}, nil
 }
 
+// PubMap returns an ordered map of the Dot's public fields.
 func (t *Dot) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Dot) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Dot) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Dot.
+func (t *Dot) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Dot.
+func (t *Dot) AsJSONStr() string { return t.AsJSONStrOf(t) }

@@ -10,6 +10,7 @@ import (
 
 type rails []string
 
+// String returns the string representation of the rails.
 func (r rails) String() string {
 	lines := make([]string, len(r))
 	for i, s := range r {
@@ -368,46 +369,113 @@ func walkExp(m Model) []string {
 }
 
 // Railroads implements the ToRailroad interface for Grammar.
-
 func (m *Grammar) Railroads() string {
 	return rails(walkGrammar(m)).String()
 }
 
+// Railroads implements the ToRailroad interface for Rule.
 func (m *Rule) Railroads() string {
 	return rails(walkRule(m)).String()
 }
 
-func (m *NULL) Railroads() string              { return rails(walkExp(m)).String() }
-func (m *Token) Railroads() string             { return rails(walkExp(m)).String() }
-func (m *Pattern) Railroads() string           { return rails(walkExp(m)).String() }
-func (m *Constant) Railroads() string          { return rails(walkExp(m)).String() }
-func (m *Alert) Railroads() string             { return rails(walkExp(m)).String() }
-func (m *Call) Railroads() string              { return rails(walkExp(m)).String() }
-func (m *RuleInclude) Railroads() string       { return rails(walkExp(m)).String() }
-func (m *Cut) Railroads() string               { return rails(walkExp(m)).String() }
-func (m *Dot) Railroads() string               { return rails(walkExp(m)).String() }
-func (m *EOF) Railroads() string               { return rails(walkExp(m)).String() }
-func (m *EOL) Railroads() string               { return rails(walkExp(m)).String() }
-func (m *Fail) Railroads() string              { return rails(walkExp(m)).String() }
-func (m *Void) Railroads() string              { return rails(walkExp(m)).String() }
-func (m *EmptyClosure) Railroads() string      { return rails(walkExp(m)).String() }
-func (m *Option) Railroads() string            { return rails(walkExp(m)).String() }
-func (m *Group) Railroads() string             { return rails(walkExp(m)).String() }
-func (m *SkipGroup) Railroads() string         { return rails(walkExp(m)).String() }
-func (m *Lookahead) Railroads() string         { return rails(walkExp(m)).String() }
+// Railroads implements the ToRailroad interface for NULL.
+func (m *NULL) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Token.
+func (m *Token) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Pattern.
+func (m *Pattern) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Constant.
+func (m *Constant) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Alert.
+func (m *Alert) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Call.
+func (m *Call) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for RuleInclude.
+func (m *RuleInclude) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Cut.
+func (m *Cut) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Dot.
+func (m *Dot) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for EOF.
+func (m *EOF) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for EOL.
+func (m *EOL) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Fail.
+func (m *Fail) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Void.
+func (m *Void) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for EmptyClosure.
+func (m *EmptyClosure) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Option.
+func (m *Option) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Group.
+func (m *Group) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for SkipGroup.
+func (m *SkipGroup) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Lookahead.
+func (m *Lookahead) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for NegativeLookahead.
 func (m *NegativeLookahead) Railroads() string { return rails(walkExp(m)).String() }
-func (m *SkipTo) Railroads() string            { return rails(walkExp(m)).String() }
-func (m *Optional) Railroads() string          { return rails(walkExp(m)).String() }
-func (m *Closure) Railroads() string           { return rails(walkExp(m)).String() }
-func (m *PositiveClosure) Railroads() string   { return rails(walkExp(m)).String() }
-func (m *Override) Railroads() string          { return rails(walkExp(m)).String() }
-func (m *OverrideList) Railroads() string      { return rails(walkExp(m)).String() }
-func (m *Synth) Railroads() string             { return rails(walkExp(m)).String() }
-func (m *Named) Railroads() string             { return rails(walkExp(m)).String() }
-func (m *NamedList) Railroads() string         { return rails(walkExp(m)).String() }
-func (m *Join) Railroads() string              { return rails(walkExp(m)).String() }
-func (m *PositiveJoin) Railroads() string      { return rails(walkExp(m)).String() }
-func (m *Gather) Railroads() string            { return rails(walkExp(m)).String() }
-func (m *PositiveGather) Railroads() string    { return rails(walkExp(m)).String() }
-func (m *Sequence) Railroads() string          { return rails(walkExp(m)).String() }
-func (m *Choice) Railroads() string            { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for SkipTo.
+func (m *SkipTo) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Optional.
+func (m *Optional) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Closure.
+func (m *Closure) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for PositiveClosure.
+func (m *PositiveClosure) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Override.
+func (m *Override) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for OverrideList.
+func (m *OverrideList) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Synth.
+func (m *Synth) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Named.
+func (m *Named) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for NamedList.
+func (m *NamedList) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Join.
+func (m *Join) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for PositiveJoin.
+func (m *PositiveJoin) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Gather.
+func (m *Gather) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for PositiveGather.
+func (m *PositiveGather) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Sequence.
+func (m *Sequence) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for Choice.
+func (m *Choice) Railroads() string { return rails(walkExp(m)).String() }

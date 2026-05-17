@@ -7,9 +7,11 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/neogeny/ogopego/util"
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
+// CursorHeavy holds the configuration and shared resources for a cursor.
 type CursorHeavy struct {
 	IgnoreCase bool
 	NameGuard  bool
@@ -17,12 +19,14 @@ type CursorHeavy struct {
 	Patterns   *TokenizingPatterns
 }
 
+// StrCursor is a string-based implementation of the Cursor interface.
 type StrCursor struct {
 	text   string
 	offset int
 	heavy  *CursorHeavy
 }
 
+// NewStrCursor creates a new StrCursor with default configuration.
 func NewStrCursor(text string) *StrCursor {
 	return &StrCursor{
 		text:   text,
@@ -35,6 +39,7 @@ func NewStrCursor(text string) *StrCursor {
 	}
 }
 
+// NewStrCursorFromSource creates a new StrCursor starting at a specific offset.
 func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 	if start > len(text) {
 		start = len(text)
@@ -53,6 +58,7 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 	}
 }
 
+// Configure updates the cursor configuration.
 func (s *StrCursor) Configure(cfg Cfg) {
 	s.heavy.IgnoreCase = cfg.IgnoreCase
 	s.heavy.NameGuard = cfg.NameGuard
@@ -81,30 +87,37 @@ func (s *StrCursor) Configure(cfg Cfg) {
 	}
 }
 
+// InputSource returns the name or description of the input source.
 func (s *StrCursor) InputSource() string {
 	return s.heavy.Source
 }
 
+// Mark returns the current byte offset in the input.
 func (s *StrCursor) Mark() int {
 	return s.offset
 }
 
+// Reset sets the current byte offset in the input.
 func (s *StrCursor) Reset(mark int) {
 	s.offset = mark
 }
 
+// AsStr returns the entire input text.
 func (s *StrCursor) AsStr() string {
 	return s.text
 }
 
+// AsRef returns a reference to the input (the text itself for string cursors).
 func (s *StrCursor) AsRef() string {
 	return s.text
 }
 
+// IgnoreCase returns true if the cursor should ignore case during matching.
 func (s *StrCursor) IgnoreCase() bool {
 	return s.heavy.IgnoreCase
 }
 
+// NameGuard returns true if name guarding is enabled.
 func (s *StrCursor) NameGuard() bool {
 	return s.heavy.NameGuard
 }
@@ -120,10 +133,12 @@ func (s *StrCursor) Lookahead(start int) string {
 	return tail
 }
 
+// AtEnd returns true if the cursor has reached the end of the input.
 func (s *StrCursor) AtEnd() bool {
 	return s.offset >= len(s.text)
 }
 
+// Next consumes and returns the next rune in the input.
 func (s *StrCursor) Next() (rune, bool) {
 	r, ok := s.Peek()
 	if ok {
@@ -132,6 +147,7 @@ func (s *StrCursor) Next() (rune, bool) {
 	return r, ok
 }
 
+// Peek returns the next rune in the input without consuming it.
 func (s *StrCursor) Peek() (rune, bool) {
 	if s.AtEnd() {
 		return 0, false
@@ -140,6 +156,7 @@ func (s *StrCursor) Peek() (rune, bool) {
 	return r, true
 }
 
+// PeekToken checks if the given token matches at the current offset without consuming it.
 func (s *StrCursor) PeekToken(token string) bool {
 	if s.offset+len(token) > len(s.text) {
 		return false
@@ -151,6 +168,7 @@ func (s *StrCursor) PeekToken(token string) bool {
 	return slice == token
 }
 
+// MatchToken consumes the given token if it matches at the current offset.
 func (s *StrCursor) MatchToken(token string) bool {
 	if s.PeekToken(token) {
 		s.offset += len(token)
@@ -159,6 +177,7 @@ func (s *StrCursor) MatchToken(token string) bool {
 	return false
 }
 
+// MatchPattern matches a regular expression at the current offset and consumes it.
 func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
 	if pat == nil {
 		return "", false
@@ -178,6 +197,7 @@ func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
 	return "", false
 }
 
+// MatchEOL matches an end-of-line (including trailing whitespace) and consumes it.
 func (s *StrCursor) MatchEOL() bool {
 	mark := s.offset
 	s.eatSpacesNoNewlines()
@@ -190,6 +210,7 @@ func (s *StrCursor) MatchEOL() bool {
 	return false
 }
 
+// NextToken consumes whitespace, comments, and end-of-line markers.
 func (s *StrCursor) NextToken() {
 	if s.heavy.Patterns == nil {
 		return
@@ -212,42 +233,45 @@ func (s *StrCursor) NextToken() {
 	}
 }
 
+// Pos provides the "editor position" and the current byte offset into the input.
 func (s *StrCursor) Pos() (int, int) {
 	return s.PosAt(s.offset)
 }
 
-func tabDisplayWidth(s string) int {
-	var w int
-	for _, r := range s {
-		if r == '\t' {
-			w += 4
-		} else {
-			w++
-		}
-	}
-	return w
-}
-
+// PosAt provides the "editor position" and the given byte offset into the input.
 func (s *StrCursor) PosAt(mark int) (int, int) {
+	if mark <= 0 || len(s.text) == 0 {
+		return 1, 1
+	}
 	if mark > len(s.text) {
 		mark = len(s.text)
 	}
-	if mark <= 0 {
-		return 0, 0
-	}
-	lineno := 0
+
 	var line string
+	lineno := 0 // NOTE: only empty strings render no Lines()
 	for l := range strings.Lines(s.text[0:mark]) {
 		line = l
 		lineno += 1
 	}
-	return lineno, tabDisplayWidth(line)
+	line = util.ExpandTabs(line)
+	col := len(strings.TrimRight(line, "\r\n"))
+	if col < len(line) {
+		// mark was at the end of the line
+		lineno += 1
+		col = 1
+	} else if col <= 0 {
+		// mark was at the beginning of the line
+		col = 1
+	}
+	return lineno, col
 }
 
+// Location returns the full location (source, line, col) at the current offset.
 func (s *StrCursor) Location() Location {
 	return s.LocationAt(s.offset)
 }
 
+// LocationAt returns the full location at the given offset.
 func (s *StrCursor) LocationAt(mark int) Location {
 	line, col := s.PosAt(mark)
 	return Location{
@@ -257,6 +281,7 @@ func (s *StrCursor) LocationAt(mark int) Location {
 	}
 }
 
+// SetIgnoreCase updates the ignore-case setting.
 func (s *StrCursor) SetIgnoreCase(ignore bool) {
 	s.heavy = &CursorHeavy{
 		IgnoreCase: ignore,
@@ -266,6 +291,7 @@ func (s *StrCursor) SetIgnoreCase(ignore bool) {
 	}
 }
 
+// SetPatterns updates the tokenizing patterns.
 func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
 	s.heavy = &CursorHeavy{
 		IgnoreCase: s.heavy.IgnoreCase,
@@ -275,6 +301,7 @@ func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
 	}
 }
 
+// Clone creates a copy of the cursor at the current offset.
 func (s *StrCursor) Clone() Cursor {
 	return &StrCursor{
 		text:   s.text,

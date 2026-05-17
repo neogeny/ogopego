@@ -12,15 +12,18 @@ import (
 	json2 "github.com/neogeny/ogopego/json"
 )
 
+// helper is a utility struct for parsing JSON.
 type helper struct {
 	value map[string]any
 	path  []string
 }
 
+// newHelper creates a new helper instance.
 func newHelper(value map[string]any) *helper {
 	return &helper{value: value, path: []string{}}
 }
 
+// push adds a label to the helper's path.
 func (h *helper) push(label string) *helper {
 	p := make([]string, len(h.path)+1)
 	copy(p, h.path)
@@ -28,6 +31,7 @@ func (h *helper) push(label string) *helper {
 	return &helper{value: h.value, path: p}
 }
 
+// withValue sets the helper's value to a new map.
 func (h *helper) withValue(v any) *helper {
 	obj, ok := v.(map[string]any)
 	if !ok {
@@ -36,6 +40,7 @@ func (h *helper) withValue(v any) *helper {
 	return &helper{value: obj, path: h.path}
 }
 
+// error creates a JsonError with the helper's path.
 func (h *helper) error(msg string) *json2.JsonError {
 	s := strings.Join(h.path, " -> ")
 	if s == "" {
@@ -44,6 +49,7 @@ func (h *helper) error(msg string) *json2.JsonError {
 	return json2.NewJsonError(fmt.Sprintf("%s at %s", msg, s))
 }
 
+// getClass retrieves the "__class__" field from the helper's value.
 func (h *helper) getClass() (string, error) {
 	raw, ok := h.value["__class__"]
 	if !ok {
@@ -56,6 +62,7 @@ func (h *helper) getClass() (string, error) {
 	return s, nil
 }
 
+// getString retrieves a string field from the helper's value.
 func (h *helper) getString(field string) (string, error) {
 	raw, ok := h.value[field]
 	if !ok {
@@ -68,6 +75,7 @@ func (h *helper) getString(field string) (string, error) {
 	return s, nil
 }
 
+// optString retrieves an optional string field from the helper's value.
 func (h *helper) optString(field string) string {
 	raw, ok := h.value[field]
 	if !ok {
@@ -79,6 +87,7 @@ func (h *helper) optString(field string) string {
 	return ""
 }
 
+// optBool retrieves an optional boolean field from the helper's value.
 func (h *helper) optBool(field string, def bool) bool {
 	raw, ok := h.value[field]
 	if !ok {
@@ -90,6 +99,7 @@ func (h *helper) optBool(field string, def bool) bool {
 	return def
 }
 
+// optFloat retrieves an optional float64 field from the helper's value.
 func (h *helper) optFloat(field string) (float64, bool) {
 	raw, ok := h.value[field]
 	if !ok {
@@ -101,6 +111,7 @@ func (h *helper) optFloat(field string) (float64, bool) {
 	return 0, false
 }
 
+// getNested retrieves a nested object as a new helper instance.
 func (h *helper) getNested(field string) (*helper, error) {
 	raw, ok := h.value[field]
 	if !ok {
@@ -117,6 +128,7 @@ func (h *helper) getNested(field string) (*helper, error) {
 	return h.push(label).withValue(obj), nil
 }
 
+// getArray retrieves an array of objects as a slice of helper instances.
 func (h *helper) getArray(field string) ([]*helper, error) {
 	raw, ok := h.value[field]
 	if !ok {
@@ -141,6 +153,7 @@ func (h *helper) getArray(field string) ([]*helper, error) {
 	return result, nil
 }
 
+// ParseGrammar parses grammar data from JSON bytes.
 func ParseGrammar(data []byte) (*Grammar, error) {
 	var raw any
 	if err := json.Unmarshal(data, &raw); err != nil {
@@ -149,6 +162,7 @@ func ParseGrammar(data []byte) (*Grammar, error) {
 	return grammarFromJSON(newHelper(raw.(map[string]any)))
 }
 
+// grammarFromJSON converts a JSON helper to a Grammar object.
 func grammarFromJSON(h *helper) (*Grammar, error) {
 	cls, err := h.getClass()
 	if err != nil {
@@ -199,6 +213,7 @@ func grammarFromJSON(h *helper) (*Grammar, error) {
 	return g, nil
 }
 
+// parseDirectives parses directives from a map.
 func parseDirectives(obj map[string]any) *json2.OrderedMap {
 	raw, ok := obj["directives"]
 	if !ok {
@@ -228,6 +243,7 @@ func parseDirectives(obj map[string]any) *json2.OrderedMap {
 	return result
 }
 
+// ruleFromJSON converts a JSON helper to a Rule object.
 func ruleFromJSON(h *helper) (*Rule, error) {
 	cls, err := h.getClass()
 	if err != nil {
@@ -281,6 +297,7 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 	return r, nil
 }
 
+// modelFromJSON converts a JSON helper to a Model object.
 func modelFromJSON(h *helper, err error) (Model, error) {
 	if err != nil {
 		return nil, err

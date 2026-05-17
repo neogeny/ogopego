@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// Link resolves rule references within a Box expression.
 func (b *Box) Link(rules map[string]*Rule) error {
 	if b.Exp != nil {
 		return b.Exp.Link(rules)
@@ -14,6 +15,7 @@ func (b *Box) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+// Link resolves rule references within a Join expression.
 func (j *Join) Link(rules map[string]*Rule) error {
 	if err := j.Exp.Link(rules); err != nil {
 		return err
@@ -21,6 +23,7 @@ func (j *Join) Link(rules map[string]*Rule) error {
 	return j.Sep.Link(rules)
 }
 
+// Link resolves rule references within a Sequence expression.
 func (s *Sequence) Link(rules map[string]*Rule) error {
 	for _, el := range s.Sequence {
 		if err := el.Link(rules); err != nil {
@@ -30,6 +33,7 @@ func (s *Sequence) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+// Link resolves rule references within a Choice expression.
 func (c *Choice) Link(rules map[string]*Rule) error {
 	for _, opt := range c.Options {
 		if err := opt.Link(rules); err != nil {
@@ -39,6 +43,7 @@ func (c *Choice) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+// Link resolves rule references within a Call expression.
 func (c *Call) Link(rules map[string]*Rule) error {
 	rule, ok := rules[c.Name]
 	if !ok {
@@ -48,6 +53,7 @@ func (c *Call) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+// Link resolves rule references within a RuleInclude expression.
 func (r *RuleInclude) Link(rules map[string]*Rule) error {
 	rule, ok := rules[r.Name]
 	if !ok {
@@ -57,6 +63,7 @@ func (r *RuleInclude) Link(rules map[string]*Rule) error {
 	return nil
 }
 
+// Link resolves all rule references within the grammar.
 func (g *Grammar) Link() error {
 	rules := make(map[string]*Rule, len(g.Rules))
 	for _, rule := range g.Rules {

@@ -15,10 +15,20 @@ type NamedBox struct {
 	Name string
 }
 
+// PubMap returns an ordered map of the Box's public fields.
 func (t *Box) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Box) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Box) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Box.
+func (t *Box) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Box.
+func (t *Box) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// PubMap returns an ordered map of the NamedBox's public fields.
 func (t *NamedBox) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *NamedBox) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *NamedBox) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the NamedBox.
+func (t *NamedBox) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the NamedBox.
+func (t *NamedBox) AsJSONStr() string { return t.AsJSONStrOf(t) }

@@ -26,34 +26,58 @@ type PositiveGather struct {
 	Gather
 }
 
+// Parse implements the Model interface for Join.
 func (j *Join) Parse(ctx Ctx) (Tree, error) {
 	return repeatWithSep(ctx, j.Exp, j.Sep, false, true)
 }
 
+// PubMap returns an ordered map of the Join's public fields.
 func (t *Join) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Join) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Join) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Join.
+func (t *Join) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Join.
+func (t *Join) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// Parse implements the Model interface for PositiveJoin.
 func (p *PositiveJoin) Parse(ctx Ctx) (Tree, error) {
 	return repeatWithSep(ctx, p.Exp, p.Sep, true, true)
 }
 
+// PubMap returns an ordered map of the PositiveJoin's public fields.
 func (t *PositiveJoin) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *PositiveJoin) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *PositiveJoin) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the PositiveJoin.
+func (t *PositiveJoin) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the PositiveJoin.
+func (t *PositiveJoin) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// Parse implements the Model interface for Gather.
 func (g *Gather) Parse(ctx Ctx) (Tree, error) {
 	return repeatWithSep(ctx, g.Exp, g.Sep, false, false)
 }
 
+// PubMap returns an ordered map of the Gather's public fields.
 func (t *Gather) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Gather) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Gather) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Gather.
+func (t *Gather) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Gather.
+func (t *Gather) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// Parse implements the Model interface for PositiveGather.
 func (p *PositiveGather) Parse(ctx Ctx) (Tree, error) {
 	return repeatWithSep(ctx, p.Exp, p.Sep, true, false)
 }
 
+// PubMap returns an ordered map of the PositiveGather's public fields.
 func (t *PositiveGather) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *PositiveGather) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *PositiveGather) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the PositiveGather.
+func (t *PositiveGather) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the PositiveGather.
+func (t *PositiveGather) AsJSONStr() string { return t.AsJSONStrOf(t) }

@@ -14,18 +14,30 @@ type PositiveClosure struct {
 	Closure
 }
 
+// Parse implements the Model interface for Closure.
 func (c *Closure) Parse(ctx Ctx) (Tree, error) {
 	return repeat(ctx, c.Exp, false)
 }
 
+// Parse implements the Model interface for PositiveClosure.
 func (p *PositiveClosure) Parse(ctx Ctx) (Tree, error) {
 	return repeat(ctx, p.Exp, true)
 }
 
+// PubMap returns an ordered map of the Closure's public fields.
 func (t *Closure) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Closure) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Closure) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Closure.
+func (t *Closure) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Closure.
+func (t *Closure) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// PubMap returns an ordered map of the PositiveClosure's public fields.
 func (t *PositiveClosure) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *PositiveClosure) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *PositiveClosure) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the PositiveClosure.
+func (t *PositiveClosure) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the PositiveClosure.
+func (t *PositiveClosure) AsJSONStr() string { return t.AsJSONStrOf(t) }

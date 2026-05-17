@@ -13,6 +13,7 @@ type Pattern struct {
 	Pattern string
 }
 
+// Parse implements the Model interface for Pattern.
 func (p *Pattern) Parse(ctx Ctx) (Tree, error) {
 	matched, err := ctx.MatchPattern(p.Pattern)
 	if err != nil {
@@ -21,6 +22,11 @@ func (p *Pattern) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Text{Value: matched}, nil
 }
 
+// PubMap returns an ordered map of the Pattern's public fields.
 func (t *Pattern) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Pattern) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Pattern) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Pattern.
+func (t *Pattern) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Pattern.
+func (t *Pattern) AsJSONStr() string { return t.AsJSONStrOf(t) }

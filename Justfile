@@ -1,3 +1,5 @@
+PACKAGES := "api cmd config context input json ogopego.go peg trees util"
+
 build: gofmt-check
     go build -o bin/ogo ./cmd/ogo
 

@@ -15,6 +15,7 @@ type SkipTo struct {
 	Box
 }
 
+// Parse implements the Model interface for SkipTo.
 func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
 	for !ctx.Eof() {
 		mark := ctx.Mark()
@@ -33,6 +34,11 @@ func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
 	)
 }
 
+// PubMap returns an ordered map of the SkipTo's public fields.
 func (t *SkipTo) PubMap() *asjson.OrderedMap { return t.PubMapOf(t) }
-func (t *SkipTo) AsJSON() any                { return t.AsJSONOf(t) }
-func (t *SkipTo) AsJSONStr() string          { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the SkipTo.
+func (t *SkipTo) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the SkipTo.
+func (t *SkipTo) AsJSONStr() string { return t.AsJSONStrOf(t) }

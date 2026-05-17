@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT OR Apache-20
 
 package peg
 
@@ -10,12 +10,14 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Call represents a call to a grammar rule.
 type Call struct {
 	ModelBase
 	Name   string
 	Target *Rule
 }
 
+// Parse implements the Model interface for Call.
 func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	if c.Target == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("call to %q has not been linked", c.Name))
@@ -126,6 +128,11 @@ func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, star
 	return lastTree, nil
 }
 
+// PubMap returns an ordered map of the Call's public fields.
 func (c *Call) PubMap() *asjson.OrderedMap { return c.PubMapOf(c) }
-func (c *Call) AsJSON() any                { return c.AsJSONOf(c) }
-func (c *Call) AsJSONStr() string          { return c.AsJSONStrOf(c) }
+
+// AsJSON returns a JSON-compatible representation of the Call.
+func (c *Call) AsJSON() any { return c.AsJSONOf(c) }
+
+// AsJSONStr returns a JSON string representation of the Call.
+func (c *Call) AsJSONStr() string { return c.AsJSONStrOf(c) }

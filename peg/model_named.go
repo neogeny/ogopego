@@ -17,6 +17,7 @@ type NamedList struct {
 	Named
 }
 
+// Parse implements the Model interface for Named.
 func (n *Named) Parse(ctx Ctx) (Tree, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
@@ -25,6 +26,7 @@ func (n *Named) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Named{Name: n.Name, Value: result}, nil
 }
 
+// Parse implements the Model interface for NamedList.
 func (n *NamedList) Parse(ctx Ctx) (Tree, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
@@ -33,10 +35,20 @@ func (n *NamedList) Parse(ctx Ctx) (Tree, error) {
 	return &trees.NamedAsList{Name: n.Name, Value: result}, nil
 }
 
+// PubMap returns an ordered map of the Named's public fields.
 func (t *Named) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Named) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Named) AsJSONStr() string   { return t.AsJSONStrOf(t) }
 
+// AsJSON returns a JSON-compatible representation of the Named.
+func (t *Named) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Named.
+func (t *Named) AsJSONStr() string { return t.AsJSONStrOf(t) }
+
+// PubMap returns an ordered map of the NamedList's public fields.
 func (t *NamedList) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *NamedList) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *NamedList) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the NamedList.
+func (t *NamedList) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the NamedList.
+func (t *NamedList) AsJSONStr() string { return t.AsJSONStrOf(t) }

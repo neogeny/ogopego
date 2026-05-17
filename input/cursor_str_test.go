@@ -4,10 +4,93 @@
 package input
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/neogeny/ogopego/util/pyre"
 )
+
+func TestStrCursorMatchPattern(t *testing.T) {
+	p, err := pyre.Compile(`\d+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := NewStrCursor("abc123def")
+	m, ok := s.MatchPattern(p)
+	if ok {
+		t.Errorf("expected no match at start, got %q", m)
+	}
+}
+
+func TestStrCursorMatchToken(t *testing.T) {
+	s := NewStrCursor("hello world")
+	if !s.MatchToken("hello") {
+		t.Error("expected MatchToken to succeed")
+	}
+	if s.offset != 5 {
+		t.Errorf("expected offset 5, got %d", s.offset)
+	}
+}
+
+func TestStrCursorPeekToken(t *testing.T) {
+	s := NewStrCursor("hello")
+	if !s.PeekToken("hello") {
+		t.Error("expected PeekToken to succeed")
+	}
+	if s.offset != 0 {
+		t.Errorf("expected offset unchanged, got %d", s.offset)
+	}
+}
+
+func TestStrCursorNextPeek(t *testing.T) {
+	s := NewStrCursor("ab")
+	r, ok := s.Peek()
+	if !ok || r != 'a' {
+		t.Errorf("expected 'a', got %c", r)
+	}
+	r, ok = s.Next()
+	if !ok || r != 'a' {
+		t.Errorf("expected 'a', got %c", r)
+	}
+	if s.offset != 1 {
+		t.Errorf("expected offset 1, got %d", s.offset)
+	}
+}
+
+func TestStrCursorAtEnd(t *testing.T) {
+	s := NewStrCursor("a")
+	if s.AtEnd() {
+		t.Error("expected not at end")
+	}
+	s.Next()
+	if !s.AtEnd() {
+		t.Error("expected at end")
+	}
+}
+
+func TestStrCursorPos(t *testing.T) {
+	s := NewStrCursor("hello\nworld")
+	line, col := s.Pos()
+	if line != 1 || col != 1 {
+		t.Errorf("expected (1,1), got (%d,%d)", line, col)
+	}
+	for range 6 {
+		s.Next()
+	}
+	line, col = s.Pos()
+	if line != 2 || col != 1 {
+		t.Errorf("expected (1,5) after newline, got (%d,%d)", line, col)
+	}
+}
+
+func TestStrCursorClone(t *testing.T) {
+	s := NewStrCursor("hello")
+	c := s.Clone()
+	s.Next()
+	if s.Mark() == c.Mark() {
+		t.Error("expected clone to have independent offset")
+	}
+}
 
 func TestMatchPatternSuccess(t *testing.T) {
 	p, err := pyre.Compile(`\d+`)
@@ -87,29 +170,38 @@ func TestMatchEOLWithWhitespace(t *testing.T) {
 
 func TestPosAt(t *testing.T) {
 	s := NewStrCursor("hello\nworld\nfoo")
-	line, col := s.PosAt(0)
-	if line != 0 || col != 0 {
-		t.Errorf("expected (0,0) at pos 0, got (%d,%d)", line, col)
+
+	testPos := func(pos int, eline int, ecol int) string {
+		line, col := s.PosAt(pos)
+		if line != eline || col != ecol {
+			return fmt.Sprintf(
+				"Expexted (%d, %d) at pos %d, got (%d, %d) ",
+				eline, ecol, pos, line, col,
+			)
+		}
+		return ""
 	}
-	line, col = s.PosAt(5)
-	if line != 1 || col != 5 {
-		t.Errorf("expected (1,5) at pos 5, got (%d,%d)", line, col)
+
+	if err := testPos(0, 1, 1); err != "" {
+		t.Error(err)
 	}
-	line, col = s.PosAt(6)
-	if line != 1 || col != 5 {
-		t.Errorf("expected (1,5) at pos 6, got (%d,%d)", line, col)
+	if err := testPos(5, 1, 5); err != "" {
+		t.Error(err)
 	}
-	line, col = s.PosAt(11)
-	if line != 2 || col != 5 {
-		t.Errorf("expected (2,5) at pos 11, got (%d,%d)", line, col)
+	if err := testPos(3, 1, 3); err != "" {
+		t.Error(err)
 	}
-	line, col = s.PosAt(12)
-	if line != 2 || col != 5 {
-		t.Errorf("expected (2,5) at pos 12, got (%d,%d)", line, col)
+	if err := testPos(6, 2, 1); err != "" {
+		t.Error(err)
 	}
-	line, col = s.PosAt(15)
-	if line != 3 || col != 3 {
-		t.Errorf("expected (3,3) at pos 15, got (%d,%d)", line, col)
+	if err := testPos(11, 2, 5); err != "" {
+		t.Error(err)
+	}
+	if err := testPos(12, 3, 1); err != "" {
+		t.Error(err)
+	}
+	if err := testPos(15, 3, 3); err != "" {
+		t.Error(err)
 	}
 }
 
@@ -127,8 +219,8 @@ func TestLocation(t *testing.T) {
 	if loc.Source != "test.txt" {
 		t.Errorf("expected Source 'test.txt', got %q", loc.Source)
 	}
-	if loc.Line != 0 || loc.Col != 0 {
-		t.Errorf("expected (0,0), got (%d,%d)", loc.Line, loc.Col)
+	if loc.Line != 1 || loc.Col != 1 {
+		t.Errorf("expected (1,1), got (%d,%d)", loc.Line, loc.Col)
 	}
 	s.Next()
 	s.Next()
@@ -140,8 +232,8 @@ func TestLocation(t *testing.T) {
 	if loc.Source != "test.txt" {
 		t.Errorf("expected Source 'test.txt', got %q", loc.Source)
 	}
-	if loc.Line != 1 || loc.Col != 5 {
-		t.Errorf("expected (1,5), got (%d,%d)", loc.Line, loc.Col)
+	if loc.Line != 2 || loc.Col != 1 {
+		t.Errorf("expected (2,1), got (%d,%d)", loc.Line, loc.Col)
 	}
 }
 
@@ -151,8 +243,8 @@ func TestLocationAt(t *testing.T) {
 	if loc.Source != "src" {
 		t.Errorf("expected 'src', got %q", loc.Source)
 	}
-	if loc.Line != 1 || loc.Col != 3 {
-		t.Errorf("expected (1,3) at pos 4, got (%d,%d)", loc.Line, loc.Col)
+	if loc.Line != 2 || loc.Col != 1 {
+		t.Errorf("expected (2,3) at pos 4, got (%d,%d)", loc.Line, loc.Col)
 	}
 }
 
@@ -278,7 +370,7 @@ func TestCloneCursor(t *testing.T) {
 func TestPosEmpty(t *testing.T) {
 	s := NewStrCursor("")
 	line, col := s.Pos()
-	if line != 0 || col != 0 {
+	if line != 1 || col != 1 {
 		t.Errorf("expected (0,0) for empty string, got (%d,%d)", line, col)
 	}
 }

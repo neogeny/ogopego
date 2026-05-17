@@ -7,21 +7,22 @@ import (
 
 const spaces = " \t\n\r\f"
 
+// StripLeft removes leading whitespace characters from s.
 func StripLeft(s string) string {
 	return strings.TrimLeft(s, spaces)
 }
 
-// StripLeft removes leading whitespace characters from s.
+// StripRight removes trailing whitespace characters from s.
 func StripRight(s string) string {
 	return strings.TrimRight(s, spaces)
 }
 
-// StripRight removes trailing whitespace characters from s.
+// ExpandTabs replaces tabs with 4 spaces.
 func ExpandTabs(s string) string {
 	return strings.ReplaceAll(s, "\t", "    ")
 }
 
-// Dedent removes identation from a text block starting after the first line.
+// Dedent strips common identation from a text block starting after the first line.
 func Dedent(s string) string {
 	indent := math.MaxInt
 	skip := true
@@ -57,4 +58,14 @@ func Dedent(s string) string {
 	return b.String()
 }
 
-// Dedent removes a common leading indentation from all non-empty lines in s.
+func TabDisplayWidth(s string) int {
+	var w int
+	for _, r := range s {
+		if r == '\t' {
+			w += 4
+		} else {
+			w++
+		}
+	}
+	return w
+}

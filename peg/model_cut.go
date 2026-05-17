@@ -12,12 +12,18 @@ type Cut struct {
 	ModelBase
 }
 
+// Parse implements the Model interface for Cut.
 func (c *Cut) Parse(ctx Ctx) (Tree, error) {
 	ctx.Cut()
 	t := &trees.Nil{}
 	return t, nil
 }
 
+// PubMap returns an ordered map of the Cut's public fields.
 func (t *Cut) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *Cut) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *Cut) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the Cut.
+func (t *Cut) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the Cut.
+func (t *Cut) AsJSONStr() string { return t.AsJSONStrOf(t) }

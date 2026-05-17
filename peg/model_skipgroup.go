@@ -3,10 +3,12 @@
 
 package peg
 
+// SkipGroup represents a group that is parsed but whose result is discarded.
 type SkipGroup struct {
 	Box
 }
 
+// Parse implements the Model interface for SkipGroup.
 func (s *SkipGroup) Parse(ctx Ctx) (Tree, error) {
 	_, err := s.Exp.Parse(ctx)
 	if err != nil {
@@ -15,6 +17,11 @@ func (s *SkipGroup) Parse(ctx Ctx) (Tree, error) {
 	return NIL, nil
 }
 
+// PubMap returns an ordered map of the SkipGroup's public fields.
 func (t *SkipGroup) PubMap() *OrderedMap { return t.PubMapOf(t) }
-func (t *SkipGroup) AsJSON() any         { return t.AsJSONOf(t) }
-func (t *SkipGroup) AsJSONStr() string   { return t.AsJSONStrOf(t) }
+
+// AsJSON returns a JSON-compatible representation of the SkipGroup.
+func (t *SkipGroup) AsJSON() any { return t.AsJSONOf(t) }
+
+// AsJSONStr returns a JSON string representation of the SkipGroup.
+func (t *SkipGroup) AsJSONStr() string { return t.AsJSONStrOf(t) }
