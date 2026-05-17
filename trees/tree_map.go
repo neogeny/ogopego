@@ -5,6 +5,7 @@ package trees
 
 import asjson "github.com/neogeny/ogopego/json"
 
+// MapNode represents a keyed mapping of entries produced during folding.
 type MapNode struct {
 	TreeBase
 	Entries map[string]Tree

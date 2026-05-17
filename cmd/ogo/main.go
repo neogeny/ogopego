@@ -157,6 +157,7 @@ func main() {
 	}
 }
 
+// loadGrammar loads a grammar from the given path, handling both EBNF and JSON formats.
 func loadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

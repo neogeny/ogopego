@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 func Compare(actual any, expected any) bool {
 	switch a := actual.(type) {
 	case *orderedmap.OrderedMap:

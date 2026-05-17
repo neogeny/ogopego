@@ -11,8 +11,11 @@ import (
 	"github.com/neogeny/ogopego/config"
 )
 
+// CLI is the command-line interface structure for the ogo tool.
+//
 //goland:noinspection GoVetStructTag
 var CLI struct {
+	// Run subcommand executes a grammar against one or more input files.
 	Run struct {
 		Grammar string   `arg:"" required name:"grammar" help:"Path to the grammar in EBNF or JSON format"`
 		Inputs  []string `arg:"" required name:"inputs" help:"The files to be parsed"`
@@ -21,6 +24,7 @@ var CLI struct {
 		Short bool `help:"Print the Tree in short notation" short:"s" group:"format"`
 	} `cmd:"" help:"Execute a grammar against one or more input files"`
 
+	// Boot subcommand provides access to the internal boot grammar.
 	Boot struct {
 		Json bool `help:"Print the boot grammar in JSON format" short:"j" group:"format"`
 		//Model     bool `help:"Print the Go code for the boot model construction" short:"m" group:"format"`
@@ -28,6 +32,7 @@ var CLI struct {
 		Railroads bool `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"boot" help:"The internal boot grammar"`
 
+	// Grammar subcommand provides transformations and information about a grammar.
 	Grammar struct {
 		Grammar string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)"`
 		Json    bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
@@ -36,9 +41,12 @@ var CLI struct {
 		Railroads bool `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"grammar" help:"Grammar transformations"`
 
+	// Output specifies a file to write output to instead of stdout.
 	Output string `help:"Output to a file instead of stdout" short:"o"`
-	Color  string `help:"Control colorized output for API results" short:"C" enum:"auto,always,never" default:auto`
-	Trace  bool   `help:"Display a detailed trace of the parsing process" short:"t"`
+	// Color controls colorized output for API results.
+	Color string `help:"Control colorized output for API results" short:"C" enum:"auto,always,never" default:auto`
+	// Trace enables a detailed trace of the parsing process.
+	Trace bool `help:"Display a detailed trace of the parsing process" short:"t"`
 }
 
 var (

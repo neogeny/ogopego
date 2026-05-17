@@ -3,19 +3,25 @@
 
 package peg
 
+// Join represents a sequence joined by a separator expression (e.g. a list
+// of elements with separators).
 type Join struct {
 	Box
 	Sep Model
 }
 
+// PositiveJoin is like Join but requires at least one element.
 type PositiveJoin struct {
 	Join
 }
 
+// Gather behaves like Join but collects elements differently (semantics
+// vary by model consumer).
 type Gather struct {
 	Join
 }
 
+// PositiveGather is the one-or-more variant of Gather.
 type PositiveGather struct {
 	Gather
 }

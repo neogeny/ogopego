@@ -7,10 +7,13 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Override marks an expression whose value overrides surrounding values.
 type Override struct {
 	Box
 }
 
+// OverrideList marks an expression whose override value should be treated
+// as a list.
 type OverrideList struct {
 	Box
 }

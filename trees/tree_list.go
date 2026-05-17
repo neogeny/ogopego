@@ -5,6 +5,7 @@ package trees
 
 import asjson "github.com/neogeny/ogopego/json"
 
+// Seq represents a sequence node whose items are merged when folding.
 type Seq struct {
 	TreeBase
 	Items []Tree
@@ -28,6 +29,7 @@ func (s *Seq) AsJSON() any {
 }
 func (s *Seq) AsJSONStr() string { return treeJSONStr(s.AsJSON()) }
 
+// List represents a closed list node produced after folding sequences.
 type List struct {
 	TreeBase
 	Items []Tree

@@ -7,6 +7,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Cut represents a cut operator that prunes alternative backtracking paths.
 type Cut struct {
 	ModelBase
 }

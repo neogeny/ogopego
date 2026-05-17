@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+// RuleInclude represents a reference to another rule whose expression is
+// included into the current grammar model once resolved.
 type RuleInclude struct {
 	ModelBase
 	Name string

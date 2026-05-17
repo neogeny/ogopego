@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// EOF matches the end of input.
 type EOF struct {
 	ModelBase
 }

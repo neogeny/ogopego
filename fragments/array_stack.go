@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Initialize an empty stack (slice)
 var stack []int
 

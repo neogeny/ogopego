@@ -4,14 +4,17 @@ import (
 	"github.com/neogeny/ogopego/input"
 )
 
+// CallStack is a slice of call-site names representing the parser call stack.
 type CallStack []string
 
+// ParseState holds lightweight parsing state for a cursor position.
 type ParseState struct {
 	cursor   input.Cursor
 	cutSeen  bool
 	lastNode any
 }
 
+// NewParseState creates a new ParseState for the provided cursor.
 func NewParseState(cursor input.Cursor) *ParseState {
 	return &ParseState{
 		cursor: cursor.Clone(),
@@ -46,10 +49,13 @@ func (ps *ParseState) Clone() *ParseState {
 	}
 }
 
+// StateStack manages a stack of ParseState objects for nested parsing.
 type StateStack struct {
 	states []*ParseState
 }
 
+// NewStateStack returns a new StateStack initialized with a ParseState for
+// the given cursor.
 func NewStateStack(cursor input.Cursor) *StateStack {
 	return &StateStack{
 		states: []*ParseState{NewParseState(cursor)},

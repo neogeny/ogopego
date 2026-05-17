@@ -9,6 +9,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// EOL matches an end-of-line sequence.
 type EOL struct {
 	ModelBase
 }

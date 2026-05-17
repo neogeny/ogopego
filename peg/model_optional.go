@@ -7,6 +7,8 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Optional represents an optional expression that may succeed with a
+// Nil result if the nested expression fails without a cut.
 type Optional struct {
 	Box
 }

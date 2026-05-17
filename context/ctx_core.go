@@ -13,6 +13,7 @@ import (
 	"github.com/neogeny/ogopego/util/pyre"
 )
 
+// CoreCtx is the concrete implementation of Ctx used by the parser runtime.
 type CoreCtx struct {
 	cfg            Cfg
 	cursor         Cursor
@@ -29,6 +30,9 @@ type CoreCtx struct {
 	heartbeatTime  time.Time
 }
 
+// NewCtx creates a new CoreCtx backed by the provided Cursor and optional
+// configuration. Use the returned value where a context implementing Ctx is
+// required.
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	cap := 64
 	ctx := CoreCtx{

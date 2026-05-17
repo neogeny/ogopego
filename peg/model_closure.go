@@ -3,10 +3,13 @@
 
 package peg
 
+// Closure represents the Kleene-closure (zero-or-more) of an expression.
 type Closure struct {
 	Box
 }
 
+// PositiveClosure represents the positive closure (one-or-more) of an
+// expression.
 type PositiveClosure struct {
 	Closure
 }

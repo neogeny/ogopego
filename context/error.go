@@ -10,11 +10,14 @@ type Location struct {
 	Line int
 }
 
+// Nope represents a localized failure with a source location.
 type Nope struct {
 	error
 	location Location
 }
 
+// DisasterReport aggregates failure information (furthest failure), cut
+// state, inner error and tracing memento for diagnostic reporting.
 type DisasterReport struct {
 	error
 	CutSeen  bool

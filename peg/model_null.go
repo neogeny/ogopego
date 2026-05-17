@@ -3,6 +3,8 @@
 
 package peg
 
+// NULL represents a parse model node that always succeeds without consuming
+// input and yields a nil-ish tree value.
 type NULL struct {
 	ModelBase
 }

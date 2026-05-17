@@ -5,10 +5,13 @@ package peg
 
 import "fmt"
 
+// Lookahead performs a positive lookahead: it succeeds if the nested
+// expression matches without consuming input.
 type Lookahead struct {
 	Box
 }
 
+// NegativeLookahead succeeds when the nested expression does not match.
 type NegativeLookahead struct {
 	Box
 }

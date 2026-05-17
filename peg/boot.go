@@ -3,6 +3,7 @@
 
 package peg
 
+// LoadBootGrammar parses and initializes a boot grammar from JSON bytes.
 func LoadBootGrammar(data []byte) (*Grammar, error) {
 	g, err := ParseGrammar(data)
 	if err != nil {

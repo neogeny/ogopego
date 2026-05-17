@@ -7,6 +7,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Sequence represents an ordered sequence of model elements.
 type Sequence struct {
 	ModelBase
 	Sequence []Model

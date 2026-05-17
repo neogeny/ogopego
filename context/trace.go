@@ -10,6 +10,10 @@ import (
 
 type Event int
 
+// Event enumerates tracing event kinds emitted during parsing.
+//
+// Values include entry, success, failure, recursion, cut, match and no-match.
+// These are supplied to TraceEvent by Tracer implementations.
 const (
 	EventEntry Event = iota
 	EventSuccess
@@ -32,6 +36,7 @@ type Tracer interface {
 	TraceNoMatch(ctx Ctx, token, name string) bool
 }
 
+// NullTracer is a no-op tracer used when tracing is disabled.
 type NullTracer struct{}
 
 func (NullTracer) Trace(_ Ctx, _ string)                {}

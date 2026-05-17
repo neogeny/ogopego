@@ -8,6 +8,7 @@ import asjson "github.com/neogeny/ogopego/json"
 var NIL = &Nil{}
 var BOTTOM = &Bottom{}
 
+// Text is a leaf node representing plain text.
 type Text struct {
 	TreeBase
 	Value string
@@ -19,6 +20,7 @@ func (t *Text) PubMap() *asjson.OrderedMap  { return t.PubMapOf(t) }
 func (t *Text) AsJSON() any                 { return t.Value }
 func (t *Text) AsJSONStr() string           { return treeJSONStr(t.AsJSON()) }
 
+// Number represents a numeric literal node.
 type Number struct {
 	TreeBase
 	Value float64
@@ -30,6 +32,7 @@ func (n *Number) PubMap() *asjson.OrderedMap  { return n.PubMapOf(n) }
 func (n *Number) AsJSON() any                 { return n.Value }
 func (n *Number) AsJSONStr() string           { return treeJSONStr(n.AsJSON()) }
 
+// Bool represents a boolean node.
 type Bool struct {
 	TreeBase
 	Value bool
@@ -41,6 +44,7 @@ func (b *Bool) PubMap() *asjson.OrderedMap  { return b.PubMapOf(b) }
 func (b *Bool) AsJSON() any                 { return b.Value }
 func (b *Bool) AsJSONStr() string           { return treeJSONStr(b.AsJSON()) }
 
+// Nil is the nil sentinel node used to represent empty results.
 type Nil struct {
 	TreeBase
 }
@@ -51,6 +55,7 @@ func (n *Nil) PubMap() *asjson.OrderedMap  { return n.PubMapOf(n) }
 func (n *Nil) AsJSON() any                 { return nil }
 func (n *Nil) AsJSONStr() string           { return treeJSONStr(n.AsJSON()) }
 
+// Bottom is an internal sentinel node.
 type Bottom struct {
 	TreeBase
 }

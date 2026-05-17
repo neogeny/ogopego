@@ -25,6 +25,8 @@ type Memento struct {
 	CallStack []string
 }
 
+// NewMemento constructs a Memento capturing cursor state and a message for
+// later diagnostic reporting.
 func NewMemento(start int, msg string, cursor input.Cursor, callstack []string) Memento {
 	cs := make([]string, len(callstack))
 	copy(cs, callstack)

@@ -7,6 +7,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Pattern matches input according to a configured pattern and returns text.
 type Pattern struct {
 	ModelBase
 	Pattern string

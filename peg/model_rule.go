@@ -10,6 +10,8 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Rule represents a named grammar rule with optional parameters and
+// metadata used during parsing and code generation.
 type Rule struct {
 	NamedBox
 	Params     []string

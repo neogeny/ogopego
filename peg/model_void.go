@@ -3,6 +3,8 @@
 
 package peg
 
+// Void represents a model node that consumes no value but indicates a
+// voided/ignored result (used for suppressed nodes).
 type Void struct {
 	ModelBase
 }

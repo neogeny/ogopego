@@ -9,8 +9,10 @@ import (
 	"github.com/neogeny/ogopego/util/heartbeat"
 )
 
+// DefaultPerlinememos is the default number of memo entries per input line.
 const DefaultPerlinememos = 8
 
+// Configurable is implemented by types that can be configured using a Cfg.
 type Configurable interface {
 	Configure(cfg Cfg)
 }
@@ -50,6 +52,7 @@ type Cfg struct {
 	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
 }
 
+// Either returns userVal if it is non-zero, otherwise defaultVal.
 func Either[T comparable](userVal, defaultVal T) T {
 	var zero T
 	if userVal != zero {
@@ -84,12 +87,14 @@ func DefaultCfg() Cfg {
 	}
 }
 
+// New returns a new Cfg produced by applying cfg as overrides over the
+// default configuration.
 func (cfg *Cfg) New() Cfg {
 	return DefaultCfg().Override(cfg)
 }
 
-// Override merges an optional cfg over the receiver. Fields set on other
-// override the receiver's values. Returns the receiver if other is nil.
+// Override merges other into cfg; non-zero fields from other override the
+// corresponding values in cfg. If other is nil, the receiver is returned.
 func (cfg Cfg) Override(other *Cfg) Cfg {
 	if other == nil {
 		return cfg

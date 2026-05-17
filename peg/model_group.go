@@ -3,6 +3,8 @@
 
 package peg
 
+// Group represents an explicit grouping of an expression; it has no
+// semantics beyond grouping (used for precedence and organization).
 type Group struct {
 	Box
 }

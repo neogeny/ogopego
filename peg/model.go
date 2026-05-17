@@ -12,13 +12,22 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Ctx is an alias for the parse-time context type.
 type Ctx = context.Ctx
+
+// MemoKey is an alias for the type used as memoization keys.
 type MemoKey = context.MemoKey
+
+// Tree is an alias for the tree node interface used in parse results.
 type Tree = trees.Tree
+
+// OrderedMap is an alias for the JSON ordered map type used by models.
 type OrderedMap = asjson.OrderedMap
 
+// NIL is the sentinel nil-like tree value used to represent empty results.
 var NIL = trees.NIL
 
+// Model is the interface implemented by all grammar model nodes.
 type Model interface {
 	Parse(ctx Ctx) (Tree, error)
 	Link(rules map[string]*Rule) error
@@ -33,6 +42,9 @@ type ModelBase struct {
 	Model
 	Node
 }
+
+// ModelBase provides common embedding for model nodes to carry identity and
+// node data.
 
 func (m *ModelBase) followRef() *ModelBase { return m }
 

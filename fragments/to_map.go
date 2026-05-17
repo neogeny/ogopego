@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // The Mirror: Converts OrderedMap tree to a standard map tree
 func ToMap(v any) any {
 	switch val := v.(type) {

@@ -7,10 +7,12 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Named wraps an expression result with a name, producing a Named tree node.
 type Named struct {
 	NamedBox
 }
 
+// NamedList wraps an expression result into a Named-as-list node.
 type NamedList struct {
 	Named
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/neogeny/ogopego/trees"
 )
 
+// Dot matches any single rune (a dot in PEG) and returns it as text.
 type Dot struct {
 	ModelBase
 }

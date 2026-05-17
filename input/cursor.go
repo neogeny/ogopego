@@ -11,6 +11,8 @@ type Location struct {
 	Col    int
 }
 
+// TokenizingPatterns groups precompiled patterns used by cursors for
+// whitespace, comments and EOL detection.
 type TokenizingPatterns struct {
 	Wsp pyre.Pattern
 	Cmt pyre.Pattern
@@ -18,6 +20,8 @@ type TokenizingPatterns struct {
 }
 
 type Cursor interface {
+	// Cursor is an abstraction over input sources providing position, lookahead
+	// and tokenization utilities used by the parsing runtime.
 	Configurable
 	InputSource() string
 	Mark() int
