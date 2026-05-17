@@ -24,7 +24,6 @@ type ParseInfo struct {
 
 // Node is an AST node produced by parsing.
 type Node struct {
-	asjson.AsJSONBase
 	parent    weak.Pointer[Node]
 	Ast       any
 	ParseInfo *ParseInfo
@@ -103,11 +102,11 @@ func (n *Node) AsJSON() any {
 	if n == nil {
 		return nil
 	}
-	return n.AsJSONBase.AsJSONOf(n)
+	return asjson.AsJSONOf(n)
 }
 
 // AsJSONStr returns a JSON string representation of the node.
-func (n *Node) AsJSONStr() string { return n.AsJSONStrOf(n) }
+func (n *Node) AsJSONStr() string { return asjson.AsJSONStrOf(n) }
 
 // MarshalJSON marshals the node to JSON.
 func (n *Node) MarshalJSON() ([]byte, error) {

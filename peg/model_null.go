@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // NULL represents a parse model node that always succeeds without consuming
 // input and yields a nil-ish tree value.
@@ -20,7 +23,7 @@ func (n *NULL) Parse(ctx Ctx) (Tree, error) {
 func (t *NULL) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the NULL.
-func (t *NULL) AsJSON() any { return t.AsJSONOf(t) }
+func (t *NULL) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the NULL.
-func (t *NULL) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *NULL) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

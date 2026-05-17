@@ -180,7 +180,6 @@ func TestAsJSONChanFunc(t *testing.T) {
 }
 
 type mixinStruct struct {
-	AsJSONBase
 	Greeting string
 	Count    int
 }
@@ -190,10 +189,10 @@ func (s *mixinStruct) PubMap() *OrderedMap {
 }
 
 func (s *mixinStruct) AsJSON() any {
-	return s.AsJSONBase.AsJSONOf(s)
+	return AsJSONOf(s)
 }
 
-func (s *mixinStruct) AsJSONStr() string { return s.AsJSONStrOf(s) }
+func (s *mixinStruct) AsJSONStr() string { return AsJSONStrOf(s) }
 
 func TestAsJSONMixin(t *testing.T) {
 	s := &mixinStruct{Greeting: "hello", Count: 42}

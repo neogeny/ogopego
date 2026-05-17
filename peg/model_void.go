@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // Void represents a model node that consumes no value but indicates a
 // voided/ignored result (used for suppressed nodes).
@@ -21,7 +24,7 @@ func (v *Void) Parse(ctx Ctx) (Tree, error) {
 func (t *Void) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Void.
-func (t *Void) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Void) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Void.
-func (t *Void) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Void) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

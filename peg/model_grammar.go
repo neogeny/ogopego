@@ -134,10 +134,10 @@ func (g *Grammar) Parse(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 func (g *Grammar) PubMap() *asjson.OrderedMap { return util.PubMapOf(g) }
 
 // AsJSON returns a JSON-compatible representation of the Grammar.
-func (g *Grammar) AsJSON() any { return g.AsJSONOf(g) }
+func (g *Grammar) AsJSON() any { return asjson.AsJSONOf(g) }
 
 // AsJSONStr returns a JSON string representation of the Grammar.
-func (g *Grammar) AsJSONStr() string { return g.AsJSONStrOf(g) }
+func (g *Grammar) AsJSONStr() string { return asjson.AsJSONStrOf(g) }
 
 // MarshalJSON marshals the Grammar to JSON.
 func (g *Grammar) MarshalJSON() ([]byte, error) { return json.Marshal(g.AsJSON()) }

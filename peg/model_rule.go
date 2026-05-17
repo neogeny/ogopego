@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"unicode"
 
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util"
 )
@@ -82,10 +83,10 @@ func (r *Rule) ShouldTrace() bool {
 func (r *Rule) PubMap() *OrderedMap { return util.PubMapOf(r) }
 
 // AsJSON returns a JSON-compatible representation of the Rule.
-func (r *Rule) AsJSON() any { return r.AsJSONOf(r) }
+func (r *Rule) AsJSON() any { return asjson.AsJSONOf(r) }
 
 // AsJSONStr returns a JSON string representation of the Rule.
-func (r *Rule) AsJSONStr() string { return r.AsJSONStrOf(r) }
+func (r *Rule) AsJSONStr() string { return asjson.AsJSONStrOf(r) }
 
 // MarshalJSON marshals the Rule to JSON.
 func (r *Rule) MarshalJSON() ([]byte, error) { return json.Marshal(r.AsJSON()) }

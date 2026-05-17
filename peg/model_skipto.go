@@ -39,7 +39,7 @@ func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
 func (t *SkipTo) PubMap() *asjson.OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the SkipTo.
-func (t *SkipTo) AsJSON() any { return t.AsJSONOf(t) }
+func (t *SkipTo) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the SkipTo.
-func (t *SkipTo) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *SkipTo) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // Fail represents a parsing failure.
 type Fail struct {
@@ -19,7 +22,7 @@ func (f *Fail) Parse(ctx Ctx) (Tree, error) {
 func (t *Fail) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Fail.
-func (t *Fail) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Fail) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Fail.
-func (t *Fail) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Fail) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

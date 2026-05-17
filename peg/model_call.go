@@ -133,7 +133,7 @@ func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, star
 func (c *Call) PubMap() *asjson.OrderedMap { return util.PubMapOf(c) }
 
 // AsJSON returns a JSON-compatible representation of the Call.
-func (c *Call) AsJSON() any { return c.AsJSONOf(c) }
+func (c *Call) AsJSON() any { return asjson.AsJSONOf(c) }
 
 // AsJSONStr returns a JSON string representation of the Call.
-func (c *Call) AsJSONStr() string { return c.AsJSONStrOf(c) }
+func (c *Call) AsJSONStr() string { return asjson.AsJSONStrOf(c) }

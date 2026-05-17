@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // Synth synthesizes a value from its nested expression; it is a thin wrapper
 // around the nested expression used for model-level transformations.
@@ -20,7 +23,7 @@ func (s *Synth) Parse(ctx Ctx) (Tree, error) {
 func (t *Synth) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Synth.
-func (t *Synth) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Synth) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Synth.
-func (t *Synth) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Synth) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

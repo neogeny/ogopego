@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // Group represents an explicit grouping of an expression; it has no
 // semantics beyond grouping (used for precedence and organization).
@@ -20,7 +23,7 @@ func (g *Group) Parse(ctx Ctx) (Tree, error) {
 func (t *Group) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Group.
-func (t *Group) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Group) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Group.
-func (t *Group) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Group) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

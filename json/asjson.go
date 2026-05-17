@@ -27,9 +27,6 @@ type AsJSONMixin interface {
 	AsJSONStr() string
 }
 
-// AsJSONBase provides common functionality for AsJSONMixin implementations.
-type AsJSONBase struct{}
-
 func AsJSON(v any) any {
 	seen := make(map[uintptr]bool)
 	return asjson(reflect.ValueOf(v), seen)
@@ -150,8 +147,8 @@ func ToGoMap(v any) any {
 }
 
 // AsJSONStrOf returns a JSON string representation of the given reference's public fields.
-func (b *AsJSONBase) AsJSONStrOf(ref any) string {
-	val := b.AsJSONOf(ref)
+func AsJSONStrOf(ref any) string {
+	val := AsJSONOf(ref)
 	if val == nil {
 		return ""
 	}
@@ -163,7 +160,7 @@ func (b *AsJSONBase) AsJSONStrOf(ref any) string {
 }
 
 // AsJSONOf returns a JSON-compatible representation of the given reference's public fields.
-func (b *AsJSONBase) AsJSONOf(ref any) any {
+func AsJSONOf(ref any) any {
 	pub := util.PubMapOf(ref)
 	if pub == nil {
 		return nil

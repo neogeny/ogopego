@@ -6,6 +6,7 @@ package peg
 import (
 	"errors"
 
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -60,16 +61,16 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 func (c *Choice) PubMap() *OrderedMap { return util.PubMapOf(c) }
 
 // AsJSON returns a JSON-compatible representation of the Choice.
-func (c *Choice) AsJSON() any { return c.AsJSONOf(c) }
+func (c *Choice) AsJSON() any { return asjson.AsJSONOf(c) }
 
 // AsJSONStr returns a JSON string representation of the Choice.
-func (c *Choice) AsJSONStr() string { return c.AsJSONStrOf(c) }
+func (c *Choice) AsJSONStr() string { return asjson.AsJSONStrOf(c) }
 
 // PubMap returns an ordered map of the Option's public fields.
 func (o *Option) PubMap() *OrderedMap { return util.PubMapOf(o) }
 
 // AsJSON returns a JSON-compatible representation of the Option.
-func (o *Option) AsJSON() any { return o.AsJSONOf(o) }
+func (o *Option) AsJSON() any { return asjson.AsJSONOf(o) }
 
 // AsJSONStr returns a JSON string representation of the Option.
-func (o *Option) AsJSONStr() string { return o.AsJSONStrOf(o) }
+func (o *Option) AsJSONStr() string { return asjson.AsJSONStrOf(o) }

@@ -6,6 +6,7 @@ package peg
 import (
 	"fmt"
 
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -29,7 +30,7 @@ func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
 func (t *RuleInclude) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the RuleInclude.
-func (t *RuleInclude) AsJSON() any { return t.AsJSONOf(t) }
+func (t *RuleInclude) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the RuleInclude.
-func (t *RuleInclude) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *RuleInclude) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

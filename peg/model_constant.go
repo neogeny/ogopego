@@ -3,7 +3,10 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/util"
+import (
+	asjson "github.com/neogeny/ogopego/json"
+	"github.com/neogeny/ogopego/util"
+)
 
 // Constant represents a literal constant value.
 type Constant struct {
@@ -26,10 +29,10 @@ func (c *Constant) Parse(ctx Ctx) (Tree, error) {
 func (t *Constant) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Constant.
-func (t *Constant) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Constant) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Constant.
-func (t *Constant) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Constant) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
 
 // Parse implements the Model interface for Alert.
 func (a *Alert) Parse(ctx Ctx) (Tree, error) {
@@ -40,7 +43,7 @@ func (a *Alert) Parse(ctx Ctx) (Tree, error) {
 func (t *Alert) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Alert.
-func (t *Alert) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Alert) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Alert.
-func (t *Alert) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Alert) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

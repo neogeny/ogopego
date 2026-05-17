@@ -6,6 +6,7 @@ package peg
 import (
 	"fmt"
 
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util"
 )
@@ -30,7 +31,7 @@ func (t *Token) Parse(ctx Ctx) (Tree, error) {
 func (t *Token) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the Token.
-func (t *Token) AsJSON() any { return t.AsJSONOf(t) }
+func (t *Token) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the Token.
-func (t *Token) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *Token) AsJSONStr() string { return asjson.AsJSONStrOf(t) }

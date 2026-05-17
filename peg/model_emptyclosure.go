@@ -4,6 +4,7 @@
 package peg
 
 import (
+	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util"
 )
@@ -22,7 +23,7 @@ func (e *EmptyClosure) Parse(ctx Ctx) (Tree, error) {
 func (t *EmptyClosure) PubMap() *OrderedMap { return util.PubMapOf(t) }
 
 // AsJSON returns a JSON-compatible representation of the EmptyClosure.
-func (t *EmptyClosure) AsJSON() any { return t.AsJSONOf(t) }
+func (t *EmptyClosure) AsJSON() any { return asjson.AsJSONOf(t) }
 
 // AsJSONStr returns a JSON string representation of the EmptyClosure.
-func (t *EmptyClosure) AsJSONStr() string { return t.AsJSONStrOf(t) }
+func (t *EmptyClosure) AsJSONStr() string { return asjson.AsJSONStrOf(t) }
