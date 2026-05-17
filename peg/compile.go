@@ -114,7 +114,7 @@ func listValue(tree trees.Tree) []trees.Tree {
 func strListValue(tree trees.Tree) []string {
 	items := listValue(tree)
 	if items == nil {
-		return nil
+		return []string{}
 	}
 	out := make([]string, 0, len(items))
 	for _, item := range items {
