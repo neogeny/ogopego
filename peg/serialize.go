@@ -145,13 +145,17 @@ func serializeRule(r *Rule) *orderedmap.OrderedMap {
 	out := orderedmap.New()
 	out.Set("__class__", "Rule")
 	out.Set("name", r.Name)
-	out.Set("exp", serializeModel(r.Exp))
-	out.Set("params", r.Params)
+	if r.Params == nil {
+		out.Set("params", []string{})
+	} else {
+		out.Set("params", r.Params)
+	}
 	out.Set("is_name", r.IsName)
 	out.Set("is_tokn", r.IsTokn)
 	out.Set("no_memo", r.NoMemo)
 	out.Set("no_stak", r.NoStak)
 	out.Set("is_memo", r.IsMemo)
 	out.Set("is_lrec", r.IsLrec)
+	out.Set("exp", serializeModel(r.Exp))
 	return out
 }
