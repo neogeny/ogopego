@@ -24,9 +24,9 @@ func TestAsJSONPrimitives(t *testing.T) {
 		{"hello", `"hello"`},
 	}
 	for _, tt := range tests {
-		got := AsJSONs(tt.in)
+		got := AsJSONStr(tt.in)
 		if got != tt.want {
-			t.Errorf("AsJSONs(%v) = %s, want %s", tt.in, got, tt.want)
+			t.Errorf("AsJSONStr(%v) = %s, want %s", tt.in, got, tt.want)
 		}
 	}
 }
@@ -159,7 +159,7 @@ func TestAsJSONCycle(t *testing.T) {
 
 func TestAsJSONs(t *testing.T) {
 	v := map[string]any{"x": 1}
-	s := AsJSONs(v)
+	s := AsJSONStr(v)
 	want := "{\n  \"x\": 1\n}"
 	if s != want {
 		t.Errorf("got %q, want %q", s, want)

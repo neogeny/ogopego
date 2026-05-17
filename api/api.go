@@ -74,7 +74,7 @@ func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONs(tree), nil
+	return json.AsJSONStr(tree), nil
 }
 
 // Compile parses a grammar string and returns a compiled Grammar ready for
@@ -118,7 +118,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONs(g), nil
+	return json.AsJSONStr(g), nil
 }
 
 // ParseInput parses the given text using a compiled Grammar and returns the
@@ -144,7 +144,7 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONs(tree), nil
+	return json.AsJSONStr(tree), nil
 }
 
 // LoadGrammarFromJSON deserializes a Grammar from JSON output produced by

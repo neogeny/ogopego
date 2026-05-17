@@ -19,12 +19,8 @@ type OrderedMap = orderedmap.OrderedMap
 
 // AsJSONMixin defines an interface for types that can be converted to JSON-compatible structures.
 type AsJSONMixin interface {
-	// PubMap returns an ordered map of public fields.
-	PubMap() *OrderedMap
 	// AsJSON returns a JSON-compatible representation of the object.
 	AsJSON() any
-	// AsJSONStr returns a JSON string representation of the object.
-	AsJSONStr() string
 }
 
 func AsJSON(v any) any {
@@ -32,12 +28,13 @@ func AsJSON(v any) any {
 	return asjson(reflect.ValueOf(v), seen)
 }
 
-func AsJSONs(v any) string {
-	b, err := json.MarshalIndent(AsJSON(v), "", "  ")
+// AsJSONStr returns a JSON string representation of the given value.
+func AsJSONStr(v any) string {
+	bts, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return fmt.Sprintf("!json:%v", err)
 	}
-	return string(b)
+	return string(bts)
 }
 
 // ToJSONString converts a Go value to a JSON string with optional prefix and indent.
@@ -144,18 +141,6 @@ func ToGoMap(v any) any {
 	default:
 		return v
 	}
-}
-
-// AsJSONStr returns a JSON string representation of the given value.
-func AsJSONStr(v any) string {
-	if v == nil {
-		return ""
-	}
-	bts, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("!json:%v", err)
-	}
-	return string(bts)
 }
 
 // AsJSONOf returns a JSON-compatible representation of the given reference's public fields.
