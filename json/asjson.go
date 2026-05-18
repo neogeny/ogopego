@@ -10,41 +10,12 @@ import (
 	"sort"
 	"strings"
 	"unicode"
-	"unsafe"
 
 	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/util"
 )
 
 type OrderedMap = orderedmap.OrderedMap
-
-// Id returns a unique uintptr identifier for any Go value,
-// mimicking Python's id() without panicking on unhashable types.
-func Id(val any) uintptr {
-	if val == nil {
-		return 0
-	}
-
-	v := reflect.ValueOf(val)
-
-	switch v.Kind() {
-	// Reference types natively hold a pointer to their data block.
-	// v.Pointer() extracts it safely without panicking.
-	case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Chan, reflect.UnsafePointer:
-		return v.Pointer()
-
-	default:
-		// For structs, arrays, and primitive scalars, we take the address
-		// of the underlying concrete value held by the interface.
-		if v.CanAddr() {
-			return v.UnsafeAddr()
-		}
-
-		// Fallback for unaddressable values: extract the address of the
-		// interface wrapper's data segment directly via unsafe.
-		return uintptr(unsafe.Pointer(&val))
-	}
-}
 
 func AsJSON(v any) any {
 	return toJSONValue(v, make(map[uintptr]bool))
@@ -59,13 +30,14 @@ func AsJSONStr(v any) string {
 	return string(bts)
 }
 
+// FIXME: dead code, remove
 // ToJSONString converts a Go value to a JSON string with optional prefix and indent.
 func ToJSONString(v any) string {
 	return toJSONString(v, "", "  ")
 }
 
 func toJSONValue(v any, seen map[uintptr]bool) any {
-	id := Id(v)
+	id := util.Id(v)
 	if in, ok := seen[id]; ok && in {
 		return fmt.Sprintf("%T@%p", v, v)
 	}
@@ -135,6 +107,7 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 	}
 }
 
+// FIXME: dead code, remove
 func toJSONString(v any, prefix, indent string) string {
 	switch val := v.(type) {
 	case *OrderedMap:
@@ -215,6 +188,7 @@ func toJSONString(v any, prefix, indent string) string {
 	}
 }
 
+// FIXME: dead code, remove
 // ToGoMap converts an OrderedMap or slice of any to a standard Go map or slice recursively.
 func ToGoMap(v any) any {
 	switch val := v.(type) {
@@ -258,6 +232,7 @@ func PythonizeName(s string) string {
 	return result.String()
 }
 
+// FIXME: dead code, remove
 func asjson(val reflect.Value, seen map[uintptr]bool) any {
 	if !val.IsValid() {
 		return nil
@@ -328,6 +303,7 @@ func asjson(val reflect.Value, seen map[uintptr]bool) any {
 	}
 }
 
+// FIXME: dead code, remove
 func marshalToAny(m json.Marshaler) any {
 	raw, err := m.MarshalJSON()
 	if err != nil {
@@ -338,6 +314,7 @@ func marshalToAny(m json.Marshaler) any {
 	return out
 }
 
+// FIXME: dead code, remove
 func structToJSON(val reflect.Value, seen map[uintptr]bool) any {
 	t := val.Type()
 

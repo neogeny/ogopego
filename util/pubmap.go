@@ -16,6 +16,9 @@ func PubMapOf(ref any) any {
 	if ref == nil {
 		return nil
 	}
+	if _, ok := ref.(*OrderedMap); ok {
+		return ref
+	}
 
 	depth := 0
 	v := reflect.ValueOf(ref)
@@ -37,12 +40,22 @@ func PubMapOf(ref any) any {
 	typeName := t.Name()
 	out := orderedmap.New()
 	out.Set("__class__", typeName)
+	flattenFields(t, v, out)
+	return out
+}
+
+func flattenFields(t reflect.Type, v reflect.Value, out *orderedmap.OrderedMap) {
 	for i := range t.NumField() {
 		f := t.Field(i)
-		if !f.IsExported() || f.Anonymous {
+		if !f.IsExported() {
+			continue
+		}
+		if f.Anonymous {
+			if f.Type.Kind() == reflect.Struct && f.Type.Name() != "Node" {
+				flattenFields(f.Type, v.Field(i), out)
+			}
 			continue
 		}
 		out.Set(f.Name, v.Field(i).Interface())
 	}
-	return out
 }
