@@ -49,7 +49,7 @@ func (c *Call) Link(rules map[string]*Rule) error {
 	if !ok {
 		return fmt.Errorf("call to undefined rule: %s", c.Name)
 	}
-	c.Target = rule
+	c.rule = rule
 	return nil
 }
 
@@ -59,7 +59,7 @@ func (r *RuleInclude) Link(rules map[string]*Rule) error {
 	if !ok {
 		return fmt.Errorf("rule include references undefined rule: %s", r.Name)
 	}
-	r.Exp = rule.Exp
+	r.exp = rule.Exp
 	return nil
 }
 

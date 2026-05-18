@@ -80,11 +80,11 @@ func TestLinkCall(t *testing.T) {
 	if !ok {
 		t.Fatal("seq[0] is not *Call")
 	}
-	if call.Target == nil {
-		t.Fatal("Call.Target is nil after Link")
+	if call.rule == nil {
+		t.Fatal("Call.rule is nil after Link")
 	}
-	if call.Target.Name != "atom" {
-		t.Fatalf("Call.Target.Name = %q, want %q", call.Target.Name, "atom")
+	if call.rule.Name != "atom" {
+		t.Fatalf("Call.rule.Name = %q, want %q", call.rule.Name, "atom")
 	}
 }
 
@@ -132,14 +132,14 @@ func TestLinkRuleInclude(t *testing.T) {
 	if !ok {
 		t.Fatal("rule_b.Exp is not *RuleInclude")
 	}
-	if ri.Exp == nil {
-		t.Fatal("RuleInclude.Exp is nil after Link")
+	if ri.exp == nil {
+		t.Fatal("RuleInclude.exp is nil after Link")
 	}
-	if _, ok := ri.Exp.(*Token); !ok {
-		t.Fatalf("RuleInclude.Exp is %T, want *Token", ri.Exp)
+	if _, ok := ri.exp.(*Token); !ok {
+		t.Fatalf("RuleInclude.exp is %T, want *Token", ri.exp)
 	}
-	if ri.Exp.(*Token).Token != "a" {
-		t.Fatalf("RuleInclude.Exp.Token = %q, want %q", ri.Exp.(*Token).Token, "a")
+	if ri.exp.(*Token).Token != "a" {
+		t.Fatalf("RuleInclude.exp.Token = %q, want %q", ri.exp.(*Token).Token, "a")
 	}
 }
 

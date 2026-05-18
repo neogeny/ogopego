@@ -12,18 +12,18 @@ import (
 // Call represents a call to a grammar rule.
 type Call struct {
 	ModelBase
-	Name   string
-	Target *Rule
+	Name string
+	rule *Rule
 }
 
 // Parse implements the Model interface for Call.
 func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
-	if c.Target == nil {
+	if c.rule == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("call to %q has not been linked", c.Name))
 	}
 
 	name := c.Name
-	rule := c.Target
+	rule := c.rule
 	start := ctx.Mark()
 
 	if !rule.IsToken() {

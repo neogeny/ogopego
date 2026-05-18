@@ -557,7 +557,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 			return nil, err
 		}
 		exp, _ := modelFromJSON(h.getNested("exp"))
-		return &RuleInclude{Name: name, Exp: exp}, nil
+		return &RuleInclude{Name: name, exp: exp}, nil
 
 	default:
 		return nil, h.error(fmt.Sprintf("Unsupported: %s", cls))

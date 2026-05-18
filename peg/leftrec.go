@@ -13,8 +13,8 @@ func isNullable(exp Model) bool {
 	case *Call:
 		return false
 	case *RuleInclude:
-		if e.Exp != nil {
-			return isNullable(e.Exp)
+		if e.exp != nil {
+			return isNullable(e.exp)
 		}
 		return false
 
@@ -68,16 +68,16 @@ func isNullable(exp Model) bool {
 func callableRuleIDs(exp Model, ruleIndex map[*Rule]int) []int {
 	switch e := exp.(type) {
 	case *Call:
-		if e.Target != nil {
-			if id, ok := ruleIndex[e.Target]; ok {
+		if e.rule != nil {
+			if id, ok := ruleIndex[e.rule]; ok {
 				return []int{id}
 			}
 		}
 		return nil
 
 	case *RuleInclude:
-		if e.Exp != nil {
-			return callableRuleIDs(e.Exp, ruleIndex)
+		if e.exp != nil {
+			return callableRuleIDs(e.exp, ruleIndex)
 		}
 		return nil
 

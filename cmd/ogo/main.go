@@ -57,6 +57,7 @@ func main() {
 	}
 
 	var output string
+	var lang string
 
 	if cmd != nil {
 		switch cmd.Name {
@@ -94,11 +95,7 @@ func main() {
 					fp.Fail()
 				} else {
 					fp.Success()
-					if CLI.Run.Json {
-						output += result + "\n"
-					} else {
-						output += result + "\n"
-					}
+					output += result + "\n"
 				}
 				prog.IncFiles()
 			}
@@ -109,6 +106,7 @@ func main() {
 				color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
 				color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
 			)
+			lang = "json"
 
 		case "boot":
 			gram, err := api.BootGrammar()
@@ -119,14 +117,19 @@ func main() {
 			switch {
 			case CLI.Boot.Json:
 				output = peg.ModelToJSONStr(gram)
+				lang = "json"
 			case CLI.Boot.Pretty:
 				output = gram.PrettyPrint()
+				lang = "ebnf"
 			case CLI.Boot.Railroads:
 				output = gram.Railroads()
+				lang = "apl"
 			case CLI.Grammar.Model:
 				output = util.Repr(gram)
+				lang = "go"
 			default:
 				output = gram.PrettyPrint()
+				lang = "ebnf"
 			}
 
 		case "grammar":
@@ -138,14 +141,19 @@ func main() {
 			switch {
 			case CLI.Grammar.Json:
 				output = peg.ModelToJSONStr(gram)
+				lang = "json"
 			case CLI.Grammar.Pretty:
 				output = gram.PrettyPrint()
+				lang = "ebnf"
 			case CLI.Grammar.Railroads:
 				output = gram.Railroads()
+				lang = "apl"
 			case CLI.Grammar.Model:
 				output = util.Repr(gram)
+				lang = "go"
 			default:
 				output = gram.PrettyPrint()
+				lang = "ebnf"
 			}
 		}
 	}
@@ -157,7 +165,7 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			fmt.Println(output)
+			fmt.Println(util.Pygmentize(output, lang, useColorOutput))
 		}
 	}
 }

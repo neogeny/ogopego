@@ -45,7 +45,7 @@ func (c *Choice) ValidateLinked() error {
 
 // ValidateLinked checks if the Call's target rule is linked.
 func (c *Call) ValidateLinked() error {
-	if c.Target == nil {
+	if c.rule == nil {
 		return fmt.Errorf("call to %q is not linked", c.Name)
 	}
 	return nil
@@ -53,7 +53,7 @@ func (c *Call) ValidateLinked() error {
 
 // ValidateLinked checks if the RuleInclude's expression is linked.
 func (r *RuleInclude) ValidateLinked() error {
-	if r.Exp == nil {
+	if r.exp == nil {
 		return fmt.Errorf("rule include %q is not linked", r.Name)
 	}
 	return nil

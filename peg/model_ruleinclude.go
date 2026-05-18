@@ -12,13 +12,13 @@ import (
 type RuleInclude struct {
 	ModelBase
 	Name string
-	Exp  Model
+	exp  Model
 }
 
 // Parse implements the Model interface for RuleInclude.
 func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
-	if r.Exp == nil {
+	if r.exp == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("RuleInclude %q has not been resolved", r.Name))
 	}
-	return r.Exp.Parse(ctx)
+	return r.exp.Parse(ctx)
 }

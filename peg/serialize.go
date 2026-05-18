@@ -53,7 +53,7 @@ func ModelToJSON(v Model) any {
 	case *Call:
 		return mapClass("Call", "name", m.Name)
 	case *RuleInclude:
-		return mapClass("RuleInclude", "name", m.Name, "exp", ModelToJSON(m.Exp))
+		return mapClass("RuleInclude", "name", m.Name, "exp", ModelToJSON(m.exp))
 
 	case *Group:
 		return mapClass("Group", "exp", ModelToJSON(m.Exp))
