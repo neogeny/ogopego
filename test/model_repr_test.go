@@ -68,11 +68,11 @@ func TestModelReprTypedRef(t *testing.T) {
 	if !strings.Contains(code, "Child *Pair") {
 		t.Error("expected Start.Child *Pair field")
 	}
-	if !strings.Contains(code, "PairFromTree(v)") {
+	if !strings.Contains(code, "PairFromTree(") {
 		t.Error("expected PairFromTree call in StartFromTree")
 	}
-	if !strings.Contains(code, "Value string") {
-		t.Error("expected Num.Value string field")
+	if !strings.Contains(code, "Value any") {
+		t.Error("expected Num.Value any field")
 	}
 }
 

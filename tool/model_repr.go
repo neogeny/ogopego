@@ -60,7 +60,7 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 			buf.WriteString("}\n\n")
 		} else {
 			fmt.Fprintf(&buf, "type %s struct {\n", ri.typeName)
-			buf.WriteString("\tValue string\n")
+			buf.WriteString("\tValue any\n")
 			buf.WriteString("}\n\n")
 		}
 	}
@@ -81,10 +81,9 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 			buf.WriteString("\tvar err error\n\n")
 
 			for _, f := range ri.fields {
-				// Generate extraction code based on type
 				switch {
-				case strings.HasPrefix(f.goType, "[]*"):
-					// NamedList — map entry is *trees.Seq
+				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					// NamedList with typed refs — entry is *trees.Seq
 					innerType := strings.TrimPrefix(f.goType, "[]")
 					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
@@ -100,8 +99,8 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 
-				case strings.HasPrefix(f.goType, "[]"):
-					// NamedList of string
+				case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
+					// NamedList of string — entry is *trees.Seq
 					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
 					buf.WriteString("\t\tif !ok {\n")
@@ -113,26 +112,51 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 
-				case strings.HasPrefix(f.goType, "*"):
-					// Named with typed rule call — entry is *trees.Node{TypeName}
+				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					// Named with list-wrapped typed ref — entry is *trees.List
+					innerType := strings.TrimPrefix(f.goType, "[]")
 					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
-					fmt.Fprintf(&buf, "\t\tresult.%s, err = %sFromTree(v)\n", f.goName, f.goType[1:])
-					buf.WriteString("\t\tif err != nil {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: %%w\", err)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\tlist, ok := v.(*trees.List)\n")
+					buf.WriteString("\t\tif !ok {\n")
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected List, got %%T\", v)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t}\n")
+					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(list.Items))\n", f.goName, f.goType)
+					buf.WriteString("\t\tfor i, item := range list.Items {\n")
+					fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
+					buf.WriteString("\t\t\tif err != nil {\n")
+					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t\t}\n")
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 
-				default:
+				case strings.HasPrefix(f.goType, "*"):
+					// Named with typed call — extract from *trees.Node (nil-safe for Optional)
+					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					buf.WriteString("\t\tif n, ok := v.(*trees.Node); ok {\n")
+					fmt.Fprintf(&buf, "\t\t\tresult.%s, err = %sFromTree(n)\n", f.goName, f.goType[1:])
+					buf.WriteString("\t\t\tif err != nil {\n")
+					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s: %%w\", err)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t\t}\n")
+					buf.WriteString("\t\t}\n")
+					buf.WriteString("\t}\n\n")
+
+				case f.goType == "string":
 					// Named with pattern/token — entry is *trees.Text
 					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
 					fmt.Fprintf(&buf, "\t\tresult.%s = v.(*trees.Text).Value\n", f.goName)
+					buf.WriteString("\t}\n\n")
+
+				default:
+					// Named with untyped/unknown inner — assign as any
+					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\t\tresult.%s = v\n", f.goName)
 					buf.WriteString("\t}\n\n")
 				}
 			}
 
 			buf.WriteString("\treturn &result, nil\n")
 		} else {
-			buf.WriteString(fmt.Sprintf("\treturn &%s{Value: n.Tree.(*trees.Text).Value}, nil\n", ri.typeName))
+			buf.WriteString(fmt.Sprintf("\treturn &%s{Value: n.Tree}, nil\n", ri.typeName))
 		}
 
 		buf.WriteString("}\n\n")
@@ -142,9 +166,10 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 }
 
 type fieldDef struct {
-	name   string
-	goName string
-	goType string
+	name          string
+	goName        string
+	goType        string
+	fromNamedList bool
 }
 
 // collectFields walks a peg.Model expression tree and collects named fields.
@@ -154,25 +179,39 @@ func collectFields(fields *[]fieldDef, exp peg.Model, rules map[string]*peg.Rule
 	switch e := exp.(type) {
 	case *peg.Named:
 		tname := resolvedTypeName(e.Exp, rules)
-		gt := "string"
-		if tname != "" {
+		var gt string
+		switch {
+		case tname != "" && isListExpr(e.Exp):
+			gt = "[]*" + tname
+		case tname != "":
 			gt = "*" + tname
+		case isConstantText(e.Exp, rules):
+			gt = "string"
+		default:
+			gt = "any"
 		}
 		*fields = append(*fields, fieldDef{
-			name:   e.Name,
-			goName: capitalise(e.Name),
-			goType: gt,
+			name:          e.Name,
+			goName:        capitalise(e.Name),
+			goType:        gt,
+			fromNamedList: false,
 		})
 	case *peg.NamedList:
 		tname := resolvedTypeName(e.Exp, rules)
-		gt := "[]string"
-		if tname != "" {
+		var gt string
+		switch {
+		case tname != "":
 			gt = "[]*" + tname
+		case isConstantText(e.Exp, rules):
+			gt = "[]string"
+		default:
+			gt = "[]any"
 		}
 		*fields = append(*fields, fieldDef{
-			name:   e.Name,
-			goName: capitalise(e.Name),
-			goType: gt,
+			name:          e.Name,
+			goName:        capitalise(e.Name),
+			goType:        gt,
+			fromNamedList: true,
 		})
 	case *peg.Sequence:
 		for _, item := range e.Sequence {
@@ -212,7 +251,8 @@ func collectFields(fields *[]fieldDef, exp peg.Model, rules map[string]*peg.Rule
 }
 
 // resolvedTypeName tries to determine the Go type name for a named element's
-// inner expression. Returns "" if the element wraps a pattern/token (string).
+// inner expression. Looks through wrapper nodes (Optional, Choice, Closure, etc.)
+// to find typed rule calls.
 func resolvedTypeName(exp peg.Model, rules map[string]*peg.Rule) string {
 	switch e := exp.(type) {
 	case *peg.Call:
@@ -227,8 +267,54 @@ func resolvedTypeName(exp peg.Model, rules map[string]*peg.Rule) string {
 				return tn
 			}
 		}
+	case *peg.Optional:
+		return resolvedTypeName(e.Exp, rules)
+	case *peg.Closure:
+		return resolvedTypeName(e.Exp, rules)
+	case *peg.PositiveClosure:
+		return resolvedTypeName(e.Exp, rules)
+	case *peg.Gather:
+		return resolvedTypeName(e.Exp, rules)
+	case *peg.PositiveGather:
+		return resolvedTypeName(e.Exp, rules)
+	case *peg.Choice:
+		for _, opt := range e.Options {
+			if tn := resolvedTypeName(opt.Exp, rules); tn != "" {
+				return tn
+			}
+		}
 	}
 	return ""
+}
+
+// isConstantText returns true when the expression is guaranteed to produce
+// *trees.Text at runtime (Pattern or Token literals).
+func isConstantText(exp peg.Model, rules map[string]*peg.Rule) bool {
+	switch e := exp.(type) {
+	case *peg.Pattern, *peg.Token:
+		return true
+	case *peg.Group:
+		return isConstantText(e.Exp, rules)
+	}
+	return false
+}
+
+// isListExpr returns true when the expression wraps its inner in a list
+// (Closure, Gather, etc.). Used to decide []*T vs *T for typed refs.
+func isListExpr(exp peg.Model) bool {
+	switch e := exp.(type) {
+	case *peg.Closure, *peg.PositiveClosure, *peg.Gather, *peg.PositiveGather:
+		return true
+	case *peg.Group:
+		return isListExpr(e.Exp)
+	case *peg.Sequence:
+		for _, item := range e.Sequence {
+			if isListExpr(item) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func capitalise(s string) string {
