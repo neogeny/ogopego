@@ -6,9 +6,6 @@ package peg
 import (
 	"strings"
 	"testing"
-
-	"github.com/iancoleman/orderedmap"
-	asjson "github.com/neogeny/ogopego/json"
 )
 
 func TestPrettyToken(t *testing.T) {
@@ -383,12 +380,10 @@ func TestPrettyGrammarWithKeywords(t *testing.T) {
 func TestPrettyGrammarWithDirectives(t *testing.T) {
 	g := &Grammar{
 		Name: "Test",
-		Directives: func() *asjson.OrderedMap {
-			om := orderedmap.New()
-			om.Set("whitespace", `\s+`)
-			om.Set("comments", `#.*`)
-			return om
-		}(),
+		Directives: [][]string{
+			{"whitespace", `\s+`},
+			{"comments", `#.*`},
+		},
 		Rules: []*Rule{
 			{
 				NamedBox: NamedBox{

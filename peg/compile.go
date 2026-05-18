@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -161,7 +160,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 		}
 	}
 
-	directives := orderedmap.New()
+	var directives [][]string
 	if dirsTree, ok := mn.Entries["directives"]; ok {
 		dirList := listValue(dirsTree)
 		for _, d := range dirList {
@@ -172,7 +171,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 			n := textValue(dm.Entries["name"])
 			v := textValue(dm.Entries["value"])
 			if n != "" {
-				directives.Set(n, v)
+				directives = append(directives, []string{n, v})
 				if n == "grammar" && name == "" {
 					name = v
 				}

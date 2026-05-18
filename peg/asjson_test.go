@@ -26,8 +26,8 @@ func TestNodeAsJSON(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected map, got %T", result)
 	}
-	if cls, _ := om["__class__"]; cls != "Node" {
-		t.Errorf("expected __class__ Node, got %v", cls)
+	if cls, _ := om["__class__"]; cls != "peg.Node" {
+		t.Errorf("expected __class__ peg.Node, got %v", cls)
 	}
 	parseinfoRaw, hasPI := om["parse_info"]
 	if !hasPI {

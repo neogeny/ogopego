@@ -6,8 +6,6 @@ package peg
 import (
 	"fmt"
 	"strings"
-
-	"github.com/iancoleman/orderedmap"
 )
 
 type prettyWriter struct {
@@ -297,66 +295,49 @@ func (m *Rule) PrettyPrint() string {
 
 // Grammar
 
-func directiveValue(v any) string {
-	switch val := v.(type) {
-	case string:
-		return val
-	case bool:
-		if val {
-			return "True"
-		}
-		return "False"
-	default:
-		return fmt.Sprintf("%v", v)
-	}
-}
-
 func (m *Grammar) PrettyPrint() string {
 	w := newPrettyWriter()
 	w.WriteLine(fmt.Sprintf("@@grammar :: %s", m.Name))
 
-	if m.Directives == nil {
-		m.Directives = orderedmap.New()
+	dirValue := func(k string) (string, bool) {
+		for _, d := range m.Directives {
+			if d[0] == k {
+				return d[1], true
+			}
+		}
+		return "", false
 	}
 
-	knownDir := func(k string) (any, bool) { return m.Directives.Get(k) }
-
-	if dir, ok := knownDir("whitespace"); ok {
-		w.WriteLine(fmt.Sprintf("@@whitespace :: /%s/", directiveValue(dir)))
+	if _, ok := dirValue("whitespace"); ok {
+		d, _ := dirValue("whitespace")
+		w.WriteLine(fmt.Sprintf("@@whitespace :: /%s/", d))
 	}
-	if dir, ok := knownDir("comments"); ok {
-		w.WriteLine(fmt.Sprintf("@@comments :: /%s/", directiveValue(dir)))
+	if _, ok := dirValue("comments"); ok {
+		d, _ := dirValue("comments")
+		w.WriteLine(fmt.Sprintf("@@comments :: /%s/", d))
 	}
-	if dir, ok := knownDir("eol_comments"); ok {
-		w.WriteLine(fmt.Sprintf("@@eol_comments :: /%s/", directiveValue(dir)))
+	if _, ok := dirValue("eol_comments"); ok {
+		d, _ := dirValue("eol_comments")
+		w.WriteLine(fmt.Sprintf("@@eol_comments :: /%s/", d))
 	}
-	if dir, ok := knownDir("namechars"); ok {
-		w.WriteLine(fmt.Sprintf("@@namechars :: \"%s\"", directiveValue(dir)))
+	if _, ok := dirValue("namechars"); ok {
+		d, _ := dirValue("namechars")
+		w.WriteLine(fmt.Sprintf("@@namechars :: \"%s\"", d))
 	}
-	if dir, ok := knownDir("ignorecase"); ok {
-		if v, ok := dir.(bool); ok && v {
-			w.WriteLine("@@ignorecase :: True")
-		}
+	if d, ok := dirValue("ignorecase"); ok && d == "True" {
+		w.WriteLine("@@ignorecase :: True")
 	}
-	if dir, ok := knownDir("nameguard"); ok {
-		if v, ok := dir.(bool); ok && v {
-			w.WriteLine("@@nameguard :: True")
-		}
+	if d, ok := dirValue("nameguard"); ok && d == "True" {
+		w.WriteLine("@@nameguard :: True")
 	}
-	if dir, ok := knownDir("left_recursion"); ok {
-		if v, ok := dir.(bool); ok && !v {
-			w.WriteLine("@@left_recursion :: False")
-		}
+	if d, ok := dirValue("left_recursion"); ok && d == "False" {
+		w.WriteLine("@@left_recursion :: False")
 	}
-	if dir, ok := knownDir("parseinfo"); ok {
-		if v, ok := dir.(bool); ok && !v {
-			w.WriteLine("@@parseinfo :: False")
-		}
+	if d, ok := dirValue("parseinfo"); ok && d == "False" {
+		w.WriteLine("@@parseinfo :: False")
 	}
-	if dir, ok := knownDir("memoization"); ok {
-		if v, ok := dir.(bool); ok && !v {
-			w.WriteLine("@@memoization :: False")
-		}
+	if d, ok := dirValue("memoization"); ok && d == "False" {
+		w.WriteLine("@@memoization :: False")
 	}
 
 	known := map[string]bool{
@@ -364,12 +345,11 @@ func (m *Grammar) PrettyPrint() string {
 		"namechars": true, "ignorecase": true, "nameguard": true,
 		"left_recursion": true, "parseinfo": true, "memoization": true,
 	}
-	for _, k := range m.Directives.Keys() {
-		if known[k] {
+	for _, d := range m.Directives {
+		if known[d[0]] {
 			continue
 		}
-		v, _ := m.Directives.Get(k)
-		w.WriteLine(fmt.Sprintf("@@%s :: %s", k, directiveValue(v)))
+		w.WriteLine(fmt.Sprintf("@@%s :: %s", d[0], d[1]))
 	}
 
 	if len(m.Keywords) > 0 {

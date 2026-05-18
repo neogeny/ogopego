@@ -37,7 +37,7 @@ func PubMapOf(ref any) any {
 	}
 
 	t := v.Type()
-	typeName := t.Name()
+	typeName := t.String()
 	out := orderedmap.New()
 	out.Set("__class__", typeName)
 	flattenFields(t, v, out)

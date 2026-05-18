@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/iancoleman/orderedmap"
 	json2 "github.com/neogeny/ogopego/json"
 )
 
@@ -214,7 +213,7 @@ func grammarFromJSON(h *helper) (*Grammar, error) {
 }
 
 // parseDirectives parses directives from a map.
-func parseDirectives(obj map[string]any) *json2.OrderedMap {
+func parseDirectives(obj map[string]any) [][]string {
 	raw, ok := obj["directives"]
 	if !ok {
 		return nil
@@ -223,21 +222,21 @@ func parseDirectives(obj map[string]any) *json2.OrderedMap {
 	if !ok {
 		return nil
 	}
-	result := orderedmap.New()
+	var result [][]string
 	for k, v := range dirObj {
 		switch val := v.(type) {
 		case string:
-			result.Set(k, val)
+			result = append(result, []string{k, val})
 		case bool:
 			if val {
-				result.Set(k, "true")
+				result = append(result, []string{k, "true"})
 			} else {
-				result.Set(k, "false")
+				result = append(result, []string{k, "false"})
 			}
 		case float64:
-			result.Set(k, fmt.Sprintf("%v", val))
+			result = append(result, []string{k, fmt.Sprintf("%v", val)})
 		default:
-			result.Set(k, fmt.Sprintf("%v", val))
+			result = append(result, []string{k, fmt.Sprintf("%v", val)})
 		}
 	}
 	return result

@@ -137,8 +137,8 @@ func TestNodeMarshalJSON(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	if out["__class__"] != "Node" {
-		t.Errorf("expected __class__ Node, got %v", out["__class__"])
+	if out["__class__"] != "peg.Node" {
+		t.Errorf("expected __class__ peg.Node, got %v", out["__class__"])
 	}
 	// FIXME
 	//if out["ast"] != nil {

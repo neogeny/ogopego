@@ -42,7 +42,7 @@ func TestReprPrimitives(t *testing.T) {
 func TestReprStruct(t *testing.T) {
 	s := &ReprTestStruct{Name: "foo", Value: 7, Ok: true}
 	got := Repr(s)
-	want := `&ReprTestStruct{Name: "foo", Value: 7, Ok: true}`
+	want := `&util.ReprTestStruct{Name: "foo", Value: 7, Ok: true}`
 	if got != want {
 		t.Errorf("Repr(%v) = %q, want %q", s, got, want)
 	}
@@ -83,7 +83,7 @@ func TestReprNestedStruct(t *testing.T) {
 		Inner: &ReprTestStruct{Name: "inner", Value: 1, Ok: false},
 	}
 	got := Repr(s)
-	want := `&ReprNested{Label: "top", Inner: &ReprTestStruct{Name: "inner", Value: 1, Ok: false}}`
+	want := "&util.ReprNested{\n  Label: \"top\",\n  Inner: &util.ReprTestStruct{Name: \"inner\", Value: 1, Ok: false},\n}"
 	if got != want {
 		t.Errorf("Repr(%v) = %q, want %q", s, got, want)
 	}
@@ -92,7 +92,7 @@ func TestReprNestedStruct(t *testing.T) {
 func TestReprTypedSlice(t *testing.T) {
 	type item struct{ Name string }
 	got := Repr([]*item{{Name: "a"}, {Name: "b"}})
-	want := `[]*util.item{&item{Name: "a"}, &item{Name: "b"}}`
+	want := `[]*util.item{&util.item{Name: "a"}, &util.item{Name: "b"}}`
 	if got != want {
 		t.Errorf("Repr([]*item) = %q, want %q", got, want)
 	}

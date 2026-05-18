@@ -127,11 +127,8 @@ func serializeGrammar(g *Grammar) any {
 	out.Set("name", g.Name)
 
 	dirs := orderedmap.New()
-	if g.Directives != nil {
-		for _, k := range g.Directives.Keys() {
-			v, _ := g.Directives.Get(k)
-			dirs.Set(k, v)
-		}
+	for _, d := range g.Directives {
+		dirs.Set(d[0], d[1])
 	}
 	out.Set("directives", dirs)
 

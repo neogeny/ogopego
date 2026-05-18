@@ -6,7 +6,6 @@ package peg
 import (
 	"fmt"
 
-	asjson "github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -14,7 +13,7 @@ import (
 type Grammar struct {
 	ModelBase
 	Name       string
-	Directives *asjson.OrderedMap
+	Directives [][]string
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
@@ -24,16 +23,9 @@ type Grammar struct {
 func (g *Grammar) CfgFromDirectives() *Cfg {
 	c := Cfg{}
 
-	if g.Directives == nil {
-		return &c
-	}
-
-	for _, name := range g.Directives.Keys() {
-		val, _ := g.Directives.Get(name)
-		s, ok := val.(string)
-		if !ok {
-			continue
-		}
+	for _, d := range g.Directives {
+		name := d[0]
+		s := d[1]
 
 		switch name {
 		case "name":

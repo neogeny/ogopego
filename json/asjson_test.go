@@ -111,8 +111,8 @@ func TestAsJSONJSONMarshaler(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatal(err)
 	}
-	if out["__class__"] != "jsonStruct" {
-		t.Errorf("expected __class__, got %v", out["__class__"])
+	if out["__class__"] != "json.jsonStruct" {
+		t.Errorf("expected __class__ json.jsonStruct, got %v", out["__class__"])
 	}
 	if out["name"] != "test" {
 		t.Errorf("expected test, got %v", out["name"])
