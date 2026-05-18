@@ -11,6 +11,12 @@ import (
 	"github.com/neogeny/ogopego/config"
 )
 
+var ctx *kong.Context
+
+func isTerminal() bool {
+	return os.Getenv("TERM") != "dumb"
+}
+
 // CLI is the command-line interface structure for the ogo tool.
 //
 //goland:noinspection GoVetStructTag
@@ -26,8 +32,8 @@ var CLI struct {
 
 	// Boot subcommand provides access to the internal boot grammar.
 	Boot struct {
-		Json bool `help:"Print the boot grammar in JSON format" short:"j" group:"format"`
-		//Model     bool `help:"Print the Go code for the boot model construction" short:"m" group:"format"`
+		Json      bool `help:"Print the boot grammar in JSON format" short:"j" group:"format"`
+		Model     bool `help:"Print the Go code for the boot model construction" short:"m" group:"format"`
 		Pretty    bool `help:"Pretty-print the boot grammar" short:"p" group:"format"`
 		Railroads bool `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"boot" help:"The internal boot grammar"`
@@ -115,9 +121,3 @@ func validateExclusive(groups ...string) error {
 	}
 	return nil
 }
-
-func isTerminal() bool {
-	return os.Getenv("TERM") != "dumb"
-}
-
-var ctx *kong.Context

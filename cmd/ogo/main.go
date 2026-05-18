@@ -14,6 +14,7 @@ import (
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
+	"github.com/neogeny/ogopego/util"
 )
 
 func main() {
@@ -122,6 +123,8 @@ func main() {
 				output = gram.PrettyPrint()
 			case CLI.Boot.Railroads:
 				output = gram.Railroads()
+			case CLI.Grammar.Model:
+				output = util.Repr(gram)
 			default:
 				output = gram.PrettyPrint()
 			}
@@ -140,7 +143,7 @@ func main() {
 			case CLI.Grammar.Railroads:
 				output = gram.Railroads()
 			case CLI.Grammar.Model:
-				output = fmt.Sprintf("%#v", gram)
+				output = util.Repr(gram)
 			default:
 				output = gram.PrettyPrint()
 			}
