@@ -43,6 +43,7 @@ var CLI struct {
 		Grammar   string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)"`
 		Json      bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
 		Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
+		Parser    string `help:"Generate Go parser source code" short:"x" group:"format" placeholder:"PKG"`
 		Pretty    bool   `help:"Pretty-print the grammar (EBNF)" short:"p" group:"format"`
 		Railroads bool   `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"grammar" help:"Grammar transformations"`
@@ -107,6 +108,9 @@ func validateExclusive(groups ...string) error {
 				if CLI.Grammar.Model {
 					set = append(set, "--model")
 				}
+				if CLI.Grammar.Parser != "" {
+					set = append(set, "--parser="+CLI.Grammar.Parser)
+				}
 				if CLI.Grammar.Pretty {
 					set = append(set, "--pretty")
 				}
@@ -117,7 +121,7 @@ func validateExclusive(groups ...string) error {
 		}
 	}
 	if len(set) > 1 {
-		return fmt.Errorf("only one of --json, --model, --pretty, --railroads, --short can be specified")
+		return fmt.Errorf("only one of --json, --model, --parser, --pretty, --railroads, --short can be specified")
 	}
 	return nil
 }

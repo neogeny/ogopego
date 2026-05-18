@@ -125,7 +125,7 @@ func main() {
 				output = gram.Railroads()
 				lang = "apl"
 			case CLI.Boot.Model:
-				output = peg.ParserRepr(*gram, "main")
+				output = util.Repr(gram)
 				lang = "go"
 			default:
 				output = gram.PrettyPrint()
@@ -149,7 +149,10 @@ func main() {
 				output = gram.Railroads()
 				lang = "apl"
 			case CLI.Grammar.Model:
-				output = peg.ParserRepr(*gram, "main")
+				output = util.Repr(gram)
+				lang = "go"
+			case CLI.Grammar.Parser != "":
+				output = peg.ParserRepr(*gram, CLI.Grammar.Parser)
 				lang = "go"
 			default:
 				output = gram.PrettyPrint()
