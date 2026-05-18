@@ -77,7 +77,9 @@ func (g *Grammar) RuleMap() map[string]*Rule {
 
 // Initialize links and validates the grammar, and marks left-recursive rules.
 func (g *Grammar) Initialize() error {
-	g.LinkGrammar()
+	if err := g.LinkGrammar(); err != nil {
+		return err
+	}
 	if err := g.ValidateLinked(); err != nil {
 		return err
 	}

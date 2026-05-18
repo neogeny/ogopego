@@ -14,6 +14,7 @@ import (
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
+	"github.com/neogeny/ogopego/tool"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -153,6 +154,9 @@ func main() {
 				lang = "go"
 			case CLI.Grammar.Parser != "":
 				output = peg.ParserRepr(*gram, CLI.Grammar.Parser)
+				lang = "go"
+			case CLI.Grammar.ModelGen != "":
+				output = tool.ModelRepr(*gram, CLI.Grammar.ModelGen)
 				lang = "go"
 			default:
 				output = gram.PrettyPrint()

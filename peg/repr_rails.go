@@ -24,8 +24,6 @@ const (
 	eol = "\x0a"
 )
 
-func makeRail(s string) string { return s }
-
 func ulen(s string) int {
 	// ASCII-only for now; full Unicode width support would need a library
 	return len(s)
@@ -135,12 +133,7 @@ func layOut(tracks [][]string) []string {
 				}
 				out = append(out, fmt.Sprintf("  └─%s─┘ ", railpad(joint, maxl)))
 			} else {
-				if len(out) > 0 {
-					last := out[len(out)-1]
-					if strings.HasSuffix(last, "─┘ ") {
-						// Already connected
-					}
-				}
+
 				out = append(out, fmt.Sprintf("  └─%s   ", blankpad(joint, maxl)))
 			}
 			for _, rail := range track[1:] {
