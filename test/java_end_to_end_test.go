@@ -14,6 +14,9 @@ import (
 )
 
 func TestJavaEndToEnd(t *testing.T) {
+	if os.Getenv("XONSH_VERSION") == "" {
+		t.Skip("XONSH_VERSION not set — local test only")
+	}
 	// 1. Load pre-compiled Java grammar
 	data, err := os.ReadFile("../grammar/java.json")
 	if err != nil {
