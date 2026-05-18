@@ -44,6 +44,7 @@ var CLI struct {
 		Json      bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
 		Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
 		Parser    string `help:"Generate Go parser source code" short:"x" group:"format" placeholder:"PKG"`
+		ModelGen  string `help:"Generate Go model source code" short:"g" group:"format" placeholder:"PKG"`
 		Pretty    bool   `help:"Pretty-print the grammar (EBNF)" short:"p" group:"format"`
 		Railroads bool   `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"grammar" help:"Grammar transformations"`
@@ -110,6 +111,9 @@ func validateExclusive(groups ...string) error {
 				}
 				if CLI.Grammar.Parser != "" {
 					set = append(set, "--parser="+CLI.Grammar.Parser)
+				}
+				if CLI.Grammar.ModelGen != "" {
+					set = append(set, "--model-gen="+CLI.Grammar.ModelGen)
 				}
 				if CLI.Grammar.Pretty {
 					set = append(set, "--pretty")
