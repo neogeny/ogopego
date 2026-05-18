@@ -10,7 +10,8 @@ import (
 // Optional represents an optional expression that may succeed with a
 // Nil result if the nested expression fails without a cut.
 type Optional struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for Optional.

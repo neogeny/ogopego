@@ -5,7 +5,8 @@ package peg
 
 // SkipGroup represents a group that is parsed but whose result is discarded.
 type SkipGroup struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for SkipGroup.

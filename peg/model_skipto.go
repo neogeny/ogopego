@@ -10,7 +10,8 @@ import (
 // SkipTo scans forward until the nested expression matches, returning the
 // nested result; used to skip to a target token or pattern.
 type SkipTo struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for SkipTo.

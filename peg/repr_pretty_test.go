@@ -103,7 +103,7 @@ func TestPrettyLeafTerminals(t *testing.T) {
 
 func TestPrettyGroup(t *testing.T) {
 	inner := &Token{Token: "x"}
-	m := &Group{Box: Box{Exp: inner}}
+	m := &Group{Exp: inner}
 	got := m.PrettyPrint()
 	want := `("x")`
 	if got != want {
@@ -118,7 +118,7 @@ func TestPrettyGroupMultiLine(t *testing.T) {
 		items[i] = &Token{Token: s}
 	}
 	seq := &Sequence{Sequence: items}
-	m := &Group{Box: Box{Exp: seq}}
+	m := &Group{Exp: seq}
 	got := m.PrettyPrint()
 	if !strings.HasPrefix(got, "(\n") {
 		t.Errorf("expected multi-line group, got %q", got)
@@ -129,7 +129,7 @@ func TestPrettyGroupMultiLine(t *testing.T) {
 }
 
 func TestPrettyOptional(t *testing.T) {
-	m := &Optional{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Optional{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `["x"]`
 	if got != want {
@@ -138,7 +138,7 @@ func TestPrettyOptional(t *testing.T) {
 }
 
 func TestPrettyClosure(t *testing.T) {
-	m := &Closure{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Closure{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `{"x"}*`
 	if got != want {
@@ -147,7 +147,7 @@ func TestPrettyClosure(t *testing.T) {
 }
 
 func TestPrettyPositiveClosure(t *testing.T) {
-	m := &PositiveClosure{Closure: Closure{Box: Box{Exp: &Token{Token: "x"}}}}
+	m := &PositiveClosure{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `{"x"}+`
 	if got != want {
@@ -156,7 +156,7 @@ func TestPrettyPositiveClosure(t *testing.T) {
 }
 
 func TestPrettyLookahead(t *testing.T) {
-	m := &Lookahead{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Lookahead{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `&"x"`
 	if got != want {
@@ -165,7 +165,7 @@ func TestPrettyLookahead(t *testing.T) {
 }
 
 func TestPrettyNegativeLookahead(t *testing.T) {
-	m := &NegativeLookahead{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &NegativeLookahead{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `!"x"`
 	if got != want {
@@ -174,7 +174,7 @@ func TestPrettyNegativeLookahead(t *testing.T) {
 }
 
 func TestPrettySkipTo(t *testing.T) {
-	m := &SkipTo{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &SkipTo{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `->"x"`
 	if got != want {
@@ -183,7 +183,7 @@ func TestPrettySkipTo(t *testing.T) {
 }
 
 func TestPrettySkipGroup(t *testing.T) {
-	m := &SkipGroup{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &SkipGroup{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `(?:` + `"x"` + `)`
 	if got != want {
@@ -192,7 +192,7 @@ func TestPrettySkipGroup(t *testing.T) {
 }
 
 func TestPrettyOverride(t *testing.T) {
-	m := &Override{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Override{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `="x"`
 	if got != want {
@@ -201,7 +201,7 @@ func TestPrettyOverride(t *testing.T) {
 }
 
 func TestPrettyOverrideList(t *testing.T) {
-	m := &OverrideList{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &OverrideList{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `+="x"`
 	if got != want {
@@ -210,7 +210,7 @@ func TestPrettyOverrideList(t *testing.T) {
 }
 
 func TestPrettyNamed(t *testing.T) {
-	m := &Named{NamedBox: NamedBox{Box: Box{Exp: &Token{Token: "x"}}, Name: "value"}}
+	m := &Named{Exp: &Token{Token: "x"}, Name: "value"}
 	got := m.PrettyPrint()
 	want := `value="x"`
 	if got != want {
@@ -219,7 +219,7 @@ func TestPrettyNamed(t *testing.T) {
 }
 
 func TestPrettyNamedList(t *testing.T) {
-	m := &NamedList{Named: Named{NamedBox: NamedBox{Box: Box{Exp: &Token{Token: "x"}}, Name: "values"}}}
+	m := &NamedList{Exp: &Token{Token: "x"}, Name: "values"}
 	got := m.PrettyPrint()
 	want := `values+="x"`
 	if got != want {
@@ -244,9 +244,9 @@ func TestPrettySequence(t *testing.T) {
 func TestPrettyChoice(t *testing.T) {
 	m := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Token{Token: "a"}}},
-			{Box: Box{Exp: &Token{Token: "b"}}},
-			{Box: Box{Exp: &Token{Token: "c"}}},
+			{Exp: &Token{Token: "a"}},
+			{Exp: &Token{Token: "b"}},
+			{Exp: &Token{Token: "c"}},
 		},
 	}
 	got := m.PrettyPrint()
@@ -258,7 +258,7 @@ func TestPrettyChoice(t *testing.T) {
 
 func TestPrettyJoin(t *testing.T) {
 	m := &Join{
-		Box: Box{Exp: &Constant{Literal: "x"}},
+		Exp: &Constant{Literal: "x"},
 		Sep: &Token{Token: ","},
 	}
 	got := m.PrettyPrint()
@@ -270,10 +270,8 @@ func TestPrettyJoin(t *testing.T) {
 
 func TestPrettyGather(t *testing.T) {
 	m := &Gather{
-		Join: Join{
-			Box: Box{Exp: &Constant{Literal: "x"}},
-			Sep: &Token{Token: ","},
-		},
+		Exp: &Constant{Literal: "x"},
+		Sep: &Token{Token: ","},
 	}
 	got := m.PrettyPrint()
 	want := "\",\".{`x`}*"
@@ -284,12 +282,8 @@ func TestPrettyGather(t *testing.T) {
 
 func TestPrettyPositiveGather(t *testing.T) {
 	m := &PositiveGather{
-		Gather: Gather{
-			Join: Join{
-				Box: Box{Exp: &Constant{Literal: "x"}},
-				Sep: &Token{Token: ","},
-			},
-		},
+		Exp: &Constant{Literal: "x"},
+		Sep: &Token{Token: ","},
 	}
 	got := m.PrettyPrint()
 	want := "\",\".{`x`}+"
@@ -300,15 +294,13 @@ func TestPrettyPositiveGather(t *testing.T) {
 
 func TestPrettyRule(t *testing.T) {
 	r := &Rule{
-		NamedBox: NamedBox{
-			Box: Box{Exp: &Choice{
-				Options: []*Option{
-					{Box: Box{Exp: &Token{Token: "hello"}}},
-					{Box: Box{Exp: &Token{Token: "world"}}},
-				},
-			}},
-			Name: "greeting",
+		Exp: &Choice{
+			Options: []*Option{
+				{Exp: &Token{Token: "hello"}},
+				{Exp: &Token{Token: "world"}},
+			},
 		},
+		Name: "greeting",
 	}
 	got := r.PrettyPrint()
 	if !strings.Contains(got, "greeting:") {
@@ -321,10 +313,8 @@ func TestPrettyRule(t *testing.T) {
 
 func TestPrettyRuleWithFlags(t *testing.T) {
 	r := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &Token{Token: "x"}},
-			Name: "test",
-		},
+		Exp:    &Token{Token: "x"},
+		Name:   "test",
 		NoStak: true,
 		NoMemo: true,
 	}
@@ -342,10 +332,8 @@ func TestPrettyGrammar(t *testing.T) {
 		Name: "Test",
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "hello"}},
-					Name: "start",
-				},
+				Exp:  &Token{Token: "hello"},
+				Name: "start",
 			},
 		},
 	}
@@ -364,10 +352,8 @@ func TestPrettyGrammarWithKeywords(t *testing.T) {
 		Keywords: []string{"if", "else", "while", "for", "return", "break", "continue", "let", "in"},
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "x"}},
-					Name: "start",
-				},
+				Exp:  &Token{Token: "x"},
+				Name: "start",
 			},
 		},
 	}
@@ -386,10 +372,8 @@ func TestPrettyGrammarWithDirectives(t *testing.T) {
 		},
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "x"}},
-					Name: "start",
-				},
+				Exp:  &Token{Token: "x"},
+				Name: "start",
 			},
 		},
 	}
@@ -459,8 +443,8 @@ func TestRailroadsSequence(t *testing.T) {
 func TestRailroadsChoice(t *testing.T) {
 	m := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Token{Token: "a"}}},
-			{Box: Box{Exp: &Token{Token: "b"}}},
+			{Exp: &Token{Token: "a"}},
+			{Exp: &Token{Token: "b"}},
 		},
 	}
 	got := m.Railroads()
@@ -470,7 +454,7 @@ func TestRailroadsChoice(t *testing.T) {
 }
 
 func TestRailroadsClosure(t *testing.T) {
-	m := &Closure{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Closure{Exp: &Token{Token: "x"}}
 	got := m.Railroads()
 	if !strings.Contains(got, "──┬→") {
 		t.Errorf("expected loop in closure railroad, got %q", got)
@@ -478,7 +462,7 @@ func TestRailroadsClosure(t *testing.T) {
 }
 
 func TestRailroadsPositiveClosure(t *testing.T) {
-	m := &PositiveClosure{Closure: Closure{Box: Box{Exp: &Token{Token: "x"}}}}
+	m := &PositiveClosure{Exp: &Token{Token: "x"}}
 	got := m.Railroads()
 	if !strings.Contains(got, "──┬─") {
 		t.Errorf("expected loop in positive closure railroad, got %q", got)
@@ -486,7 +470,7 @@ func TestRailroadsPositiveClosure(t *testing.T) {
 }
 
 func TestRailroadsOptional(t *testing.T) {
-	m := &Optional{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Optional{Exp: &Token{Token: "x"}}
 	got := m.Railroads()
 	if !strings.Contains(got, "──┬─") && !strings.Contains(got, "├─") {
 		t.Errorf("expected branch in optional railroad, got %q", got)
@@ -494,10 +478,10 @@ func TestRailroadsOptional(t *testing.T) {
 }
 
 func TestRailroadsNamed(t *testing.T) {
-	m := &Named{NamedBox: NamedBox{
-		Box:  Box{Exp: &Token{Token: "x"}},
+	m := &Named{
+		Exp:  &Token{Token: "x"},
 		Name: "val",
-	}}
+	}
 	got := m.Railroads()
 	if !strings.Contains(got, "val=(") {
 		t.Errorf("expected named wrapper, got %q", got)
@@ -505,7 +489,7 @@ func TestRailroadsNamed(t *testing.T) {
 }
 
 func TestRailroadsLookahead(t *testing.T) {
-	m := &Lookahead{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &Lookahead{Exp: &Token{Token: "x"}}
 	got := m.Railroads()
 	if !strings.Contains(got, "&[") {
 		t.Errorf("expected lookahead wrapper, got %q", got)
@@ -513,7 +497,7 @@ func TestRailroadsLookahead(t *testing.T) {
 }
 
 func TestRailroadsNegativeLookahead(t *testing.T) {
-	m := &NegativeLookahead{Box: Box{Exp: &Token{Token: "x"}}}
+	m := &NegativeLookahead{Exp: &Token{Token: "x"}}
 	got := m.Railroads()
 	if !strings.Contains(got, "![") {
 		t.Errorf("expected negative lookahead wrapper, got %q", got)
@@ -534,10 +518,8 @@ func TestRailroadsGrammar(t *testing.T) {
 		Name: "Test",
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "x"}},
-					Name: "start",
-				},
+				Exp:  &Token{Token: "x"},
+				Name: "start",
 			},
 		},
 	}

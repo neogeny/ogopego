@@ -6,7 +6,8 @@ package peg
 // Synth synthesizes a value from its nested expression; it is a thin wrapper
 // around the nested expression used for model-level transformations.
 type Synth struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for Synth.

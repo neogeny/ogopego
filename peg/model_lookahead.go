@@ -10,12 +10,14 @@ import (
 // Lookahead performs a positive lookahead: it succeeds if the nested
 // expression matches without consuming input.
 type Lookahead struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // NegativeLookahead succeeds when the nested expression does not match.
 type NegativeLookahead struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for Lookahead.

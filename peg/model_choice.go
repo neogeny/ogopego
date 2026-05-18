@@ -9,7 +9,8 @@ import (
 
 // Option represents a single alternative within a Choice expression.
 type Option struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Choice represents a PEG choice expression (ordered choice).

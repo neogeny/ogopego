@@ -12,7 +12,9 @@ import (
 // Rule represents a named grammar rule with optional parameters and
 // metadata used during parsing and code generation.
 type Rule struct {
-	NamedBox
+	ModelBase
+	Exp  Model
+	Name string
 	// Params are the parameters for the rule.
 	Params []string
 	// KWParams are keyword parameters for the rule.

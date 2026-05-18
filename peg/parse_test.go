@@ -99,8 +99,8 @@ func TestParseChoiceFirst(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Token{Token: "hello"}}},
-			{Box: Box{Exp: &Token{Token: "world"}}},
+			{Exp: &Token{Token: "hello"}},
+			{Exp: &Token{Token: "world"}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -117,8 +117,8 @@ func TestParseChoiceSecond(t *testing.T) {
 	ctx := ctxFrom("world")
 	expr := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Token{Token: "hello"}}},
-			{Box: Box{Exp: &Token{Token: "world"}}},
+			{Exp: &Token{Token: "hello"}},
+			{Exp: &Token{Token: "world"}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -135,8 +135,8 @@ func TestParseChoiceFail(t *testing.T) {
 	ctx := ctxFrom("nope")
 	expr := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Token{Token: "hello"}}},
-			{Box: Box{Exp: &Token{Token: "world"}}},
+			{Exp: &Token{Token: "hello"}},
+			{Exp: &Token{Token: "world"}},
 		},
 	}
 	_, err := expr.Parse(ctx)
@@ -147,7 +147,7 @@ func TestParseChoiceFail(t *testing.T) {
 
 func TestParseOptionalMatches(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &Optional{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -160,7 +160,7 @@ func TestParseOptionalMatches(t *testing.T) {
 
 func TestParseOptionalNoMatch(t *testing.T) {
 	ctx := ctxFrom("world")
-	expr := &Optional{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -175,7 +175,7 @@ func TestParseOptionalNoMatch(t *testing.T) {
 
 func TestParseClosureMultiple(t *testing.T) {
 	ctx := ctxFrom("aaa")
-	expr := &Closure{Box: Box{Exp: &Token{Token: "a"}}}
+	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -191,7 +191,7 @@ func TestParseClosureMultiple(t *testing.T) {
 
 func TestParseClosureZero(t *testing.T) {
 	ctx := ctxFrom("bbb")
-	expr := &Closure{Box: Box{Exp: &Token{Token: "a"}}}
+	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -207,7 +207,7 @@ func TestParseClosureZero(t *testing.T) {
 
 func TestParsePositiveClosure(t *testing.T) {
 	ctx := ctxFrom("aaa")
-	expr := &PositiveClosure{Closure: Closure{Box: Box{Exp: &Token{Token: "a"}}}}
+	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -223,7 +223,7 @@ func TestParsePositiveClosure(t *testing.T) {
 
 func TestParsePositiveClosureFail(t *testing.T) {
 	ctx := ctxFrom("bbb")
-	expr := &PositiveClosure{Closure: Closure{Box: Box{Exp: &Token{Token: "a"}}}}
+	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	_, err := expr.Parse(ctx)
 	if err == nil {
 		t.Fatal("expected error when positive closure can't match at least once")
@@ -232,7 +232,7 @@ func TestParsePositiveClosureFail(t *testing.T) {
 
 func TestParseGroup(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &Group{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Group{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -245,7 +245,7 @@ func TestParseGroup(t *testing.T) {
 
 func TestParseLookahead(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &Lookahead{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Lookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -260,7 +260,7 @@ func TestParseLookahead(t *testing.T) {
 
 func TestParseLookaheadFail(t *testing.T) {
 	ctx := ctxFrom("world")
-	expr := &Lookahead{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Lookahead{Exp: &Token{Token: "hello"}}
 	_, err := expr.Parse(ctx)
 	if err == nil {
 		t.Fatal("expected error")
@@ -269,7 +269,7 @@ func TestParseLookaheadFail(t *testing.T) {
 
 func TestParseNegativeLookahead(t *testing.T) {
 	ctx := ctxFrom("world")
-	expr := &NegativeLookahead{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &NegativeLookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -281,7 +281,7 @@ func TestParseNegativeLookahead(t *testing.T) {
 
 func TestParseNegativeLookaheadFail(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &NegativeLookahead{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &NegativeLookahead{Exp: &Token{Token: "hello"}}
 	_, err := expr.Parse(ctx)
 	if err == nil {
 		t.Fatal("expected error when negative lookahead matches")
@@ -290,7 +290,7 @@ func TestParseNegativeLookaheadFail(t *testing.T) {
 
 func TestParseNamed(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &Named{NamedBox: NamedBox{Box: Box{Exp: &Token{Token: "hello"}}, Name: "greeting"}}
+	expr := &Named{Exp: &Token{Token: "hello"}, Name: "greeting"}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -310,7 +310,7 @@ func TestParseNamed(t *testing.T) {
 
 func TestParseOverride(t *testing.T) {
 	ctx := ctxFrom("hello")
-	expr := &Override{Box: Box{Exp: &Token{Token: "hello"}}}
+	expr := &Override{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -323,10 +323,8 @@ func TestParseOverride(t *testing.T) {
 func TestParseRule(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &Token{Token: "hello"}},
-			Name: "test",
-		},
+		Exp:    &Token{Token: "hello"},
+		Name:   "test",
 		Params: []string{"test"},
 	}
 	result, err := expr.Parse(ctx)
@@ -352,10 +350,8 @@ func TestParseGrammar(t *testing.T) {
 		Name: "Test",
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "hello"}},
-					Name: "start",
-				},
+				Exp:    &Token{Token: "hello"},
+				Name:   "start",
 				Params: []string{"start"},
 			},
 		},
@@ -379,17 +375,13 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 		Name: "Test",
 		Rules: []*Rule{
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "hello"}},
-					Name: "first",
-				},
+				Exp:    &Token{Token: "hello"},
+				Name:   "first",
 				Params: []string{"first"},
 			},
 			{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "universe"}},
-					Name: "second",
-				},
+				Exp:    &Token{Token: "universe"},
+				Name:   "second",
 				Params: []string{"second"},
 			},
 		},
@@ -488,12 +480,12 @@ func TestParseChoiceResetsCursor(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Choice{
 		Options: []*Option{
-			{Box: Box{Exp: &Sequence{
+			{Exp: &Sequence{
 				Sequence: []Model{&Token{Token: "wrong"}, &Token{Token: "stuff"}},
-			}}},
-			{Box: Box{Exp: &Sequence{
+			}},
+			{Exp: &Sequence{
 				Sequence: []Model{&Token{Token: "hello"}, &Token{Token: "world"}},
-			}}},
+			}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -511,9 +503,9 @@ func TestParseClosureIncremental(t *testing.T) {
 	expr := &Sequence{
 		Sequence: []Model{
 			&Token{Token: "a"},
-			&Closure{Box: Box{Exp: &Sequence{
+			&Closure{Exp: &Sequence{
 				Sequence: []Model{&Token{Token: "b"}, &Token{Token: "c"}},
-			}}},
+			}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -539,16 +531,12 @@ func TestParseFoldIntegration(t *testing.T) {
 	expr := &Sequence{
 		Sequence: []Model{
 			&Named{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "hello"}},
-					Name: "first",
-				},
+				Exp:  &Token{Token: "hello"},
+				Name: "first",
 			},
 			&Named{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: &Token{Token: "world"}},
-					Name: "second",
-				},
+				Exp:  &Token{Token: "world"},
+				Name: "second",
 			},
 		},
 	}

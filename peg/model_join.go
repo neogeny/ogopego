@@ -6,24 +6,31 @@ package peg
 // Join represents a sequence joined by a separator expression (e.g. a list
 // of elements with separators).
 type Join struct {
-	Box
+	ModelBase
+	Exp Model
 	Sep Model
 }
 
 // PositiveJoin is like Join but requires at least one element.
 type PositiveJoin struct {
-	Join
+	ModelBase
+	Exp Model
+	Sep Model
 }
 
 // Gather behaves like Join but collects elements differently (semantics
 // vary by model consumer).
 type Gather struct {
-	Join
+	ModelBase
+	Exp Model
+	Sep Model
 }
 
 // PositiveGather is the one-or-more variant of Gather.
 type PositiveGather struct {
-	Gather
+	ModelBase
+	Exp Model
+	Sep Model
 }
 
 // Parse implements the Model interface for Join.

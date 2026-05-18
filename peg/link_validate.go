@@ -7,21 +7,41 @@ import (
 	"fmt"
 )
 
-// ValidateLinked checks if the Box's expression is linked.
-func (b *Box) ValidateLinked() error {
-	if b.Exp != nil {
-		return b.Exp.ValidateLinked()
+func validateExp(exp Model) error {
+	if exp != nil {
+		return exp.ValidateLinked()
 	}
 	return nil
 }
 
-// ValidateLinked checks if the Join's expressions are linked.
-func (j *Join) ValidateLinked() error {
-	if err := j.Exp.ValidateLinked(); err != nil {
+func validateSep(exp, sep Model) error {
+	if err := validateExp(exp); err != nil {
 		return err
 	}
-	return j.Sep.ValidateLinked()
+	return validateExp(sep)
 }
+
+// ValidateLinked checks that all nested expressions are linked.
+func (g *Group) ValidateLinked() error             { return validateExp(g.Exp) }
+func (o *Optional) ValidateLinked() error          { return validateExp(o.Exp) }
+func (c *Closure) ValidateLinked() error           { return validateExp(c.Exp) }
+func (p *PositiveClosure) ValidateLinked() error   { return validateExp(p.Exp) }
+func (l *Lookahead) ValidateLinked() error         { return validateExp(l.Exp) }
+func (n *NegativeLookahead) ValidateLinked() error { return validateExp(n.Exp) }
+func (s *SkipGroup) ValidateLinked() error         { return validateExp(s.Exp) }
+func (s *SkipTo) ValidateLinked() error            { return validateExp(s.Exp) }
+func (o *Override) ValidateLinked() error          { return validateExp(o.Exp) }
+func (o *OverrideList) ValidateLinked() error      { return validateExp(o.Exp) }
+func (s *Synth) ValidateLinked() error             { return validateExp(s.Exp) }
+func (o *Option) ValidateLinked() error            { return validateExp(o.Exp) }
+func (n *Named) ValidateLinked() error             { return validateExp(n.Exp) }
+func (n *NamedList) ValidateLinked() error         { return validateExp(n.Exp) }
+func (r *Rule) ValidateLinked() error              { return validateExp(r.Exp) }
+
+func (j *Join) ValidateLinked() error           { return validateSep(j.Exp, j.Sep) }
+func (p *PositiveJoin) ValidateLinked() error   { return validateSep(p.Exp, p.Sep) }
+func (g *Gather) ValidateLinked() error         { return validateSep(g.Exp, g.Sep) }
+func (p *PositiveGather) ValidateLinked() error { return validateSep(p.Exp, p.Sep) }
 
 // ValidateLinked checks if all expressions in the Sequence are linked.
 func (s *Sequence) ValidateLinked() error {

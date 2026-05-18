@@ -247,10 +247,8 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 	params := strListValue(mn.Entries["params"])
 
 	r := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: exp},
-			Name: name,
-		},
+		Exp:    exp,
+		Name:   name,
 		Params: params,
 	}
 	return r, nil
@@ -303,7 +301,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, &Option{Box: Box{Exp: e}})
+			opts = append(opts, &Option{Exp: e})
 		}
 		exp = &Choice{Options: opts}
 
@@ -312,14 +310,14 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &Option{Box: Box{Exp: e}}
+		exp = &Option{Exp: e}
 
 	case "Closure":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &Closure{Box: Box{Exp: e}}
+		exp = &Closure{Exp: e}
 
 	case "Constant":
 		exp = &Constant{Literal: textValue(inner)}
@@ -359,7 +357,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &Gather{Join: Join{Box: Box{Exp: e}, Sep: s}}
+		exp = &Gather{Exp: e, Sep: s}
 
 	case "Grammar":
 		exp = &NULL{}
@@ -372,7 +370,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &Group{Box: Box{Exp: e}}
+		exp = &Group{Exp: e}
 
 	case "Join":
 		expTree, err := cc.mapGet(inner, "exp")
@@ -391,14 +389,14 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &Join{Box: Box{Exp: e}, Sep: s}
+		exp = &Join{Exp: e, Sep: s}
 
 	case "Lookahead":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &Lookahead{Box: Box{Exp: e}}
+		exp = &Lookahead{Exp: e}
 
 	case "Model":
 		exp = &NULL{}
@@ -419,12 +417,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &Named{
-			NamedBox: NamedBox{
-				Box:  Box{Exp: e},
-				Name: name,
-			},
-		}
+		exp = &Named{Exp: e, Name: name}
 
 	case "NamedBox":
 		exp = &NULL{}
@@ -439,42 +432,35 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &NamedList{
-			Named: Named{
-				NamedBox: NamedBox{
-					Box:  Box{Exp: e},
-					Name: name,
-				},
-			},
-		}
+		exp = &NamedList{Exp: e, Name: name}
 
 	case "NegativeLookahead":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &NegativeLookahead{Box: Box{Exp: e}}
+		exp = &NegativeLookahead{Exp: e}
 
 	case "Optional":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &Optional{Box: Box{Exp: e}}
+		exp = &Optional{Exp: e}
 
 	case "Override":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &Override{Box: Box{Exp: e}}
+		exp = &Override{Exp: e}
 
 	case "OverrideList":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &OverrideList{Box: Box{Exp: e}}
+		exp = &OverrideList{Exp: e}
 
 	case "Pattern":
 		exp = &Pattern{Pattern: textValue(inner)}
@@ -499,7 +485,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		} else {
 			var opts []*Option
 			for _, e := range exps {
-				opts = append(opts, &Option{Box: Box{Exp: e}})
+				opts = append(opts, &Option{Exp: e})
 			}
 			exp = &Choice{Options: opts}
 		}
@@ -509,7 +495,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &PositiveClosure{Closure: Closure{Box: Box{Exp: e}}}
+		exp = &PositiveClosure{Exp: e}
 
 	case "PositiveGather":
 		expTree, err := cc.mapGet(inner, "exp")
@@ -528,11 +514,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &PositiveGather{
-			Gather: Gather{
-				Join: Join{Box: Box{Exp: e}, Sep: s},
-			},
-		}
+		exp = &PositiveGather{Exp: e, Sep: s}
 
 	case "PositiveJoin", "RightJoin", "LeftJoin":
 		expTree, err := cc.mapGet(inner, "exp")
@@ -551,7 +533,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &PositiveJoin{Join: Join{Box: Box{Exp: e}, Sep: s}}
+		exp = &PositiveJoin{Exp: e, Sep: s}
 
 	case "Rule":
 		exp = &NULL{}
@@ -581,14 +563,14 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		exp = &SkipGroup{Box: Box{Exp: e}}
+		exp = &SkipGroup{Exp: e}
 
 	case "SkipTo":
 		e, err := cc.compileExp(inner)
 		if err != nil {
 			return nil, err
 		}
-		exp = &SkipTo{Box: Box{Exp: e}}
+		exp = &SkipTo{Exp: e}
 
 	case "Synth":
 		exp = &NULL{}

@@ -9,12 +9,16 @@ import (
 
 // Named wraps an expression result with a name, producing a Named tree node.
 type Named struct {
-	NamedBox
+	ModelBase
+	Exp  Model
+	Name string
 }
 
 // NamedList wraps an expression result into a Named-as-list node.
 type NamedList struct {
-	Named
+	ModelBase
+	Exp  Model
+	Name string
 }
 
 // Parse implements the Model interface for Named.

@@ -5,13 +5,15 @@ package peg
 
 // Closure represents the Kleene-closure (zero-or-more) of an expression.
 type Closure struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // PositiveClosure represents the positive closure (one-or-more) of an
 // expression.
 type PositiveClosure struct {
-	Closure
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for Closure.

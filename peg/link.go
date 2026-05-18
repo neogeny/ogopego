@@ -7,21 +7,41 @@ import (
 	"fmt"
 )
 
-// Link resolves rule references within a Box expression.
-func (b *Box) Link(rules map[string]*Rule) error {
-	if b.Exp != nil {
-		return b.Exp.Link(rules)
+func linkExp(exp Model, rules map[string]*Rule) error {
+	if exp != nil {
+		return exp.Link(rules)
 	}
 	return nil
 }
 
-// Link resolves rule references within a Join expression.
-func (j *Join) Link(rules map[string]*Rule) error {
-	if err := j.Exp.Link(rules); err != nil {
+func linkSep(exp, sep Model, rules map[string]*Rule) error {
+	if err := linkExp(exp, rules); err != nil {
 		return err
 	}
-	return j.Sep.Link(rules)
+	return linkExp(sep, rules)
 }
+
+// Link resolves rule references within expression-bearing types.
+func (g *Group) Link(rules map[string]*Rule) error             { return linkExp(g.Exp, rules) }
+func (o *Optional) Link(rules map[string]*Rule) error          { return linkExp(o.Exp, rules) }
+func (c *Closure) Link(rules map[string]*Rule) error           { return linkExp(c.Exp, rules) }
+func (p *PositiveClosure) Link(rules map[string]*Rule) error   { return linkExp(p.Exp, rules) }
+func (l *Lookahead) Link(rules map[string]*Rule) error         { return linkExp(l.Exp, rules) }
+func (n *NegativeLookahead) Link(rules map[string]*Rule) error { return linkExp(n.Exp, rules) }
+func (s *SkipGroup) Link(rules map[string]*Rule) error         { return linkExp(s.Exp, rules) }
+func (s *SkipTo) Link(rules map[string]*Rule) error            { return linkExp(s.Exp, rules) }
+func (o *Override) Link(rules map[string]*Rule) error          { return linkExp(o.Exp, rules) }
+func (o *OverrideList) Link(rules map[string]*Rule) error      { return linkExp(o.Exp, rules) }
+func (s *Synth) Link(rules map[string]*Rule) error             { return linkExp(s.Exp, rules) }
+func (o *Option) Link(rules map[string]*Rule) error            { return linkExp(o.Exp, rules) }
+func (n *Named) Link(rules map[string]*Rule) error             { return linkExp(n.Exp, rules) }
+func (n *NamedList) Link(rules map[string]*Rule) error         { return linkExp(n.Exp, rules) }
+func (r *Rule) Link(rules map[string]*Rule) error              { return linkExp(r.Exp, rules) }
+
+func (j *Join) Link(rules map[string]*Rule) error           { return linkSep(j.Exp, j.Sep, rules) }
+func (p *PositiveJoin) Link(rules map[string]*Rule) error   { return linkSep(p.Exp, p.Sep, rules) }
+func (g *Gather) Link(rules map[string]*Rule) error         { return linkSep(g.Exp, g.Sep, rules) }
+func (p *PositiveGather) Link(rules map[string]*Rule) error { return linkSep(p.Exp, p.Sep, rules) }
 
 // Link resolves rule references within a Sequence expression.
 func (s *Sequence) Link(rules map[string]*Rule) error {

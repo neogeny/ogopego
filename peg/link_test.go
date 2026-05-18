@@ -43,26 +43,22 @@ func expectValidateError(t *testing.T, g *Grammar) {
 // Uses Call to reference atom from expr.
 func linkTestGrammar() *Grammar {
 	atom := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &Token{Token: "x"}},
-			Name: "atom",
-		},
+		Exp:  &Token{Token: "x"},
+		Name: "atom",
 	}
 	expr := &Rule{
-		NamedBox: NamedBox{
-			Box: Box{Exp: &Sequence{
-				Sequence: []Model{
-					&Call{Name: "atom"},
-					&Closure{Box: Box{Exp: &Sequence{
-						Sequence: []Model{
-							&Token{Token: "+"},
-							&Call{Name: "atom"},
-						},
-					}}},
-				},
-			}},
-			Name: "expr",
+		Exp: &Sequence{
+			Sequence: []Model{
+				&Call{Name: "atom"},
+				&Closure{Exp: &Sequence{
+					Sequence: []Model{
+						&Token{Token: "+"},
+						&Call{Name: "atom"},
+					},
+				}},
+			},
 		},
+		Name: "expr",
 	}
 	return &Grammar{Name: "test", Rules: []*Rule{expr, atom}}
 }
@@ -109,16 +105,12 @@ func TestLinkCallUndefined(t *testing.T) {
 //	rule_b = >rule_a   (includes rule_a)
 func includeTestGrammar() *Grammar {
 	ruleA := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &Token{Token: "a"}},
-			Name: "rule_a",
-		},
+		Exp:  &Token{Token: "a"},
+		Name: "rule_a",
 	}
 	ruleB := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &RuleInclude{Name: "rule_a"}},
-			Name: "rule_b",
-		},
+		Exp:  &RuleInclude{Name: "rule_a"},
+		Name: "rule_b",
 	}
 	return &Grammar{Name: "test", Rules: []*Rule{ruleB, ruleA}}
 }
@@ -157,36 +149,32 @@ func TestLinkRuleIncludeUndefined(t *testing.T) {
 // deepTestGrammar builds a deeply nested grammar exercising all Link recursion paths.
 func deepTestGrammar() *Grammar {
 	prim := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: &Token{Token: "p"}},
-			Name: "prim",
-		},
+		Exp:  &Token{Token: "p"},
+		Name: "prim",
 	}
 	deep := &Rule{
-		NamedBox: NamedBox{
-			Box: Box{Exp: &Choice{
-				Options: []*Option{
-					{Box: Box{Exp: &Call{Name: "prim"}}},
-					{Box: Box{Exp: &Group{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &Override{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &OverrideList{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &Lookahead{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &NegativeLookahead{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &Closure{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &PositiveClosure{Closure: Closure{Box: Box{Exp: &Call{Name: "prim"}}}}}},
-					{Box: Box{Exp: &Optional{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &SkipGroup{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &SkipTo{Box: Box{Exp: &Call{Name: "prim"}}}}},
-					{Box: Box{Exp: &Named{NamedBox: NamedBox{Box: Box{Exp: &Call{Name: "prim"}}, Name: "n"}}}},
-					{Box: Box{Exp: &NamedList{Named: Named{NamedBox: NamedBox{Box: Box{Exp: &Call{Name: "prim"}}, Name: "nl"}}}}},
-					{Box: Box{Exp: &Join{Box: Box{Exp: &Call{Name: "prim"}}, Sep: &Token{Token: ","}}}},
-					{Box: Box{Exp: &PositiveJoin{Join: Join{Box: Box{Exp: &Call{Name: "prim"}}, Sep: &Token{Token: ","}}}}},
-					{Box: Box{Exp: &Gather{Join: Join{Box: Box{Exp: &Call{Name: "prim"}}, Sep: &Token{Token: ","}}}}},
-					{Box: Box{Exp: &PositiveGather{Gather: Gather{Join: Join{Box: Box{Exp: &Call{Name: "prim"}}, Sep: &Token{Token: ","}}}}}},
-				},
-			}},
-			Name: "deep",
+		Exp: &Choice{
+			Options: []*Option{
+				{Exp: &Call{Name: "prim"}},
+				{Exp: &Group{Exp: &Call{Name: "prim"}}},
+				{Exp: &Override{Exp: &Call{Name: "prim"}}},
+				{Exp: &OverrideList{Exp: &Call{Name: "prim"}}},
+				{Exp: &Lookahead{Exp: &Call{Name: "prim"}}},
+				{Exp: &NegativeLookahead{Exp: &Call{Name: "prim"}}},
+				{Exp: &Closure{Exp: &Call{Name: "prim"}}},
+				{Exp: &PositiveClosure{Exp: &Call{Name: "prim"}}},
+				{Exp: &Optional{Exp: &Call{Name: "prim"}}},
+				{Exp: &SkipGroup{Exp: &Call{Name: "prim"}}},
+				{Exp: &SkipTo{Exp: &Call{Name: "prim"}}},
+				{Exp: &Named{Exp: &Call{Name: "prim"}, Name: "n"}},
+				{Exp: &NamedList{Exp: &Call{Name: "prim"}, Name: "nl"}},
+				{Exp: &Join{Exp: &Call{Name: "prim"}, Sep: &Token{Token: ","}}},
+				{Exp: &PositiveJoin{Exp: &Call{Name: "prim"}, Sep: &Token{Token: ","}}},
+				{Exp: &Gather{Exp: &Call{Name: "prim"}, Sep: &Token{Token: ","}}},
+				{Exp: &PositiveGather{Exp: &Call{Name: "prim"}, Sep: &Token{Token: ","}}},
+			},
 		},
+		Name: "deep",
 	}
 	return &Grammar{Name: "test", Rules: []*Rule{deep, prim}}
 }

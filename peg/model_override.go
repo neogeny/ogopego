@@ -9,13 +9,15 @@ import (
 
 // Override marks an expression whose value overrides surrounding values.
 type Override struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // OverrideList marks an expression whose override value should be treated
 // as a list.
 type OverrideList struct {
-	Box
+	ModelBase
+	Exp Model
 }
 
 // Parse implements the Model interface for Override.

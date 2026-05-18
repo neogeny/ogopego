@@ -281,10 +281,8 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 	isLrec := h.optBool("is_lrec", false)
 
 	r := &Rule{
-		NamedBox: NamedBox{
-			Box:  Box{Exp: exp},
-			Name: name,
-		},
+		Exp:    exp,
+		Name:   name,
 		Params: params,
 		IsName: isName,
 		IsTokn: isTokn,
@@ -339,7 +337,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, &Option{Box: Box{Exp: exp}})
+			opts = append(opts, &Option{Exp: exp})
 		}
 		return &Choice{Options: opts}, nil
 
@@ -348,7 +346,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Option{Box: Box{Exp: exp}}, nil
+		return &Option{Exp: exp}, nil
 
 	case "Named":
 		name, err := h.getString("name")
@@ -359,7 +357,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Named{NamedBox: NamedBox{Box: Box{Exp: exp}, Name: name}}, nil
+		return &Named{Exp: exp, Name: name}, nil
 
 	case "NamedList":
 		name, err := h.getString("name")
@@ -370,7 +368,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &NamedList{Named: Named{NamedBox: NamedBox{Box: Box{Exp: exp}, Name: name}}}, nil
+		return &NamedList{Exp: exp, Name: name}, nil
 
 	case "Call":
 		name, err := h.getString("name")
@@ -410,70 +408,70 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Group{Box: Box{Exp: exp}}, nil
+		return &Group{Exp: exp}, nil
 
 	case "Optional":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &Optional{Box: Box{Exp: exp}}, nil
+		return &Optional{Exp: exp}, nil
 
 	case "Closure":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &Closure{Box: Box{Exp: exp}}, nil
+		return &Closure{Exp: exp}, nil
 
 	case "PositiveClosure":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &PositiveClosure{Closure: Closure{Box: Box{Exp: exp}}}, nil
+		return &PositiveClosure{Exp: exp}, nil
 
 	case "Lookahead":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &Lookahead{Box: Box{Exp: exp}}, nil
+		return &Lookahead{Exp: exp}, nil
 
 	case "NegativeLookahead":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &NegativeLookahead{Box: Box{Exp: exp}}, nil
+		return &NegativeLookahead{Exp: exp}, nil
 
 	case "SkipGroup":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &SkipGroup{Box: Box{Exp: exp}}, nil
+		return &SkipGroup{Exp: exp}, nil
 
 	case "SkipTo":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &SkipTo{Box: Box{Exp: exp}}, nil
+		return &SkipTo{Exp: exp}, nil
 
 	case "Override":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &Override{Box: Box{Exp: exp}}, nil
+		return &Override{Exp: exp}, nil
 
 	case "OverrideList":
 		exp, err := modelFromJSON(h.getNested("exp"))
 		if err != nil {
 			return nil, err
 		}
-		return &OverrideList{Box: Box{Exp: exp}}, nil
+		return &OverrideList{Exp: exp}, nil
 
 	case "Join":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -484,7 +482,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Join{Box: Box{Exp: exp}, Sep: sep}, nil
+		return &Join{Exp: exp, Sep: sep}, nil
 
 	case "PositiveJoin":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -495,7 +493,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &PositiveJoin{Join: Join{Box: Box{Exp: exp}, Sep: sep}}, nil
+		return &PositiveJoin{Exp: exp, Sep: sep}, nil
 
 	case "Gather":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -506,7 +504,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Gather{Join: Join{Box: Box{Exp: exp}, Sep: sep}}, nil
+		return &Gather{Exp: exp, Sep: sep}, nil
 
 	case "PositiveGather":
 		exp, err := modelFromJSON(h.getNested("exp"))
@@ -517,7 +515,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &PositiveGather{Gather: Gather{Join: Join{Box: Box{Exp: exp}, Sep: sep}}}, nil
+		return &PositiveGather{Exp: exp, Sep: sep}, nil
 
 	case "Void":
 		return &Void{}, nil
@@ -536,7 +534,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Synth{Box: Box{Exp: exp}}, nil
+		return &Synth{Exp: exp}, nil
 
 	case "Cut":
 		return &Cut{}, nil
