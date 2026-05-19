@@ -67,9 +67,9 @@ func ParseGrammarToJSON(grammar string, cfg *Cfg) (any, error) {
 	return json.AsJSON(tree), nil
 }
 
-// ParseGrammarToJSONString is like ParseGrammarToJSON but returns a JSON
+// ParseGrammarToJSONStr is like ParseGrammarToJSON but returns a JSON
 // string.
-func ParseGrammarToJSONString(grammar string, cfg *Cfg) (string, error) {
+func ParseGrammarToJSONStr(grammar string, cfg *Cfg) (string, error) {
 	tree, err := ParseGrammar(grammar, cfg)
 	if err != nil {
 		return "", err
@@ -148,7 +148,8 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 }
 
 // LoadGrammarFromJSON deserializes a Grammar from JSON output produced by
-// CompileToJSON or peg.serializeGrammar.
+//
+//	CompileToJSON or peg.serializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 	return peg.ParseGrammar(data)
 }

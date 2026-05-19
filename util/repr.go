@@ -18,6 +18,13 @@ type FoldOption struct {
 	Amount    int
 }
 
+// Repr returns a Go-composite-literal representation of v.
+// Structs are rendered via PubMapOf, giving each one its type name
+// and exported fields. Slices, maps, and scalars follow Go literal syntax.
+func Repr(v any) string {
+	return reprValue(v, make(map[uintptr]bool))
+}
+
 // Fold joins parts with commas, wraps in brackets, and handles line-breaking.
 // Pass a single-element parts for field-level wrapping ("prefix + body").
 func Fold(prefix string, parts []string, lbrack, rbrack string, opts ...FoldOption) string {
@@ -70,13 +77,6 @@ func reprFold(parts []string, typeName string) string {
 		return Fold("", parts, "map[string]any{", "}")
 	}
 	return Fold("", parts, typeName+"{", "}")
-}
-
-// Repr returns a Go-composite-literal representation of v.
-// Structs are rendered via PubMapOf, giving each one its type name
-// and exported fields. Slices, maps, and scalars follow Go literal syntax.
-func Repr(v any) string {
-	return reprValue(v, make(map[uintptr]bool))
 }
 
 func reprValue(v any, seen map[uintptr]bool) string {

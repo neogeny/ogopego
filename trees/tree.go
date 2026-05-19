@@ -6,6 +6,7 @@ package trees
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 )
 
 type Tree interface {
@@ -69,9 +70,7 @@ func TreeToJSON(t Tree) any {
 			if _, has := m["__class__"]; !has {
 				out := make(map[string]any, len(m)+1)
 				out["__class__"] = v.TypeName
-				for k, val := range m {
-					out[k] = val
-				}
+				maps.Copy(out, m)
 				return out
 			}
 		}
