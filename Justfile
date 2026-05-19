@@ -3,7 +3,6 @@ PACKAGES := "\
 ./cmd/ogo \
 ./config \
 ./context \
-./corpus \
 ./input \
 ./json \
 ./peg \
