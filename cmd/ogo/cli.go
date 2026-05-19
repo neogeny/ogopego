@@ -40,7 +40,7 @@ var CLI struct {
 
 	// Grammar subcommand provides transformations and information about a grammar.
 	Grammar struct {
-		Grammar   string `arg:"" required name:"grammar" help:"Path to the compiled grammar (.ebnf or .json)"`
+		Grammar   string `arg:"" required name:"grammar" help:"Path to the grammar source (.ebnf or .json)"`
 		Json      bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
 		Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
 		Parser    string `help:"Generate Go parser source code" short:"x" group:"format" placeholder:"PKG"`

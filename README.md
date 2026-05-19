@@ -1,8 +1,8 @@
-# ⻰OgoPEGo
+# ⻰OGoPEGo
 
 A PEG parser generator in Go.
 
-**⻰OgoPEGo** is the Go sibling of [竜TatSu] (Python) and [铁修TieXiu] (Rust).
+**⻰OGoPEGo** is the Go sibling of [竜TatSu] (Python) and [铁修TieXiu] (Rust).
 It is functionally complete and passes the same test suite as its siblings.
 
 [竜TatSu]: https://tatsu.readthedocs.io/
@@ -78,27 +78,49 @@ fmt.Println(g.Railroads())      // railroad diagram
 
 ## CLI
 
-The `ogo` CLI is a convenience for testing grammars and examining
-output formats:
+The `ogo` CLI allows testing grammars and examining them in various
+output formats. The CLI is also the primary way to generate `Go`source code for parsers and object models.
 
 ```bash
-ogo run grammar.json input.txt        # parse input files
-ogo boot --pretty                     # inspect boot grammar
-ogo grammar grammar.ebnf --railroads  # diagram grammar
+ogo grammar --help
+Usage: ogo grammar <grammar> [flags]
+
+Grammar transformations
+
+Arguments:
+  <grammar>    Path to the grammar source (.ebnf or .json)
+
+Flags:
+  -h, --help             Show context-sensitive help.
+  -o, --output=STRING    Output to a file instead of stdout
+  -C, --color="auto"     Control colorized output for API results
+  -t, --trace            Display a detailed trace of the parsing process
+
+format
+  -j, --json             Print the grammar in JSON format
+  -m, --model            Print the Go code grammar model constructors
+  -x, --parser=PKG       Generate Go parser source code
+  -g, --model-gen=PKG    Generate Go model source code
+  -p, --pretty           Pretty-print the grammar (EBNF)
+  -r, --railroads        Print a railroad diagram
 ```
 
 Use `ogo --help` for details.
 
+
+## Features
+
+* [x] Generation of source code with an object model for deifinitions in the grammar is complete. The model generator defines the types specified in the input grammar and creates the transformation from the `Tree` result of a call to `Parse()` to the object model.
+* [x] Code generation of a parser recently moved in **竜TatSu** to the loading of a model of the Grammar and using it as parser. **⻰OGoPEGo** is cabable of the same. A generated parser features the constructors for a complete grammar module, and it can be compiled into a hosting project for blazing bootstrap speeds.
+* **⻰OGoPEGo** also knows how to load _fast_ a Grammar model from **竜TatSu** JSON.
+
 ## Non-Features
 
-Most features of **竜TatSu** are available in **⻰OgoPEGo**. Some features have not yet been implemented, and a few never will:
+Most features of **竜TatSu** are available in **⻰OGoPEGo**. Some features have not yet been implemented, and a few never will:
 
-* [ ] Generation of synthetic classes from grammar parameters will not be implemented in Go.
-* [ ] Generation of source code with an object model for deifinitions in the grammar may be implemented if a way is found to make the parser or postprocessing bind the Tree output of a parse to the model.
-* [ ] Code generation of a parser recently moved in **竜TatSu** to the loading of a model of the Grammar and using it as parser. Although the generated procedural parser may produce 1.3x increased throughput in Python, supporting generated code is hard and it complicates the internal interfaces. For Go, **⻰OgoPEGo** _alreay knows_ how to load _fast_ a Grammar model from **竜TatSu** JSON. A generated copy of the grammar model constructor could be precompiled by Go.
-* [ ] Parsing of boolean and numeric values happens in **竜TatSu** through synthetic actions, which call the constructors for those types passing the parsed strings. For **⻰OgoPEGo** the preferred way of transformig a tree (semantics) is through post-processing (folding), but basic numeric types and booleans could be supported.
+* [ ] Parsing of boolean and numeric values happens in **竜TatSu** through synthetic actions, which call the constructors for those types passing the parsed strings. For **⻰OGoPEGo** the preferred way of transformig a tree (semantics) is through post-processing (folding), but basic numeric types and booleans could be supported.
 * [ ] Semantic actions (transformations) during parse are not implemented. Python is friendly to objects of type `Any`, so semantic actions during parse in **竜TatSu** can produce a _tree_ of any type. Go is different, and trying to produce structures of type `any` is not idiomatic. The result of a parse is a well-defined Tree which is a small-enough interface that writing a walker for it is easy, so type transformations can be done in postprocessing by folding.
-* [ ] Interpolation and evaluation of _\`constant\`_ expressions hasn't had any known use cases with **竜TatSu**. They will not be implemented in **⻰OgoPEGo** until a use case appears.
+* [ ] Interpolation and evaluation of _\`constant\`_ expressions hasn't had any known use cases with **竜TatSu**. They will not be implemented in **⻰OGoPEGo** until a use case appears.
 
 
 ## License
