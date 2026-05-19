@@ -1,4 +1,16 @@
-PACKAGES := "./api ./cmd/ogo ./config ./context ./corpus ./input ./json ./peg ./test ./trees ./util/..."
+PACKAGES := "\
+./api \
+./cmd/ogo \
+./config \
+./context \
+./corpus \
+./input \
+./json \
+./peg \
+./test \
+./trees \
+./util/ \
+"
 
 default: check
 
