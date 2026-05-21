@@ -15,15 +15,6 @@ type Text struct {
 func (*Text) tree()                         {}
 func (t *Text) fold(gather *treeMerge) Tree { return t }
 
-// Number represents a numeric literal node.
-type Number struct {
-	TreeBase
-	Value float64
-}
-
-func (*Number) tree()                         {}
-func (n *Number) fold(gather *treeMerge) Tree { return n }
-
 // Bool represents a boolean node.
 type Bool struct {
 	TreeBase
@@ -48,3 +39,36 @@ type Bottom struct {
 
 func (*Bottom) tree()                         {}
 func (b *Bottom) fold(gather *treeMerge) Tree { return b }
+
+// TrueValue A JSON-compatible true value.
+type TrueValue struct {
+	TreeBase
+}
+
+func (*TrueValue) tree()                         {}
+func (v *TrueValue) fold(gather *treeMerge) Tree { return v }
+
+// FalseValue A JSON-compatible false value.
+type FalseValue struct {
+	TreeBase
+}
+
+func (*FalseValue) tree()                         {}
+func (v *FalseValue) fold(gather *treeMerge) Tree { return v }
+
+// NullValue A JSON-compatible null value.
+type NullValue struct {
+	TreeBase
+}
+
+func (*NullValue) tree()                         {}
+func (v *NullValue) fold(gather *treeMerge) Tree { return v }
+
+// Number represents JSON-compatible a numeric literal node.
+type Number struct {
+	TreeBase
+	Value float64
+}
+
+func (*Number) tree()                         {}
+func (n *Number) fold(gather *treeMerge) Tree { return n }

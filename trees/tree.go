@@ -38,6 +38,12 @@ func TreeToJSON(t Tree) any {
 		return nil
 	case *Bottom:
 		return nil
+	case *TrueValue:
+		return true
+	case *FalseValue:
+		return false
+	case *NullValue:
+		return nil
 	case *Seq:
 		items := make([]any, len(v.Items))
 		for i, item := range v.Items {
