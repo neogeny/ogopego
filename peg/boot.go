@@ -43,7 +43,16 @@ func GrammarParserSemantics(
 	node trees.Tree,
 	ruleName string,
 	params []string) (trees.Tree, bool) {
+	if ruleName == "true" {
+		return trees.TRUE, true
+	}
+	if ruleName == "false" {
+		return trees.FALSE, true
+	}
+	if ruleName == "null" {
+		return trees.NULL, true
+	}
 	// do nothing by default
 	// return false to tell caller to apply default processing
-	return nil, false
+	return node, false
 }

@@ -45,6 +45,8 @@ type TrueValue struct {
 	TreeBase
 }
 
+var TRUE Tree = &TrueValue{}
+
 func (*TrueValue) tree()                         {}
 func (v *TrueValue) fold(gather *treeMerge) Tree { return v }
 
@@ -53,6 +55,8 @@ type FalseValue struct {
 	TreeBase
 }
 
+var FALSE Tree = &FalseValue{}
+
 func (*FalseValue) tree()                         {}
 func (v *FalseValue) fold(gather *treeMerge) Tree { return v }
 
@@ -60,6 +64,8 @@ func (v *FalseValue) fold(gather *treeMerge) Tree { return v }
 type NullValue struct {
 	TreeBase
 }
+
+var NULL Tree = &NullValue{}
 
 func (*NullValue) tree()                         {}
 func (v *NullValue) fold(gather *treeMerge) Tree { return v }

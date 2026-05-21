@@ -49,9 +49,13 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	return &ctx
 }
 
+func (ctx *CoreCtx) Cfg() Cfg { return ctx.cfg }
+
 func (ctx *CoreCtx) Configure(cfg Cfg) {
+	ctx.cfg = ctx.cfg.Override(&cfg)
 	ctx.cursor.Configure(cfg)
 	ctx.setKeywords(cfg.Keywords)
+
 	if cfg.Trace {
 		if cfg.Colorize {
 			color.Output = os.Stderr
@@ -61,6 +65,7 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 	} else {
 		ctx.tracer = NullTracer{}
 	}
+	// FIXME  should have been set by Override()
 	if cfg.Heartbeat != nil {
 		ctx.heartbeat = cfg.Heartbeat
 	}

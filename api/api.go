@@ -12,6 +12,7 @@
 package api
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
@@ -48,13 +49,30 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
+	if boot.Semantics == nil {
+		return nil, fmt.Errorf("boot grammar semantics not set")
+	}
+
+	// FIXME why set the default whitespace pattern here?
+	//  present both in the .ebnf and the JSON
 	pat, err := pyre.Compile(`(?m)[ \t]+`)
 	if err != nil {
 		return nil, err
 	}
 	cursor := input.NewStrCursor(grammar)
 	cursor.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
+
+	directivesCfg := boot.CfgFromDirectives()
+	if directivesCfg.Semantics == nil {
+		return nil, fmt.Errorf("semantics not returned from grammar")
+	}
+
 	ctx := context.NewCtx(cursor, cfg)
+	ctx.Configure(*directivesCfg)
+	if ctx.Cfg().Semantics == nil {
+		return nil, fmt.Errorf("boot semantics not passed to Ctx")
+	}
+
 	return boot.ParseAt(ctx, cfg)
 }
 
