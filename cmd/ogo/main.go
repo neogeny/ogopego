@@ -186,7 +186,7 @@ func loadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
 	case ".json":
-		g, err := peg.ParseGrammar(data)
+		g, err := peg.LoadGrammarFromJSON(data)
 		if err != nil {
 			return nil, err
 		}

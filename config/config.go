@@ -6,6 +6,7 @@ package config
 import (
 	"strings"
 
+	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/heartbeat"
 )
 
@@ -17,6 +18,8 @@ type Configurable interface {
 	Configure(cfg Cfg)
 }
 
+type SemanticsFunc func(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
+
 // Cfg configures grammar compilation and input parsing. Use DefaultCfg() or
 // pass nil to API functions for defaults. Individual fields override
 // grammar-level @@directives.
@@ -24,8 +27,6 @@ type Cfg struct {
 	Name   string // grammar name (overrides @@grammar)
 	Source string // source description for error messages
 	Start  string // start rule name (default: "start")
-
-	Semantics any // reserved for future use
 
 	NoMemo            bool    // disable memoization
 	NoPruneMemosOnCut bool    // disable pruning memos on cut (~)
@@ -49,6 +50,7 @@ type Cfg struct {
 
 	ParseInfo bool // attach source position info to AST nodes
 
+	Semantics SemanticsFunc
 	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
 }
 
@@ -70,9 +72,8 @@ func eitherSlice[T any](userVal, defaultVal []T) []T {
 
 // DefaultCfg returns the default configuration. Pass nil to API functions
 // to use these defaults.
-func DefaultCfg() Cfg {
-	ws := `(?m)\s+`
-	return Cfg{
+func DefaultCfg() *Cfg {
+	return &Cfg{
 		NoMemo:            false,
 		NoPruneMemosOnCut: false,
 		PerLineMemos:      DefaultPerlinememos,
@@ -81,7 +82,7 @@ func DefaultCfg() Cfg {
 		NoLeftRecursion:   false,
 		IgnoreCase:        false,
 		NameGuard:         false,
-		Whitespace:        &ws,
+		Whitespace:        new(`(?m)\s+`),
 		Keywords:          nil,
 		ParseInfo:         false,
 	}
@@ -95,15 +96,14 @@ func (cfg *Cfg) New() Cfg {
 
 // Override merges other into cfg; non-zero fields from other override the
 // corresponding values in cfg. If other is nil, the receiver is returned.
-func (cfg Cfg) Override(other *Cfg) Cfg {
+func (cfg *Cfg) Override(other *Cfg) Cfg {
 	if other == nil {
-		return cfg
+		return *cfg
 	}
 	result := Cfg{
 		Name:              Either(other.Name, cfg.Name),
 		Source:            Either(other.Source, cfg.Source),
 		Start:             Either(other.Start, cfg.Start),
-		Semantics:         Either(other.Semantics, cfg.Semantics),
 		NoMemo:            Either(other.NoMemo, cfg.NoMemo),
 		NoPruneMemosOnCut: Either(other.NoPruneMemosOnCut, cfg.NoPruneMemosOnCut),
 		PerLineMemos:      Either(other.PerLineMemos, cfg.PerLineMemos),
@@ -120,6 +120,9 @@ func (cfg Cfg) Override(other *Cfg) Cfg {
 		Keywords:          eitherSlice(other.Keywords, cfg.Keywords),
 		ParseInfo:         Either(other.ParseInfo, cfg.ParseInfo),
 		Heartbeat:         Either(other.Heartbeat, cfg.Heartbeat),
+	}
+	if other.Semantics != nil {
+		result.Semantics = other.Semantics
 	}
 
 	if other.Grammar != "" {

@@ -120,7 +120,7 @@ func mapClass(class string, kv ...any) *orderedmap.OrderedMap {
 }
 
 // serializeGrammar returns a JSON string representation of g
-// that can be read back by ParseGrammar.
+// that can be read back by LoadGrammarFromJSON.
 func serializeGrammar(g *Grammar) any {
 	out := orderedmap.New()
 	out.Set("__class__", "Grammar")

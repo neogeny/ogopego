@@ -44,7 +44,7 @@ func TestRoundtripJSON(t *testing.T) {
 
 	jsonStr := peg.ModelToJSONStr(g1)
 
-	g2, err := peg.ParseGrammar([]byte(jsonStr))
+	g2, err := peg.LoadGrammarFromJSON([]byte(jsonStr))
 	if err != nil {
 		t.Fatalf("parse JSON: %v\nJSON:\n%s", err, jsonStr)
 	}

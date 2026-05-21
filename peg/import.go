@@ -152,8 +152,8 @@ func (h *helper) getArray(field string) ([]*helper, error) {
 	return result, nil
 }
 
-// ParseGrammar parses grammar data from JSON bytes.
-func ParseGrammar(data []byte) (*Grammar, error) {
+// LoadGrammarFromJSON parses grammar data from JSON bytes.
+func LoadGrammarFromJSON(data []byte) (*Grammar, error) {
 	var raw any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, json2.NewJsonError(fmt.Sprintf("JSON parse error: %v", err))

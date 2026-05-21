@@ -22,7 +22,7 @@ func TestJavaEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read java.json: %v", err)
 	}
-	g, err := peg.ParseGrammar(data)
+	g, err := peg.LoadGrammarFromJSON(data)
 	if err != nil {
 		t.Fatalf("parse grammar: %v", err)
 	}

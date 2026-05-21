@@ -52,9 +52,10 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := input.NewStrCursor(grammar)
-	c.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
-	return boot.ParseAt(context.NewCtx(c, cfg), cfg)
+	cursor := input.NewStrCursor(grammar)
+	cursor.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
+	ctx := context.NewCtx(cursor, cfg)
+	return boot.ParseAt(ctx, cfg)
 }
 
 // ParseGrammarToJSON parses a grammar string and returns the raw parse tree
@@ -151,5 +152,5 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 //
 //	CompileToJSON or peg.serializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
-	return peg.ParseGrammar(data)
+	return peg.LoadGrammarFromJSON(data)
 }

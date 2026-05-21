@@ -13,7 +13,7 @@ func TestImportCalcJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	g, err := ParseGrammar(data)
+	g, err := LoadGrammarFromJSON(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestImportTatsuJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	g, err := ParseGrammar(data)
+	g, err := LoadGrammarFromJSON(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,14 +76,14 @@ func TestImportTatsuJSON(t *testing.T) {
 }
 
 func TestImportInvalidJSON(t *testing.T) {
-	_, err := ParseGrammar([]byte(`{"__class__": "NotAGrammar"}`))
+	_, err := LoadGrammarFromJSON([]byte(`{"__class__": "NotAGrammar"}`))
 	if err == nil {
 		t.Fatal("expected error for non-Grammar root")
 	}
 }
 
 func TestImportMalformedJSON(t *testing.T) {
-	_, err := ParseGrammar([]byte(`{not valid json`))
+	_, err := LoadGrammarFromJSON([]byte(`{not valid json`))
 	if err == nil {
 		t.Fatal("expected error for malformed JSON")
 	}

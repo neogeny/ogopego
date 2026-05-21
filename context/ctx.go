@@ -90,4 +90,7 @@ type Ctx interface {
 	CutStackPush()
 	// CutStackPop pops the cut state from the stack.
 	CutStackPop() bool
+
+	// ApplySemantics apply the semantics of Tree transformations in the Cfg for the grammar
+	ApplySemantics(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
 }

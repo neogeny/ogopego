@@ -6,6 +6,7 @@ package peg
 import (
 	"fmt"
 
+	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/trees"
 )
 
@@ -17,6 +18,9 @@ type Grammar struct {
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
+	// Allow setting semantics filtering at the grammar definition level
+	// Can be used on the boot grammar to implement grammar-parser semantics
+	Semantics config.SemanticsFunc
 }
 
 // CfgFromDirectives creates a Cfg object based on the grammar's directives.
@@ -63,6 +67,9 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 		case "noprunememosoncut":
 			c.NoPruneMemosOnCut = s == "True" || s == "true" || s == "1"
 		}
+	}
+	if g.Semantics != nil {
+		c.Semantics = g.Semantics
 	}
 	return &c
 }

@@ -45,10 +45,17 @@ func (r *Rule) Parse(ctx Ctx) (Tree, error) {
 		ctx.Reset(mark)
 		return nil, err
 	}
+
 	folded := trees.Fold(result)
+
+	if newTree, ok := ctx.ApplySemantics(folded, r.Name, r.Params); ok {
+		return newTree, nil
+	}
+
 	if len(r.Params) == 0 || r.Params[0] == "bool" {
 		return folded, nil
 	}
+
 	return &trees.Node{TypeName: r.Params[0], Tree: folded}, nil
 }
 

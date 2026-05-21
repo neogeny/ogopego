@@ -34,16 +34,18 @@ type CoreCtx struct {
 // configuration. Use the returned value where a context implementing Ctx is
 // required.
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
-	cap := 64
+	capacity := 64
 	ctx := CoreCtx{
+		// this is how passed configuration gets injected
 		cfg:       cfg.New(),
 		cursor:    cursor,
 		tracer:    NullTracer{},
 		heartbeat: heartbeat.NullHeartbeat{},
-		callStack: make(CallStack, 0, cap),
-		cutStack:  make([]bool, 1, cap),
+		callStack: make(CallStack, 0, capacity),
+		cutStack:  make([]bool, 1, capacity),
 	}
 	ctx.cursor.Configure(ctx.cfg)
+	ctx.cfg = ctx.cfg.Override(cfg)
 	return &ctx
 }
 
@@ -385,4 +387,11 @@ func (ctx *CoreCtx) CutStackPop() bool {
 	cutSeen := ctx.IsCutSeen()
 	ctx.cutStack = ctx.cutStack[:len(ctx.cutStack)-1]
 	return cutSeen
+}
+
+func (ctx *CoreCtx) ApplySemantics(node trees.Tree, ruleName string, params []string) (trees.Tree, bool) {
+	if ctx.cfg.Semantics != nil {
+		return ctx.cfg.Semantics(node, ruleName, params)
+	}
+	return node, false
 }

@@ -48,4 +48,7 @@ func TestBootGrammarCfgFromDirectives(t *testing.T) {
 	if cfg.Keywords != nil {
 		t.Errorf("expected Keywords to be nil, got %v", cfg.Keywords)
 	}
+	if cfg.Semantics == nil {
+		t.Error("expected Semantics to be non-nil")
+	}
 }
