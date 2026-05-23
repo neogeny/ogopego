@@ -13,6 +13,8 @@ import (
 // DefaultPerlinememos is the default number of memo entries per input line.
 const DefaultPerlinememos = 8
 
+const MaxPointerDerefDepth = 4
+
 // Configurable is implemented by types that can be configured using a Cfg.
 type Configurable interface {
 	Configure(cfg Cfg)

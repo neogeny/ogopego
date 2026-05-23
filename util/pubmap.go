@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/iancoleman/orderedmap"
+	"github.com/neogeny/ogopego/config"
 )
 
 type OrderedMap = orderedmap.OrderedMap
@@ -28,7 +29,7 @@ func PubMapOf(ref any) any {
 		}
 		v = v.Elem()
 		depth += 1
-		if depth > 4 {
+		if depth > config.MaxPointerDerefDepth {
 			panic(v)
 		}
 	}
