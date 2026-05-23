@@ -19,6 +19,13 @@ import (
 )
 
 func main() {
+	for _, arg := range os.Args[1:] {
+		if arg == "--version" || arg == "-v" {
+			fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
+			os.Exit(0)
+		}
+	}
+
 	ctx = kong.Parse(&CLI,
 		kong.Name("ogo"),
 		kong.Description("ogopego: A PEG parser generator in Go"),

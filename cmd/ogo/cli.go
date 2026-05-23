@@ -55,6 +55,8 @@ var CLI struct {
 	Color string `help:"Control colorized output for API results" short:"C" enum:"auto,always,never" default:auto`
 	// Trace enables a detailed trace of the parsing process.
 	Trace bool `help:"Display a detailed trace of the parsing process" short:"t"`
+	// Version prints version information.
+	Version bool `help:"Print version information" short:"v"`
 }
 
 var (

@@ -1,11 +1,11 @@
-package main
+package util
 
 import (
 	"fmt"
 	"runtime/debug"
 )
 
-func getVersion() string {
+func GetVersion() string {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
 		return "unknown"
@@ -41,8 +41,4 @@ func getVersion() string {
 	}
 
 	return "unknown"
-}
-
-func main() {
-	fmt.Printf("OgoPego version: %s\n", getVersion())
 }

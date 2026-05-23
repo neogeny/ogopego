@@ -10,6 +10,9 @@ import (
 	"github.com/neogeny/ogopego/util/heartbeat"
 )
 
+// ProgramName is the name of the CLI binary for use in messages.
+const ProgramName = "OGoPEGo"
+
 // DefaultPerlinememos is the default number of memo entries per input line.
 const DefaultPerlinememos = 8
 
