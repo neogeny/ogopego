@@ -210,32 +210,7 @@ func (ctx *CoreCtx) GetPattern(pattern string) pyre.Pattern {
 func (ctx *CoreCtx) MatchToken(token string) bool {
 	ctx.NextToken()
 
-	wordlike := false
-	if ctx.cursor.NameGuard() {
-		wordlike = true
-		for _, r := range token {
-			if !isAlphaNum(r) {
-				wordlike = false
-				break
-			}
-		}
-	}
-
-	var result bool
-	if wordlike {
-		var pat string
-		if ctx.cursor.IgnoreCase() {
-			pat = token + `\b`
-		} else {
-			pat = `(?i)` + token + `\b`
-		}
-		_, err := ctx.MatchPattern(pat)
-		if err != nil {
-			return false
-		}
-	} else {
-		result = ctx.cursor.MatchToken(token)
-	}
+	result := ctx.cursor.MatchToken(token)
 
 	if result {
 		ctx.Tracer().TraceMatch(ctx, token, "")
@@ -243,10 +218,6 @@ func (ctx *CoreCtx) MatchToken(token string) bool {
 		ctx.Tracer().TraceNoMatch(ctx, token, "")
 	}
 	return result
-}
-
-func isAlphaNum(r rune) bool {
-	return r == '_' || (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')
 }
 
 func (ctx *CoreCtx) Enter(name string) {

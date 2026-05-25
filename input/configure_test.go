@@ -76,6 +76,15 @@ func TestConfigureNilWhitespacePattern(t *testing.T) {
 	}
 }
 
+func TestConfigureNameGuardWithNameChars(t *testing.T) {
+	s := NewStrCursor("if_else")
+	// NameChars implies NameGuard (handled in config.Override)
+	s.Configure(Cfg{NameChars: "_"})
+	if !s.NameGuard() {
+		t.Error("expected NameGuard to be enabled when NameChars is set")
+	}
+}
+
 func TestConfigureIgnoresBadPattern(t *testing.T) {
 	ws := `[invalid`
 	wsPtr := ws

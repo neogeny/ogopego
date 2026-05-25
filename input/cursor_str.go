@@ -5,6 +5,7 @@ package input
 
 import (
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/neogeny/ogopego/util"
@@ -21,9 +22,10 @@ type CursorHeavy struct {
 
 // StrCursor is a string-based implementation of the Cursor interface.
 type StrCursor struct {
-	text   string
-	offset int
-	heavy  *CursorHeavy
+	text      string
+	offset    int
+	heavy     *CursorHeavy
+	nameChars string
 }
 
 // NewStrCursor creates a new StrCursor with default configuration.
@@ -61,7 +63,8 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 // Configure updates the cursor configuration.
 func (s *StrCursor) Configure(cfg Cfg) {
 	s.heavy.IgnoreCase = cfg.IgnoreCase
-	s.heavy.NameGuard = cfg.NameGuard
+	s.nameChars = cfg.NameChars
+	s.heavy.NameGuard = cfg.NameGuard || cfg.NameChars != ""
 	if cfg.Source != "" {
 		s.heavy.Source = cfg.Source
 	}
@@ -168,13 +171,47 @@ func (s *StrCursor) PeekToken(token string) bool {
 	return slice == token
 }
 
-// MatchToken consumes the given token if it matches at the current offset.
-func (s *StrCursor) MatchToken(token string) bool {
-	if s.PeekToken(token) {
-		s.offset += len(token)
-		return true
+// IsNameChar returns true if the rune can be part of a name.
+func (s *StrCursor) IsNameChar(c rune) bool {
+	return c == '_' || unicode.IsLetter(c) || unicode.IsDigit(c) ||
+		strings.ContainsRune(s.nameChars, c)
+}
+
+// IsName returns true if the given string is a valid name.
+func (s *StrCursor) IsName(token string) bool {
+	if token == "" {
+		return false
 	}
-	return false
+	runes := []rune(token)
+	first := runes[0]
+	if first != '_' && !unicode.IsLetter(first) &&
+		!strings.ContainsRune(s.nameChars, first) {
+		return false
+	}
+	for _, r := range runes[1:] {
+		if !s.IsNameChar(r) {
+			return false
+		}
+	}
+	return true
+}
+
+// MatchToken consumes the given token if it matches at the current offset.
+// If nameguard is enabled and the token is a name, it checks the next character
+// to ensure it is not also a name character (prevents partial name matches).
+func (s *StrCursor) MatchToken(token string) bool {
+	if !s.PeekToken(token) {
+		return false
+	}
+	mark := s.offset
+	s.offset += len(token)
+	if s.heavy.NameGuard && s.IsName(token) {
+		if r, size := utf8.DecodeRuneInString(s.text[s.offset:]); size > 0 && s.IsNameChar(r) {
+			s.offset = mark
+			return false
+		}
+	}
+	return true
 }
 
 // MatchPattern matches a regular expression at the current offset and consumes it.
