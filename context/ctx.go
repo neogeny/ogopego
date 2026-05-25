@@ -41,6 +41,10 @@ type Ctx interface {
 	// GetPattern retrieves a compiled regular expression pattern.
 	GetPattern(pattern string) pyre.Pattern
 	Void()
+	// EnterLookahead increments the lookahead depth counter.
+	EnterLookahead()
+	// LeaveLookahead decrements the lookahead depth counter.
+	LeaveLookahead()
 	// Fail records a parsing failure.
 	Fail() error
 	// Eof checks if the end of file has been reached.

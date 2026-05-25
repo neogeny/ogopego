@@ -26,6 +26,8 @@ type CoreCtx struct {
 	memoCache      map[MemoKey]Memo
 	recursionKey   MemoKey
 	recursionDepth int
+	lookaheadDepth int
+	lastCutMark    int
 	heartbeat      heartbeat.Heartbeat
 	heartbeatTime  time.Time
 }
@@ -128,7 +130,7 @@ func (ctx *CoreCtx) pruneCache() {
 	if ctx.cfg.NoPruneMemosOnCut {
 		return
 	}
-	ctx.memoCache = pruneCacheWithCopy(ctx.memoCache, ctx.Mark())
+	pruneCacheInPlace(ctx.memoCache, ctx.Mark())
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
@@ -293,6 +295,14 @@ func (ctx *CoreCtx) Void() {
 	ctx.NextToken()
 }
 
+func (ctx *CoreCtx) EnterLookahead() {
+	ctx.lookaheadDepth++
+}
+
+func (ctx *CoreCtx) LeaveLookahead() {
+	ctx.lookaheadDepth--
+}
+
 func (ctx *CoreCtx) Fail() error {
 	return ctx.Failure(
 		ctx.Mark(),
@@ -345,7 +355,13 @@ func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 func (ctx *CoreCtx) Cut() {
 	ctx.cutStack[len(ctx.cutStack)-1] = true
 	ctx.Tracer().TraceCut(ctx)
-	ctx.pruneCache()
+	if ctx.lookaheadDepth == 0 {
+		mark := ctx.Mark()
+		if mark > ctx.lastCutMark {
+			ctx.lastCutMark = mark
+			ctx.pruneCache()
+		}
+	}
 }
 
 func (ctx *CoreCtx) SetCut() {

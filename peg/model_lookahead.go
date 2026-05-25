@@ -24,6 +24,8 @@ type NegativeLookahead struct {
 func (l *Lookahead) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	defer ctx.Reset(mark)
+	ctx.EnterLookahead()
+	defer ctx.LeaveLookahead()
 
 	_, err := l.Exp.Parse(ctx)
 	if err != nil {
@@ -36,6 +38,8 @@ func (l *Lookahead) Parse(ctx Ctx) (Tree, error) {
 func (n *NegativeLookahead) Parse(ctx Ctx) (Tree, error) {
 	mark := ctx.Mark()
 	defer ctx.Reset(mark)
+	ctx.EnterLookahead()
+	defer ctx.LeaveLookahead()
 
 	_, err := n.Exp.Parse(ctx)
 	if err == nil {
