@@ -95,6 +95,15 @@ func (s *StrCursor) InputSource() string {
 	return s.heavy.Source
 }
 
+// LineCount the line count or an estimate
+func (s *StrCursor) LineCount() int {
+	count := 0
+	for range strings.Lines(s.text) {
+		count++
+	}
+	return count
+}
+
 // Mark returns the current byte offset in the input.
 func (s *StrCursor) Mark() int {
 	return s.offset

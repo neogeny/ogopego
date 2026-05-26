@@ -26,6 +26,8 @@ type Cursor interface {
 	Configurable
 	// InputSource returns the name of the input source.
 	InputSource() string
+	// LineCount returns the input line count or an estimate
+	LineCount() int
 	// Mark returns the current position of the cursor.
 	Mark() int
 	// Reset sets the cursor position to the given mark.

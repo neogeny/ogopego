@@ -13,8 +13,8 @@ import (
 // ProgramName is the name of the CLI binary for use in messages.
 const ProgramName = "OGoPEGo"
 
-// DefaultPerlinememos is the default number of memo entries per input line.
-const DefaultPerlinememos = 8
+// DefaultPerLineMemos is the default number of memo entries per input line.
+const DefaultPerLineMemos = 8
 
 const MaxPointerDerefDepth = 4
 
@@ -81,7 +81,7 @@ func DefaultCfg() *Cfg {
 	return &Cfg{
 		NoMemo:            false,
 		NoPruneMemosOnCut: false,
-		PerLineMemos:      DefaultPerlinememos,
+		PerLineMemos:      DefaultPerLineMemos,
 		Trace:             false,
 		Colorize:          false,
 		NoLeftRecursion:   false,

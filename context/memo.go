@@ -2,6 +2,7 @@ package context
 
 import (
 	"github.com/neogeny/ogopego/trees"
+	ctn "github.com/neogeny/ogopego/util/container"
 )
 
 // MemoKey represents a key for memoization, combining the input mark and rule name.
@@ -17,18 +18,20 @@ type Memo struct {
 	Mark int        // Mark is the input position after the rule successfully parsed.
 }
 
+type MemoCache = ctn.BoundedMap[MemoKey, Memo]
+
+func NewMemoMache(capacity int) MemoCache {
+	return ctn.NewBoundedMap[MemoKey, Memo](capacity)
+}
+
+func PruneMemoCache(cache MemoCache, cutpoint int) {
+	cache.Retain(func(key MemoKey, memo Memo) bool {
+		return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
+	})
+}
+
 // IsBottomEntry checks if the memo entry represents a "bottom" (failed) parse.
 func (m Memo) IsBottomEntry() bool {
 	_, isBottom := m.Tree.(*trees.Bottom)
 	return isBottom
-}
-
-// pruneCacheInPlace removes entries with Mark before cutpoint from cache,
-// preserving bottom (failure) entries which are needed for left-recursion.
-func pruneCacheInPlace(cache map[MemoKey]Memo, cutpoint int) {
-	for k, v := range cache {
-		if k.Mark < cutpoint && !v.IsBottomEntry() {
-			delete(cache, k)
-		}
-	}
 }

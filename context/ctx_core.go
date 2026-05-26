@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"runtime"
 	"sort"
@@ -23,7 +24,7 @@ type CoreCtx struct {
 	furthest       *DisasterReport
 	patternCache   map[string]pyre.Pattern
 	keywords       map[string]struct{}
-	memoCache      map[MemoKey]Memo
+	memoCache      MemoCache
 	recursionKey   MemoKey
 	recursionDepth int
 	lookaheadDepth int
@@ -36,15 +37,20 @@ type CoreCtx struct {
 // configuration. Use the returned value where a context implementing Ctx is
 // required.
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
-	capacity := 64
+	stackCapacity := 64
+	memoCapacity := max(
+		stackCapacity,
+		int(math.Round(cfg.PerLineMemos*float64(cursor.LineCount()))),
+	)
 	ctx := CoreCtx{
 		// this is how passed configuration gets injected
 		cfg:       cfg.New(),
 		cursor:    cursor,
 		tracer:    NullTracer{},
 		heartbeat: heartbeat.NullHeartbeat{},
-		callStack: make(CallStack, 0, capacity),
-		cutStack:  make([]bool, 1, capacity),
+		callStack: make(CallStack, 0, stackCapacity),
+		cutStack:  make([]bool, 1, stackCapacity),
+		memoCache: NewMemoMache(memoCapacity),
 	}
 	ctx.cursor.Configure(ctx.cfg)
 	ctx.cfg = ctx.cfg.Override(cfg)
@@ -130,7 +136,7 @@ func (ctx *CoreCtx) pruneCache() {
 	if ctx.cfg.NoPruneMemosOnCut {
 		return
 	}
-	pruneCacheInPlace(ctx.memoCache, ctx.Mark())
+	PruneMemoCache(ctx.memoCache, ctx.Mark())
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
@@ -138,21 +144,14 @@ func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 }
 
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
-	if ctx.memoCache == nil {
-		return Memo{}, false
-	}
-	m, ok := ctx.memoCache[key]
-	return m, ok
+	return ctx.memoCache.Get(key)
 }
 
 func (ctx *CoreCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
 	if !key.CanMemo {
 		return
 	}
-	if ctx.memoCache == nil {
-		ctx.memoCache = make(map[MemoKey]Memo)
-	}
-	ctx.memoCache[key] = Memo{Tree: tree, Mark: mark}
+	ctx.memoCache.Set(key, Memo{Tree: tree, Mark: mark})
 }
 
 func (ctx *CoreCtx) TrackRecursionDepth(key MemoKey) error {
