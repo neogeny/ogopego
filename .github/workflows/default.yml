@@ -23,13 +23,13 @@ jobs:
       - name: download dependencies
         run: go mod download
 
-      - name: lint
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-          golangci-lint run --exclude-dirs fragments ./...
-
       - name: build
         run: go build ./...
+
+      - name: lint
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+          golangci-lint run --exclude-dirs fragments ./...
 
       - name: test
         run: go test -count=1 ./api ./cmd/ogo ./config ./context ./input ./json ./peg ./test ./trees ./util/...
