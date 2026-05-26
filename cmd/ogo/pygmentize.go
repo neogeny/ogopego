@@ -11,7 +11,7 @@ func Pygmentize(content, lexer string, useColor bool) string {
 		return content
 	}
 	var buf strings.Builder
-	err := quick.Highlight(&buf, content, lexer, "terminal256", "base16-eighties.dark")
+	err := quick.Highlight(&buf, content, lexer, "terminal256", "github-dark")
 	if err != nil {
 		return content
 	}

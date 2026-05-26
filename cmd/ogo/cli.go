@@ -52,11 +52,11 @@ var CLI struct {
 	// Output specifies a file to write output to instead of stdout.
 	Output string `help:"Output to a file instead of stdout" short:"o"`
 	// Color controls colorized output for API results.
-	Color string `help:"Control colorized output for API results" short:"C" enum:"auto,always,never" default:auto`
+	Color string `help:"Control colorized output for API results" enum:"auto,always,never" default:auto`
 	// Trace enables a detailed trace of the parsing process.
-	Trace bool `help:"Display a detailed trace of the parsing process" short:"t"`
+	Trace bool `help:"Display a detailed trace of the parsing process"`
 	// Version prints version information.
-	Version bool `help:"Print version information" short:"v"`
+	Version bool `help:"Print version information"`
 }
 
 var (
