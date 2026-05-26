@@ -3,7 +3,6 @@ module github.com/neogeny/ogopego
 go 1.26.3
 
 require (
-	github.com/Jemmic/go-pcre2 v0.0.0-20190111114109-bd52ad5f7098
 	github.com/alecthomas/chroma/v2 v2.25.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/davecgh/go-spew v1.1.1
@@ -21,6 +20,5 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 )
