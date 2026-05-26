@@ -1,7 +1,6 @@
 run:
   tests: false
   timeout: 5m
-  modules-download-mode: vendor
 
 issues:
   exclude-rules:
