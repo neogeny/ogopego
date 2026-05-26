@@ -14,7 +14,7 @@ PACKAGES := "\
 default: check
 
 build: gofmt-check
-    go build -o bin/ogo ./cmd/ogo
+    go build -mod=mod -o bin/ogo ./cmd/ogo
 
 run *args:
     go run ./cmd/ogo {{args}}
@@ -23,7 +23,7 @@ grammar FILE="grammar/tatsu.ebnf":
     go run ./cmd/ogo grammar -m {{FILE}}
 
 test: gofmt-check
-    gotestsum -- {{PACKAGES}}
+    gotestsum -- -mod=mod {{PACKAGES}}
 
 test-v:
     gotestsum --format testname -- -v {{PACKAGES}}
@@ -39,13 +39,13 @@ cover:
     go tool cover -html=coverage.out
 
 lint:
-    golangci-lint run --exclude-dirs fragments ./... 
+    golangci-lint run ./...
 
 fmt:
-    find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
 
 gofmt:
-    find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
 
 gofmt-check: gofmt
 
