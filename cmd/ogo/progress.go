@@ -1,8 +1,10 @@
 package main
 
 import (
+	math "math"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/util/heartbeat"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
@@ -65,13 +67,14 @@ type FileProgress struct {
 // NewFileProgress creates a file progress bar with a name and returns a
 // handle providing heartbeat integration.
 func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
+	yellow := func(s string) string { return color.YellowString(s) }
 	bar := p.New(0,
 		mpb.BarStyle().
 			Lbound(" ").
 			Rbound(" ").
-			Filler("--").
+			Filler("-").FillerMeta(yellow).
 			Padding("  ").
-			Tip("-"),
+			Tip("-").TipMeta(yellow),
 		mpb.PrependDecorators(
 			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
 		),
@@ -117,13 +120,15 @@ type ProgressUI struct {
 func NewProgressUI(total int) *ProgressUI {
 	p := mpb.New(mpb.WithOutput(os.Stderr))
 
+	green := func(s string) string { return color.GreenString(s) }
 	files := p.New(int64(total),
 		mpb.BarStyle().
 			Lbound(" ").
 			Rbound(" ").
-			Filler("--").
-			Padding("  ").
-			Tip("-"),
+			Filler(".").FillerMeta(green).
+			Padding(" ").
+			Tip(".").TipMeta(green),
+		mpb.BarPriority(math.MaxInt32),
 		mpb.PrependDecorators(
 			decor.CountersNoUnit("%d/%d files"),
 		),
