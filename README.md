@@ -8,12 +8,37 @@ It is functionally complete and passes the same test suite as its siblings.
 [竜TatSu]: https://tatsu.readthedocs.io/
 [铁修TieXiu]: https://github.com/neogeny/TieXiu
 
-## Documentation
-
-Refer to the [竜TatSu documentation] for grammar syntax, semantics, and usage.
-The local [SYNTAX.md](SYNTAX.md) describes the grammar format.
+Refer to the [竜TatSu documentation] for grammar syntax, semantics, and usage. The local [SYNTAX.md](SYNTAX.md) describes the grammar format.
 
 [竜TatSu documentation]: https://tatsu.readthedocs.io/
+
+The CLI tool is a great way to explored the features offered by the library:
+
+```bash
+$ ogo --help
+Usage: ogo <command> [flags]
+
+ogopego: A PEG parser generator in Go
+
+Flags:
+  -h, --help             Show context-sensitive help.
+  -o, --output=STRING    Output to a file instead of stdout
+  -C, --color="auto"     Control colorized output for API results
+  -t, --trace            Display a detailed trace of the parsing process
+  -v, --version          Print version information
+
+Commands:
+  run <grammar> <inputs> ... [flags]
+    Execute a grammar against one or more input files
+
+  boot [flags]
+    The internal boot grammar
+
+  grammar <grammar> [flags]
+    Grammar transformations
+
+Run "ogo <command> --help" for more information on a command.
+```
 
 ## Installation
 
@@ -76,50 +101,12 @@ fmt.Println(g.PrettyPrint())    // EBNF pretty-print
 fmt.Println(g.Railroads())      // railroad diagram
 ```
 
-## CLI
-
-The `ogo` CLI allows testing grammars and examining them in various
-output formats. The CLI is also the primary way to generate `Go`source code for parsers and object models.
-
-```bash
-ogo grammar --help
-Usage: ogo grammar <grammar> [flags]
-
-Grammar transformations
-
-Arguments:
-  <grammar>    Path to the grammar source (.ebnf or .json)
-
-Flags:
-  -h, --help             Show context-sensitive help.
-  -o, --output=STRING    Output to a file instead of stdout
-  -C, --color="auto"     Control colorized output for API results
-  -t, --trace            Display a detailed trace of the parsing process
-
-format
-  -j, --json             Print the grammar in JSON format
-  -m, --model            Print the Go code grammar model constructors
-  -x, --parser=PKG       Generate Go parser source code
-  -g, --model-gen=PKG    Generate Go model source code
-  -p, --pretty           Pretty-print the grammar (EBNF)
-  -r, --railroads        Print a railroad diagram
-```
-
-Use `ogo --help` for details.
-
-
 ## Features
 
 * [x] Generation of source code with an object model for deifinitions in the grammar is complete. The model generator defines the types specified in the input grammar and creates the transformation from the `Tree` result of a call to `Parse()` to the object model.
-* [x] Code generation of a parser recently moved in **竜TatSu** to the loading of a model of the Grammar and using it as parser. **⻰OGoPEGo** is cabable of the same. A generated parser features the constructors for a complete grammar module, and it can be compiled into a hosting project for blazing bootstrap speeds.
-* **⻰OGoPEGo** also knows how to load _fast_ a Grammar model from **竜TatSu** JSON.
-
-## Non-Features
-
-Most features of **竜TatSu** are available in **⻰OGoPEGo**. Some features have not yet been implemented, and a few never will:
-
-* [ ] Parsing of boolean and numeric values happens in **竜TatSu** through synthetic actions, which call the constructors for those types passing the parsed strings. For **⻰OGoPEGo** the preferred way of transformig a tree (semantics) is through post-processing (folding), but basic numeric types and booleans could be supported.
-* [ ] Semantic actions (transformations) during parse are not implemented. Python is friendly to objects of type `Any`, so semantic actions during parse in **竜TatSu** can produce a _tree_ of any type. Go is different, and trying to produce structures of type `any` is not idiomatic. The result of a parse is a well-defined Tree which is a small-enough interface that writing a walker for it is easy, so type transformations can be done in postprocessing by folding.
+* [x] Code generation of a parser recently moved in **竜TatSu** to the loading of a model of the Grammar and using it as parser. **⻰OGoPEGo** is cabable of generating a model of the `Grammar` constructor for a grammar that can be compiled by Go for blazing boot times.
+* **⻰OGoPEGo** also knows how to load _fast_ a `Grammar` model from **竜TatSu**-format JSON.
+* [x] Semantic actions (transformations) during parse are implemented through a `SemanticsFunc(Tree) Tree` configuration entry. Transformations are limited to `Tree->Tree`, so a walker must be used as post-processor if a different AST type is desidred. The AST model generation available through the CLI tool generates such a walker. 
 * [ ] Interpolation and evaluation of _\`constant\`_ expressions hasn't had any known use cases with **竜TatSu**. They will not be implemented in **⻰OGoPEGo** until a use case appears.
 
 
