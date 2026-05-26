@@ -8,13 +8,13 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-// CliHeartbeat implements the heartbeat.Heartbeat interface using an mpb.Bar.
+// CliHeartbeat implements the heartbeat.Heartbeat interface using a mpb.Bar.
 type CliHeartbeat struct {
 	bar      *mpb.Bar
 	lastMark int
 }
 
-// NewCliHeartbeat returns a heartbeat implementation backed by an mpb.Bar.
+// NewCliHeartbeat returns a heartbeat implementation backed by a mpb.Bar.
 func NewCliHeartbeat(bar *mpb.Bar) *CliHeartbeat {
 	return &CliHeartbeat{bar: bar}
 }
