@@ -77,3 +77,7 @@ func (bm *BoundedMap[K, V]) Retain(keep func(K, V) bool) {
 		}
 	}
 }
+
+func (bm *BoundedMap[K, V]) Len() int {
+	return bm.evictList.Len()
+}
