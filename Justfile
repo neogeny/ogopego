@@ -42,10 +42,10 @@ lint:
     golangci-lint run ./...
 
 fmt:
-    find . -name '*.go' -not -path './vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
 
 gofmt:
-    find . -name '*.go' -not -path './vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
 
 gofmt-check: gofmt
 
@@ -53,7 +53,7 @@ deps:
     go mod download
 
 vendor:
-    go mod vendor
+    go mod vendor -o _vendor
 
 mod: tidy vendor
 
@@ -69,6 +69,9 @@ update:
 
 clean:
     rm -rf bin/
+
+zero: clean
+    go clean -cache -modcache
 
 release:
     go build -ldflags="-s -w" -o bin/ogo-release ./cmd/ogo
