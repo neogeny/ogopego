@@ -26,8 +26,7 @@ var CLI struct {
 		Grammar string   `arg:"" required name:"grammar" help:"Path to the grammar in EBNF or JSON format"`
 		Inputs  []string `arg:"" required name:"inputs" help:"The files to be parsed"`
 		Json    bool     `help:"Print the output tree in JSON format" short:"j" group:"format"`
-		//Model   bool     `help:"Print the Go code for the tree construction" short:"m" group:"format"`
-		Short bool `help:"Print the Tree in short notation" short:"s" group:"format"`
+		Model   bool     `help:"Print the Go code for the tree construction" short:"m" group:"format"`
 	} `cmd:"" help:"Execute a grammar against one or more input files"`
 
 	// Boot subcommand provides access to the internal boot grammar.
@@ -79,11 +78,8 @@ func validateExclusive(groups ...string) error {
 				if CLI.Run.Json {
 					set = append(set, "--json")
 				}
-				//if CLI.Run.Model {
-				//	set = append(set, "--model")
-				//}
-				if CLI.Run.Short {
-					set = append(set, "--short")
+				if CLI.Run.Model {
+					set = append(set, "--model")
 				}
 			}
 		case "boot":
@@ -127,7 +123,7 @@ func validateExclusive(groups ...string) error {
 		}
 	}
 	if len(set) > 1 {
-		return fmt.Errorf("only one of --json, --model, --parser, --pretty, --railroads, --short can be specified")
+		return fmt.Errorf("only one of --json, --model, --parser, --pretty, --railroads can be specified")
 	}
 	return nil
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/peg"
 	"github.com/neogeny/ogopego/tool"
+	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -96,14 +97,19 @@ func main() {
 
 				fileCfg := *cliCfg
 				fileCfg.Heartbeat = fp.Heartbeat()
-				result, err := api.ParseInputToJSONString(gram, string(data), &fileCfg)
+				tree, err := api.ParseInput(gram, string(data), &fileCfg)
 				if err != nil {
 					_, _ = fmt.Fprintf(os.Stderr, "\nerror parsing %s: %v\n", path, err)
 					errcount++
 					fp.Fail()
 				} else {
 					fp.Success()
-					output += result + "\n"
+					switch {
+					case CLI.Run.Model:
+						output += util.Repr(tree) + "\n"
+					default:
+						output += trees.TreeToJSONStr(tree) + "\n"
+					}
 				}
 				prog.IncFiles()
 			}
@@ -114,7 +120,12 @@ func main() {
 				color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
 				color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
 			)
-			lang = "json"
+			switch {
+			case CLI.Run.Model:
+				lang = "go"
+			default:
+				lang = "json"
+			}
 
 		case "boot":
 			gram, err := api.BootGrammar()
