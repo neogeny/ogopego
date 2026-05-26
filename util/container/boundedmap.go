@@ -1,6 +1,9 @@
 package container
 
-import "container/list"
+import (
+	"container/list"
+	"iter"
+)
 
 type cacheEntry[K comparable, V any] struct {
 	key   K
@@ -23,7 +26,9 @@ func NewBoundedMap[K comparable, V any](capacity int) BoundedMap[K, V] {
 
 func (bm *BoundedMap[K, V]) Get(key K) (V, bool) {
 	if elem, exists := bm.items[key]; exists {
-		bm.evictList.MoveToFront(elem)
+		if bm.capacity > 0 {
+			bm.evictList.MoveToFront(elem)
+		}
 		return elem.Value.(*cacheEntry[K, V]).value, true
 	}
 	var zero V
@@ -33,7 +38,9 @@ func (bm *BoundedMap[K, V]) Get(key K) (V, bool) {
 func (bm *BoundedMap[K, V]) Set(key K, value V) {
 	// 1. Update if it already exists
 	if elem, exists := bm.items[key]; exists {
-		bm.evictList.MoveToFront(elem)
+		if bm.capacity > 0 {
+			bm.evictList.MoveToFront(elem)
+		}
 		elem.Value.(*cacheEntry[K, V]).value = value
 		return
 	}
@@ -48,10 +55,47 @@ func (bm *BoundedMap[K, V]) Set(key K, value V) {
 		}
 	}
 
-	// 3. Insert new entry
+	// 3. Insert new entry (front for LRU, back for ordered)
 	entry := &cacheEntry[K, V]{key: key, value: value}
-	elem := bm.evictList.PushFront(entry)
+	var elem *list.Element
+	if bm.capacity > 0 {
+		elem = bm.evictList.PushFront(entry)
+	} else {
+		elem = bm.evictList.PushBack(entry)
+	}
 	bm.items[key] = elem
+}
+
+func (bm *BoundedMap[K, V]) Keys() iter.Seq[K] {
+	return func(yield func(K) bool) {
+		// Traverse the doubly-linked list from front to back
+		for e := bm.evictList.Front(); e != nil; e = e.Next() {
+			// Type-assert the element's Value back to our internal entry struct
+			if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
+				// yield passes the key/value to the for-range loop.
+				// If yield returns false, the loop broke early, so we stop.
+				if !yield(pair.key) {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (bm *BoundedMap[K, V]) Entries() iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		// Traverse the doubly-linked list from front to back
+		for e := bm.evictList.Front(); e != nil; e = e.Next() {
+			// Type-assert the element's Value back to our internal entry struct
+			if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
+				// yield passes the key/value to the for-range loop.
+				// If yield returns false, the loop broke early, so we stop.
+				if !yield(pair.key, pair.value) {
+					return
+				}
+			}
+		}
+	}
 }
 
 func (bm *BoundedMap[K, V]) Delete(key K) {
