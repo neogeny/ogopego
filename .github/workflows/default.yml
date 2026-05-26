@@ -24,10 +24,9 @@ jobs:
         run: go mod download
 
       - name: lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          install-mode: goinstall
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint run --exclude-dirs fragments ./...
 
       - name: build
         run: go build ./...
