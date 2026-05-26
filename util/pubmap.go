@@ -6,11 +6,11 @@ package util
 import (
 	"reflect"
 
-	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/config"
+	ctn "github.com/neogeny/ogopego/util/container"
 )
 
-type OrderedMap = orderedmap.OrderedMap
+type OrderedMap = ctn.BoundedMap[string, any]
 
 // PubMapOf returns an OrderedMap containing the public fields of the given reference.
 func PubMapOf(ref any) any {
@@ -39,13 +39,13 @@ func PubMapOf(ref any) any {
 
 	t := v.Type()
 	typeName := t.String()
-	out := orderedmap.New()
+	out := ctn.NewBoundedMap[string, any](0)
 	out.Set("__class__", typeName)
-	flattenFields(t, v, out)
-	return out
+	flattenFields(t, v, &out)
+	return &out
 }
 
-func flattenFields(t reflect.Type, v reflect.Value, out *orderedmap.OrderedMap) {
+func flattenFields(t reflect.Type, v reflect.Value, out *OrderedMap) {
 	for i := range t.NumField() {
 		f := t.Field(i)
 		if !f.IsExported() {

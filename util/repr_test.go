@@ -3,7 +3,7 @@ package util
 import (
 	"testing"
 
-	"github.com/iancoleman/orderedmap"
+	ctn "github.com/neogeny/ogopego/util/container"
 )
 
 type ReprTestStruct struct {
@@ -107,10 +107,10 @@ func TestReprTypedStringSlice(t *testing.T) {
 }
 
 func TestReprOrderedMap(t *testing.T) {
-	om := orderedmap.New()
+	om := ctn.NewBoundedMap[string, any](0)
 	om.Set("count", 42)
 	om.Set("hello", "world")
-	got := Repr(om)
+	got := Repr(&om)
 	want := `map[string]any{count: 42, hello: "world"}`
 	if got != want {
 		t.Errorf("Repr(OrderedMap) = %q, want %q", got, want)
@@ -118,8 +118,8 @@ func TestReprOrderedMap(t *testing.T) {
 }
 
 func TestReprEmptyOrderedMap(t *testing.T) {
-	om := orderedmap.New()
-	got := Repr(om)
+	om := ctn.NewBoundedMap[string, any](0)
+	got := Repr(&om)
 	want := "map[string]any{}"
 	if got != want {
 		t.Errorf("Repr(empty OrderedMap) = %q, want %q", got, want)

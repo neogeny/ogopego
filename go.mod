@@ -5,10 +5,8 @@ go 1.26.3
 require (
 	github.com/alecthomas/chroma/v2 v2.25.0
 	github.com/alecthomas/kong v1.15.0
-	github.com/davecgh/go-spew v1.1.1
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/fatih/color v1.19.0
-	github.com/iancoleman/orderedmap v0.3.0
 	github.com/vbauerster/mpb/v8 v8.12.1
 )
 

@@ -3,7 +3,7 @@ package peg
 import (
 	"encoding/json"
 
-	"github.com/iancoleman/orderedmap"
+	ctn "github.com/neogeny/ogopego/util/container"
 )
 
 func ModelToJSONStr(v Model) string {
@@ -108,29 +108,29 @@ func ModelToJSON(v Model) any {
 	}
 }
 
-func mapClass(class string, kv ...any) *orderedmap.OrderedMap {
-	out := orderedmap.New()
+func mapClass(class string, kv ...any) *ctn.BoundedMap[string, any] {
+	out := ctn.NewBoundedMap[string, any](0)
 	out.Set("__class__", class)
 	for i := 0; i < len(kv); i += 2 {
 		k := kv[i].(string)
 		v := kv[i+1]
 		out.Set(k, v)
 	}
-	return out
+	return &out
 }
 
 // serializeGrammar returns a JSON string representation of g
 // that can be read back by LoadGrammarFromJSON.
 func serializeGrammar(g *Grammar) any {
-	out := orderedmap.New()
+	out := ctn.NewBoundedMap[string, any](0)
 	out.Set("__class__", "Grammar")
 	out.Set("name", g.Name)
 
-	dirs := orderedmap.New()
+	dirs := ctn.NewBoundedMap[string, any](0)
 	for _, d := range g.Directives {
 		dirs.Set(d[0], d[1])
 	}
-	out.Set("directives", dirs)
+	out.Set("directives", &dirs)
 
 	kw := make([]string, len(g.Keywords))
 	copy(kw, g.Keywords)
@@ -141,11 +141,11 @@ func serializeGrammar(g *Grammar) any {
 		rules[i] = serializeRule(rule)
 	}
 	out.Set("rules", rules)
-	return out
+	return &out
 }
 
-func serializeRule(r *Rule) *orderedmap.OrderedMap {
-	out := orderedmap.New()
+func serializeRule(r *Rule) *ctn.BoundedMap[string, any] {
+	out := ctn.NewBoundedMap[string, any](0)
 	out.Set("__class__", "Rule")
 	out.Set("name", r.Name)
 	if r.Params == nil {
@@ -160,5 +160,5 @@ func serializeRule(r *Rule) *orderedmap.OrderedMap {
 	out.Set("is_memo", r.IsMemo)
 	out.Set("is_lrec", r.IsLrec)
 	out.Set("exp", ModelToJSON(r.Exp))
-	return out
+	return &out
 }

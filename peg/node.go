@@ -4,9 +4,9 @@
 package peg
 
 import (
+	"fmt"
 	"weak"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/neogeny/ogopego/util"
 )
 
@@ -60,7 +60,7 @@ func (n *Node) Line() int {
 
 // AsStr returns a string representation of the node for debugging.
 func (n *Node) AsStr() string {
-	return spew.Sdump(n)
+	return fmt.Sprintf("%+v", n)
 }
 
 // Path returns the path of ancestors from the root to this node.
@@ -116,7 +116,7 @@ func (n *Node) getChildren() []*Node {
 			}
 			return
 		case OrderedMap:
-			for _, item := range val.Values() {
+			for _, item := range val.Entries() {
 				dfs(item)
 			}
 			return
@@ -127,7 +127,7 @@ func (n *Node) getChildren() []*Node {
 	dfs(n.Ast)
 	pub := util.PubMapOf(n)
 	if m, ok := pub.(OrderedMap); ok {
-		for obj := range m.Values() {
+		for _, obj := range m.Entries() {
 			dfs(obj)
 		}
 	}

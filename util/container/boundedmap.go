@@ -1,7 +1,9 @@
 package container
 
 import (
+	"bytes"
 	"container/list"
+	"encoding/json"
 	"iter"
 )
 
@@ -66,20 +68,14 @@ func (bm *BoundedMap[K, V]) Set(key K, value V) {
 	bm.items[key] = elem
 }
 
-func (bm *BoundedMap[K, V]) Keys() iter.Seq[K] {
-	return func(yield func(K) bool) {
-		// Traverse the doubly-linked list from front to back
-		for e := bm.evictList.Front(); e != nil; e = e.Next() {
-			// Type-assert the element's Value back to our internal entry struct
-			if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
-				// yield passes the key/value to the for-range loop.
-				// If yield returns false, the loop broke early, so we stop.
-				if !yield(pair.key) {
-					return
-				}
-			}
+func (bm *BoundedMap[K, V]) Keys() []K {
+	keys := make([]K, 0, bm.evictList.Len())
+	for e := bm.evictList.Front(); e != nil; e = e.Next() {
+		if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
+			keys = append(keys, pair.key)
 		}
 	}
+	return keys
 }
 
 func (bm *BoundedMap[K, V]) Entries() iter.Seq2[K, V] {
@@ -124,4 +120,30 @@ func (bm *BoundedMap[K, V]) Retain(keep func(K, V) bool) {
 
 func (bm *BoundedMap[K, V]) Len() int {
 	return bm.evictList.Len()
+}
+
+func (bm *BoundedMap[K, V]) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+	first := true
+	for e := bm.evictList.Front(); e != nil; e = e.Next() {
+		pair := e.Value.(*cacheEntry[K, V])
+		if !first {
+			buf.WriteByte(',')
+		}
+		first = false
+		keyJSON, err := json.Marshal(pair.key)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(keyJSON)
+		buf.WriteByte(':')
+		valJSON, err := json.Marshal(pair.value)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(valJSON)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
 }

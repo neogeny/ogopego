@@ -10,11 +10,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/iancoleman/orderedmap"
 	"github.com/neogeny/ogopego/util"
 )
 
-type OrderedMap = orderedmap.OrderedMap
+type OrderedMap = util.OrderedMap
 
 func AsJSON(v any) any {
 	return toJSONValue(v, make(map[uintptr]bool))
@@ -42,7 +41,7 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 	v = util.PubMapOf(v)
 	switch val := v.(type) {
 	case *OrderedMap:
-		out := make(map[string]any, len(val.Keys()))
+		out := make(map[string]any, val.Len())
 		for _, k := range val.Keys() {
 			item, _ := val.Get(k)
 			out[PythonizeName(k)] = toJSONValue(item, seen)
