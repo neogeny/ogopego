@@ -1,12 +1,13 @@
 package main
 
+//goland:noinspection GoRedundantImportAlias
 import (
 	math "math"
 	"os"
 
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/util/heartbeat"
-	"github.com/vbauerster/mpb/v8"
+	mpb "github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
