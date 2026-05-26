@@ -6,9 +6,9 @@ All notable changes to this project will be documented in this file. The format 
 
 [Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.4...HEAD
 
-## [0.1.4] - 2026-05-26
+## [0.1.5] - 2026-05-26
 
-[0.1.4]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.4
+[0.1.5]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.5
 
 ### Changed
 - Implement `NameGuard` semantics with string and rune comparisons, replacing the previous implementation that used regular expressions. `NameGuard` avoids matching a token when it is not a complete word in the input, like not matching`"new"` when the input at the cursor is `newVar...`. 
@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Fixed
 - Verified non-local/thirs-party builds through GitHub workflow.
+- To be friendly with the ecosystem, skip the use of a `vendor` directory. A `_vendor` directory remains in the repo to guarantee build stability if a dependency becomes unreliable.
 
 ## [0.1.2] - 2026-05-23
 
