@@ -66,14 +66,19 @@ type FileProgress struct {
 func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 	bar := p.New(0,
 		mpb.BarStyle(),
+		//Lbound("<").
+		//Filler(color.RedString("━")).
+		//Tip(color.RedString("━")).
+		//Padding(".").
+		//Rbound(">"),
 		mpb.PrependDecorators(
 			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
 		),
 		mpb.AppendDecorators(
 			decor.Percentage(),
-			decor.Elapsed(decor.ET_STYLE_GO),
+			//decor.Elapsed(decor.ET_STYLE_GO),
 		),
-		mpb.BarRemoveOnComplete(),
+		//mpb.BarRemoveOnComplete(),
 	)
 	return &FileProgress{bar: bar, hb: NewCliHeartbeat(bar)}
 }
