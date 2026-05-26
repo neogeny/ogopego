@@ -49,7 +49,7 @@ var CLI struct {
 	} `cmd:"grammar" help:"Grammar transformations"`
 
 	// Output specifies a file to write output to instead of stdout.
-	Output string `help:"Output to a file instead of stdout" short:"o"`
+	Output string `help:"Output to a file or directory instead of stdout" short:"o"`
 	// Color controls colorized output for API results.
 	Color string `help:"Control colorized output for API results" enum:"auto,always,never" default:auto`
 	// Trace enables a detailed trace of the parsing process.

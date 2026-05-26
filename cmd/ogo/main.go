@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
@@ -18,6 +19,11 @@ import (
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util"
 )
+
+type outputItem struct {
+	Name    string
+	Payload string
+}
 
 func main() {
 	for _, arg := range os.Args[1:] {
@@ -65,7 +71,7 @@ func main() {
 		Colorize: useColorOutput,
 	}
 
-	var output string
+	var outputs []outputItem
 	var lang string
 
 	if cmd != nil {
@@ -82,6 +88,8 @@ func main() {
 				os.Exit(1)
 			}
 			var errcount int
+			start := time.Now()
+			sourceLines := 0
 			for _, path := range CLI.Run.Inputs {
 				name := filepath.Base(path)
 				fp := prog.AddFile(name)
@@ -103,22 +111,28 @@ func main() {
 					errcount++
 					fp.Fail()
 				} else {
+					sourceLines += util.CountLines(string(data)).Code
 					fp.Success()
+					var payload string
 					switch {
 					case CLI.Run.Model:
-						output += util.Repr(tree) + "\n"
+						payload = util.Repr(tree)
 					default:
-						output += trees.TreeToJSONStr(tree) + "\n"
+						payload = trees.TreeToJSONStr(tree)
 					}
+					outputs = append(outputs, outputItem{Name: name, Payload: payload})
 				}
 				prog.IncFiles()
 			}
 			prog.Finish()
 			passed := len(CLI.Run.Inputs) - errcount
-			_, _ = fmt.Fprintf(os.Stderr, "%s %s %s\n",
+			elapsed := time.Since(start)
+			rate := int(float64(sourceLines) / elapsed.Seconds())
+			_, _ = fmt.Fprintf(os.Stderr, "%s %s %s %s\n",
 				color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(CLI.Run.Inputs)),
 				color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
 				color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
+				color.New(color.FgCyan).Sprintf("%d sloc/s", rate),
 			)
 			switch {
 			case CLI.Run.Model:
@@ -133,23 +147,25 @@ func main() {
 				fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
 				os.Exit(1)
 			}
+			var payload string
 			switch {
 			case CLI.Boot.Json:
-				output = peg.ModelToJSONStr(gram)
+				payload = peg.ModelToJSONStr(gram)
 				lang = "json"
 			case CLI.Boot.Pretty:
-				output = gram.PrettyPrint()
+				payload = gram.PrettyPrint()
 				lang = "ebnf"
 			case CLI.Boot.Railroads:
-				output = gram.Railroads()
+				payload = gram.Railroads()
 				lang = "apl"
 			case CLI.Boot.Model:
-				output = util.Repr(gram)
+				payload = util.Repr(gram)
 				lang = "go"
 			default:
-				output = gram.PrettyPrint()
+				payload = gram.PrettyPrint()
 				lang = "ebnf"
 			}
+			outputs = append(outputs, outputItem{Name: "boot", Payload: payload})
 
 		case "grammar":
 			gram, err := loadGrammar(CLI.Grammar.Grammar, cliCfg)
@@ -157,42 +173,123 @@ func main() {
 				fmt.Fprintln(os.Stderr, "error:", err)
 				os.Exit(1)
 			}
+			var payload string
 			switch {
 			case CLI.Grammar.Json:
-				output = peg.ModelToJSONStr(gram)
+				payload = peg.ModelToJSONStr(gram)
 				lang = "json"
 			case CLI.Grammar.Pretty:
-				output = gram.PrettyPrint()
+				payload = gram.PrettyPrint()
 				lang = "ebnf"
 			case CLI.Grammar.Railroads:
-				output = gram.Railroads()
+				payload = gram.Railroads()
 				lang = "apl"
 			case CLI.Grammar.Model:
-				output = util.Repr(gram)
+				payload = util.Repr(gram)
 				lang = "go"
 			case CLI.Grammar.Parser != "":
-				output = peg.ParserRepr(*gram, CLI.Grammar.Parser)
+				payload = peg.ParserRepr(*gram, CLI.Grammar.Parser)
 				lang = "go"
 			case CLI.Grammar.ModelGen != "":
-				output = tool.ModelRepr(*gram, CLI.Grammar.ModelGen)
+				payload = tool.ModelRepr(*gram, CLI.Grammar.ModelGen)
 				lang = "go"
 			default:
-				output = gram.PrettyPrint()
+				payload = gram.PrettyPrint()
 				lang = "ebnf"
 			}
+			outputs = append(outputs, outputItem{Name: filepath.Base(CLI.Grammar.Grammar), Payload: payload})
 		}
 	}
 
-	if output != "" {
-		if CLI.Output != "" {
-			if err := os.WriteFile(CLI.Output, []byte(output), 0644); err != nil {
-				fmt.Fprintln(os.Stderr, "error writing output:", err)
-				os.Exit(1)
-			}
-		} else {
-			fmt.Println(Pygmentize(output, lang, useColorOutput))
+	if len(outputs) > 0 {
+		if err := writeOutputs(outputs, lang, CLI.Output, useColorOutput); err != nil {
+			fmt.Fprintln(os.Stderr, "error writing output:", err)
+			os.Exit(1)
 		}
 	}
+}
+
+// outputMode classifies an output path as stdout, file, or directory mode.
+func outputMode(path string) int {
+	if path == "" || path == "-" {
+		return modeStdout
+	}
+	if path == "/dev/null" {
+		return modeFile
+	}
+	if fi, err := os.Stat(path); err == nil {
+		if fi.IsDir() {
+			return modeDir
+		}
+		return modeFile
+	}
+	if filepath.Ext(path) == "" {
+		return modeDir
+	}
+	return modeFile
+}
+
+const (
+	modeStdout = iota
+	modeFile
+	modeDir
+)
+
+// langExt returns the file extension for a given output language.
+func langExt(lang string) string {
+	switch lang {
+	case "json":
+		return ".json"
+	case "go":
+		return ".go"
+	default:
+		return ".ebnf"
+	}
+}
+
+// replaceExt replaces the extension of name with newExt.
+// If name has no extension, newExt is appended.
+func replaceExt(name, newExt string) string {
+	if old := filepath.Ext(name); old != "" {
+		name = name[:len(name)-len(old)]
+	}
+	return name + newExt
+}
+
+// writeOutputs routes outputs to stdout, a single file, or a directory.
+func writeOutputs(outputs []outputItem, lang string, path string, color bool) error {
+	switch outputMode(path) {
+	case modeStdout:
+		fmt.Println(Pygmentize(joinOutputs(outputs), lang, color))
+		return nil
+
+	case modeFile:
+		joined := joinOutputs(outputs)
+		return os.WriteFile(path, []byte(joined), 0644)
+
+	case modeDir:
+		ext := langExt(lang)
+		if err := os.MkdirAll(path, 0755); err != nil {
+			return fmt.Errorf("creating output directory: %w", err)
+		}
+		for _, o := range outputs {
+			name := replaceExt(o.Name, ext)
+			outPath := filepath.Join(path, name)
+			if err := os.WriteFile(outPath, []byte(o.Payload), 0644); err != nil {
+				return fmt.Errorf("writing %s: %w", outPath, err)
+			}
+		}
+		return nil
+	}
+	return nil
+}
+
+func joinOutputs(outputs []outputItem) string {
+	payloads := make([]string, len(outputs))
+	for i, o := range outputs {
+		payloads[i] = o.Payload
+	}
+	return strings.Join(payloads, "\n")
 }
 
 // loadGrammar loads a grammar from the given path, handling both EBNF and JSON formats.

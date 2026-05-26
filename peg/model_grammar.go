@@ -91,6 +91,7 @@ func (g *Grammar) Initialize() error {
 		return err
 	}
 	g.markLeftRecursion()
+	g.Optimize()
 	g.Analyzed = true
 	return nil
 }
