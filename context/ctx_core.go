@@ -132,11 +132,11 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	ctx.heartbeatTime = time.Now()
 }
 
-func (ctx *CoreCtx) pruneCache() {
+func (ctx *CoreCtx) pruneCache(cutPoint int) {
 	if ctx.cfg.NoPruneMemosOnCut {
 		return
 	}
-	PruneMemoCache(ctx.memoCache, ctx.Mark())
+	PruneMemoCache(ctx.memoCache, cutPoint)
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
@@ -357,8 +357,8 @@ func (ctx *CoreCtx) Cut() {
 	if ctx.lookaheadDepth == 0 {
 		mark := ctx.Mark()
 		if mark > ctx.lastCutMark {
+			ctx.pruneCache(ctx.lastCutMark)
 			ctx.lastCutMark = mark
-			ctx.pruneCache()
 		}
 	}
 }
