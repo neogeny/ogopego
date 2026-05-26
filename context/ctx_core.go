@@ -38,13 +38,14 @@ type CoreCtx struct {
 // required.
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	stackCapacity := 64
+	cfgS := cfg.New()
 	memoCapacity := max(
 		stackCapacity,
-		int(math.Round(cfg.PerLineMemos*float64(cursor.LineCount()))),
+		int(math.Round(cfgS.PerLineMemos*float64(cursor.LineCount()))),
 	)
 	ctx := CoreCtx{
 		// this is how passed configuration gets injected
-		cfg:       cfg.New(),
+		cfg:       cfgS,
 		cursor:    cursor,
 		tracer:    NullTracer{},
 		heartbeat: heartbeat.NullHeartbeat{},
