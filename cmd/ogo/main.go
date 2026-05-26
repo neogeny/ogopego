@@ -179,7 +179,7 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			fmt.Println(util.Pygmentize(output, lang, useColorOutput))
+			fmt.Println(Pygmentize(output, lang, useColorOutput))
 		}
 	}
 }

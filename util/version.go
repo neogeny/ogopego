@@ -11,12 +11,10 @@ func GetVersion() string {
 		return "unknown"
 	}
 
-	// 1. If installed via 'go install github.com/user/repo@v0.1.0'
 	if info.Main.Version != "" && info.Main.Version != "(devel)" {
 		return info.Main.Version
 	}
 
-	// 2. If built locally from source (e.g., 'go build'), dig into the VCS settings
 	var revision string
 	var dirty bool
 
