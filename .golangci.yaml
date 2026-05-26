@@ -1,6 +1,7 @@
 run:
   tests: false
   timeout: 5m
+  modules-download-mode: mod
 
 issues:
   exclude-rules:
