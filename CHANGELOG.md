@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file. The format 
 - Use `BoundedMap` for the `Memo` cache. Parsing is faster with with a smaller cache that speeds up `Memo` lookups. The cache capacity is calculared using the heuristic `Cfg.PerLineMemos * Cursor.LineCount`. 
 - The `Memo` cache is pruned when a `Cut`expression is parsed. Entries with marks lower than that of the previous cut are removed if they are not failure (`Tree.Bottom`) markers.
 
+### Fixed
+- Verified non-local/thirs-party builds through GitHub workflow.
+
 ## [0.1.2] - 2026-05-23
 
 [0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
