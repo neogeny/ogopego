@@ -4,15 +4,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.4...HEAD
 
-### Added
+## [0.1.4] - 2026-05-26
 
-### Fixed
-
-## [0.1.3] - 2026-05-25
-
-[0.1.3]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.3
+[0.1.4]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.4
 
 ### Changed
 - Implement `NameGuard` semantics with string and rune comparisons, replacing the previous implementation that used regular expressions. `NameGuard` avoids matching a token when it is not a complete word in the input, like not matching`"new"` when the input at the cursor is `newVar...`. 
