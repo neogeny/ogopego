@@ -12,6 +12,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      GOFLAGS: -mod=vendor
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +27,7 @@ jobs:
         with:
           version: latest
           install-mode: goinstall
+          args: --modules-download-mode=vendor
 
       - name: build
         run: go build ./...
