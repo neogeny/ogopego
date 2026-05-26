@@ -39,7 +39,7 @@ cover:
     go tool cover -html=coverage.out
 
 lint:
-    golangci-lint run --modules-download-mode=vendor --exclude-dirs fragments ./... 
+    golangci-lint run --exclude-dirs fragments ./... 
 
 fmt:
     find . -name '*.go' -not -path './vendor/*' -not -path './fragments/*' -exec gofmt -l -w -s {} +
