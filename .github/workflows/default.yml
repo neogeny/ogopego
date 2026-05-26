@@ -12,8 +12,6 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    env:
-      GOFLAGS: -mod=vendor
     steps:
       - uses: actions/checkout@v4
 
@@ -22,12 +20,14 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: download dependencies
+        run: go mod download
+
       - name: lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           install-mode: goinstall
-          args: --modules-download-mode=vendor
 
       - name: build
         run: go build ./...
