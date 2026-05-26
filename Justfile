@@ -79,4 +79,4 @@ pre-push: clean check build release
 
 tools:
     go install gotest.tools/gotestsum@latest
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
