@@ -137,6 +137,21 @@ func reprValue(v any, seen map[uintptr]bool) string {
 				return "nil"
 			}
 			return "&" + reprValue(rv.Elem().Interface(), seen)
+		case reflect.Map:
+			if rv.IsNil() {
+				return "nil"
+			}
+			keys := rv.MapKeys()
+			sort.Slice(keys, func(i, j int) bool {
+				return fmt.Sprint(keys[i].Interface()) < fmt.Sprint(keys[j].Interface())
+			})
+			parts := make([]string, len(keys))
+			for i, k := range keys {
+				parts[i] = fmt.Sprintf("%s: %s",
+					reprValue(k.Interface(), seen),
+					reprValue(rv.MapIndex(k).Interface(), seen))
+			}
+			return Fold("", parts, rv.Type().String()+"{", "}")
 		case reflect.Slice, reflect.Array:
 			n := rv.Len()
 			parts := make([]string, n)
