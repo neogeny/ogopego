@@ -57,20 +57,21 @@ func (lp *LoadProgress) Finish() {
 
 // FileProgress manages a progress bar for individual file processing.
 type FileProgress struct {
-	bar *mpb.Bar
-	hb  *CliHeartbeat
+	bar    *mpb.Bar
+	hb     *CliHeartbeat
+	length int
 }
 
 // NewFileProgress creates a file progress bar with a name and returns a
 // handle providing heartbeat integration.
 func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 	bar := p.New(0,
-		mpb.BarStyle(),
-		//Lbound("<").
-		//Filler(color.RedString("━")).
-		//Tip(color.RedString("━")).
-		//Padding(".").
-		//Rbound(">"),
+		mpb.BarStyle().
+			Lbound(" ").
+			Rbound(" ").
+			Filler("--").
+			Padding("  ").
+			Tip("-"),
 		mpb.PrependDecorators(
 			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
 		),
@@ -90,18 +91,19 @@ func (fp *FileProgress) Heartbeat() heartbeat.Heartbeat {
 
 // SetLength sets the total length for the file progress bar.
 func (fp *FileProgress) SetLength(length int) {
+	fp.length = length
 	fp.bar.SetTotal(int64(length), false)
 }
 
 // Success marks the file progress as successful.
 func (fp *FileProgress) Success() {
-	fp.bar.SetTotal(0, true)
-	fp.bar.Wait()
+	fp.bar.SetCurrent(1 + int64(fp.length))
+	fp.bar.Abort(false)
 }
 
 // Fail marks the file progress as failed.
 func (fp *FileProgress) Fail() {
-	fp.bar.Abort(true)
+	fp.bar.Abort(false)
 }
 
 // ProgressUI manages the overall progress display for the CLI.
@@ -116,7 +118,12 @@ func NewProgressUI(total int) *ProgressUI {
 	p := mpb.New(mpb.WithOutput(os.Stderr))
 
 	files := p.New(int64(total),
-		mpb.BarStyle(),
+		mpb.BarStyle().
+			Lbound(" ").
+			Rbound(" ").
+			Filler("--").
+			Padding("  ").
+			Tip("-"),
 		mpb.PrependDecorators(
 			decor.CountersNoUnit("%d/%d files"),
 		),
@@ -143,6 +150,6 @@ func (ui *ProgressUI) IncFiles() {
 
 // Finish marks the overall progress UI as complete.
 func (ui *ProgressUI) Finish() {
-	ui.files.SetTotal(0, true)
+	ui.files.SetTotal(ui.files.Current()+1, true)
 	ui.p.Wait()
 }
