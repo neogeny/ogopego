@@ -39,7 +39,7 @@ func (bm *BoundedMap[K, V]) Set(key K, value V) {
 	}
 
 	// 2. Evict if we hit the boundary limit
-	if bm.evictList.Len() >= bm.capacity {
+	if bm.capacity > 0 && bm.evictList.Len() >= bm.capacity {
 		oldest := bm.evictList.Back()
 		if oldest != nil {
 			bm.evictList.Remove(oldest)
