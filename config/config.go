@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/util"
 	"github.com/neogeny/ogopego/util/heartbeat"
 )
 
@@ -15,8 +16,6 @@ const ProgramName = "OGoPEGo"
 
 // DefaultPerLineMemos is the default number of memo entries per input line.
 const DefaultPerLineMemos = 8
-
-const MaxPointerDerefDepth = 4
 
 // Configurable is implemented by types that can be configured using a Cfg.
 type Configurable interface {
@@ -59,22 +58,6 @@ type Cfg struct {
 	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
 }
 
-// Either returns userVal if it is non-zero, otherwise defaultVal.
-func Either[T comparable](userVal, defaultVal T) T {
-	var zero T
-	if userVal != zero {
-		return userVal
-	}
-	return defaultVal
-}
-
-func eitherSlice[T any](userVal, defaultVal []T) []T {
-	if userVal != nil {
-		return userVal
-	}
-	return defaultVal
-}
-
 // DefaultCfg returns the default configuration. Pass nil to API functions
 // to use these defaults.
 func DefaultCfg() *Cfg {
@@ -106,25 +89,25 @@ func (cfg *Cfg) Override(other *Cfg) Cfg {
 		return *cfg
 	}
 	result := Cfg{
-		Name:              Either(other.Name, cfg.Name),
-		Source:            Either(other.Source, cfg.Source),
-		Start:             Either(other.Start, cfg.Start),
-		NoMemo:            Either(other.NoMemo, cfg.NoMemo),
-		NoPruneMemosOnCut: Either(other.NoPruneMemosOnCut, cfg.NoPruneMemosOnCut),
-		PerLineMemos:      Either(other.PerLineMemos, cfg.PerLineMemos),
-		Trace:             Either(other.Trace, cfg.Trace),
-		Colorize:          Either(other.Colorize, cfg.Colorize),
-		Grammar:           Either(other.Grammar, cfg.Grammar),
-		NoLeftRecursion:   Either(other.NoLeftRecursion, cfg.NoLeftRecursion),
-		IgnoreCase:        Either(other.IgnoreCase, cfg.IgnoreCase),
-		NameChars:         Either(other.NameChars, cfg.NameChars),
-		NameGuard:         Either(other.NameGuard, cfg.NameGuard),
-		Whitespace:        Either(other.Whitespace, cfg.Whitespace),
-		Comments:          Either(other.Comments, cfg.Comments),
-		EolComments:       Either(other.EolComments, cfg.EolComments),
-		Keywords:          eitherSlice(other.Keywords, cfg.Keywords),
-		ParseInfo:         Either(other.ParseInfo, cfg.ParseInfo),
-		Heartbeat:         Either(other.Heartbeat, cfg.Heartbeat),
+		Name:              util.Either(other.Name, cfg.Name),
+		Source:            util.Either(other.Source, cfg.Source),
+		Start:             util.Either(other.Start, cfg.Start),
+		NoMemo:            util.Either(other.NoMemo, cfg.NoMemo),
+		NoPruneMemosOnCut: util.Either(other.NoPruneMemosOnCut, cfg.NoPruneMemosOnCut),
+		PerLineMemos:      util.Either(other.PerLineMemos, cfg.PerLineMemos),
+		Trace:             util.Either(other.Trace, cfg.Trace),
+		Colorize:          util.Either(other.Colorize, cfg.Colorize),
+		Grammar:           util.Either(other.Grammar, cfg.Grammar),
+		NoLeftRecursion:   util.Either(other.NoLeftRecursion, cfg.NoLeftRecursion),
+		IgnoreCase:        util.Either(other.IgnoreCase, cfg.IgnoreCase),
+		NameChars:         util.Either(other.NameChars, cfg.NameChars),
+		NameGuard:         util.Either(other.NameGuard, cfg.NameGuard),
+		Whitespace:        util.Either(other.Whitespace, cfg.Whitespace),
+		Comments:          util.Either(other.Comments, cfg.Comments),
+		EolComments:       util.Either(other.EolComments, cfg.EolComments),
+		Keywords:          util.EitherSlice(other.Keywords, cfg.Keywords),
+		ParseInfo:         util.Either(other.ParseInfo, cfg.ParseInfo),
+		Heartbeat:         util.Either(other.Heartbeat, cfg.Heartbeat),
 	}
 	if other.Semantics != nil {
 		result.Semantics = other.Semantics

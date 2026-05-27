@@ -8,6 +8,7 @@ require (
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/fatih/color v1.19.0
 	github.com/vbauerster/mpb/v8 v8.12.1
+	golang.org/x/term v0.43.0
 )
 
 require (

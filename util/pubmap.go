@@ -6,9 +6,10 @@ package util
 import (
 	"reflect"
 
-	"github.com/neogeny/ogopego/config"
 	ctn "github.com/neogeny/ogopego/util/container"
 )
+
+const MaxPointerDerefDepth = 4
 
 type OrderedMap = ctn.BoundedMap[string, any]
 
@@ -29,7 +30,7 @@ func PubMapOf(ref any) any {
 		}
 		v = v.Elem()
 		depth += 1
-		if depth > config.MaxPointerDerefDepth {
+		if depth > MaxPointerDerefDepth {
 			panic(v)
 		}
 	}

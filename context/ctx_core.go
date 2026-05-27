@@ -14,6 +14,9 @@ import (
 	"github.com/neogeny/ogopego/util/heartbeat"
 )
 
+// CallStack is a slice of call-site names representing the parser call stack.
+type CallStack []string
+
 // CoreCtxHeavy holds shared heavyweight state used across context clones.
 type CoreCtxHeavy struct {
 	mu            sync.Mutex

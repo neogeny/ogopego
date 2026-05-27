@@ -125,6 +125,11 @@ func (bm *BoundedMap[K, V]) Len() int {
 func (bm *BoundedMap[K, V]) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
+
+	// Create a single encoder bound to our buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false) // Stop the escaping madness
+
 	first := true
 	for e := bm.evictList.Front(); e != nil; e = e.Next() {
 		pair := e.Value.(*cacheEntry[K, V])
@@ -132,18 +137,24 @@ func (bm *BoundedMap[K, V]) MarshalJSON() ([]byte, error) {
 			buf.WriteByte(',')
 		}
 		first = false
-		keyJSON, err := json.Marshal(pair.key)
-		if err != nil {
+
+		// 1. Encode the Key
+		if err := enc.Encode(pair.key); err != nil {
 			return nil, err
 		}
-		buf.Write(keyJSON)
+		// Strip the trailing newline added by enc.Encode
+		buf.Truncate(buf.Len() - 1)
+
 		buf.WriteByte(':')
-		valJSON, err := json.Marshal(pair.value)
-		if err != nil {
+
+		// 2. Encode the Value
+		if err := enc.Encode(pair.value); err != nil {
 			return nil, err
 		}
-		buf.Write(valJSON)
+		// Strip the trailing newline added by enc.Encode
+		buf.Truncate(buf.Len() - 1)
 	}
+
 	buf.WriteByte('}')
 	return buf.Bytes(), nil
 }

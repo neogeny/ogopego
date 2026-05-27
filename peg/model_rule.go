@@ -84,3 +84,16 @@ func (r *Rule) IsMemoizable() bool {
 func (r *Rule) ShouldTrace() bool {
 	return !r.NoStak && !r.IsToken()
 }
+
+// normalize Sets default values for missing fields
+func (r *Rule) normalize() {
+	if r.Params == nil {
+		r.Params = []string{}
+	}
+	if r.KWParams == nil {
+		r.KWParams = map[string]any{}
+	}
+	if r.Decorators == nil {
+		r.Decorators = []string{}
+	}
+}

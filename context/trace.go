@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/neogeny/ogopego/util"
 )
 
 // Event represents a tracing event kind emitted during parsing.
@@ -131,16 +132,22 @@ func (t ConsoleTracer) TraceEvent(ctx Ctx, event Event, msg string) {
 		strings.ReplaceAll(ctx.Cursor().Lookahead(ctx.Mark()), " ", "·"),
 	)
 
+	cols, _ := util.TermSize()
 	var cs string
 	bold := color.New(color.FgWhite, color.Bold)
-	for _, call := range ctx.CallStack() {
-		cs += bold.Sprint(call) + ssym
+	callStack := ctx.CallStack()
+	for i := len(callStack) - 1; i >= 0; i-- {
+		cs += bold.Sprint(callStack[i]) + ssym
+		if len(cs) >= cols-8 {
+			cs += "••"
+			break
+		}
 	}
 
 	line, col := ctx.Cursor().Pos()
 	pos := color.New(color.FgBlack, color.Bold).Sprintf("[%d:%d]→", line, col)
 
-	lineMsg := fmt.Sprintf("%s%s %s •\n%s%s",
+	lineMsg := fmt.Sprintf("%s%s %s•\n%s%s",
 		esym, msg, cs, pos, lookahead)
 
 	t.Trace(ctx, lineMsg)

@@ -4,9 +4,6 @@ import (
 	"github.com/neogeny/ogopego/input"
 )
 
-// CallStack is a slice of call-site names representing the parser call stack.
-type CallStack []string
-
 // ParseState holds lightweight parsing state for a cursor position.
 type ParseState struct {
 	cursor   input.Cursor

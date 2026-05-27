@@ -91,8 +91,11 @@ func (g *Grammar) Initialize() error {
 		return err
 	}
 	g.markLeftRecursion()
-	g.Optimize()
 	g.computeAnalysis()
+	// NOTE
+	//  Do not Optimize here so comparisons with sibling output is possible
+	//  Optimization can be postoned until model is used to Parse()
+	//g.Optimize()
 	g.Analyzed = true
 	return nil
 }
@@ -141,4 +144,12 @@ func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+// normalize Bring fields to a consistent state, setting defaults
+// for missing values and ensuring internal consistency.
+func (g *Grammar) normalize() {
+	for _, r := range g.Rules {
+		r.normalize()
+	}
 }

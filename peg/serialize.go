@@ -1,6 +1,7 @@
 package peg
 
 import (
+	"bytes"
 	"encoding/json"
 
 	ctn "github.com/neogeny/ogopego/util/container"
@@ -8,8 +9,17 @@ import (
 
 func ModelToJSONStr(v Model) string {
 	out := ModelToJSON(v)
-	b, _ := json.MarshalIndent(out, "", "  ")
-	return string(b)
+
+	// Temporarily print the concrete types inside your map/struct
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetIndent("", "  ")
+	enc.SetEscapeHTML(false) // Prevents escaping Unicode/HTML
+
+	_ = enc.Encode(out)
+
+	// Trim the trailing newline so it behaves exactly like MarshalIndent
+	return string(bytes.TrimRight(buf.Bytes(), "\n"))
 }
 
 // ModelToJSON returns an any that can be serialized to JSON,
@@ -38,7 +48,7 @@ func ModelToJSON(v Model) any {
 	case *Fail:
 		return mapClass("Fail")
 	case *Void:
-		return mapClass("Void")
+		return mapClass("Void", "ast", "()")
 	case *NULL:
 		return mapClass("Null")
 	case *Cut:
@@ -46,15 +56,13 @@ func ModelToJSON(v Model) any {
 	case *Synth:
 		return mapClass("Synth", "exp", ModelToJSON(m.Exp))
 	case *EmptyClosure:
-		return mapClass("EmptyClosure")
+		return mapClass("EmptyClosure", "ast", []any{})
 	case *SkipTo:
 		return mapClass("SkipTo", "exp", ModelToJSON(m.Exp))
-
 	case *Call:
 		return mapClass("Call", "name", m.Name)
 	case *RuleInclude:
-		return mapClass("RuleInclude", "name", m.Name, "exp", ModelToJSON(m.exp))
-
+		return mapClass("RuleInclude", "name", m.Name)
 	case *Group:
 		return mapClass("Group", "exp", ModelToJSON(m.Exp))
 	case *SkipGroup:
@@ -128,7 +136,17 @@ func serializeGrammar(g *Grammar) any {
 
 	dirs := ctn.NewBoundedMap[string, any](0)
 	for _, d := range g.Directives {
-		dirs.Set(d[0], d[1])
+		v := d[1]
+		var value any = v
+		switch d[1] {
+		case "true", "True":
+			value = true
+		case "false", "False":
+			value = false
+		case "null", "None":
+			value = nil
+		}
+		dirs.Set(d[0], value)
 	}
 	out.Set("directives", &dirs)
 
@@ -145,20 +163,29 @@ func serializeGrammar(g *Grammar) any {
 }
 
 func serializeRule(r *Rule) *ctn.BoundedMap[string, any] {
+	r.normalize()
 	out := ctn.NewBoundedMap[string, any](0)
 	out.Set("__class__", "Rule")
 	out.Set("name", r.Name)
+	// NOTE This is the field order used by TatSu @ 2026-05-27
+	out.Set("exp", ModelToJSON(r.Exp))
 	if r.Params == nil {
 		out.Set("params", []string{})
 	} else {
 		out.Set("params", r.Params)
 	}
+	if r.KWParams == nil {
+		out.Set("kwparams", map[string]any{})
+	} else {
+		out.Set("kwparams", r.KWParams)
+	}
+	out.Set("decorators", r.Decorators)
+	out.Set("base", nil)
 	out.Set("is_name", r.IsName)
 	out.Set("is_tokn", r.IsTokn)
 	out.Set("no_memo", r.NoMemo)
 	out.Set("no_stak", r.NoStak)
 	out.Set("is_memo", r.IsMemo)
 	out.Set("is_lrec", r.IsLrec)
-	out.Set("exp", ModelToJSON(r.Exp))
 	return &out
 }
