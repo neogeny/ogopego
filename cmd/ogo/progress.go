@@ -2,7 +2,6 @@ package main
 
 //goland:noinspection GoRedundantImportAlias
 import (
-	math "math"
 	"os"
 
 	"github.com/fatih/color"
@@ -83,7 +82,7 @@ func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 			decor.Percentage(),
 			//decor.Elapsed(decor.ET_STYLE_GO),
 		),
-		//mpb.BarRemoveOnComplete(),
+		mpb.BarRemoveOnComplete(),
 	)
 	return &FileProgress{bar: bar, hb: NewCliHeartbeat(bar)}
 }
@@ -102,12 +101,12 @@ func (fp *FileProgress) SetLength(length int) {
 // Success marks the file progress as successful.
 func (fp *FileProgress) Success() {
 	fp.bar.SetCurrent(1 + int64(fp.length))
-	fp.bar.Abort(false)
+	fp.bar.Abort(true)
 }
 
 // Fail marks the file progress as failed.
 func (fp *FileProgress) Fail() {
-	fp.bar.Abort(false)
+	fp.bar.Abort(true)
 }
 
 // ProgressUI manages the overall progress display for the CLI.
@@ -129,7 +128,7 @@ func NewProgressUI(total int) *ProgressUI {
 			Filler(".").FillerMeta(green).
 			Padding(" ").
 			Tip(".").TipMeta(green),
-		mpb.BarPriority(math.MaxInt32),
+		//mpb.BarPriority(math.MaxInt32),
 		mpb.PrependDecorators(
 			decor.CountersNoUnit("%d/%d files"),
 		),
