@@ -11,12 +11,8 @@ import (
 )
 
 func TestStrCursorMatchPattern(t *testing.T) {
-	p, err := pyre.Compile(`\d+`)
-	if err != nil {
-		t.Fatal(err)
-	}
 	s := NewStrCursor("abc123def")
-	m, ok := s.MatchPattern(p)
+	m, ok := s.MatchPattern(`\d+`)
 	if ok {
 		t.Errorf("expected no match at start, got %q", m)
 	}
@@ -93,16 +89,12 @@ func TestStrCursorClone(t *testing.T) {
 }
 
 func TestMatchPatternSuccess(t *testing.T) {
-	p, err := pyre.Compile(`\d+`)
-	if err != nil {
-		t.Fatal(err)
-	}
 	s := NewStrCursor("abc123def")
 	// skip past "abc"
 	s.Next()
 	s.Next()
 	s.Next()
-	m, ok := s.MatchPattern(p)
+	m, ok := s.MatchPattern(`\d+`)
 	if !ok {
 		t.Fatal("expected match")
 	}
@@ -115,12 +107,8 @@ func TestMatchPatternSuccess(t *testing.T) {
 }
 
 func TestMatchPatternWithGroup(t *testing.T) {
-	p, err := pyre.Compile(`(foo)\s+(bar)`)
-	if err != nil {
-		t.Fatal(err)
-	}
 	s := NewStrCursor("foo bar baz")
-	m, ok := s.MatchPattern(p)
+	m, ok := s.MatchPattern(`(foo)\s+(bar)`)
 	if !ok {
 		t.Fatal("expected match")
 	}
@@ -372,5 +360,25 @@ func TestPosEmpty(t *testing.T) {
 	line, col := s.Pos()
 	if line != 1 || col != 1 {
 		t.Errorf("expected (0,0) for empty string, got (%d,%d)", line, col)
+	}
+}
+
+func TestStrCursorGetPattern(t *testing.T) {
+	s := NewStrCursor("")
+	p1 := s.GetPattern(`\d+`)
+	if p1 == nil {
+		t.Fatal("expected non-nil pattern")
+	}
+	p2 := s.GetPattern(`\d+`)
+	if p2 != p1 {
+		t.Error("expected cached pattern to be same instance")
+	}
+}
+
+func TestStrCursorGetPatternInvalid(t *testing.T) {
+	s := NewStrCursor("")
+	p := s.GetPattern(`[invalid`)
+	if p != nil {
+		t.Error("expected nil for invalid pattern")
 	}
 }

@@ -168,26 +168,6 @@ func TestBaseCtxIntern(t *testing.T) {
 	}
 }
 
-func TestBaseCtxGetPattern(t *testing.T) {
-	ctx := newTestBaseCtx()
-	p1 := ctx.GetPattern(`\d+`)
-	if p1 == nil {
-		t.Fatal("expected non-nil pattern")
-	}
-	p2 := ctx.GetPattern(`\d+`)
-	if p2 != p1 {
-		t.Error("expected cached pattern to be same instance")
-	}
-}
-
-func TestBaseCtxGetPatternInvalid(t *testing.T) {
-	ctx := newTestBaseCtx()
-	p := ctx.GetPattern(`[invalid`)
-	if p != nil {
-		t.Error("expected nil for invalid pattern")
-	}
-}
-
 func TestBaseCtxMarkReset(t *testing.T) {
 	ctx := newTestBaseCtx()
 	if m := ctx.Mark(); m != 0 {

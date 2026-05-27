@@ -11,7 +11,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/trees"
 	"github.com/neogeny/ogopego/util/heartbeat"
-	"github.com/neogeny/ogopego/util/pyre"
 )
 
 // CoreCtx is the concrete implementation of Ctx used by the parser runtime.
@@ -22,7 +21,6 @@ type CoreCtx struct {
 	cutStack       []bool
 	tracer         Tracer
 	furthest       *DisasterReport
-	patternCache   map[string]pyre.Pattern
 	keywords       map[string]struct{}
 	memoCache      MemoCache
 	recursionKey   MemoKey
@@ -194,21 +192,6 @@ func (ctx *CoreCtx) setKeywords(keywords []string) {
 	ctx.keywords = set
 }
 
-func (ctx *CoreCtx) GetPattern(pattern string) pyre.Pattern {
-	if ctx.patternCache == nil {
-		ctx.patternCache = make(map[string]pyre.Pattern)
-	}
-	if p, ok := ctx.patternCache[pattern]; ok {
-		return p
-	}
-	p, err := pyre.Compile(pattern)
-	if err != nil {
-		return nil
-	}
-	ctx.patternCache[pattern] = p
-	return p
-}
-
 func (ctx *CoreCtx) MatchToken(token string) bool {
 	ctx.NextToken()
 
@@ -274,19 +257,9 @@ func (ctx *CoreCtx) SetFurthestFailure(dis *DisasterReport) { ctx.furthest = dis
 
 func (ctx *CoreCtx) MatchPattern(pattern string) (string, error) {
 	mark := ctx.Mark()
-	re := ctx.GetPattern(pattern)
-	if re == nil {
-		return "", ctx.Failure(
-			mark,
-			fmt.Errorf("invalid pattern %q", pattern),
-		)
-	}
-	m, ok := ctx.cursor.MatchPattern(re)
+	m, ok := ctx.cursor.MatchPattern(pattern)
 	if !ok {
-		return "", ctx.Failure(
-			mark,
-			fmt.Errorf("expected pattern %q", pattern),
-		)
+		return "", ctx.Failure(mark, fmt.Errorf("expected pattern %q", pattern))
 	}
 	return m, nil
 }

@@ -2,7 +2,6 @@ package context
 
 import (
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util/pyre"
 )
 
 // Ctx represents the parsing context used during parse operations. It
@@ -38,8 +37,6 @@ type Ctx interface {
 	MatchToken(token string) bool
 	// MatchPattern matches a regular expression pattern.
 	MatchPattern(pattern string) (string, error)
-	// GetPattern retrieves a compiled regular expression pattern.
-	GetPattern(pattern string) pyre.Pattern
 	Void()
 	// EnterLookahead increments the lookahead depth counter.
 	EnterLookahead()

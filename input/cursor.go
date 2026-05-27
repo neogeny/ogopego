@@ -57,7 +57,9 @@ type Cursor interface {
 	// IsName returns true if the given string is a valid name.
 	IsName(s string) bool
 	// MatchPattern attempts to match the given pattern and advances the cursor if successful.
-	MatchPattern(pattern pyre.Pattern) (string, bool)
+	MatchPattern(pattern string) (string, bool)
+	// GetPattern compiles and caches a regular expression pattern.
+	GetPattern(pattern string) pyre.Pattern
 	// MatchEOL attempts to match an end-of-line sequence and advances the cursor if successful.
 	MatchEOL() bool
 	// NextToken advances the cursor past the current token (whitespace and comments).

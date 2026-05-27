@@ -14,10 +14,11 @@ import (
 
 // CursorHeavy holds the configuration and shared resources for a cursor.
 type CursorHeavy struct {
-	IgnoreCase bool
-	NameGuard  bool
-	Source     string
-	Patterns   *TokenizingPatterns
+	IgnoreCase   bool
+	NameGuard    bool
+	Source       string
+	Patterns     *TokenizingPatterns
+	PatternCache map[string]pyre.Pattern
 }
 
 // StrCursor is a string-based implementation of the Cursor interface.
@@ -224,7 +225,8 @@ func (s *StrCursor) MatchToken(token string) bool {
 }
 
 // MatchPattern matches a regular expression at the current offset and consumes it.
-func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
+func (s *StrCursor) MatchPattern(pattern string) (string, bool) {
+	pat := s.GetPattern(pattern)
 	if pat == nil {
 		return "", false
 	}
@@ -241,6 +243,22 @@ func (s *StrCursor) MatchPattern(pat pyre.Pattern) (string, bool) {
 		return g, true
 	}
 	return "", false
+}
+
+// GetPattern compiles and caches a regular expression pattern.
+func (s *StrCursor) GetPattern(pattern string) pyre.Pattern {
+	if s.heavy.PatternCache == nil {
+		s.heavy.PatternCache = make(map[string]pyre.Pattern)
+	}
+	if p, ok := s.heavy.PatternCache[pattern]; ok {
+		return p
+	}
+	p, err := pyre.Compile(pattern)
+	if err != nil {
+		return nil
+	}
+	s.heavy.PatternCache[pattern] = p
+	return p
 }
 
 // MatchEOL matches an end-of-line (including trailing whitespace) and consumes it.
