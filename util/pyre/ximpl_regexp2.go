@@ -10,8 +10,7 @@ import (
 )
 
 type Regexp2Pattern struct {
-	re      *regexp2.Regexp
-	pattern string
+	re *regexp2.Regexp
 }
 
 type Regexp2Match struct {
@@ -25,7 +24,7 @@ func NewRegexp2Pattern(pattern string) (*Regexp2Pattern, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Regexp2Pattern{re: re, pattern: pattern}, nil
+	return &Regexp2Pattern{re: re}, nil
 }
 
 func (p *Regexp2Pattern) Match(text string) (Match, bool) {
@@ -165,7 +164,7 @@ func (p *Regexp2Pattern) SubN(repl, text string, count int) (string, int) {
 }
 
 func (p *Regexp2Pattern) Pattern() string {
-	return p.pattern
+	return p.re.String()
 }
 
 func (p *Regexp2Pattern) MatchesEmpty() bool {
@@ -174,7 +173,7 @@ func (p *Regexp2Pattern) MatchesEmpty() bool {
 }
 
 func (p *Regexp2Pattern) IsEmpty() bool {
-	return strings.TrimSpace(p.pattern) == ""
+	return p == nil || strings.TrimSpace(p.re.String()) == ""
 }
 
 func (p *Regexp2Pattern) GroupIndex() map[string]int {
@@ -215,8 +214,7 @@ func (m *Regexp2Match) Groups() []*string {
 	for i := 1; i < m.match.GroupCount(); i++ {
 		g := m.match.GroupByNumber(i)
 		if g.Index >= 0 {
-			s := g.String()
-			groups[i-1] = &s
+			groups[i-1] = new(g.String())
 		}
 	}
 	return groups
@@ -248,8 +246,7 @@ func (m *Regexp2Match) GroupDict() map[string]*string {
 	for _, g := range groups {
 		if g.Name != "" {
 			if g.Index >= 0 {
-				s := g.String()
-				result[g.Name] = &s
+				result[g.Name] = new(g.String())
 			}
 		}
 	}
