@@ -2,10 +2,17 @@ package main
 
 import (
 	"os"
+	"runtime/debug"
 	"runtime/pprof"
 )
 
 func main() {
+	debug.SetGCPercent(500)
+	debug.SetMemoryLimit(4 * 1024 * 1024 * 1024)
+	profileMain(cliMain)
+}
+
+func profileMain(actualMain func()) {
 	// 1. Create a file to hold the CPU profile data
 	cpuFile, err := os.Create("cpu.pprof")
 	if err != nil {
@@ -27,7 +34,7 @@ func main() {
 	}
 	defer memFile.Close()
 
-	cliMain()
+	actualMain()
 
 	if err := pprof.WriteHeapProfile(memFile); err != nil {
 		panic(err)
