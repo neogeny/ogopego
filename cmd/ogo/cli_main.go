@@ -116,7 +116,7 @@ func cliMain() {
 
 					fileCfg := *cliCfg
 					fileCfg.Heartbeat = fProgress.Heartbeat()
-					fileCfg.Source = fileName
+					fileCfg.Source, _ = util.PathRelativeToCwd(path)
 					tree, err := api.ParseInput(gram, string(d), &fileCfg)
 
 					// Thread-safe accumulation block
