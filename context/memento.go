@@ -65,7 +65,7 @@ func (m *Memento) Error() string {
 	)
 	b.WriteString(
 		fmt.Sprintf(
-			"  %s %s@[%d:%d]\n",
+			"  %s %s @ [%d:%d]\n",
 			arrow,
 			m.Cursor.InputSource(),
 			line,
@@ -73,30 +73,31 @@ func (m *Memento) Error() string {
 		),
 	)
 
-	b.WriteString(fmt.Sprintf("   %s\n", bluePipe))
+	b.WriteString(fmt.Sprintf(" %5s%s\n", "", bluePipe))
 	start := line - 4
 	if start < 0 {
 		start = 0
 	}
 	for i, linestr := range m.Cursor.LinesAt(start, line+1) {
-		linestr = strings.TrimRight(linestr, "\n\r\t\f")
+		linestr = util.StripRight(linestr)
 		disp := util.ExpandTabs(linestr)
 		b.WriteString(
 			fmt.Sprintf(
-				"%s%2d%s %s %s\n",
+				"%s%5d %s %s\n",
 				ansiBlue+ansiBold,
 				start+i,
-				ansiReset,
-				bluePipe,
+				ansiReset+bluePipe,
 				disp,
 			),
 		)
 	}
 	pad := strings.Repeat(" ", col)
-	_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
-		bluePipe, pad,
-		ansiBold+ansiRed, ansiReset,
-		ansiRed, m.Msg, ansiReset)
+	_, _ = fmt.Fprintf(&b, " %5s%s %s^ %s\n",
+		"",
+		bluePipe,
+		ansiReset+pad+ansiRed,
+		m.Msg+ansiReset,
+	)
 
 	if len(m.CallStack) > 0 {
 		b.WriteString("\n")

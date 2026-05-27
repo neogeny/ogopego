@@ -354,7 +354,7 @@ func (s *StrCursor) PosAt(mark int) (int, int) {
 		lineno += 1
 	}
 	line = util.ExpandTabs(line)
-	col := len(strings.TrimRight(line, "\r\n"))
+	col := len(util.StripRight(line))
 	if col < len(line) {
 		// mark was at the end of the line
 		lineno += 1
