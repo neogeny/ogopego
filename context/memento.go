@@ -4,16 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/input"
 	"github.com/neogeny/ogopego/util"
-)
-
-const (
-	ansiRed   = "\033[31m"
-	ansiBlue  = "\033[34m"
-	ansiBold  = "\033[1m"
-	ansiReset = "\033[0m"
-	ansiGrey  = "\033[90m"
 )
 
 // Memento captures the state of the parser at a specific point for error reporting.
@@ -49,29 +42,17 @@ func (m *Memento) Error() string {
 	line, col := m.Cursor.PosAt(m.Mark)
 	var b strings.Builder
 
-	errLabel := ansiBold + ansiRed + "error" + ansiReset
-	bluePipe := ansiBlue + ansiBold + "|" + ansiReset
-	arrow := ansiBlue + ansiBold + "-->" + ansiReset
+	errStyle := color.New(color.FgRed, color.Bold)
+	blueStyle := color.New(color.FgBlue, color.Bold)
+	bold := color.New(color.Bold)
+	grey := color.New(color.FgHiBlack)
 
-	b.WriteString("\n")
-	b.WriteString(
-		fmt.Sprintf(
-			"%s: %s%s%s\n",
-			errLabel,
-			ansiBold,
-			m.Msg,
-			ansiReset,
-		),
-	)
-	b.WriteString(
-		fmt.Sprintf(
-			"  %s %s @ [%d:%d]\n",
-			arrow,
-			m.Cursor.InputSource(),
-			line,
-			col,
-		),
-	)
+	errLabel := errStyle.Sprint("error")
+	bluePipe := blueStyle.Sprint("|")
+	arrow := blueStyle.Sprint("-->")
+
+	b.WriteString(fmt.Sprintf("\n%s: %s\n", errLabel, bold.Sprint(m.Msg)))
+	b.WriteString(fmt.Sprintf("  %s %s @ [%d:%d]\n", arrow, m.Cursor.InputSource(), line, col))
 
 	b.WriteString(fmt.Sprintf(" %5s%s\n", "", bluePipe))
 	start := line - 4
@@ -81,30 +62,16 @@ func (m *Memento) Error() string {
 	for i, linestr := range m.Cursor.LinesAt(start, line+1) {
 		linestr = util.StripRight(linestr)
 		disp := util.ExpandTabs(linestr)
-		b.WriteString(
-			fmt.Sprintf(
-				"%s%5d %s %s\n",
-				ansiBlue+ansiBold,
-				start+i,
-				ansiReset+bluePipe,
-				disp,
-			),
-		)
+		lineno := blueStyle.Sprintf("%5d", start+i)
+		b.WriteString(fmt.Sprintf("%s %s %s\n", lineno, bluePipe, disp))
 	}
 	pad := strings.Repeat(" ", col)
-	_, _ = fmt.Fprintf(&b, " %5s%s %s^ %s\n",
-		"",
-		bluePipe,
-		ansiReset+pad+ansiRed,
-		m.Msg+ansiReset,
-	)
+	_, _ = fmt.Fprintf(&b, " %5s%s %s\n", "", bluePipe, errStyle.Sprintf("%s^ %s", pad, m.Msg))
 
 	if len(m.CallStack) > 0 {
 		b.WriteString("\n")
 		for i := len(m.CallStack) - 1; i >= 0; i-- {
-			b.WriteString(fmt.Sprintf(" %s%s→%s %s%s%s\n",
-				ansiRed, ansiBold, ansiReset,
-				ansiGrey, m.CallStack[i], ansiReset))
+			b.WriteString(fmt.Sprintf(" %s %s\n", errStyle.Sprint("→"), grey.Sprint(m.CallStack[i])))
 		}
 	}
 
