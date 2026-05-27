@@ -10,8 +10,10 @@ import (
 //
 // The interface is implemented by CoreCtx returned from NewCtx.
 type Ctx interface {
-	Clone() Ctx
 	Configurable
+
+	Clone() Ctx
+	Merge(other Ctx)
 	// Cursor returns the input cursor.
 	Cursor() Cursor
 	// CallStack returns the current call stack.
@@ -58,11 +60,11 @@ type Ctx interface {
 	// Leave pops a rule from the call stack.
 	Leave()
 	// Failure creates a new Nope error.
-	Failure(start int, source error) *Nope
+	Failure(start int, source error) error
 	// FurthestFailure returns the furthest failure encountered so far.
-	FurthestFailure() *DisasterReport
+	FurthestFailure() *ParseFailure
 	// SetFurthestFailure sets the furthest failure.
-	SetFurthestFailure(dis *DisasterReport)
+	SetFurthestFailure(dis *ParseFailure)
 	// IsKeyword checks if a name is a reserved keyword.
 	IsKeyword(name string) bool
 	// Intern interns a string to save memory.
@@ -84,13 +86,11 @@ type Ctx interface {
 
 	// Cut marks a "cut" point in the parsing process.
 	Cut()
-	// SetCut sets the cut flag.
-	SetCut()
 	// IsCutSeen checks if a cut has been seen.
 	IsCutSeen() bool
 	// CutStackPush pushes the current cut state onto the stack.
 	CutStackPush()
-	// CutStackPop pops the cut state from the stack.
+	// CutStackPop pops the cut state from the stack. Returns the popped value.
 	CutStackPop() bool
 
 	// ApplySemantics apply the semantics of Tree transformations in the Cfg for the grammar

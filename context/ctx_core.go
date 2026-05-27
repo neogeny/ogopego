@@ -24,7 +24,6 @@ type CoreCtxHeavy struct {
 	memoCache     MemoCache
 	tracer        Tracer
 	keywords      map[string]struct{}
-	furthest      *DisasterReport
 	heartbeat     heartbeat.Heartbeat
 	heartbeatTime time.Time
 }
@@ -38,6 +37,7 @@ type CoreCtx struct {
 	recursionDepth int
 	lookaheadDepth int
 	lastCutMark    int
+	furthest       *ParseFailure
 	heavy          *CoreCtxHeavy
 }
 
@@ -80,6 +80,11 @@ func (ctx *CoreCtx) Clone() Ctx {
 		lastCutMark:    ctx.lastCutMark,
 		heavy:          ctx.heavy,
 	}
+}
+
+func (ctx *CoreCtx) Merge(other Ctx) {
+	ctx.cursor = other.Cursor()
+	ctx.furthest = other.FurthestFailure()
 }
 
 func (ctx *CoreCtx) Cfg() Cfg {
@@ -275,24 +280,15 @@ func (ctx *CoreCtx) ParseEOF() bool {
 	return result
 }
 
-func (ctx *CoreCtx) Failure(start int, source error) *Nope {
+func (ctx *CoreCtx) Failure(start int, source error) error {
 	loc := Location{}
 	_, loc.File, loc.Line, _ = runtime.Caller(2)
 
 	ctx.Reset(start)
-	nope := &Nope{
-		location: loc,
-	}
-	ctx.heavy.mu.Lock()
-	if ctx.heavy.furthest != nil && ctx.heavy.furthest.Start() >= start {
-		ctx.heavy.mu.Unlock()
-		return nope
-	}
 	msg := source.Error()
-	dis := &DisasterReport{
+	dis := &ParseFailure{
 		location: loc,
 		Inner:    source,
-		CutSeen:  ctx.IsCutSeen(),
 		Memento: NewMemento(
 			start,
 			msg,
@@ -300,21 +296,18 @@ func (ctx *CoreCtx) Failure(start int, source error) *Nope {
 			ctx.CallStack(),
 		),
 	}
-	ctx.heavy.furthest = dis
-	ctx.heavy.mu.Unlock()
-	return nope
+	if ctx.furthest == nil || ctx.furthest.Mark() <= ctx.Mark() {
+		ctx.SetFurthestFailure(dis)
+	}
+	return dis
 }
 
-func (ctx *CoreCtx) FurthestFailure() *DisasterReport {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
-	return ctx.heavy.furthest
+func (ctx *CoreCtx) FurthestFailure() *ParseFailure {
+	return ctx.furthest
 }
 
-func (ctx *CoreCtx) SetFurthestFailure(dis *DisasterReport) {
-	ctx.heavy.mu.Lock()
-	ctx.heavy.furthest = dis
-	ctx.heavy.mu.Unlock()
+func (ctx *CoreCtx) SetFurthestFailure(dis *ParseFailure) {
+	ctx.furthest = dis
 }
 
 func (ctx *CoreCtx) MatchPattern(pattern string) (string, error) {
@@ -397,10 +390,6 @@ func (ctx *CoreCtx) Cut() {
 			ctx.lastCutMark = mark
 		}
 	}
-}
-
-func (ctx *CoreCtx) SetCut() {
-	ctx.cutStack[len(ctx.cutStack)-1] = true
 }
 
 func (ctx *CoreCtx) IsCutSeen() bool {

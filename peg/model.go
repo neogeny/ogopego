@@ -5,6 +5,8 @@ package peg
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/neogeny/ogopego/context"
 	asjson "github.com/neogeny/ogopego/json"
@@ -70,3 +72,11 @@ func (m *ModelBase) PrettyPrint() string { return "" }
 
 // Railroads is a placeholder for Model implementations.
 func (m *ModelBase) Railroads() string { return "" }
+
+func (m *ModelBase) LookAheadStr() string {
+	reprs := make([]string, len(m.la), len(m.la))
+	for i, item := range m.la {
+		reprs[i] = fmt.Sprintf("`%v`", item)
+	}
+	return strings.Join(reprs, " ")
+}

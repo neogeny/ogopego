@@ -11,6 +11,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed `DisasterReport` to `ParseFailure` and removed the lightweight `Nope` error.
+
+### In Progress
+- The implementation of concurrent `Choice` options is in, but.. it doesn't work!
+
 
 ## [0.1.6] 2026-05-27 Debug
 

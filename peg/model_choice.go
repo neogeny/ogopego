@@ -6,7 +6,6 @@ package peg
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 // Option represents a single alternative within a Choice expression.
@@ -35,7 +34,7 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	failure := func() error {
 		msg := "no option matched"
 		if len(c.la) > 0 {
-			msg = fmt.Sprintf("expecteing %s", strings.Join(c.la, ", "))
+			msg = fmt.Sprintf("expecteing one of: %s", c.LookAheadStr())
 		}
 		return ctx.Failure(startMark, errors.New(msg))
 	}

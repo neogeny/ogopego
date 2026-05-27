@@ -11,27 +11,16 @@ type Location struct {
 	Line int
 }
 
-// Nope represents a localized parsing failure with a source location.
-type Nope struct {
-	location Location
-}
-
-// DisasterReport aggregates failure information (furthest failure), cut
+// ParseFailure aggregates failure information (furthest failure), cut
 // state, inner error and tracing memento for diagnostic reporting.
-type DisasterReport struct {
-	CutSeen  bool
-	location Location
+type ParseFailure struct {
 	Inner    error
+	location Location
 	Memento  Memento
 }
 
-// Error returns a string representation of the Nope error.
-func (e *Nope) Error() string {
-	return fmt.Sprintf("Scaped Nope at %v", e.location)
-}
-
-// Error returns a string representation of the DisasterReport.
-func (e *DisasterReport) Error() string {
+// Error returns a string representation of the ParseFailure.
+func (e *ParseFailure) Error() string {
 	var inner string
 	if e.Inner != nil {
 		inner = e.Inner.Error()
@@ -43,8 +32,7 @@ func (e *DisasterReport) Error() string {
 	location := fmt.Sprintf("%s@%d", filename, e.location.Line)
 
 	return fmt.Sprintf(
-		"\nDisasterReport(\n  CutSeen: %t,\n  Loc: %v,\n  Error: %s,\n%s\n)",
-		e.CutSeen,
+		"\nDisasterReport(\nLoc: %v,\nError: %s\n\n%s\n)",
 		location,
 		inner,
 		memento,
@@ -52,16 +40,16 @@ func (e *DisasterReport) Error() string {
 }
 
 // Start returns the starting position of the failure.
-func (e *DisasterReport) Start() int {
+func (e *ParseFailure) Start() int {
 	return e.Memento.Start
 }
 
 // Mark returns the input mark at which the failure occurred.
-func (e *DisasterReport) Mark() int {
+func (e *ParseFailure) Mark() int {
 	return e.Memento.Mark
 }
 
-// Unwrap returns the inner error of the DisasterReport.
-func (e *DisasterReport) Unwrap() error {
+// Unwrap returns the inner error of the ParseFailure.
+func (e *ParseFailure) Unwrap() error {
 	return e.Inner
 }

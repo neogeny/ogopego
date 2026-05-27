@@ -3,7 +3,6 @@ package peg
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 type Result struct {
@@ -19,7 +18,6 @@ func (c *Choice) ParsePar(ctx Ctx) (Tree, error) {
 	chans := make([]chan Result, numOptions)
 	clones := make([]Ctx, numOptions)
 
-	// 1. Launch concurrent branches
 	for i, opt := range c.Options {
 		chans[i] = make(chan Result, 1)
 		clones[i] = ctx.Clone()
@@ -33,23 +31,21 @@ func (c *Choice) ParsePar(ctx Ctx) (Tree, error) {
 		}(chans[i], opt, clones[i])
 	}
 
-	// 2. Evaluate in strict priority order
 	for i := 0; i < numOptions; i++ {
 		res := <-chans[i]
 
 		if res.Err == nil {
-			// Even if res.Tree is nil, a nil error confirms this branch won
-			ctx.Reset(clones[i].Mark())
+			ctx.Merge(clones[i])
 			return res.Tree, nil
+		} else if res.Cut {
+			return nil, res.Err
 		}
 	}
-
-	// 3. Fallback: handle failures...
+	ctx.Reset(startMark)
 	msg := "no option matched"
 	if len(c.la) > 0 {
-		msg = fmt.Sprintf("expecting %s", strings.Join(c.la, ", "))
+		msg = fmt.Sprintf("expecting one of: %s", c.LookAheadStr())
 	}
 	lastErr := ctx.Failure(startMark, errors.New(msg))
-	ctx.Reset(startMark)
 	return nil, lastErr
 }
