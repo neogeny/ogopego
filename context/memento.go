@@ -65,7 +65,7 @@ func (m *Memento) Error() string {
 		lineno := blueStyle.Sprintf("%5d", start+i)
 		b.WriteString(fmt.Sprintf("%s %s %s\n", lineno, bluePipe, disp))
 	}
-	pad := strings.Repeat(" ", col)
+	pad := strings.Repeat(" ", col-1)
 	_, _ = fmt.Fprintf(&b, " %5s%s %s\n", "", bluePipe, errStyle.Sprintf("%s^ %s", pad, m.Msg))
 
 	if len(m.CallStack) > 0 {
