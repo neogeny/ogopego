@@ -22,7 +22,6 @@ import (
 	"github.com/neogeny/ogopego/json"
 	"github.com/neogeny/ogopego/peg"
 	"github.com/neogeny/ogopego/trees"
-	"github.com/neogeny/ogopego/util/pyre"
 )
 
 // Cfg is an alias for config.Cfg. It controls parsing behavior including
@@ -53,17 +52,11 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 		return nil, fmt.Errorf("boot grammar semantics not set")
 	}
 
-	// FIXME why set the default whitespace pattern here?
-	//  present both in the .ebnf and the JSON
-	pat, err := pyre.Compile(`(?m)[ \t]+`)
-	if err != nil {
-		return nil, err
-	}
 	cursor := input.NewStrCursor(grammar)
-	cursor.SetPatterns(&input.TokenizingPatterns{Wsp: pat})
 
 	directivesCfg := boot.CfgFromDirectives()
 	if directivesCfg.Semantics == nil {
+		// FIXME: this looks like debugging boot Grammar semantics
 		return nil, fmt.Errorf("semantics not returned from grammar")
 	}
 
