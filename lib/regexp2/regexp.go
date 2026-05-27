@@ -180,7 +180,7 @@ func (re *Regexp) ReplaceFunc(input string, evaluator MatchEvaluator, startAt, c
 // FindStringMatch searches the input string for a Regexp match
 func (re *Regexp) FindStringMatch(s string) (*Match, error) {
 	// convert string to runes
-	return re.run(false, -1, getRunes(s))
+	return re.run(false, -1, re.cachedRunes(s))
 }
 
 // FindRunesMatch searches the input rune slice for a Regexp match
@@ -234,7 +234,7 @@ func (re *Regexp) FindNextMatch(m *Match) (*Match, error) {
 // MatchString return true if the string matches the regex
 // error will be set if a timeout occurs
 func (re *Regexp) MatchString(s string) (bool, error) {
-	m, err := re.run(true, -1, getRunes(s))
+	m, err := re.run(true, -1, re.cachedRunes(s))
 	if err != nil {
 		return false, err
 	}
@@ -244,10 +244,10 @@ func (re *Regexp) MatchString(s string) (bool, error) {
 func (re *Regexp) getRunesAndStart(s string, startAt int) ([]rune, int) {
 	if startAt < 0 {
 		if re.RightToLeft() {
-			r := getRunes(s)
+			r := re.cachedRunes(s)
 			return r, len(r)
 		}
-		return getRunes(s), 0
+		return re.cachedRunes(s), 0
 	}
 	if cap(re.runeCache) < len(s) {
 		re.runeCache = make([]rune, len(s))
@@ -267,8 +267,16 @@ func (re *Regexp) getRunesAndStart(s string, startAt int) ([]rune, int) {
 	return re.runeCache[:i], runeIdx
 }
 
-func getRunes(s string) []rune {
-	return []rune(s)
+func (re *Regexp) cachedRunes(s string) []rune {
+	if cap(re.runeCache) < len(s) {
+		re.runeCache = make([]rune, len(s))
+	}
+	i := 0
+	for _, r := range s {
+		re.runeCache[i] = r
+		i++
+	}
+	return re.runeCache[:i]
 }
 
 // MatchRunes return true if the runes matches the regex
