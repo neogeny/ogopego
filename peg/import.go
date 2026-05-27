@@ -6,6 +6,7 @@ package peg
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	json2 "github.com/neogeny/ogopego/json"
@@ -273,23 +274,39 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 		}
 	}
 
-	noMemo := h.optBool("no_memo", false)
-	noStak := h.optBool("no_stak", false)
-	isName := h.optBool("is_name", false)
+	var decorators []string
+	if pRaw, ok := h.value["decorators"]; ok {
+		if pArr, ok := pRaw.([]any); ok {
+			for _, v := range pArr {
+				if s, ok := v.(string); ok {
+					decorators = append(decorators, s)
+				}
+			}
+		}
+	}
+
+	noMemo := h.optBool("no_memo", false) ||
+		slices.Contains(decorators, "nomemo")
+	noStak := h.optBool("no_stak", false) ||
+		slices.Contains(decorators, "nostak")
+	isName := h.optBool("is_name", false) ||
+		slices.Contains(decorators, "name") ||
+		slices.Contains(decorators, "isname")
 	isTokn := h.optBool("is_tokn", false)
 	isMemo := h.optBool("is_memo", true)
 	isLrec := h.optBool("is_lrec", false)
 
 	r := &Rule{
-		Exp:    exp,
-		Name:   name,
-		Params: params,
-		IsName: isName,
-		IsTokn: isTokn,
-		NoMemo: noMemo,
-		NoStak: noStak,
-		IsMemo: isMemo,
-		IsLrec: isLrec,
+		Exp:        exp,
+		Name:       name,
+		Params:     params,
+		Decorators: decorators,
+		IsName:     isName,
+		IsTokn:     isTokn,
+		NoMemo:     noMemo,
+		NoStak:     noStak,
+		IsMemo:     isMemo,
+		IsLrec:     isLrec,
 	}
 	return r, nil
 }
