@@ -35,7 +35,7 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	for _, opt := range c.Options {
 		mark := ctx.Mark()
 		ctx.CutStackPush()
-		result, err := opt.Parse(ctx)
+		result, err := opt.Exp.Parse(ctx)
 		ctx.CutStackPop()
 
 		if err == nil {
@@ -43,6 +43,7 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 		}
 
 		ctx.Reset(mark)
+		// FIXME
 		//if cutSeen {
 		//	return nil, err
 		//}
