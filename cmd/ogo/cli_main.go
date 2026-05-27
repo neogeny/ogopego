@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/config"
+	"github.com/neogeny/ogopego/context"
 	"github.com/neogeny/ogopego/peg"
 	"github.com/neogeny/ogopego/tool"
 	"github.com/neogeny/ogopego/trees"
@@ -124,7 +126,10 @@ func cliMain() {
 					defer mu.Unlock()
 
 					if err != nil {
-						_, _ = fmt.Fprintf(os.Stderr, "\nerror parsing %s: %v\n", p, err)
+						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+							err = &report.Memento
+						}
+						_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 						errcount++
 						fProgress.Fail()
 					} else {
