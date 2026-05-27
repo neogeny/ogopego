@@ -9,5 +9,5 @@ type Node struct {
 	Tree     Tree
 }
 
-func (*Node) tree()                         {}
+func (Node) tree()                          {}
 func (r *Node) fold(gather *treeMerge) Tree { return r }

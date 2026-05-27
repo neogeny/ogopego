@@ -93,7 +93,7 @@ type treeMerge struct {
 
 func Fold(tree Tree) Tree {
 	if tree == nil {
-		return &Nil{}
+		return NIL
 	}
 	g := &treeMerge{Map: make(map[string]Tree)}
 	result := tree.fold(g)
@@ -113,8 +113,8 @@ func finish(g *treeMerge, base Tree) Tree {
 }
 
 func closed(t Tree) Tree {
-	if _, ok := t.(*Seq); ok {
-		return &List{Items: t.(*Seq).Items}
+	if s, ok := t.(*Seq); ok {
+		return &List{Items: s.Items}
 	}
 	return t
 }

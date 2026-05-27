@@ -15,6 +15,6 @@ type Cut struct {
 // Parse implements the Model interface for Cut.
 func (c *Cut) Parse(ctx Ctx) (Tree, error) {
 	ctx.Cut()
-	t := &trees.Nil{}
+	t := trees.NIL
 	return t, nil
 }

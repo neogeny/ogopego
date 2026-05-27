@@ -39,3 +39,6 @@ corpus/
 tmp/
 grammar/
 .aider*
+
+_out/
+*.pprof

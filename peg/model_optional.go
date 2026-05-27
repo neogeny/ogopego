@@ -27,7 +27,7 @@ func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 		if cutSeen {
 			return nil, err
 		}
-		return &trees.Nil{}, nil
+		return trees.NIL, nil
 	}
 	return result, nil
 }

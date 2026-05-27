@@ -10,7 +10,7 @@ type Named struct {
 	Value Tree
 }
 
-func (*Named) tree() {}
+func (Named) tree() {}
 func (n *Named) fold(gather *treeMerge) Tree {
 	val := n.Value.fold(gather)
 	gather.insert(n.Name, val)
@@ -24,7 +24,7 @@ type NamedAsList struct {
 	Value Tree
 }
 
-func (*NamedAsList) tree() {}
+func (NamedAsList) tree() {}
 func (n *NamedAsList) fold(gather *treeMerge) Tree {
 	val := n.Value.fold(gather)
 	gather.insertAsList(n.Name, val)
@@ -38,7 +38,7 @@ type Override struct {
 	Value Tree
 }
 
-func (*Override) tree() {}
+func (Override) tree() {}
 func (o *Override) fold(gather *treeMerge) Tree {
 	val := o.Value.fold(gather)
 	gather.Root = appendTree(gather.Root, val)
@@ -51,7 +51,7 @@ type OverrideAsList struct {
 	Value Tree
 }
 
-func (*OverrideAsList) tree() {}
+func (OverrideAsList) tree() {}
 func (o *OverrideAsList) fold(gather *treeMerge) Tree {
 	val := o.Value.fold(gather)
 	gather.Root = appendAsList(gather.Root, val)

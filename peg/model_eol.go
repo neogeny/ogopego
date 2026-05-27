@@ -22,5 +22,5 @@ func (e *EOL) Parse(ctx Ctx) (Tree, error) {
 			fmt.Errorf("expected EOL"),
 		)
 	}
-	return &trees.Nil{}, nil
+	return trees.NIL, nil
 }

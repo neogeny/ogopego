@@ -9,7 +9,7 @@ type Seq struct {
 	Items []Tree
 }
 
-func (*Seq) tree() {}
+func (Seq) tree() {}
 func (s *Seq) fold(gather *treeMerge) Tree {
 	var out Tree = &Nil{}
 	for _, item := range s.Items {
@@ -24,7 +24,7 @@ type List struct {
 	Items []Tree
 }
 
-func (*List) tree() {}
+func (List) tree() {}
 func (l *List) fold(gather *treeMerge) Tree {
 	items := make([]Tree, len(l.Items))
 	for i, item := range l.Items {
