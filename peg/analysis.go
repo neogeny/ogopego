@@ -52,9 +52,17 @@ func computeLA(exp Model) []string {
 	case *Join, *PositiveJoin, *Gather, *PositiveGather:
 		la = computeLA(unboxExp(e))
 
-	case *Call, *RuleInclude, *NULL, *Void, *Cut, *EmptyClosure,
+	case *Call:
+		if e.rule != nil {
+			la = []string{fmt.Sprintf("→%s", e.Name)}
+		}
+
+	case *RuleInclude:
+		la = computeLA(e.exp)
+
+	case *NULL, *Void, *Cut, *EmptyClosure,
 		*Fail, *Dot, *EOL:
-		// no contribution
+	// no contribution
 
 	default:
 		panic(fmt.Sprintf("computeLA: unhandled model type %T", exp))
