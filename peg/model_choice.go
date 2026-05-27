@@ -5,6 +5,8 @@ package peg
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 )
 
 // Option represents a single alternative within a Choice expression.
@@ -31,9 +33,9 @@ func (o *Option) Parse(ctx Ctx) (Tree, error) {
 // Parse implements the Model interface for Choice.
 func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	startMark := ctx.Mark()
-	var lastErr error
 	for _, opt := range c.Options {
-		mark := ctx.Mark()
+		ctx.Reset(startMark)
+
 		ctx.CutStackPush()
 		result, err := opt.Exp.Parse(ctx)
 		ctx.CutStackPop()
@@ -42,16 +44,16 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 			return result, nil
 		}
 
-		ctx.Reset(mark)
 		// FIXME
-		//if cutSeen {
+		//if _cutSeen {
 		//	return nil, err
 		//}
-		lastErr = err
 	}
-	if lastErr == nil {
-		lastErr = ctx.Failure(startMark, errors.New("no option matched"))
+	msg := "no option matched"
+	if len(c.la) > 0 {
+		msg = fmt.Sprintf("expecteing %s", strings.Join(c.la, ", "))
 	}
+	lastErr := ctx.Failure(startMark, errors.New(msg))
 	ctx.Reset(startMark)
 	return nil, lastErr
 }

@@ -48,6 +48,7 @@ type Model interface {
 type ModelBase struct {
 	Model
 	Node
+	la []string
 }
 
 // followRef returns the underlying ModelBase.

@@ -92,8 +92,15 @@ func (g *Grammar) Initialize() error {
 	}
 	g.markLeftRecursion()
 	g.Optimize()
+	g.computeAnalysis()
 	g.Analyzed = true
 	return nil
+}
+
+func (g *Grammar) computeAnalysis() {
+	for _, rule := range g.Rules {
+		computeLA(rule.Exp)
+	}
 }
 
 // GetRule retrieves a rule by its name.
