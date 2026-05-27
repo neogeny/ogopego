@@ -72,7 +72,6 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 	} else {
 		ctx.tracer = NullTracer{}
 	}
-	// FIXME  should have been set by Override()
 	if cfg.Heartbeat != nil {
 		ctx.heartbeat = cfg.Heartbeat
 	}
@@ -123,7 +122,7 @@ func (ctx *CoreCtx) HeartbeatTick() {
 		return
 	}
 	mark := ctx.Mark()
-	total := len(ctx.cursor.AsStr())
+	total := ctx.cursor.Len()
 	if total == 0 {
 		return
 	}

@@ -21,9 +21,6 @@ func TestMementoNew(t *testing.T) {
 	if m.InputSource() != "some input" {
 		t.Errorf("InputSource = %q, want %q", m.InputSource(), "some input")
 	}
-	if m.Text() != "hello world\nsecond line" {
-		t.Errorf("Text = %q", m.Text())
-	}
 	if len(m.CallStack) != 2 {
 		t.Errorf("expected 2 callstack entries, got %d", len(m.CallStack))
 	}

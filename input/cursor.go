@@ -26,12 +26,18 @@ type Cursor interface {
 	Configurable
 	// InputSource returns the name of the input source.
 	InputSource() string
-	// LineCount returns the input line count or an estimate
-	LineCount() int
 	// Mark returns the current position of the cursor.
 	Mark() int
 	// Reset sets the cursor position to the given mark.
 	Reset(mark int)
+	// Len returns the total input size in marks.
+	Len() int
+	// LineCount returns the total number of lines in the input.
+	LineCount() int
+	// LineAt returns the content of line n (0-indexed), or "" if out of range.
+	LineAt(n int) string
+	// LinesAt returns lines [start, end) (0-indexed, half-open), or nil if empty.
+	LinesAt(start, end int) []string
 	// AsStr returns the entire input as a string.
 	AsStr() string
 	// AsRef returns a reference to the input string.

@@ -96,13 +96,49 @@ func (s *StrCursor) InputSource() string {
 	return s.heavy.Source
 }
 
-// LineCount the line count or an estimate
+// Len returns the total input size in marks.
+func (s *StrCursor) Len() int {
+	return len(s.text)
+}
+
+// LineCount returns the total number of lines in the input.
 func (s *StrCursor) LineCount() int {
 	count := 0
 	for range strings.Lines(s.text) {
 		count++
 	}
 	return count
+}
+
+// LineAt returns the content of line n (0-indexed), or "" if out of range.
+func (s *StrCursor) LineAt(n int) string {
+	i := 0
+	for line := range strings.Lines(s.text) {
+		if i == n {
+			return line
+		}
+		i++
+	}
+	return ""
+}
+
+// LinesAt returns lines [start, end) (0-indexed, half-open), or nil if empty.
+func (s *StrCursor) LinesAt(start, end int) []string {
+	if end <= start || start < 0 {
+		return nil
+	}
+	out := make([]string, 0, end-start)
+	i := 0
+	for line := range strings.Lines(s.text) {
+		if i >= end {
+			break
+		}
+		if i >= start {
+			out = append(out, line)
+		}
+		i++
+	}
+	return out
 }
 
 // Mark returns the current byte offset in the input.

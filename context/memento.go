@@ -44,11 +44,6 @@ func (m *Memento) InputSource() string {
 	return m.Cursor.InputSource()
 }
 
-// Text returns the full text of the input.
-func (m *Memento) Text() string {
-	return m.Cursor.AsStr()
-}
-
 // Error returns a formatted string representation of the Memento, suitable for error messages.
 func (m *Memento) Error() string {
 	line, col := m.Cursor.PosAt(m.Mark)
@@ -79,26 +74,23 @@ func (m *Memento) Error() string {
 	)
 
 	b.WriteString(fmt.Sprintf("   %s\n", bluePipe))
-	i := 0
-	for linestr := range strings.Lines(m.Cursor.AsStr()) {
-		if i > line {
-			break
-		}
+	start := line - 4
+	if start < 0 {
+		start = 0
+	}
+	for i, linestr := range m.Cursor.LinesAt(start, line+1) {
 		linestr = strings.TrimRight(linestr, "\n\r\t\f")
-		if i >= line-4 {
-			disp := util.ExpandTabs(linestr)
-			b.WriteString(
-				fmt.Sprintf(
-					"%s%2d%s %s %s\n",
-					ansiBlue+ansiBold,
-					i,
-					ansiReset,
-					bluePipe,
-					disp,
-				),
-			)
-		}
-		i += 1
+		disp := util.ExpandTabs(linestr)
+		b.WriteString(
+			fmt.Sprintf(
+				"%s%2d%s %s %s\n",
+				ansiBlue+ansiBold,
+				start+i,
+				ansiReset,
+				bluePipe,
+				disp,
+			),
+		)
 	}
 	pad := strings.Repeat(" ", col)
 	_, _ = fmt.Fprintf(&b, "   %s %s%s^%s %s%s%s\n",
