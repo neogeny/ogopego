@@ -42,10 +42,10 @@ lint:
     golangci-lint run ./...
 
 fmt:
-    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
 
 gofmt:
-    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
 
 gofmt-check: gofmt
 

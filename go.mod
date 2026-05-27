@@ -20,3 +20,5 @@ require (
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 )
+
+replace github.com/dlclark/regexp2 v1.12.0 => ./lib/regexp2
