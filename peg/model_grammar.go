@@ -120,6 +120,7 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 	acfg := g.CfgFromDirectives().New()
 	acfg = acfg.Override(cfg)
+	acfg.Keywords = g.Keywords
 	ctx.Configure(acfg)
 
 	start := acfg.Start

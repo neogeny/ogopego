@@ -6,7 +6,6 @@ package peg
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -33,7 +32,14 @@ func (o *Option) Parse(ctx Ctx) (Tree, error) {
 
 func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	startMark := ctx.Mark()
-	for i, opt := range c.Options {
+	failure := func() error {
+		msg := "no option matched"
+		if len(c.la) > 0 {
+			msg = fmt.Sprintf("expecteing %s", strings.Join(c.la, ", "))
+		}
+		return ctx.Failure(startMark, errors.New(msg))
+	}
+	for _, opt := range c.Options {
 		ctx.Reset(startMark)
 
 		ctx.CutStackPush()
@@ -45,15 +51,10 @@ func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 		}
 
 		if cutSeen {
-			fmt.Fprintf(os.Stderr, "CUT: la=%q pos=%d opt=%d err=%v\n", c.la, startMark, i, err)
-			return nil, err
+			ctx.Reset(startMark)
+			return nil, failure()
 		}
 	}
-	msg := "no option matched"
-	if len(c.la) > 0 {
-		msg = fmt.Sprintf("expecteing %s", strings.Join(c.la, ", "))
-	}
-	lastErr := ctx.Failure(startMark, errors.New(msg))
 	ctx.Reset(startMark)
-	return nil, lastErr
+	return nil, failure()
 }
