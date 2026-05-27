@@ -274,6 +274,19 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 		}
 	}
 
+	var kwparams map[string]string
+	if pRaw, ok := h.value["kwparams"]; ok {
+		if pMap, ok := pRaw.(map[any]any); ok {
+			for k, v := range pMap {
+				if ks, ok := k.(string); ok {
+					if vs, ok := v.(string); ok {
+						kwparams[ks] = vs
+					}
+				}
+			}
+		}
+	}
+
 	var decorators []string
 	if pRaw, ok := h.value["decorators"]; ok {
 		if pArr, ok := pRaw.([]any); ok {
@@ -300,6 +313,7 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 		Exp:        exp,
 		Name:       name,
 		Params:     params,
+		KWParams:   kwparams,
 		Decorators: decorators,
 		IsName:     isName,
 		IsTokn:     isTokn,

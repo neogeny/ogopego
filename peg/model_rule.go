@@ -18,7 +18,7 @@ type Rule struct {
 	// Params are the parameters for the rule.
 	Params []string
 	// KWParams are keyword parameters for the rule.
-	KWParams map[string]any
+	KWParams map[string]string
 	// Decorators are decorators applied to the rule.
 	Decorators []string
 	// Base is the base rule name.
@@ -91,7 +91,7 @@ func (r *Rule) normalize() {
 		r.Params = []string{}
 	}
 	if r.KWParams == nil {
-		r.KWParams = map[string]any{}
+		r.KWParams = map[string]string{}
 	}
 	if r.Decorators == nil {
 		r.Decorators = []string{}

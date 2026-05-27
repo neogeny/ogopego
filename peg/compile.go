@@ -5,7 +5,9 @@ package peg
 
 import (
 	"fmt"
+	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/neogeny/ogopego/trees"
 )
@@ -120,6 +122,21 @@ func strListValue(tree trees.Tree) []string {
 		s := textValue(item)
 		if s != "" {
 			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// strPairsListValue extracts a slice of strings from a list of Text tree nodes.
+func strPairsListValue(tree trees.Tree) map[string]string {
+	out := map[string]string{}
+	items := listValue(tree)
+	if items != nil {
+		for _, item := range items {
+			pair := strListValue(item)
+			if len(pair) == 2 {
+				out[pair[0]] = pair[1]
+			}
 		}
 	}
 	return out
@@ -244,12 +261,31 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 		return nil, err
 	}
 
+	decorators := strListValue(mn.Entries["decorators"])
+
 	params := strListValue(mn.Entries["params"])
+	kwparams := strPairsListValue(mn.Entries["kwparams"])
+
+	isName := slices.Contains(decorators, "name") ||
+		slices.Contains(decorators, "isname")
+	noMemo := slices.Contains(decorators, "nomemo")
+	noStak := slices.Contains(decorators, "nostak")
+
+	trimmed := strings.TrimLeft(name, "_")
+	isTokn := len(trimmed) > 0 && unicode.IsUpper(rune(trimmed[0])) ||
+		slices.Contains(decorators, "token") ||
+		slices.Contains(decorators, "tokn")
 
 	r := &Rule{
-		Exp:    exp,
-		Name:   name,
-		Params: params,
+		Exp:        exp,
+		Name:       name,
+		Params:     params,
+		KWParams:   kwparams,
+		Decorators: decorators,
+		IsName:     isName,
+		NoMemo:     noMemo,
+		NoStak:     noStak,
+		IsTokn:     isTokn,
 	}
 	return r, nil
 }
@@ -301,7 +337,11 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, &Option{Exp: e})
+			if opt, ok := e.(*Option); ok {
+				opts = append(opts, opt)
+			} else {
+				opts = append(opts, &Option{Exp: e})
+			}
 		}
 		exp = &Choice{Options: opts}
 
@@ -556,7 +596,11 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 			}
 			exps = append(exps, e)
 		}
-		exp = &Sequence{Sequence: exps}
+		if len(exps) == 1 {
+			exp = exps[0]
+		} else {
+			exp = &Sequence{Sequence: exps}
+		}
 
 	case "SkipGroup":
 		e, err := cc.compileExp(inner)
