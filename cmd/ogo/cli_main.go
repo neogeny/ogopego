@@ -97,8 +97,8 @@ func cliMain() {
 			var wg sync.WaitGroup
 
 			for _, path := range CLI.Run.Inputs {
-				name := filepath.Base(path)
-				fp := prog.AddFile(name)
+				fileName := filepath.Base(path)
+				fp := prog.AddFile(fileName)
 
 				data, err := os.ReadFile(path)
 				if err != nil {
@@ -116,6 +116,7 @@ func cliMain() {
 
 					fileCfg := *cliCfg
 					fileCfg.Heartbeat = fProgress.Heartbeat()
+					fileCfg.Source = fileName
 					tree, err := api.ParseInput(gram, string(d), &fileCfg)
 
 					// Thread-safe accumulation block
@@ -139,7 +140,7 @@ func cliMain() {
 						outputs = append(outputs, outputItem{Name: fName, Payload: payload})
 					}
 					prog.IncFiles()
-				}(path, data, fp, name)
+				}(path, data, fp, fileName)
 			}
 
 			// Block the main thread until every individual parsing worker finishes
