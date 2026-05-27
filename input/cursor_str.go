@@ -65,17 +65,20 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 
 // Configure updates the cursor configuration.
 func (s *StrCursor) Configure(cfg Cfg) {
-	s.heavy.mu.Lock()
-	s.heavy.IgnoreCase = cfg.IgnoreCase
-	s.heavy.NameChars = cfg.NameChars
-	s.heavy.NameGuard = cfg.NameGuard || cfg.NameChars != ""
 	if cfg.Source != "" {
 		s.heavy.Source = cfg.Source
 	}
 
+	s.heavy.mu.Lock()
+	s.heavy.IgnoreCase = cfg.IgnoreCase
+	s.heavy.NameChars = cfg.NameChars
+	s.heavy.NameGuard = cfg.NameGuard ||
+		cfg.NameChars != ""
+
 	if cfg.Whitespace != nil {
 		if *cfg.Whitespace != "" {
 			if pat, err := pyre.Compile(*cfg.Whitespace); err == nil {
+				s.heavy.NameGuard = true
 				s.heavy.Patterns.Wsp = pat
 			}
 		} else {
@@ -84,11 +87,13 @@ func (s *StrCursor) Configure(cfg Cfg) {
 	}
 	if cfg.Comments != "" {
 		if pat, err := pyre.Compile(cfg.Comments); err == nil {
+			s.heavy.NameGuard = true
 			s.heavy.Patterns.Cmt = pat
 		}
 	}
 	if cfg.EolComments != "" {
 		if pat, err := pyre.Compile(cfg.EolComments); err == nil {
+			s.heavy.NameGuard = true
 			s.heavy.Patterns.Eol = pat
 		}
 	}
