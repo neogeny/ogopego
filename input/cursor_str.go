@@ -5,6 +5,7 @@ package input
 
 import (
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 
@@ -14,8 +15,10 @@ import (
 
 // CursorHeavy holds the configuration and shared resources for a cursor.
 type CursorHeavy struct {
+	mu           sync.Mutex
 	IgnoreCase   bool
 	NameGuard    bool
+	NameChars    string
 	Source       string
 	Patterns     *TokenizingPatterns
 	PatternCache map[string]pyre.Pattern
@@ -23,10 +26,9 @@ type CursorHeavy struct {
 
 // StrCursor is a string-based implementation of the Cursor interface.
 type StrCursor struct {
-	text      string
-	offset    int
-	heavy     *CursorHeavy
-	nameChars string
+	text   string
+	offset int
+	heavy  *CursorHeavy
 }
 
 // NewStrCursor creates a new StrCursor with default configuration.
@@ -63,8 +65,9 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 
 // Configure updates the cursor configuration.
 func (s *StrCursor) Configure(cfg Cfg) {
+	s.heavy.mu.Lock()
 	s.heavy.IgnoreCase = cfg.IgnoreCase
-	s.nameChars = cfg.NameChars
+	s.heavy.NameChars = cfg.NameChars
 	s.heavy.NameGuard = cfg.NameGuard || cfg.NameChars != ""
 	if cfg.Source != "" {
 		s.heavy.Source = cfg.Source
@@ -89,6 +92,7 @@ func (s *StrCursor) Configure(cfg Cfg) {
 			s.heavy.Patterns.Eol = pat
 		}
 	}
+	s.heavy.mu.Unlock()
 }
 
 // InputSource returns the name or description of the input source.
@@ -220,7 +224,7 @@ func (s *StrCursor) PeekToken(token string) bool {
 // IsNameChar returns true if the rune can be part of a name.
 func (s *StrCursor) IsNameChar(c rune) bool {
 	return c == '_' || unicode.IsLetter(c) || unicode.IsDigit(c) ||
-		strings.ContainsRune(s.nameChars, c)
+		strings.ContainsRune(s.heavy.NameChars, c)
 }
 
 // IsName returns true if the given string is a valid name.
@@ -231,7 +235,7 @@ func (s *StrCursor) IsName(token string) bool {
 	runes := []rune(token)
 	first := runes[0]
 	if first != '_' && !unicode.IsLetter(first) &&
-		!strings.ContainsRune(s.nameChars, first) {
+		!strings.ContainsRune(s.heavy.NameChars, first) {
 		return false
 	}
 	for _, r := range runes[1:] {
@@ -283,6 +287,8 @@ func (s *StrCursor) MatchPattern(pattern string) (string, bool) {
 
 // GetPattern compiles and caches a regular expression pattern.
 func (s *StrCursor) GetPattern(pattern string) pyre.Pattern {
+	s.heavy.mu.Lock()
+	defer s.heavy.mu.Unlock()
 	if s.heavy.PatternCache == nil {
 		s.heavy.PatternCache = make(map[string]pyre.Pattern)
 	}

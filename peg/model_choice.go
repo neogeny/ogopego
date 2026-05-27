@@ -30,7 +30,6 @@ func (o *Option) Parse(ctx Ctx) (Tree, error) {
 	return result, nil
 }
 
-// Parse implements the Model interface for Choice.
 func (c *Choice) Parse(ctx Ctx) (Tree, error) {
 	startMark := ctx.Mark()
 	for _, opt := range c.Options {

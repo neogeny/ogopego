@@ -10,6 +10,7 @@ import (
 //
 // The interface is implemented by CoreCtx returned from NewCtx.
 type Ctx interface {
+	Clone() Ctx
 	Configurable
 	// Cursor returns the input cursor.
 	Cursor() Cursor
