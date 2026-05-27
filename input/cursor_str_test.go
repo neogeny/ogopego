@@ -266,8 +266,8 @@ func TestIgnoreCase(t *testing.T) {
 
 func TestNameGuard(t *testing.T) {
 	s := NewStrCursor("hello")
-	if !s.NameGuard() {
-		t.Error("expected NameGuard true by default")
+	if s.NameGuard() {
+		t.Error("expected NameGuard false by default")
 	}
 }
 

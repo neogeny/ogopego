@@ -37,9 +37,9 @@ func NewStrCursor(text string) *StrCursor {
 		text:   text,
 		offset: 0,
 		heavy: &CursorHeavy{
-			NameGuard: true,
+			NameGuard: false,
 			Source:    "some input",
-			Patterns:  &TokenizingPatterns{},
+			Patterns:  DefaultPatterns(),
 		},
 	}
 }
@@ -56,9 +56,9 @@ func NewStrCursorFromSource(source, text string, start int) *StrCursor {
 		text:   text,
 		offset: start,
 		heavy: &CursorHeavy{
-			NameGuard: true,
+			NameGuard: false,
 			Source:    source,
-			Patterns:  &TokenizingPatterns{},
+			Patterns:  DefaultPatterns(),
 		},
 	}
 }
@@ -72,30 +72,14 @@ func (s *StrCursor) Configure(cfg Cfg) {
 	s.heavy.mu.Lock()
 	s.heavy.IgnoreCase = cfg.IgnoreCase
 	s.heavy.NameChars = cfg.NameChars
-	s.heavy.NameGuard = cfg.NameGuard ||
-		cfg.NameChars != ""
+	s.heavy.Patterns.Configure(cfg)
 
-	if cfg.Whitespace != nil {
-		if *cfg.Whitespace != "" {
-			if pat, err := pyre.Compile(*cfg.Whitespace); err == nil {
-				s.heavy.NameGuard = true
-				s.heavy.Patterns.Wsp = pat
-			}
-		} else {
-			s.heavy.Patterns.Wsp = nil
-		}
-	}
-	if cfg.Comments != "" {
-		if pat, err := pyre.Compile(cfg.Comments); err == nil {
-			s.heavy.NameGuard = true
-			s.heavy.Patterns.Cmt = pat
-		}
-	}
-	if cfg.EolComments != "" {
-		if pat, err := pyre.Compile(cfg.EolComments); err == nil {
-			s.heavy.NameGuard = true
-			s.heavy.Patterns.Eol = pat
-		}
+	if cfg.NameGuard != nil {
+		s.heavy.NameGuard = *cfg.NameGuard ||
+			s.heavy.NameChars != ""
+	} else {
+		s.heavy.NameGuard = cfg.NameChars != "" ||
+			s.heavy.Patterns.NonDefault && !s.heavy.Patterns.Wsp.IsEmpty()
 	}
 	s.heavy.mu.Unlock()
 }
@@ -394,12 +378,7 @@ func (s *StrCursor) LocationAt(mark int) Location {
 
 // SetIgnoreCase updates the ignore-case setting.
 func (s *StrCursor) SetIgnoreCase(ignore bool) {
-	s.heavy = &CursorHeavy{
-		IgnoreCase: ignore,
-		NameGuard:  s.heavy.NameGuard,
-		Source:     s.heavy.Source,
-		Patterns:   s.heavy.Patterns,
-	}
+	s.heavy.IgnoreCase = ignore
 }
 
 // SetPatterns updates the tokenizing patterns.

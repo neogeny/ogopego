@@ -45,8 +45,10 @@ type CoreCtx struct {
 // configuration. Use the returned value where a context implementing Ctx is
 // required.
 func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
-	stackCapacity := 64
 	cfgS := cfg.New()
+	cursor.Configure(cfgS)
+
+	stackCapacity := 64
 	memoCapacity := max(
 		stackCapacity,
 		int(math.Round(cfgS.PerLineMemos*float64(cursor.LineCount()))),
@@ -63,8 +65,6 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 		callStack: make(CallStack, 0, stackCapacity),
 		cutStack:  make([]bool, 1, stackCapacity),
 	}
-	ctx.cursor.Configure(heavy.cfg)
-	heavy.cfg = heavy.cfg.Override(cfg)
 	return &ctx
 }
 

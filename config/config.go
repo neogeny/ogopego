@@ -44,7 +44,7 @@ type Cfg struct {
 
 	IgnoreCase bool   // case-insensitive matching
 	NameChars  string // additional name characters (implies NameGuard)
-	NameGuard  bool   // enforce word boundaries on names
+	NameGuard  *bool  // enforce word boundaries on names
 
 	Whitespace  *string // whitespace pattern (nil = default, &"" = none)
 	Comments    string  // comment pattern
@@ -69,7 +69,7 @@ func DefaultCfg() *Cfg {
 		Colorize:          false,
 		NoLeftRecursion:   false,
 		IgnoreCase:        false,
-		NameGuard:         false,
+		NameGuard:         nil,
 		Whitespace:        new(`(?m)\s+`),
 		Keywords:          nil,
 		ParseInfo:         false,
@@ -84,6 +84,8 @@ func (cfg *Cfg) New() Cfg {
 
 // Override merges other into cfg; non-zero fields from other override the
 // corresponding values in cfg. If other is nil, the receiver is returned.
+//
+//goland:noinspection DuplicatedCode
 func (cfg *Cfg) Override(other *Cfg) Cfg {
 	if other == nil {
 		return *cfg
@@ -101,7 +103,6 @@ func (cfg *Cfg) Override(other *Cfg) Cfg {
 		NoLeftRecursion:   util.Either(other.NoLeftRecursion, cfg.NoLeftRecursion),
 		IgnoreCase:        util.Either(other.IgnoreCase, cfg.IgnoreCase),
 		NameChars:         util.Either(other.NameChars, cfg.NameChars),
-		NameGuard:         util.Either(other.NameGuard, cfg.NameGuard),
 		Whitespace:        util.Either(other.Whitespace, cfg.Whitespace),
 		Comments:          util.Either(other.Comments, cfg.Comments),
 		EolComments:       util.Either(other.EolComments, cfg.EolComments),
@@ -130,7 +131,10 @@ func (cfg *Cfg) Override(other *Cfg) Cfg {
 	}
 
 	if result.NameChars != "" {
-		result.NameGuard = true
+		result.NameGuard = new(true)
+	}
+	if other.NameGuard != nil {
+		result.NameGuard = other.NameGuard
 	}
 
 	return result

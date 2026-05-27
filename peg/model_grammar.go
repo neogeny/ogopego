@@ -5,6 +5,7 @@ package peg
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/neogeny/ogopego/config"
 	"github.com/neogeny/ogopego/trees"
@@ -55,7 +56,9 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 		case "namechars":
 			c.NameChars = s
 		case "nameguard":
-			c.NameGuard = s == "True" || s == "true" || s == "1"
+			c.NameGuard = new(
+				!slices.Contains([]string{"False", "false", "0", "None", "null"}, s),
+			)
 		case "parseinfo":
 			c.ParseInfo = s == "True" || s == "true" || s == "1"
 		case "trace":

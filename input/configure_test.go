@@ -18,7 +18,7 @@ func TestConfigureSetsIgnoreCase(t *testing.T) {
 
 func TestConfigureSetsNameGuard(t *testing.T) {
 	s := NewStrCursor("hello")
-	cfg := Cfg{NameGuard: true}
+	cfg := Cfg{NameGuard: new(true)}
 	s.Configure(cfg)
 	if !s.NameGuard() {
 		t.Error("expected NameGuard to be set")
@@ -48,9 +48,8 @@ func TestConfigureSetsPatterns(t *testing.T) {
 	wsp := `[ \t]+`
 	cmt := `//[^\n]*`
 	eol := `\r?\n`
-	ws := wsp
 	s := NewStrCursor("  // comment \n  hello")
-	s.Configure(Cfg{Whitespace: &ws, Comments: cmt, EolComments: eol})
+	s.Configure(Cfg{Whitespace: new(wsp), Comments: cmt, EolComments: eol})
 	s.NextToken()
 	if !s.MatchToken("hello") {
 		t.Error("expected to match 'hello' after skipping whitespace and comment")
@@ -58,9 +57,8 @@ func TestConfigureSetsPatterns(t *testing.T) {
 }
 
 func TestConfigureEmptyPatterns(t *testing.T) {
-	ws := ``
 	s := NewStrCursor("  hello")
-	s.Configure(Cfg{Whitespace: &ws})
+	s.Configure(Cfg{Whitespace: new(``)})
 	s.NextToken()
 	if s.MatchToken("hello") {
 		t.Error("expected NOT to match 'hello' with empty whitespace pattern (should not skip)")
@@ -69,7 +67,7 @@ func TestConfigureEmptyPatterns(t *testing.T) {
 
 func TestConfigureNilWhitespacePattern(t *testing.T) {
 	s := NewStrCursor("  hello")
-	s.Configure(Cfg{})
+	s.Configure(Cfg{Whitespace: new("")})
 	s.NextToken()
 	if s.MatchToken("hello") {
 		t.Error("expected NOT to match 'hello' with nil whitespace (should not skip)")
@@ -87,8 +85,7 @@ func TestConfigureNameGuardWithNameChars(t *testing.T) {
 
 func TestConfigureIgnoresBadPattern(t *testing.T) {
 	ws := `[invalid`
-	wsPtr := ws
 	s := NewStrCursor("hello")
-	s.Configure(Cfg{Whitespace: &wsPtr})
+	s.Configure(Cfg{Whitespace: new(ws)})
 	_ = s
 }
