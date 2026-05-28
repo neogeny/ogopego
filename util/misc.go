@@ -1,6 +1,7 @@
 package util
 
 import (
+	"iter"
 	"os"
 
 	"golang.org/x/term"
@@ -36,4 +37,25 @@ func TermSize() (int, int) {
 		rows = 25
 	}
 	return cols, rows
+}
+
+func Chunks[T any](slice []T, chunkSize int) iter.Seq[[]T] {
+	return func(yield func([]T) bool) {
+		if chunkSize <= 0 {
+			return
+		}
+
+		for i := 0; i < len(slice); i += chunkSize {
+			end := i + chunkSize
+			if end > len(slice) {
+				end = len(slice)
+			}
+
+			// Yield the current batch window. If the loop body
+			// breaks early, yield returns false, and we stop.
+			if !yield(slice[i:end]) {
+				return
+			}
+		}
+	}
 }
