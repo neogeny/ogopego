@@ -4,6 +4,7 @@
 package pyre
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/dlclark/regexp2"
@@ -14,8 +15,8 @@ type Regexp2Pattern struct {
 }
 
 type Regexp2Match struct {
-	match *regexp2.Match
 	text  string
+	match *regexp2.Match
 	re    *regexp2.Regexp
 }
 
@@ -173,7 +174,13 @@ func (p *Regexp2Pattern) MatchesEmpty() bool {
 }
 
 func (p *Regexp2Pattern) IsEmpty() bool {
-	return p == nil || strings.TrimSpace(p.re.String()) == ""
+	if p == nil || reflect.ValueOf(p).IsNil() {
+		return true
+	}
+	if p.re == nil {
+		return true
+	}
+	return strings.TrimSpace(p.re.String()) == ""
 }
 
 func (p *Regexp2Pattern) GroupIndex() map[string]int {

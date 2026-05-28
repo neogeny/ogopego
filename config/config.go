@@ -70,7 +70,7 @@ func DefaultCfg() *Cfg {
 		NoLeftRecursion:   false,
 		IgnoreCase:        false,
 		NameGuard:         nil,
-		Whitespace:        new(`(?m)\s+`),
+		Whitespace:        nil,
 		Keywords:          nil,
 		ParseInfo:         false,
 	}

@@ -40,15 +40,16 @@ func NewPatterns(wsp string, cmt string, eol string) (*TokenizingPatterns, error
 
 }
 
-func DefaultPatterns() *TokenizingPatterns {
+func DefaultPatterns() TokenizingPatterns {
 	pat, err := NewPatterns(`(?m)\s+`, `(?m)#.*`, `(?m)#.*$`)
 	if err != nil {
 		panic("failed to compile default patterns: " + err.Error())
 	}
-	return pat
+	return *pat
 }
 
 func (p *TokenizingPatterns) Configure(cfg config.Cfg) {
+	p.NonDefault = false
 	if cfg.Whitespace != nil {
 		p.NonDefault = true
 		if *cfg.Whitespace != "" {

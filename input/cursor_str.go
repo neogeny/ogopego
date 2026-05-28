@@ -20,7 +20,7 @@ type CursorHeavy struct {
 	NameGuard    bool
 	NameChars    string
 	Source       string
-	Patterns     *TokenizingPatterns
+	Patterns     TokenizingPatterns
 	PatternCache map[string]pyre.Pattern
 }
 
@@ -79,7 +79,9 @@ func (s *StrCursor) Configure(cfg Cfg) {
 			s.heavy.NameChars != ""
 	} else {
 		s.heavy.NameGuard = cfg.NameChars != "" ||
-			s.heavy.Patterns.NonDefault && !s.heavy.Patterns.Wsp.IsEmpty()
+			s.heavy.Patterns.NonDefault &&
+				s.heavy.Patterns.Wsp != nil &&
+				!s.heavy.Patterns.Wsp.IsEmpty()
 	}
 	s.heavy.mu.Unlock()
 }
@@ -307,10 +309,6 @@ func (s *StrCursor) MatchEOL() bool {
 
 // NextToken consumes whitespace, comments, and end-of-line markers.
 func (s *StrCursor) NextToken() {
-	if s.heavy.Patterns == nil {
-		return
-	}
-
 	wsp := s.heavy.Patterns.Wsp
 	eol := s.heavy.Patterns.Eol
 	cmt := s.heavy.Patterns.Cmt
@@ -383,11 +381,10 @@ func (s *StrCursor) SetIgnoreCase(ignore bool) {
 
 // SetPatterns updates the tokenizing patterns.
 func (s *StrCursor) SetPatterns(patterns *TokenizingPatterns) {
-	s.heavy = &CursorHeavy{
-		IgnoreCase: s.heavy.IgnoreCase,
-		NameGuard:  s.heavy.NameGuard,
-		Source:     s.heavy.Source,
-		Patterns:   patterns,
+	if patterns == nil {
+		s.heavy.Patterns = DefaultPatterns()
+	} else {
+		s.heavy.Patterns = *patterns
 	}
 }
 
