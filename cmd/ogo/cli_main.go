@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -94,11 +95,12 @@ func cliMain() {
 			start := time.Now()
 			sourceLines := 0
 
-			// Mutex to guard shared accumulators from concurrent write operations
 			var mu sync.Mutex
 			var wg sync.WaitGroup
 
-			for _, path := range CLI.Run.Inputs {
+			maxWorkers := runtime.GOMAXPROCS(0)
+			sem := make(chan int, maxWorkers)
+			for i, path := range CLI.Run.Inputs {
 				fileName := filepath.Base(path)
 				fp := prog.AddFile(fileName)
 
@@ -112,26 +114,29 @@ func cliMain() {
 				fp.SetLength(len(data))
 
 				wg.Add(1)
-				// Launch each file processing operation in its own separate goroutine
+				sem <- i
 				go func(p string, d []byte, fProgress *FileProgress, fName string) {
 					defer wg.Done()
 
 					fileCfg := *cliCfg
 					fileCfg.Heartbeat = fProgress.Heartbeat()
 					fileCfg.Source, _ = util.PathRelativeToCwd(path)
+
 					tree, err := api.ParseInput(gram, string(d), &fileCfg)
+					prog.IncFiles()
 
 					// Thread-safe accumulation block
+					<-sem
 					mu.Lock()
 					defer mu.Unlock()
 
 					if err != nil {
+						errcount++
+						fProgress.Fail()
 						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
 							err = &report.Memento
 						}
 						_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-						errcount++
-						fProgress.Fail()
 					} else {
 						sourceLines += util.CountLines(string(d)).Code
 						fProgress.Success()
@@ -144,7 +149,6 @@ func cliMain() {
 						}
 						outputs = append(outputs, outputItem{Name: fName, Payload: payload})
 					}
-					prog.IncFiles()
 				}(path, data, fp, fileName)
 			}
 
