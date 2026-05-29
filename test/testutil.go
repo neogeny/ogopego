@@ -11,7 +11,7 @@ import (
 	"github.com/neogeny/ogopego/util"
 )
 
-type Cfg = config.Cfg
+type Cfg config.Cfg
 
 func Dedent(s string) string {
 	return util.Dedent(s)

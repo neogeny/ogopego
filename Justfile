@@ -39,7 +39,7 @@ cover:
     go tool cover -html=coverage.out
 
 lint:
-    golangci-lint run ./...
+    golangci-lint run ./... --exclude-dirs ./tmp
 
 fmt:
     find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
@@ -81,5 +81,11 @@ check: fmt lint vet test
 pre-push: clean check build release
 
 tools:
+    go install golang.org/x/tools/cmd/goimports@latest
+    go install github.com/go-python/gopy@latest
     go install gotest.tools/gotestsum@latest
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+
+gopy:
+    gopy pkg -vm=python3 -output ogopego

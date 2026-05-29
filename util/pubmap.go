@@ -11,7 +11,7 @@ import (
 
 const MaxPointerDerefDepth = 4
 
-type OrderedMap = ctn.BoundedMap[string, any]
+type OrderedMap ctn.BoundedMap[string, any]
 
 // PubMapOf returns an OrderedMap containing the public fields of the given reference.
 func PubMapOf(ref any) any {
