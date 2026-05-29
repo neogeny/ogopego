@@ -89,4 +89,4 @@ tools:
 
 
 gopy:
-    uv run --dev gopy pkg -vm=python3 -output ogopego ogopego {{PACKAGES}}
+    uv run --dev gopy pkg -vm=python3 -output python ogopego {{PACKAGES}}
