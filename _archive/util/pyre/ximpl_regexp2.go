@@ -1,3 +1,5 @@
+//go:build pyre_regexp2
+
 // Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
 // SPDX-License-Identifier: Apache-2.0
 

@@ -3,12 +3,16 @@
 
 package pyre
 
+// LookaheadSupport reports whether the compiled regex engine supports
+// lookahead assertions ((?=...), (?!...)). Always false in this configuration.
+const LookaheadSupport = false
+
 func Compile(pattern string) (Pattern, error) {
-	return NewRegexp2Pattern(pattern)
+	return NewGoPattern(pattern)
 }
 
 func MustCompile(pattern string) Pattern {
-	p, err := NewRegexp2Pattern(pattern)
+	p, err := NewGoPattern(pattern)
 	if err != nil {
 		panic(err)
 	}

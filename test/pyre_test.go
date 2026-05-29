@@ -53,6 +53,9 @@ func TestTatsuEOLPatterns(t *testing.T) {
 }
 
 func TestMatchZeroWidthLookahead(t *testing.T) {
+	if !pyre.LookaheadSupport {
+		t.Skip("requires regexp lookaheads")
+	}
 	p, err := pyre.Compile(`(?=\s*(?:\r?\n|\r)\S)`)
 	if err != nil {
 		t.Fatal(err)
@@ -67,6 +70,9 @@ func TestMatchZeroWidthLookahead(t *testing.T) {
 }
 
 func TestMatchEndruleUnindentedBranch(t *testing.T) {
+	if !pyre.LookaheadSupport {
+		t.Skip("requires regexp lookaheads")
+	}
 	p, err := pyre.Compile(`\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`)
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +87,11 @@ func TestMatchEndruleUnindentedBranch(t *testing.T) {
 }
 
 func TestMatchEndruleBlankLine(t *testing.T) {
-	p, err := pyre.Compile(`\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`)
+	pat := `\s*[;]|(?:\s*(?:\r?\n|\r)){2,}[;]?`
+	if pyre.LookaheadSupport {
+		pat = `\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`
+	}
+	p, err := pyre.Compile(pat)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,6 +102,9 @@ func TestMatchEndruleBlankLine(t *testing.T) {
 }
 
 func TestMatchEndruleCRLF(t *testing.T) {
+	if !pyre.LookaheadSupport {
+		t.Skip("requires regexp lookaheads")
+	}
 	p, err := pyre.Compile(`\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;?]`)
 	if err != nil {
 		t.Fatal(err)
@@ -131,6 +144,9 @@ func TestMatchRequiresStartAtZero(t *testing.T) {
 }
 
 func TestEatPatternZeroWidth(t *testing.T) {
+	if !pyre.LookaheadSupport {
+		t.Skip("requires regexp lookaheads")
+	}
 	p, err := pyre.Compile(`(?=\s*(?:\r?\n|\r)\S)`)
 	if err != nil {
 		t.Fatal(err)
