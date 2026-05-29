@@ -20,11 +20,12 @@ func IsTerminal() bool {
 // CLI is the command-line interface structure for the ogo tool.
 //
 //goland:noinspection GoVetStructTag
+//nolint:govet // Kong uses non-standard tag syntax
 var CLI struct {
 	// Run subcommand executes a grammar against one or more input files.
 	Run struct {
-		Grammar string   `arg:"" required name:"grammar" help:"Path to the grammar in EBNF or JSON format"`
-		Inputs  []string `arg:"" required name:"inputs" help:"The files to be parsed"`
+		Grammar string   `arg required name:"grammar" help:"Path to the grammar in EBNF or JSON format"`
+		Inputs  []string `arg required name:"inputs" help:"The files to be parsed"`
 		Json    bool     `help:"Print the output tree in JSON format" short:"j" group:"format"`
 		Model   bool     `help:"Print the Go code for the tree construction" short:"m" group:"format"`
 	} `cmd:"" help:"Execute a grammar against one or more input files"`
@@ -39,7 +40,7 @@ var CLI struct {
 
 	// Grammar subcommand provides transformations and information about a grammar.
 	Grammar struct {
-		Grammar   string `arg:"" required name:"grammar" help:"Path to the grammar source (.ebnf or .json)"`
+		Grammar   string `arg required name:"grammar" help:"Path to the grammar source (.ebnf or .json)"`
 		Json      bool   `help:"Print the grammar in JSON format" short:"j" group:"format"`
 		Model     bool   `help:"Print the Go code grammar model constructors" short:"m" group:"format"`
 		Parser    string `help:"Generate Go parser source code" short:"x" group:"format" placeholder:"PKG"`
@@ -51,7 +52,7 @@ var CLI struct {
 	// Output specifies a file to write output to instead of stdout.
 	Output string `help:"Output to a file or directory instead of stdout" short:"o"`
 	// Color controls colorized output for API results.
-	Color string `help:"Control colorized output for API results" enum:"auto,always,never" default:auto`
+	Color string `help:"Control colorized output for API results" enum:"auto,always,never" default:"auto"`
 	// Trace enables a detailed trace of the parsing process.
 	Trace bool `help:"Display a detailed trace of the parsing process"`
 	// Version prints version information.
