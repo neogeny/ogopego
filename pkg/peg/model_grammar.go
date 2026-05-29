@@ -150,9 +150,9 @@ func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 	return result, nil
 }
 
-// normalize Bring fields to a consistent state, setting defaults
+// Normalize Bring fields to a consistent state, setting defaults
 // for missing values and ensuring internal consistency.
-func (g *Grammar) normalize() {
+func (g *Grammar) Normalize() {
 	for _, r := range g.Rules {
 		r.normalize()
 	}

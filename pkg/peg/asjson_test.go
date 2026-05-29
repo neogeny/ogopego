@@ -6,7 +6,7 @@ package peg
 import (
 	"testing"
 
-	asjson "github.com/neogeny/ogopego/pkg/json"
+	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
 func TestNodeAsJSON(t *testing.T) {

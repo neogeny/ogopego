@@ -16,10 +16,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/context"
 	"github.com/neogeny/ogopego/pkg/input"
-	"github.com/neogeny/ogopego/pkg/json"
 	"github.com/neogeny/ogopego/pkg/peg"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
@@ -76,7 +76,7 @@ func ParseGrammarToJSON(grammar string, cfg *Cfg) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.AsJSON(tree), nil
+	return asjson.AsJSON(tree), nil
 }
 
 // ParseGrammarToJSONStr is like ParseGrammarToJSON but returns a JSON
@@ -86,7 +86,7 @@ func ParseGrammarToJSONStr(grammar string, cfg *Cfg) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONStr(tree), nil
+	return asjson.AsJSONStr(tree), nil
 }
 
 // Compile parses a grammar string and returns a compiled Grammar ready for
@@ -121,7 +121,7 @@ func CompileToJSON(grammar string, cfg *Cfg) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.AsJSON(g), nil
+	return asjson.AsJSON(g), nil
 }
 
 // CompileToJSONString is like CompileToJSON but returns a JSON string.
@@ -130,7 +130,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONStr(g), nil
+	return asjson.AsJSONStr(g), nil
 }
 
 // ParseInput parses the given text using a compiled Grammar and returns the

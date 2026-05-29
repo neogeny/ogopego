@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
 // SPDX-License-Identifier: Apache-2.0
 
-package json
+package asjson
 
 import (
 	"encoding/json"
@@ -10,10 +10,10 @@ import (
 	"strings"
 	"unicode"
 
-	util2 "github.com/neogeny/ogopego/pkg/util"
+	"github.com/neogeny/ogopego/pkg/util"
 )
 
-type OrderedMap = util2.OrderedMap
+type OrderedMap = util.OrderedMap
 
 func AsJSON(v any) any {
 	return toJSONValue(v, make(map[uintptr]bool))
@@ -29,7 +29,7 @@ func AsJSONStr(v any) string {
 }
 
 func toJSONValue(v any, seen map[uintptr]bool) any {
-	id := util2.Id(v)
+	id := util.Id(v)
 	if in, ok := seen[id]; ok && in {
 		return fmt.Sprintf("%T@%p", v, v)
 	}
@@ -38,7 +38,7 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 		seen[id] = false
 	}()
 
-	v = util2.PubMapOf(v)
+	v = util.PubMapOf(v)
 	switch val := v.(type) {
 	case *OrderedMap:
 		out := make(map[string]any, val.Len())

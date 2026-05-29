@@ -5,7 +5,7 @@ PACKAGES := "\
 ./pkg/config \
 ./pkg/context \
 ./pkg/input \
-./pkg/json \
+./pkg/asjson \
 ./pkg/peg \
 ./pkg/trees \
 ./pkg/util/ \

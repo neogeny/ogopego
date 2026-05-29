@@ -9,7 +9,7 @@ import (
 	"slices"
 	"strings"
 
-	json2 "github.com/neogeny/ogopego/pkg/json"
+	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
 // helper is a utility struct for parsing JSON.
@@ -41,12 +41,12 @@ func (h *helper) withValue(v any) *helper {
 }
 
 // error creates a JsonError with the helper's path.
-func (h *helper) error(msg string) *json2.JsonError {
+func (h *helper) error(msg string) *asjson.JsonError {
 	s := strings.Join(h.path, " -> ")
 	if s == "" {
-		return json2.NewJsonError(msg)
+		return asjson.NewJsonError(msg)
 	}
-	return json2.NewJsonError(fmt.Sprintf("%s at %s", msg, s))
+	return asjson.NewJsonError(fmt.Sprintf("%s at %s", msg, s))
 }
 
 // getClass retrieves the "__class__" field from the helper's value.
@@ -157,7 +157,7 @@ func (h *helper) getArray(field string) ([]*helper, error) {
 func LoadGrammarFromJSON(data []byte) (*Grammar, error) {
 	var raw any
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return nil, json2.NewJsonError(fmt.Sprintf("JSON parse error: %v", err))
+		return nil, asjson.NewJsonError(fmt.Sprintf("JSON parse error: %v", err))
 	}
 	return grammarFromJSON(newHelper(raw.(map[string]any)))
 }
@@ -186,7 +186,7 @@ func grammarFromJSON(h *helper) (*Grammar, error) {
 	for i, rh := range ruleHelpers {
 		r, err := ruleFromJSON(rh)
 		if err != nil {
-			return nil, json2.NewJsonError(fmt.Sprintf("rules[%d]: %v", i, err))
+			return nil, asjson.NewJsonError(fmt.Sprintf("rules[%d]: %v", i, err))
 		}
 		rules = append(rules, r)
 	}
@@ -274,7 +274,7 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 		}
 	}
 
-	var kwparams map[string]string
+	var kwparams = make(map[string]string)
 	if pRaw, ok := h.value["kwparams"]; ok {
 		if pMap, ok := pRaw.(map[any]any); ok {
 			for k, v := range pMap {

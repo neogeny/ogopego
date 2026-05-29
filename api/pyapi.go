@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/config"
-	"github.com/neogeny/ogopego/pkg/json"
 	"github.com/neogeny/ogopego/pkg/peg"
 )
 
@@ -14,7 +14,7 @@ type GrammarHandle int64
 
 var (
 	pyMu      sync.RWMutex
-	pyHandles = make(map[GrammarHandle]*peg.Grammar)
+	pyHandles               = make(map[GrammarHandle]*peg.Grammar)
 	pyNextID  GrammarHandle = 1
 )
 
@@ -141,15 +141,6 @@ func PyCompile(grammar string, cfgJSON string) (GrammarHandle, error) {
 	return storeGrammar(g), nil
 }
 
-func PyCompileToJSONString(grammar string, cfgJSON string) (GrammarHandle, string, error) {
-	cfg := decodeConfig(cfgJSON)
-	g, err := Compile(grammar, cfg)
-	if err != nil {
-		return 0, "", err
-	}
-	return storeGrammar(g), json.AsJSONStr(g), nil
-}
-
 func PyParseToJSONString(grammar string, text string, cfgJSON string) (string, error) {
 	cfg := decodeConfig(cfgJSON)
 	g, err := Compile(grammar, cfg)
@@ -172,15 +163,7 @@ func PyGrammarToJSONString(handle GrammarHandle) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return json.AsJSONStr(g), nil
-}
-
-func PyGrammarPretty(handle GrammarHandle) (string, error) {
-	g, err := lookupGrammar(handle)
-	if err != nil {
-		return "", err
-	}
-	return g.Pretty(), nil
+	return asjson.AsJSONStr(g), nil
 }
 
 func PyFreeGrammar(handle GrammarHandle) {
@@ -195,16 +178,11 @@ func PyBootGrammarToJSONString(cfgJSON string) (string, error) {
 		return "", err
 	}
 	_ = cfgJSON
-	return json.MarshalIndent(g, "", "  ")
-}
-
-func PyBootGrammarPretty(cfgJSON string) (string, error) {
-	g, err := BootGrammar()
+	out, err := json.MarshalIndent(g, "", "  ")
 	if err != nil {
 		return "", err
 	}
-	_ = cfgJSON
-	return g.Pretty(), nil
+	return string(out), nil
 }
 
 func PyParseGrammarToJSONString(grammar string, cfgJSON string) (string, error) {
