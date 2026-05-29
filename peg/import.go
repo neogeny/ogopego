@@ -274,7 +274,7 @@ func ruleFromJSON(h *helper) (*Rule, error) {
 		}
 	}
 
-	var kwparams map[string]string
+	kwparams := make(map[string]string)
 	if pRaw, ok := h.value["kwparams"]; ok {
 		if pMap, ok := pRaw.(map[any]any); ok {
 			for k, v := range pMap {

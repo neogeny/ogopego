@@ -131,12 +131,10 @@ func strListValue(tree trees.Tree) []string {
 func strPairsListValue(tree trees.Tree) map[string]string {
 	out := map[string]string{}
 	items := listValue(tree)
-	if items != nil {
-		for _, item := range items {
-			pair := strListValue(item)
-			if len(pair) == 2 {
-				out[pair[0]] = pair[1]
-			}
+	for _, item := range items {
+		pair := strListValue(item)
+		if len(pair) == 2 {
+			out[pair[0]] = pair[1]
 		}
 	}
 	return out

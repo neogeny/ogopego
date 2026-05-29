@@ -74,7 +74,7 @@ func (m *ModelBase) PrettyPrint() string { return "" }
 func (m *ModelBase) Railroads() string { return "" }
 
 func (m *ModelBase) LookAheadStr() string {
-	reprs := make([]string, len(m.la), len(m.la))
+	reprs := make([]string, len(m.la))
 	for i, item := range m.la {
 		reprs[i] = fmt.Sprintf("`%v`", item)
 	}
