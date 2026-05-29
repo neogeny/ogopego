@@ -47,8 +47,8 @@ type Regexp struct {
 	code *syntax.Code // compiled program
 
 	// cache of machines for running regexp
-	muRun    *sync.Mutex
-	runner   []*runner
+	muRun     *sync.Mutex
+	runner    []*runner
 	runeCache []rune
 }
 

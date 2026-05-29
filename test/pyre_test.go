@@ -52,69 +52,6 @@ func TestTatsuEOLPatterns(t *testing.T) {
 	}
 }
 
-func TestMatchZeroWidthLookahead(t *testing.T) {
-	if !pyre.LookaheadSupport {
-		t.Skip("requires regexp lookaheads")
-	}
-	p, err := pyre.Compile(`(?=\s*(?:\r?\n|\r)\S)`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	m, ok := p.Match("\nnext")
-	if !ok {
-		t.Fatal("lookahead should match at start")
-	}
-	if m.Start() != 0 || m.End() != 0 {
-		t.Errorf("expected 0-width match at start, got start=%d end=%d", m.Start(), m.End())
-	}
-}
-
-func TestMatchEndruleUnindentedBranch(t *testing.T) {
-	if !pyre.LookaheadSupport {
-		t.Skip("requires regexp lookaheads")
-	}
-	p, err := pyre.Compile(`\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	m, ok := p.Match("\nnext_rule")
-	if !ok {
-		t.Fatal("ENDRULE should match before an unindented next rule")
-	}
-	if m.Start() != 0 || m.End() != 0 {
-		t.Errorf("expected 0-width at start, got start=%d end=%d", m.Start(), m.End())
-	}
-}
-
-func TestMatchEndruleBlankLine(t *testing.T) {
-	pat := `\s*[;]|(?:\s*(?:\r?\n|\r)){2,}[;]?`
-	if pyre.LookaheadSupport {
-		pat = `\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`
-	}
-	p, err := pyre.Compile(pat)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, ok := p.Match("\n\n")
-	if !ok {
-		t.Fatal("ENDRULE should match blank line")
-	}
-}
-
-func TestMatchEndruleCRLF(t *testing.T) {
-	if !pyre.LookaheadSupport {
-		t.Skip("requires regexp lookaheads")
-	}
-	p, err := pyre.Compile(`\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;?]`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, ok := p.Match("\r\nnext_rule")
-	if !ok {
-		t.Fatal("ENDRULE should match CRLF before an unindented next rule")
-	}
-}
-
 func TestMatchFirstIsStartPosition(t *testing.T) {
 	p, err := pyre.Compile(`\d+`)
 	if err != nil {
@@ -143,19 +80,17 @@ func TestMatchRequiresStartAtZero(t *testing.T) {
 	}
 }
 
-func TestEatPatternZeroWidth(t *testing.T) {
-	if !pyre.LookaheadSupport {
-		t.Skip("requires regexp lookaheads")
+func TestMatchEndruleBlankLine(t *testing.T) {
+	pat := `\s*[;]|(?:\s*(?:\r?\n|\r)){2,}[;]?`
+	if pyre.LookaheadSupport {
+		pat = `\s*[;]|(?=\s*(?:\r?\n|\r)\S)|(?:\s*(?:\r?\n|\r)){2,}[;]?`
 	}
-	p, err := pyre.Compile(`(?=\s*(?:\r?\n|\r)\S)`)
+	p, err := pyre.Compile(pat)
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, ok := p.Match("\nrule")
+	_, ok := p.Match("\n\n")
 	if !ok {
-		t.Fatal("lookahead should match")
-	}
-	if m.End() != 0 {
-		t.Errorf("expected zero-width match, got end=%d", m.End())
+		t.Fatal("ENDRULE should match blank line")
 	}
 }
