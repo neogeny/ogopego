@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/peg"
+	"github.com/neogeny/ogopego/pkg/peg"
 )
 
 func TestRoundtripJSON(t *testing.T) {

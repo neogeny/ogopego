@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/config"
-	"github.com/neogeny/ogopego/peg"
-	"github.com/neogeny/ogopego/util"
+	"github.com/neogeny/ogopego/pkg/config"
+	"github.com/neogeny/ogopego/pkg/peg"
+	"github.com/neogeny/ogopego/pkg/util"
 )
 
-type Cfg = config.Cfg
+type Cfg config.Cfg
 
 func Dedent(s string) string {
 	return util.Dedent(s)

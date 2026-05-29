@@ -11,3 +11,6 @@ import _ "embed"
 //
 //go:embed grammar/tatsu.json
 var TatSuGrammarJSON []byte
+
+//go:embed grammar/calc.json
+var CalcJSON []byte

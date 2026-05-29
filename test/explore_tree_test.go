@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func printTreeRec(t *testing.T, indent string, node trees.Tree) {

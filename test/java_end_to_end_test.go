@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/peg"
-	"github.com/neogeny/ogopego/tool"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/pkg/peg"
+	"github.com/neogeny/ogopego/pkg/tool"
+	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestJavaEndToEnd(t *testing.T) {

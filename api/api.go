@@ -16,12 +16,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/neogeny/ogopego/config"
-	"github.com/neogeny/ogopego/context"
-	"github.com/neogeny/ogopego/input"
-	"github.com/neogeny/ogopego/json"
-	"github.com/neogeny/ogopego/peg"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/pkg/config"
+	"github.com/neogeny/ogopego/pkg/context"
+	"github.com/neogeny/ogopego/pkg/input"
+	"github.com/neogeny/ogopego/pkg/json"
+	"github.com/neogeny/ogopego/pkg/peg"
+	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // Cfg is an alias for config.Cfg. It controls parsing behavior including

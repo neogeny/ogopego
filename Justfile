@@ -1,20 +1,26 @@
 PACKAGES := "\
 ./api \
-./cmd/ogo \
-./config \
-./context \
-./input \
-./json \
-./peg \
+./cmd \
+./cmd/cli \
+./pkg/config \
+./pkg/context \
+./pkg/input \
+./pkg/json \
+./pkg/peg \
+./pkg/trees \
+./pkg/util/ \
 ./test \
-./trees \
-./util/ \
 "
+
+TARGET := "./target"
 
 default: check
 
 build: gofmt-check
-    go build -mod=mod -o bin/ogo ./cmd/ogo
+    go build -mod=mod -o {{TARGET}}/debug/ogo ./cmd
+
+release:
+    go build -ldflags="-s -w" -o {{TARGET}}/release/ogo ./cmd
 
 run *args:
     go run ./cmd/ogo {{args}}
@@ -39,7 +45,7 @@ cover:
     go tool cover -html=coverage.out
 
 lint:
-    golangci-lint run ./...
+    golangci-lint run ./... --exclude-dirs ./tmp
 
 fmt:
     find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
@@ -52,10 +58,8 @@ gofmt-check: gofmt
 deps:
     go mod download
 
-vendor:
+vendor: tidy
     go mod vendor -o _vendor
-
-mod: tidy vendor
 
 vet:
     go vet -structtag=false {{PACKAGES}}
@@ -68,18 +72,21 @@ update:
     go mod tidy
 
 clean:
-    rm -rf bin/
+    rm -rf {{TARGET}}
 
 zero: clean
     go clean -cache -modcache
-
-release:
-    go build -ldflags="-s -w" -o bin/ogo-release ./cmd/ogo
 
 check: fmt lint vet test
 
 pre-push: clean check build release
 
 tools:
+    go install golang.org/x/tools/cmd/goimports@latest
+    go install github.com/go-python/gopy@latest
     go install gotest.tools/gotestsum@latest
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+
+gopy:
+    uv run --dev gopy pkg -vm=python3 -output ogopego ogopego {{PACKAGES}}
