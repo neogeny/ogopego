@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/util/pyre"
+	"github.com/neogeny/ogopego/pkg/util/pyre"
 )
 
 func TestMultilineDollarWithAnchor(t *testing.T) {

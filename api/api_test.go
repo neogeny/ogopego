@@ -6,7 +6,7 @@ package api
 import (
 	"testing"
 
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestParseGrammar(t *testing.T) {

@@ -1,20 +1,26 @@
 PACKAGES := "\
 ./api \
-./cmd/ogo \
-./config \
-./context \
-./input \
-./json \
-./peg \
+./cmd \
+./cmd/cli \
+./pkg/config \
+./pkg/context \
+./pkg/input \
+./pkg/json \
+./pkg/peg \
+./pkg/trees \
+./pkg/util/ \
 ./test \
-./trees \
-./util/ \
 "
+
+TARGET := "./target"
 
 default: check
 
 build: gofmt-check
-    go build -mod=mod -o bin/ogo ./cmd/ogo
+    go build -mod=mod -o {{TARGET}}/debug/ogo ./cmd
+
+release:
+    go build -ldflags="-s -w" -o {{TARGET}}/release/ogo ./cmd
 
 run *args:
     go run ./cmd/ogo {{args}}
@@ -52,10 +58,8 @@ gofmt-check: gofmt
 deps:
     go mod download
 
-vendor:
+vendor: tidy
     go mod vendor -o _vendor
-
-mod: tidy vendor
 
 vet:
     go vet -structtag=false {{PACKAGES}}
@@ -68,13 +72,10 @@ update:
     go mod tidy
 
 clean:
-    rm -rf bin/
+    rm -rf {{TARGET}}
 
 zero: clean
     go clean -cache -modcache
-
-release:
-    go build -ldflags="-s -w" -o bin/ogo-release ./cmd/ogo
 
 check: fmt lint vet test
 
@@ -88,4 +89,4 @@ tools:
 
 
 gopy:
-    gopy pkg -vm=python3 -output ogopego
+    uv run --dev gopy pkg -vm=python3 -output ogopego ogopego {{PACKAGES}}

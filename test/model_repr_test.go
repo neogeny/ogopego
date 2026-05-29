@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/neogeny/ogopego/api"
-	"github.com/neogeny/ogopego/config"
-	"github.com/neogeny/ogopego/tool"
-	"github.com/neogeny/ogopego/trees"
+	"github.com/neogeny/ogopego/pkg/config"
+	"github.com/neogeny/ogopego/pkg/tool"
+	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestModelReprOutput(t *testing.T) {

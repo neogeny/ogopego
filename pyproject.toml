@@ -27,3 +27,6 @@ dev = [
     "pybindgen>=0.22.1",
     "wheel>=0.47.0",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ogopego"]
