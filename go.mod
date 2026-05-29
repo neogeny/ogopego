@@ -5,7 +5,6 @@ go 1.26.3
 require (
 	github.com/alecthomas/chroma/v2 v2.25.0
 	github.com/alecthomas/kong v1.15.0
-	github.com/dlclark/regexp2 v1.12.0
 	github.com/fatih/color v1.19.0
 	github.com/vbauerster/mpb/v8 v8.12.1
 	golang.org/x/term v0.43.0
@@ -21,5 +20,3 @@ require (
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 )
-
-replace github.com/dlclark/regexp2 v1.12.0 => ./lib/regexp2
