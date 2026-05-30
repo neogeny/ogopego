@@ -78,7 +78,22 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 			fmt.Fprintf(&buf, "\t\treturn nil, fmt.Errorf(\"%sFromTree: expected MapNode, got %%T\", n.Tree)\n", ri.typeName)
 			buf.WriteString("\t}\n")
 			buf.WriteString(fmt.Sprintf("\tvar result %s\n", ri.typeName))
-			buf.WriteString("\tvar err error\n\n")
+
+			needsErr := false
+			for _, f := range ri.fields {
+				switch {
+				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					needsErr = true
+				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					needsErr = true
+				case strings.HasPrefix(f.goType, "*"):
+					needsErr = true
+				}
+			}
+			if needsErr {
+				buf.WriteString("\tvar err error\n")
+			}
+			buf.WriteString("\n")
 
 			for _, f := range ri.fields {
 				switch {

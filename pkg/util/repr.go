@@ -159,6 +159,11 @@ func reprValue(v any, seen map[uintptr]bool) string {
 				parts[i] = reprValue(rv.Index(i).Interface(), seen)
 			}
 			return Fold("", parts, rv.Type().String()+"{", "}")
+		case reflect.Func:
+			if rv.IsNil() {
+				return "nil"
+			}
+			return fmt.Sprintf("%v", val)
 		default:
 			return fmt.Sprintf("%v", val)
 		}

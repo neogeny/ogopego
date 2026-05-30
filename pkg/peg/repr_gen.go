@@ -12,7 +12,7 @@ func ParserRepr(g Grammar, pkg string) string {
 	var buf strings.Builder
 	buf.WriteString("package ")
 	buf.WriteString(pkg)
-	buf.WriteString("\n\nimport \"github.com/neogeny/ogopego/peg\"\n\nfunc ")
+	buf.WriteString("\n\nimport peg \"github.com/neogeny/ogopego/pkg/peg\"\n\nfunc ")
 	buf.WriteString(funcName)
 	buf.WriteString("() peg.Grammar {\n\treturn ")
 
