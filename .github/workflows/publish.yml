@@ -42,15 +42,17 @@ jobs:
       - name: Build Wheels via cibuildwheel
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          # On Windows and macOS, use the host Go.
-          # On Linux, dynamically bootstrap Go inside the manylinux container.
-          CIBW_BEFORE_ALL_LINUX: "curl -L https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf -"
-          CIBW_ENVIRONMENT_LINUX: 'PATH=$PATH:/usr/local/go/bin GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
+          # Strict constraint: Only execute the build using Python 3.14
+          CIBW_BUILD: "cp314-*"
 
-          # Force a uniform deployment target of 12.0 for macOS so Go and Python match
+          # On Linux, install Go inside the container environment from scratch
+          CIBW_BEFORE_ALL_LINUX: "curl -L https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf -"
+
+          # Isolated environment definitions without leaking host Python PATH strings
+          CIBW_ENVIRONMENT_LINUX: 'PATH=$PATH:/usr/local/go/bin GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
           CIBW_ENVIRONMENT_MACOS: 'MACOSX_DEPLOYMENT_TARGET=12.0'
 
-          # Maintain uniform output path targeting for all platforms
+          # Compile application directly into the package structure
           CIBW_BEFORE_BUILD: "go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
           CIBW_BUILD_FRONTEND: "build[uv]"
 
