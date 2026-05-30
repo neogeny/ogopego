@@ -25,7 +25,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Set up Go natively for macOS and Windows host compilation
       - name: Set up Go
         if: matrix.os != 'ubuntu-latest'
         uses: actions/setup-go@v5
@@ -44,9 +43,12 @@ jobs:
         uses: pypa/cibuildwheel@v2.22.0
         env:
           # On Windows and macOS, use the host Go.
-          # On Linux, dynamically bootstrap Go inside the manylinux container via hooks to avoid host-mismatch code 127.
+          # On Linux, dynamically bootstrap Go inside the manylinux container.
           CIBW_BEFORE_ALL_LINUX: "curl -L https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf -"
           CIBW_ENVIRONMENT_LINUX: 'PATH=$PATH:/usr/local/go/bin GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
+
+          # Force a uniform deployment target of 12.0 for macOS so Go and Python match
+          CIBW_ENVIRONMENT_MACOS: 'MACOSX_DEPLOYMENT_TARGET=12.0'
 
           # Maintain uniform output path targeting for all platforms
           CIBW_BEFORE_BUILD: "go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
