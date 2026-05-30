@@ -1,62 +1,70 @@
-name: Build and Publish Wheels
+name: Build and Publish
 
 on:
   release:
     types: [published]
-  workflow_dispatch: # Allows manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish artifacts to PyPI?'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        # Launch Windows, macOS, and Linux runners concurrently
-        os: [ubuntu-latest, macos-latest, windows-latest]
-
+  build_artifacts:
+    name: Build Matrix Artifacts
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.26'
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
-#        run: python -m pip install cibuildwheel==2.16.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
-      - name: Build Wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+      - name: Run Release Matrix
+        run: python3 python/release.py
         env:
-          # Tell Go's build compiler to produce position independent code (required for Linux)
-          CGO_ENABLED: 1 
+          CGO_ENABLED: 1
 
-      - name: Upload Artifacts
+      - name: Build Source Distribution
+        run: uv build --sdist
+
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
+          name: pypi-dist
+          path: dist/
+          retention-days: 1
 
-  publish_pypi:
+  publish_release:
     name: Publish to PyPI
-    needs: [build_wheels]
+    needs: [build_artifacts]
     runs-on: ubuntu-latest
-    # Required permission step for secure PyPI Trusted Publishing API
     permissions:
       id-token: write
+    # Run if triggered by a GitHub Release or if the manual dispatch flag is explicitly set to true
+    if: ${{ github.event_name == 'release' || inputs.publish == true }}
     steps:
-      - name: Download all wheels
+      - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
+          name: pypi-dist
           path: dist
-          merge-multiple: true
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

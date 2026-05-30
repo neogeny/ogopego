@@ -18,11 +18,21 @@ source = "vcs"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "pkg/*.py",
+    "SYNTAX.md",
+    "CUT.md",
+    "grammar/tatsu.*",
+    "grammar/calc.*",
+    "go.*",
+    "*.go",
+    "api/**/*.go",
+    "cmd/**/*.go",
+    "pkg/**/*.go",
+    "test/**/*.go",
+    "python"
 ]
 exclude = [
-    "*.json",
-    "pkg/_compat.py",
+    "_*",
+    "python/ogopego/bin",
 ]
 
 [tool.hatch.build.targets.wheel]

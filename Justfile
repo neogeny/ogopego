@@ -117,3 +117,9 @@ gopy-init:
 
 gopy-build:
     uv run {{GOPY}} build -output=./python/ogopego -vm=python3 .
+
+test-pypi: test
+    gh workflow run publish.yml -f publish=false
+
+publish-pypi: test
+    gh workflow run publish.yml -f publish=true
