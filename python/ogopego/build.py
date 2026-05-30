@@ -181,6 +181,7 @@ def compile_binary(goos: str, goarch: str) -> Path:
 
     try:
         subprocess.run(cmd, env=env, cwd=str(go_module_root), check=True)
+        output_path.chmod(0o755)
     except subprocess.CalledProcessError as e:
         print(
             f"Go compilation failed for target {goos}/{goarch}: {e}",

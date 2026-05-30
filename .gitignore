@@ -7,7 +7,6 @@
 *.dll
 *.so
 *.dylib
-bin/
 
 # Test binary, built with `go test -c`
 *.test
@@ -32,12 +31,14 @@ go.work.sum
 .idea/
 .vscode/
 
+# Filters for build distributions
+grammar/java.*
+
 
 # Other projects symlinked
 x/
 .corpus/
 tmp/
-grammar/
 .aider*
 
 _out/

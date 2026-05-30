@@ -33,7 +33,7 @@ include = [
     "python"
 ]
 exclude = [
-    "_*",
+    "/_*",
     "python/ogopego/bin",
 ]
 
@@ -43,8 +43,13 @@ pure = false
 include = [
     "python/ogopego/bin/*"
 ]
-[tool.hatch.build.targets.wheel.force-include]
-"python/ogopego/bin" = "ogopego/bin"
+artifacts = [
+    "grammar/tatsu.*",
+    "grammar/calc.*",
+    "*.toml",
+]
+#[tool.hatch.build.targets.wheel.force-include]
+#"python/ogopego/bin" = "ogopego/bin"
 
 
 [tool.cibuildwheel]
