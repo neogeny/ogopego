@@ -1,3 +1,10 @@
+"""Python wrapper around the ogopego Go CLI binary.
+
+Provides compile(), parse(), and parse_file() with a TatSu-compatible
+signature. The Go binary is bundled in the wheel and invoked via
+subprocess.
+"""
+
 import hashlib
 import json
 import subprocess
@@ -54,6 +61,8 @@ _UNSUPPORTED_DEFAULTS: dict[str, object] = {
 
 
 class OgoError(Exception):
+    """Raised when the ogopego Go binary exits with a non-zero status."""
+
     def __init__(self, returncode: int, stderr: str = ""):
         self.returncode = returncode
         self.stderr = stderr
@@ -113,41 +122,34 @@ def _build_cli_args(
     return args
 
 
-_CFG_KEYS = frozenset({"trace", "color"})
-
-
 def compile(
     grammar: str,
     name: str | None = None,
     *,
-    config=None,
     filename=None,
-    basetype=None,
-    semantics=None,
-    asmodel=False,
-    builderconfig=None,
-    synthok=True,
-    typedefs=None,
-    constructors=None,
-    **settings,
+    trace: bool = False,
+    color: str = "auto",
 ) -> dict:
-    _check_unsupported(
-        name=name,
-        config=config,
-        filename=filename,
-        basetype=basetype,
-        semantics=semantics,
-        asmodel=asmodel,
-        builderconfig=builderconfig,
-        synthok=synthok,
-        typedefs=typedefs,
-        constructors=constructors,
-    )
-    unknown = {k for k in settings if k not in _CFG_KEYS}
-    if unknown:
-        _raise_unknown("compile", settings)
-    trace = settings.get("trace", False)
-    color = settings.get("color", "auto")
+    """Compile a PEG grammar string and return the compiled grammar as a dict.
+
+    The result is cached by grammar content hash so repeated calls with
+    the same grammar string return the cached result.
+
+    Args:
+        grammar: PEG grammar source text.
+        name: Grammar name (unused, raises ValueError if set).
+        filename: Source filename hint (unused, raises ValueError if set).
+        trace: Enable trace output from the Go binary.
+        color: Color mode for CLI output ("auto", "never", "always").
+
+    Returns:
+        A dict representing the compiled grammar (JSON-serializable).
+
+    Raises:
+        OgoError: If the Go binary fails.
+        ValueError: If an unsupported argument is provided.
+    """
+    _check_unsupported(name=name, filename=filename)
 
     key = _hasha(grammar)
     if key in __cache:
@@ -177,37 +179,34 @@ def parse(
     text: str,
     /,
     *,
-    config=None,
     start=None,
     name=None,
     filename=None,
-    semantics=None,
-    asmodel=False,
-    builderconfig=None,
-    basetype=None,
-    synthok=True,
-    typedefs=None,
-    constructors=None,
-    **settings,
+    trace: bool = False,
+    color: str = "auto",
 ):
-    _check_unsupported(
-        config=config,
-        start=start,
-        name=name,
-        filename=filename,
-        semantics=semantics,
-        asmodel=asmodel,
-        builderconfig=builderconfig,
-        basetype=basetype,
-        synthok=synthok,
-        typedefs=typedefs,
-        constructors=constructors,
-    )
-    unknown = {k for k in settings if k not in _CFG_KEYS}
-    if unknown:
-        _raise_unknown("parse", settings)
-    trace = settings.get("trace", False)
-    color = settings.get("color", "auto")
+    """Parse input text against a PEG grammar and return the parse tree.
+
+    Compiles the grammar first (with caching), then runs the parser on
+    the input text via the Go binary.
+
+    Args:
+        grammar: PEG grammar source text.
+        text: Input text to parse.
+        start: Start rule name (unused, raises ValueError if set).
+        name: Grammar name hint (unused, raises ValueError if set).
+        filename: Source filename hint (unused, raises ValueError if set).
+        trace: Enable trace output from the Go binary.
+        color: Color mode for CLI output ("auto", "never", "always").
+
+    Returns:
+        A dict representing the parse tree (JSON-serializable).
+
+    Raises:
+        OgoError: If compilation or parsing fails.
+        ValueError: If an unsupported argument is provided.
+    """
+    _check_unsupported(start=start, name=name, filename=filename)
 
     grammar_dict = compile(grammar, trace=trace, color=color)
 
@@ -240,37 +239,34 @@ def parse_file(
     path: str,
     /,
     *,
-    config=None,
     start=None,
     name=None,
     filename=None,
-    semantics=None,
-    asmodel=False,
-    builderconfig=None,
-    basetype=None,
-    synthok=True,
-    typedefs=None,
-    constructors=None,
-    **settings,
+    trace: bool = False,
+    color: str = "auto",
 ):
-    _check_unsupported(
-        config=config,
-        start=start,
-        name=name,
-        filename=filename,
-        semantics=semantics,
-        asmodel=asmodel,
-        builderconfig=builderconfig,
-        basetype=basetype,
-        synthok=synthok,
-        typedefs=typedefs,
-        constructors=constructors,
-    )
-    unknown = {k for k in settings if k not in _CFG_KEYS}
-    if unknown:
-        _raise_unknown("parse_file", settings)
-    trace = settings.get("trace", False)
-    color = settings.get("color", "auto")
+    """Parse a file against a PEG grammar and return the parse tree.
+
+    Compiles the grammar first (with caching), then runs the parser on
+    the file at *path* via the Go binary.
+
+    Args:
+        grammar: PEG grammar source text.
+        path: Path to the input file to parse.
+        start: Start rule name (unused, raises ValueError if set).
+        name: Grammar name hint (unused, raises ValueError if set).
+        filename: Source filename hint (unused, raises ValueError if set).
+        trace: Enable trace output from the Go binary.
+        color: Color mode for CLI output ("auto", "never", "always").
+
+    Returns:
+        A dict representing the parse tree (JSON-serializable).
+
+    Raises:
+        OgoError: If compilation or parsing fails.
+        ValueError: If an unsupported argument is provided.
+    """
+    _check_unsupported(start=start, name=name, filename=filename)
 
     grammar_dict = compile(grammar, trace=trace, color=color)
 
@@ -289,10 +285,3 @@ def parse_file(
         return json.loads(stdout)
     finally:
         Path(grammar_file).unlink(missing_ok=True)
-
-
-def _raise_unknown(caller: str, settings: dict) -> None:
-    items = ", ".join(
-        f"{k}={v!r}" for k, v in settings.items() if k not in _CFG_KEYS
-    )
-    raise ValueError(f"ogopego {caller} does not support: {items}")
