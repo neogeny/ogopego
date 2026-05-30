@@ -65,6 +65,8 @@ go build -ldflags='-s -w' -gcflags='all=-B' \
 ./pkg/util/ \
 """
 build-frontend = "build[uv]"
+environment-pass = ["PATH"]
+environment = { GOPATH = "/tmp/gopath", GOCACHE = "/tmp/gocache" }
 
 [tool.hatch.build.hooks.custom]
 path = "python/hatch_build.py"
