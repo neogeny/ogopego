@@ -6,7 +6,6 @@ require (
 	github.com/alecthomas/chroma/v2 v2.25.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/fatih/color v1.19.0
-	github.com/go-python/gopy v0.4.10
 	github.com/vbauerster/mpb/v8 v8.12.1
 	golang.org/x/term v0.43.0
 )
