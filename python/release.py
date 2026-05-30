@@ -4,9 +4,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Fix search path to import our internal build engine
-PACKAGE_ROOT = Path(__file__).parent / "python" / "ogopego"
-sys.path.insert(0, str(PACKAGE_ROOT))
+PROJECT_ROOT = Path(__file__).parent.parent
+PACKAGE_ROOT = PROJECT_ROOT / "python" / "ogopego"
+# sys.path.insert(0, str(PACKAGE_ROOT))
 
 from ogopego import build  # type: ignore
 
@@ -24,22 +24,17 @@ def clean_workspace(root_dir: Path):
 
 def build_targeted_wheels(root_dir: Path):
     """Builds individual, optimized wheels for each OS/Arch matrix target."""
-    
-    # Step 1: Pre-compile all binaries into the target lib path
+
     build.compile_all()
 
     print("\n--- Starting Targeted Wheel Packaging with uv ---")
     
-    # Step 2: Iterate over each configuration to wrap it in a platform-tagged wheel
     for (goos, goarch), binary_name in build.MATRIX.items():
         wheel_tag = build.get_wheel_tag(goos, goarch)
-        resolved_binary = build.get_binary_path(goos, goarch)
+        _resolved_binary = build.get_binary_path(goos, goarch)
         
         print(f"\nPackaging wheel for target: {goos}_{goarch} ({wheel_tag})...")
 
-        # Set up Hatchling override environment variables.
-        # HATCH_BUILD_HOOKS_ENABLE=false ensures hatch_build.py doesn't try to
-        # re-compile the binary locally during this packaging pass.
         env = os.environ.copy()
         env["HATCH_BUILD_HOOKS_ENABLE"] = "false"
         
@@ -50,8 +45,13 @@ def build_targeted_wheels(root_dir: Path):
         env["HATCH_BIN_NAME"] = binary_name
 
         # Trigger uv build targeting only the wheel distribution channel
-        cmd = ["uv", "build", "--wheel"]
-        
+        cmd = [
+            "uv", "build", "--wheel",
+            "--force-pep517",
+            "-C", f"build-data.tag=py3-none-{wheel_tag}",
+            str(PROJECT_ROOT),
+        ]
+
         try:
             # We enforce execution context from the root module folder
             subprocess.run(cmd, env=env, cwd=str(root_dir), check=True)
@@ -64,6 +64,7 @@ def build_targeted_wheels(root_dir: Path):
 if __name__ == "__main__":
     project_root = Path(__file__).parent.resolve()
     clean_workspace(project_root)
-    build_targeted_wheels(project_root)
+    # build_targeted_wheels(project_root)
+    build.compile_all()
 
 

@@ -7,7 +7,9 @@ authors = [
     { name = "Juancarlo Añez", email = "apalala@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "tatsu>=5.20.0",
+]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs", "uv-dynamic-versioning"]
@@ -37,17 +39,27 @@ exclude = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["python/ogopego"]
+pure = false
 include = [
     "python/ogopego/bin/*"
 ]
 [tool.hatch.build.targets.wheel.force-include]
 "python/ogopego/bin" = "ogopego/bin"
 
-#[tool.uv.extra-build-dependencies]
-#ogopego = ["hatchling.build.hooks"]
+
+[tool.cibuildwheel]
+# -ldflags="-s -w" strips debug information and symbols to drastically reduce binary size.
+# -gcflags="all=-B" disables bounds checking for a performance boost (optional/use with caution).
+before-build = "go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/"
+build-frontend = "build[uv]"
 
 [tool.hatch.build.hooks.custom]
 path = "python/hatch_build.py"
+
+[dependency-groups]
+dev = [
+    "wheel>=0.47.0",
+]
 
 #exclude = [
 #    "python/ogopego/lib/*"

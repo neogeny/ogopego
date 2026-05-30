@@ -1,4 +1,4 @@
-name: Build and Publish
+name: Build and Publish Wheels
 
 on:
   release:
@@ -12,57 +12,71 @@ on:
         default: false
 
 jobs:
-  build_artifacts:
-    name: Build Matrix Artifacts
-    runs-on: ubuntu-latest
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.24'
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.14'
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Run Release Matrix
-        run: python3 python/release.py
-        env:
-          CGO_ENABLED: 1
+      - name: Build Wheels via cibuildwheel
+        uses: pypa/cibuildwheel@v2.22.0
 
-      - name: Build Source Distribution
-        run: uv build --sdist
-
-      - name: Upload Build Artifacts
+      - name: Upload Wheels
         uses: actions/upload-artifact@v4
         with:
-          name: pypi-dist
-          path: dist/
-          retention-days: 1
+          name: cibw-wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build Source Distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Build sdist
+        run: uv build --sdist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
 
   publish_release:
     name: Publish to PyPI
-    needs: [build_artifacts]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-    # Run if triggered by a GitHub Release or if the manual dispatch flag is explicitly set to true
     if: ${{ github.event_name == 'release' || inputs.publish == true }}
     steps:
-      - name: Download Build Artifacts
+      - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: pypi-dist
+          pattern: cibw-*
           path: dist
+          merge-multiple: true
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
