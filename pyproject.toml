@@ -7,9 +7,7 @@ authors = [
     { name = "Juancarlo Añez", email = "apalala@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = [
-    "tatsu>=5.20.0",
-]
+dependencies = []
 
 [build-system]
 requires = ["hatchling", "hatch-vcs", "uv-dynamic-versioning"]
