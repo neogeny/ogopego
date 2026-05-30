@@ -29,6 +29,7 @@ var CLI struct {
 		Json    bool     `help:"Print the output tree in JSON format" short:"j" group:"format"`
 		Model   bool     `help:"Print the Go code for the tree construction" short:"m" group:"format"`
 		Start   string   `help:"Name of the start rule (defaults to 'start')" short:"s"`
+		Nproc   int      `help:"Number of concurrent workers (default: number of CPUs)" short:"n" default:"0"`
 	} `cmd:"" help:"Execute a grammar against one or more input files"`
 
 	// Boot subcommand provides access to the internal boot grammar.

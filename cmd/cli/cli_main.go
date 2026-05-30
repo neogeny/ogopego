@@ -98,7 +98,10 @@ func Main() {
 			var mu sync.Mutex
 			var wg sync.WaitGroup
 
-			maxWorkers := runtime.GOMAXPROCS(0)
+			maxWorkers := CLI.Run.Nproc
+			if maxWorkers <= 0 {
+				maxWorkers = runtime.GOMAXPROCS(0)
+			}
 			sem := make(chan int, maxWorkers)
 			for i, path := range CLI.Run.Inputs {
 				fileName := filepath.Base(path)
