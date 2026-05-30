@@ -30,3 +30,18 @@ enabled = true
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
+
+[tool.setuptools.packages.find]
+where = ["ogopego"]
+include = ["*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ogopego"]
+include = [
+    "ogopego/*.py",
+    "ogopego/*.so",
+    "ogopego/*.pyd",
+]
+
+[tool.setuptools.package-data]
+"*" = ["*.so", "*.pyd", "*.dll", "*.dylib"]
