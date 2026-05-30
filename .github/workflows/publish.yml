@@ -39,9 +39,11 @@ jobs:
           CIBW_BUILD: "cp313-*"
           CIBW_SKIP: "*t-* *musllinux*"
 
+          CIBW_BEFORE_ALL_LINUX: "curl -fsSL https://go.dev/dl/go1.26.3.linux-amd64.tar.gz | tar -C /usr/local -xzf - && ln -s /usr/local/go/bin/go /usr/local/bin/go"
+
           CIBW_ENVIRONMENT_MACOS: 'MACOSX_DEPLOYMENT_TARGET=12.0'
 
-          CIBW_BUILD_FRONTEND: "build[uv]"
+          CIBW_BUILD_FRONTEND: "pip"
 
       - name: Upload Wheels
         uses: actions/upload-artifact@v4
