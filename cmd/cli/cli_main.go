@@ -121,6 +121,9 @@ func Main() {
 					fileCfg := *cliCfg
 					fileCfg.Heartbeat = fProgress.Heartbeat()
 					fileCfg.Source, _ = util.PathRelativeToCwd(path)
+					if CLI.Run.Start != "" {
+						fileCfg.Start = CLI.Run.Start
+					}
 
 					tree, err := api.ParseInput(gram, string(d), &fileCfg)
 					prog.IncFiles()
