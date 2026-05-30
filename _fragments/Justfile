@@ -1,0 +1,197 @@
+PACKAGES := "\
+./api \
+./cmd \
+./cmd/cli \
+./pkg/config \
+./pkg/context \
+./pkg/input \
+./pkg/asjson \
+./pkg/peg \
+./pkg/trees \
+./pkg/util/ \
+./test \
+"
+
+TARGET := "./target"
+
+default: check
+
+build: gofmt-check
+    go build -mod=mod -o {{TARGET}}/debug/ogo ./cmd
+
+release:
+    go build -ldflags="-s -w" -o {{TARGET}}/release/ogo ./cmd
+
+run *args:
+    go run ./cmd/ogo {{args}}
+
+grammar FILE="grammar/tatsu.ebnf":
+    go run ./cmd/ogo grammar -m {{FILE}}
+
+test: gofmt-check
+    gotestsum -- -mod=mod {{PACKAGES}}
+
+test-v:
+    gotestsum --format testname -- -v {{PACKAGES}}
+
+test-fast: gofmt-check lint vet
+    gotestsum -- -run 'Test[^P]' {{PACKAGES}}
+
+bench:
+    go test -bench=. -benchmem {{PACKAGES}}
+
+cover:
+    go test -coverprofile=coverage.out {{PACKAGES}}
+    go tool cover -html=coverage.out
+
+lint:
+    golangci-lint run ./... --exclude-dirs ./tmp
+
+fmt:
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
+
+gofmt:
+    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
+
+gofmt-check: gofmt
+
+deps:
+    go mod download
+
+vendor: tidy
+    go mod vendor -o _vendor
+
+vet:
+    go vet -structtag=false {{PACKAGES}}
+
+tidy:
+    go mod tidy
+
+update:
+    go get -u ./...
+    go mod tidy
+
+clean:
+    rm -rf {{TARGET}}
+
+zero: clean
+    go clean -cache -modcache
+
+check: fmt lint vet test
+
+pre-push: clean check build release
+
+tools:
+    go install golang.org/x/tools/cmd/goimports@latest
+    go install github.com/go-python/gopy@latest
+    go install gotest.tools/gotestsum@latest
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+
+# ------------------------------------------------------------------------------
+# Python binding build pipeline
+# ------------------------------------------------------------------------------
+PYAPI_PKG := "./pyapi"
+PYTHON    := `pwd` + "/.venv/bin/python"
+GOPY_BIN  := "{{TARGET}}/gopy"
+PYOUT     := "python/ogopego/_ogo"
+
+
+
+# Build the gopy CLI tool from the forked source in lib/gopy/
+gopy-bin:
+	mkdir -p {{TARGET}}
+	cd lib/gopy && go build -o ../../{{GOPY_BIN}} .
+
+# Generate Python binding stubs and C extension code
+pyapi-gen: gopy-bin
+	mkdir -p {{PYOUT}}
+	rm -f {{PYOUT}}/ogo.go {{PYOUT}}/build.py {{PYOUT}}/go.py {{PYOUT}}/pyapi.py {{PYOUT}}/Makefile
+	{{GOPY_BIN}} gen \
+		-output={{PYOUT}} \
+		-name=ogo \
+		-dynamic-link \
+		-vm={{PYTHON}} \
+		{{PYAPI_PKG}}
+	# Restore custom __init__.py after gopy overwrites it with empty one
+	{{PYTHON}} -c "
+content = '\x69mport importlib.machinery\nimport importlib.util\nimport os\nimport sys\n\n_dir = os.path.dirname(__file__)\n\nsuffix = importlib.machinery.EXTENSION_SUFFIXES\n_mod = None\nfor ext in suffix:\n    path = os.path.join(_dir, f\"_ogo{ext}\")\n    if os.path.exists(path):\n        spec = importlib.util.spec_from_file_location(\"ogopego._ogo._ogo\", path)\n        _mod = importlib.util.module_from_spec(spec)\n        spec.loader.exec_module(_mod)\n        break\n\nif _mod is None:\n    raise ImportError(f\"no _ogo native extension found in {_dir} (looked for suffixes: {suffix})\")\n\nsys.modules[\"ogopego._ogo._ogo\"] = _mod\n'
+with open('{{PYOUT}}/__init__.py', 'w') as f:
+    f.write(content)
+"
+
+# Create go.mod for the binding module (needed for pass 1 and pass 2)
+pyapi-gomod: pyapi-gen
+	printf 'module ogo\n\ngo 1.22\n\nrequire github.com/go-python/gopy v0.4.10\n\n' > {{PYOUT}}/go.mod
+	printf 'replace github.com/neogeny/ogopego => ../../../\n' >> {{PYOUT}}/go.mod
+	printf 'replace github.com/go-python/gopy => ../../../lib/gopy\n' >> {{PYOUT}}/go.mod
+	cd {{PYOUT}} && go mod tidy
+
+# Pass 1: Go-only build to generate the export header (ogo_go.h)
+pyapi-build-pass1: pyapi-gomod
+	rm -f {{PYOUT}}/ogo.c
+	cd {{PYOUT}} && \
+		MACOSX_DEPLOYMENT_TARGET=11.0 \
+		CGO_LDFLAGS="-Wl,-undefined,dynamic_lookup" \
+		go build -buildmode=c-shared -o ogo_go.so .
+
+# Generate C extension wrapper code (ogo.c) via pybindgen
+pyapi-build-c: pyapi-build-pass1
+	rm -f {{PYOUT}}/ogo_go.so
+	cd {{PYOUT}} && {{PYTHON}} build.py
+
+# Pass 2: Full build (Go + C) → final _ogo.so, then rename to ABI-tagged name
+pyapi-build-pass2: pyapi-build-c
+	cd {{PYOUT}} && \
+		MACOSX_DEPLOYMENT_TARGET=11.0 \
+		CGO_LDFLAGS="-Wl,-undefined,dynamic_lookup" \
+		go build -buildmode=c-shared -o _ogo.so .
+	cd {{PYOUT}} && {{PYTHON}} -c "import os, sysconfig; os.rename('_ogo.so', f'_ogo{sysconfig.get_config_var(\"EXT_SUFFIX\")}')"
+
+# Remove intermediate files, keep only what Python needs
+pyapi-clean-artifacts: pyapi-build-pass2
+	rm -f {{PYOUT}}/ogo_go.h {{PYOUT}}/ogo_go.so
+	rm -f {{PYOUT}}/ogo.c   # pybindgen-generated C
+	rm -f {{PYOUT}}/ogo.go  # gopy-generated CGo
+	rm -f {{PYOUT}}/build.py {{PYOUT}}/Makefile
+	rm -f {{PYOUT}}/go.mod {{PYOUT}}/go.sum
+	# keep: _ogo.<suffix>.so/.pyd, pyapi.py, go.py, __init__.py, _ogo.h
+
+# All-in-one: build Python extension from scratch
+pyapi: pyapi-clean-artifacts
+
+# Write C stub, build wheel/sdist, remove C stub
+pyapi-wheel: pyapi
+	cat > {{PYOUT}}/_ogo_plat.c << 'CEOF'
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+
+static PyMethodDef _ogo_plat_methods[] = {
+    {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef _ogo_plat_module = {
+    PyModuleDef_HEAD_INIT,
+    "_ogo_plat",
+    NULL,
+    -1,
+    _ogo_plat_methods
+};
+
+PyMODINIT_FUNC PyInit__ogo_plat(void) {
+    return PyModule_Create(&_ogo_plat_module);
+}
+CEOF
+	mkdir -p dist
+	cd python && uv build --sdist --wheel --out-dir ../dist .
+	rm -f {{PYOUT}}/_ogo_plat.c
+
+# All-in-one: full build → wheel
+pyapi-all: pyapi-wheel
+
+# Clean all Python build artifacts (project-root level)
+pyapi-clean:
+	rm -rf dist
+	rm -rf python/dist
+	rm -rf python/build
+	rm -rf python/*.egg-info

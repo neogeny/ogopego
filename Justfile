@@ -5,14 +5,14 @@ PACKAGES := "\
 ./pkg/config \
 ./pkg/context \
 ./pkg/input \
-./pkg/json \
+./pkg/asjson \
 ./pkg/peg \
 ./pkg/trees \
 ./pkg/util/ \
 ./test \
 "
 
-TARGET := "./target"
+TARGET := "target"
 
 default: check
 
@@ -88,5 +88,32 @@ tools:
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
 
-gopy:
-    uv run --dev gopy pkg -vm=python3 -output ogopego ogopego {{PACKAGES}}
+# ------------------------------------------------------------------------------
+# Python binding build pipeline
+# ------------------------------------------------------------------------------
+PYAPI_PKG := "./pyapi"
+PYTHON    := `pwd` + "/.venv/bin/python"
+GOPY      := "target/gopy"
+PYOUT     := "python/ogopego/_ogo"
+
+
+
+# Build the gopy CLI tool from the forked source in lib/gopy/
+gopy-bin:
+	mkdir -p {{TARGET}}
+	cd lib/gopy && go build -o ../../{{GOPY}} .
+
+
+# Clean all Python build artifacts (project-root level)
+pyapi-clean:
+	rm -rf dist
+	rm -rf python/dist
+	rm -rf python/build
+	rm -rf python/*.egg-info
+
+gopy-init:
+    uv run {{GOPY}} pkg -output=./python/ogopego -vm=python3 \
+        github.com/neogeny/ogopego ./api/pyapi.go
+
+gopy-build:
+    uv run {{GOPY}} build -output=./python/ogopego -vm=python3 .

@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	asjson "github.com/neogeny/ogopego/pkg/json"
+	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
 func TestNodeNilSafety(t *testing.T) {

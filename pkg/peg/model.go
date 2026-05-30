@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/neogeny/ogopego/pkg/asjson"
 	context2 "github.com/neogeny/ogopego/pkg/context"
-	asjson "github.com/neogeny/ogopego/pkg/json"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
 

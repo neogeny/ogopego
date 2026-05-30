@@ -12,7 +12,7 @@ var ogoBin string
 func ogoPath(t *testing.T) string {
 	if ogoBin == "" {
 		root := filepath.Join("..")
-		bin := filepath.Join(root, "bin", "ogo")
+		bin := filepath.Join(root, "target/debug", "ogo")
 		if _, err := os.Stat(bin); err != nil {
 			t.Skipf("ogo binary not found at %s — run 'just build' first", bin)
 		}
