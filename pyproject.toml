@@ -52,27 +52,6 @@ artifacts = [
 #"python/ogopego/bin" = "ogopego/bin"
 
 
-[tool.cibuildwheel]
-# -ldflags="-s -w" strips debug information and symbols to drastically reduce binary size.
-# -gcflags="all=-B" disables bounds checking for a performance boost (optional/use with caution).
-before-build = """\
-go build -ldflags='-s -w' -gcflags='all=-B' \
--o python/ogopego/bin/ \
-./api \
-./cmd \
-./cmd/cli \
-./pkg/config \
-./pkg/context \
-./pkg/input \
-./pkg/asjson \
-./pkg/peg \
-./pkg/trees \
-./pkg/util/ \
-"""
-build-frontend = "build[uv]"
-environment-pass = ["PATH"]
-environment = { GOPATH = "/tmp/gopath", GOCACHE = "/tmp/gocache" }
-
 [tool.hatch.build.hooks.custom]
 path = "python/hatch_build.py"
 
