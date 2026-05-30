@@ -14,7 +14,6 @@ class CustomBuildHook(BuildHookInterface):
     def initialize(self, version, build_data):
         # Instruct Hatchling that this package outputs binary wheels
         build_data["pure_python"] = False
-        build_data["infer_tag"] = True
 
         # Check if an explicit cross-compilation wheel tag was provided by release.py
         platform_tag = os.environ.get("HATCH_WHEEL_PLATFORM_TAG", "").lower()
@@ -48,6 +47,8 @@ class CustomBuildHook(BuildHookInterface):
                 goarch = "arm64"
             else:
                 goarch = arch_raw
+
+        build_data["tag"] = f"py3-none-{build.get_wheel_tag(goos, goarch)}"
 
         expected_binary = build.get_binary_path(goos, goarch)
 

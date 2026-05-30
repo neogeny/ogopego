@@ -25,16 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        if: matrix.os != 'ubuntu-latest'
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.13'
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
@@ -42,17 +36,10 @@ jobs:
       - name: Build Wheels via cibuildwheel
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_BUILD: "cp314-*"
+          CIBW_BUILD: "cp313-*"
           CIBW_SKIP: "*t-* *musllinux*"
 
-          CIBW_BEFORE_ALL_LINUX: "curl -L https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf -"
-
-          CIBW_ENVIRONMENT_LINUX: 'GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
           CIBW_ENVIRONMENT_MACOS: 'MACOSX_DEPLOYMENT_TARGET=12.0'
-
-          CIBW_BEFORE_BUILD_LINUX: "export PATH='/usr/local/go/bin:$PATH' && go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
-
-          CIBW_BEFORE_BUILD: "go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
 
           CIBW_BUILD_FRONTEND: "build[uv]"
 
