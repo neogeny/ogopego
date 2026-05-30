@@ -64,7 +64,7 @@ ogo --help
 
 For the Python API please take a look at the documentation in the [docs] directory.
 
-[docs]: python/ogopego/docs/ogopego.html 
+[docs]: python/docs/ogopego.html 
 
 
 ## Library API
