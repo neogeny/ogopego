@@ -8,12 +8,12 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).parent / "python" / "ogopego"
 sys.path.insert(0, str(PACKAGE_ROOT))
 
-import build  # type: ignore
+from ogopego import build  # type: ignore
 
 def clean_workspace(root_dir: Path):
     """Cleans up stale build artifacts to ensure reproducible packaging."""
     dist_dir = root_dir / "dist"
-    lib_dir = PACKAGE_ROOT / build.LIB_DIR_NAME
+    lib_dir = PACKAGE_ROOT / build.BIN_DIR_NAME
 
     if dist_dir.exists():
         shutil.rmtree(dist_dir)
@@ -47,6 +47,7 @@ def build_targeted_wheels(root_dir: Path):
         # and specify exactly which binary file from our lib directory should be bundled.
         # Files not matching this pattern are skipped for this specific wheel package pass.
         env["HATCH_WHEEL_PLATFORM_TAG"] = wheel_tag
+        env["HATCH_BIN_NAME"] = binary_name
 
         # Trigger uv build targeting only the wheel distribution channel
         cmd = ["uv", "build", "--wheel"]
@@ -64,3 +65,5 @@ if __name__ == "__main__":
     project_root = Path(__file__).parent.resolve()
     clean_workspace(project_root)
     build_targeted_wheels(project_root)
+
+

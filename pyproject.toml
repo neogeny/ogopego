@@ -1,7 +1,6 @@
 [project]
 name = "ogopego"
 dynamic = ["version"]
-version = "0.1.0"
 description = "A PEG Parser generator in Go"
 readme = "README.md"
 authors = [
@@ -11,20 +10,40 @@ requires-python = ">=3.12"
 dependencies = []
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "pkg/*.py",
+]
+exclude = [
+    "*.json",
+    "pkg/_compat.py",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["python/ogopego"]
-
-# Exclude all compiled binaries by default from standard packaging passes
-exclude = [
-    "python/ogopego/lib/*"
+include = [
+    "python/ogopego/bin/*"
 ]
-# Dynamically override and inject the correct binary into the target wheel location.
-# This maps the workspace file directly to the embedded distribution 'lib' directory.
 [tool.hatch.build.targets.wheel.force-include]
-"python/ogopego/lib/{env:HATCH_BIN_NAME:placeholder}" = "ogopego/lib/{env:HATCH_BIN_NAME:placeholder}"
+"python/ogopego/bin" = "ogopego/bin"
+
+#[tool.uv.extra-build-dependencies]
+#ogopego = ["hatchling.build.hooks"]
+
+[tool.hatch.build.hooks.custom]
+path = "python/hatch_build.py"
+
+#exclude = [
+#    "python/ogopego/lib/*"
+#]
+#[tool.hatch.build.targets.wheel.force-include]
+#"python/ogopego/lib/{env:HATCH_BIN_NAME:placeholder}" = "ogopego/lib/{env:HATCH_BIN_NAME:placeholder}"
 
 #[tool.hatch.build.targets.wheel.hooks.custom]
 #path = "python/ogopego/build.py" # Keeps Hatchling happy during sdist fallbacks

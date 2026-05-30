@@ -1,32 +1,32 @@
-import platform
 import subprocess
+import sys
 from pathlib import Path
+from .build import get_binary_path
 
-def get_binary_path() -> Path:
-    base_dir = Path(__file__).parent / "binaries"
-    system = platform.system().lower() # 'darwin', 'linux', 'windows'
-    machine = platform.machine().lower() # 'x86_64', 'arm64', 'amd64'
 
-    # Normalize architecture names
-    arch = "amd64" if machine in ["x86_64", "amd64"] else "arm64" if "arm" in machine else machine
-    
-    ext = ".exe" if system == "windows" else ""
-    binary_name = f"ogopego_{system}_{arch}{ext}"
-    
-    binary_path = base_dir / binary_name
+def ogo(*args: str, **kwargs) -> subprocess.CompletedProcess:
+    """Executes the embedded Go binary with the provided arguments.
+
+    Forwards stdin, stdout, and stderr to the parent process by default
+    unless overridden via kwargs (e.g., capture_output=True).
+    """
+    binary_path = get_binary_path()
+
     if not binary_path.exists():
-        raise RuntimeError(f"Unsupported platform platform configuration: {system}_{arch}")
-        
-    return binary_path
+        raise FileNotFoundError(
+            f"Native ogopego binary component is missing at: {binary_path}"
+        )
 
-def start_go_submodule():
-    binary = get_binary_path()
-    
-    # Example: Fire up the Go binary via a background subprocess
-    # Your Go binary can listen on a dynamic port or process stdin/stdout lines
-    process = subprocess.Popen(
-        [str(binary), "--port", "8080"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    return process
+    # Convert all arguments to strings and build the execution command list
+    cmd = [str(binary_path)] + [str(arg) for arg in args]
+
+    # Provide safe terminal defaults while allowing complete subprocess parameter overrides
+    kwargs.setdefault("stdout", None)
+    kwargs.setdefault("stderr", None)
+    kwargs.setdefault("stdin", None)
+
+    try:
+        return subprocess.run(cmd, check=True, **kwargs)
+    except subprocess.CalledProcessError as e:
+        # Transparently pass through the exit code if the Go executable fails internally
+        sys.exit(e.returncode)

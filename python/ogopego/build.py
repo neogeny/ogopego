@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 # Centralized configuration constants
-LIB_DIR_NAME = "lib"
+BIN_DIR_NAME = "bin"
 
 MATRIX = {
     ("darwin", "amd64"): "ogopego_darwin_amd64",
@@ -64,7 +64,7 @@ def get_binary_name(goos: str = None, goarch: str = None) -> str:
 def get_binary_path(goos: str = None, goarch: str = None) -> Path:
     """Resolves the absolute path to the binary artifact based on package location."""
     package_dir = Path(__file__).parent.resolve()
-    lib_dir = package_dir / LIB_DIR_NAME
+    lib_dir = package_dir / BIN_DIR_NAME
     return lib_dir / get_binary_name(goos, goarch)
 
 def compile_binary(goos: str, goarch: str) -> Path:
