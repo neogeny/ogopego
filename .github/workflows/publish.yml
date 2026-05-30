@@ -40,17 +40,20 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Build Wheels via cibuildwheel
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v2.22.0
         env:
-          # On Linux, dynamically bootstrap Go inside the manylinux container.
+          CIBW_BUILD: "cp314-*"
+          CIBW_SKIP: "*t-* *musllinux*"
+
           CIBW_BEFORE_ALL_LINUX: "curl -L https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf -"
 
-          # Isolate system paths safely to ensure zero host runner cross-contamination
-          CIBW_ENVIRONMENT_LINUX: 'PATH=$PATH:/usr/local/go/bin GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
+          CIBW_ENVIRONMENT_LINUX: 'GOPATH=/tmp/gopath GOCACHE=/tmp/gocache'
           CIBW_ENVIRONMENT_MACOS: 'MACOSX_DEPLOYMENT_TARGET=12.0'
 
-          # Native compilation target pass executed directly inside the target context
+          CIBW_BEFORE_BUILD_LINUX: "export PATH='/usr/local/go/bin:$PATH' && go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
+
           CIBW_BEFORE_BUILD: "go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/ ./api ./cmd ./cmd/cli ./pkg/config ./pkg/context ./pkg/input ./pkg/asjson ./pkg/peg ./pkg/trees ./pkg/util/"
+
           CIBW_BUILD_FRONTEND: "build[uv]"
 
       - name: Upload Wheels
