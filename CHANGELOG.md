@@ -4,12 +4,21 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
-[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.8
 [0.1.6]: https://github.com/neogeny/ogopego/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.5
 [0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
 
 ## [Unreleased]
+
+## [0.1.8] 2026-05-30 Python 
+
+### Added
+
+* A Python package with an _out-of-process_ integration of **OGoPEGo** was created and published to [PyPi]. **OGoPEGo** outperforms **TatSu** (Python) by 1.6x and **TieXiu** (Rust) by 2.5x in the benchmarks.
+
+[PyPi]: https://pypi.org/project/ogopego/
 
 ### Changed
 

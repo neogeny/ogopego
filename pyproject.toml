@@ -9,6 +9,9 @@ authors = [
 requires-python = ">=3.12"
 dependencies = []
 
+[project.scripts]
+ogo = "ogopego.__main__:main"
+
 [build-system]
 requires = ["hatchling", "hatch-vcs", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"

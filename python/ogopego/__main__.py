@@ -3,6 +3,10 @@ from ._ogopego import ogo
 
 
 def main():
+    """CLI entry point registered as ``ogo`` in ``[project.scripts]``.
+
+    All arguments are forwarded verbatim to the bundled ogopego Go binary.
+    """
     try:
         # sys.argv[1:] passes all command line flags down into the driver, ignoring the calling script path
         ogo(*sys.argv[1:])

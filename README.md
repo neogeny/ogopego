@@ -46,6 +46,27 @@ Run "ogo <command> --help" for more information on a command.
 go install github.com/neogeny/ogopego/cmd/ogo@latest
 ```
 
+## Python
+
+There's a Python package that provides an _out-of-process_ integration with **⻰OGoPEGo**. The package provides a Python API that allows you to compile grammars and parse input using the Go implementation of the PEG parser generator. The package is available on PyPI as [ogopego] and can be installed with:
+
+```bash
+pip install ogopego
+````
+
+[ogopego]: https://pypi.org/project/ogopego/
+
+After installation the command-line executable becomes available as ``ogo``.
+
+```bash
+ogo --help
+```
+
+For the Python API please take a look at the documentation in the [docs] directory.
+
+[docs]: python/docs/ogopego.html 
+
+
 ## Library API
 
 ```go
@@ -103,6 +124,8 @@ fmt.Println(g.Railroads())      // railroad diagram
 
 ## Features
 
+
+* [x] Out-of-process integration for Python is complete.
 * [x] Generation of source code with an object model for deifinitions in the grammar is complete. The model generator defines the types specified in the input grammar and creates the transformation from the `Tree` result of a call to `Parse()` to the object model.
 * [x] Code generation of a parser recently moved in **竜TatSu** to the loading of a model of the Grammar and using it as parser. **⻰OGoPEGo** is cabable of generating a model of the `Grammar` constructor for a grammar that can be compiled by Go for blazing boot times.
 * **⻰OGoPEGo** also knows how to load _fast_ a `Grammar` model from **竜TatSu**-format JSON.
