@@ -11,9 +11,6 @@ on:
         type: boolean
         default: false
 
-env:
-  GOFLAGS: '-ldflags=-s -w -gcflags=all=-B'
-
 jobs:
   build_wheels:
     name: Build wheel on ${{ matrix.os }}
@@ -40,12 +37,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.26.3'
+      - name: Install Go
+        shell: bash
+        run: |
+          case ${{ runner.os }} in
+            Linux)  curl -fsSL https://go.dev/dl/go1.26.3.linux-amd64.tar.gz | sudo tar -C /usr/local -xzf - ;;
+            macOS)  curl -fsSL https://go.dev/dl/go1.26.3.darwin-arm64.tar.gz | sudo tar -C /usr/local -xzf - ;;
+            Windows) curl -fsSL https://go.dev/dl/go1.26.3.windows-amd64.zip -o /tmp/go.zip && unzip -q /tmp/go.zip -d /usr/local/ ;;
+          esac
+          echo '/usr/local/go/bin' >> "$GITHUB_PATH"
 
       - name: Build Go binary
-        run: go build -o python/ogopego/bin/${{ matrix.binary }} ./cmd/
+        shell: bash
+        run: go build -ldflags='-s -w' -gcflags='all=-B' -o python/ogopego/bin/${{ matrix.binary }} ./cmd/
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
