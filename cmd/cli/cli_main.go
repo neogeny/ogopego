@@ -81,7 +81,7 @@ func Main() {
 	if cmd != nil {
 		switch cmd.Name {
 		case "run":
-			prog := NewProgressUI(len(CLI.Run.Inputs))
+			prog := NewProgressUI(len(CLI.Run.Inputs), CLI.Quiet)
 			loader := prog.Loading("loading grammar")
 			loadCfg := *cliCfg
 			loadCfg.Heartbeat = loader.Heartbeat()

@@ -56,6 +56,8 @@ var CLI struct {
 	Color string `help:"Control colorized output for API results" enum:"auto,always,never" default:"auto"`
 	// Trace enables a detailed trace of the parsing process.
 	Trace bool `help:"Display a detailed trace of the parsing process"`
+	// Quiet disables progress bars and spinner output.
+	Quiet bool `help:"Suppress progress bar and spinner output"`
 	// Version prints version information.
 	Version bool `help:"Print version information"`
 }
