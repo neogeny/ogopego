@@ -8,6 +8,7 @@
 *.so
 *.dylib
 bin/
+target/
 
 # Test binary, built with `go test -c`
 *.test
@@ -32,6 +33,10 @@ go.work.sum
 .idea/
 .vscode/
 
+# Python integration
+dist/
+*.egg-info
+build/
 
 # Other projects symlinked
 x/
@@ -42,3 +47,10 @@ grammar/
 
 _out/
 *.pprof
+
+# Python package build artifacts
+ogopego/*.so
+ogopego/*.h
+ogopego/*.c
+ogopego/Makefile
+ogopego/__pycache__/

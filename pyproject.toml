@@ -1,32 +1,32 @@
+#[build-system]
+#requires = ["setuptools>=68", "pybindgen"]
+#build-backend = "setuptools.build_meta:__legacy__"
 [build-system]
-# Crucial: Include hatch-vcs here so uv downloads it during the build phase
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ogopego"
-description = "A PEG Parser generator for the Go language"
-authors = [
-    { name = "Juancarlo Añez", email = "apalala@gmail.com" }
-]
-requires-python = ">=3.14"
-dependencies = []
-dynamic = ["version"]  # Tell Hatch that the version is determined at runtime
-#license = "Apache-2.0"
+dynamic = ["version"]
+description = "PEG Parser Generator in Go with Python bindings"
+readme = "README.md"
 license = { file = "LICENSE" }
+authors = [
+    { name = "Juancarlo Añez", email = "apalala@gmail.com" },
+]
+requires-python = ">=3.12"
+keywords = ["PEG", "parser", "generator", "Go"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Go",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Software Development :: Code Generators",
+#    "Topic :: Text Processing :: Parsing",
+]
+urls = { Homepage = "https://github.com/neogeny/ogopego" }
 
-[project.scripts]
-ogopego = "ogopego:main"
+[tool.setuptools-git-versioning]
+enabled = true
 
 [tool.hatch.version]
-source = "vcs"  # Instructs Hatch to read from Git tags
-
-[dependency-groups]
-dev = [
-    "hatch>=1.16.5",
-    "pybindgen>=0.22.1",
-    "wheel>=0.47.0",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = ["ogopego"]
+source = "uv-dynamic-versioning"

@@ -540,7 +540,8 @@ func (g *pyGen) genPrintOut(outfn string, pr *printer) {
 func (g *pyGen) genOut() {
 	g.pybuild.Printf("\nmod.generate(open('%v.c', 'w'))\n\n", g.cfg.Name)
 	g.gofile.Printf("\n\n")
-	g.genPrintOut(g.cfg.Name+".go", g.gofile)
+	gofn := strings.TrimLeft(g.cfg.Name, "_") + ".go"
+	g.genPrintOut(gofn, g.gofile)
 	g.genPrintOut("build.py", g.pybuild)
 	if !NoMake {
 		g.makefile.Printf("\n\n")
@@ -595,7 +596,7 @@ func (g *pyGen) genGoPreamble() {
 		}
 	}
 	// gopy's generated CGo stubs use these standard library packages
-	pkgimport += "\n\t\"reflect\"\n\t\"unsafe\"\n\t\"errors\""
+	pkgimport += "\n\t\"unsafe\"\n\t\"errors\""
 	libcfg := func() string {
 		pycfg, err := GetPythonConfig(g.cfg.VM)
 		if err != nil {
@@ -607,6 +608,10 @@ func (g *pyGen) genGoPreamble() {
 		} else {
 			ldflags = pycfg.LdDynamicFlags
 		}
+		// Only keep flags Go's #cgo LDFLAGS whitelist allows.
+		// Python flags (-undefined dynamic_lookup, -lpython, etc.)
+		// must be set via CGO_LDFLAGS env var when building.
+		ldflags = "-ldl -framework CoreFoundation"
 		// this is critical to avoid pybindgen errors:
 		exflags := " -Wno-error -Wno-implicit-function-declaration -Wno-int-conversion"
 		pkgcfg := fmt.Sprintf(`

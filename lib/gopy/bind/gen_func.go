@@ -261,11 +261,12 @@ func (g *pyGen) genFuncBody(sym *symbol, fsym *Func) {
 		}
 	}
 
-	// release GIL
-	g.gofile.Printf("_saved_thread := C.PyEval_SaveThread()\n")
+	// release GIL -- disabled: crashes in CGo exports via ctypes (SIGSEGV in PyEval_SaveThread)
+
+	// g.gofile.Printf("_saved_thread := C.PyEval_SaveThread()\n")
 	if !rvIsErr && nres != 2 {
-		// reacquire GIL after return
-		g.gofile.Printf("defer C.PyEval_RestoreThread(_saved_thread)\n")
+		// reacquire GIL after return -- disabled, see above
+		// g.gofile.Printf("defer C.PyEval_RestoreThread(_saved_thread)\n")
 	}
 
 	if isMethod {
@@ -415,8 +416,8 @@ if __err != nil {
 
 	if rvIsErr || nres == 2 {
 		g.gofile.Printf("\n")
-		// reacquire GIL
-		g.gofile.Printf("C.PyEval_RestoreThread(_saved_thread)\n")
+		// reacquire GIL -- disabled: crashes in CGo exports via ctypes (SIGSEGV in PyEval_SaveThread)
+		// g.gofile.Printf("C.PyEval_RestoreThread(_saved_thread)\n")
 
 		g.gofile.Printf("if __err != nil {\n")
 		g.gofile.Indent()
