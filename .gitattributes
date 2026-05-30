@@ -1,7 +1,8 @@
-# Mark the vendor directory as vendored code
+# Mark the _vendor directory as vendored code
 # This hides it from GitHub's language statistics and collapses it in diffs
-vendor/**       linguist-vendored
-vendor/**       -diff
+_vendor/**       linguist-vendored
+_vendor/**       -diff
+_vendor/**       binary
 
 # Optional: Treat go.sum as a generated file to keep diffs clean
 go.sum          linguist-generated

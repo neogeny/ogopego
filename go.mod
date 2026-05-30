@@ -10,13 +10,11 @@ require (
 	golang.org/x/term v0.43.0
 )
 
-require github.com/dlclark/regexp2/v2 v2.1.1 // indirect
-
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
-	github.com/go-python/gopy v0.4.10
+	github.com/dlclark/regexp2/v2 v2.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-runewidth v0.0.24 // indirect

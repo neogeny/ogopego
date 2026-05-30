@@ -1,47 +1,44 @@
-#[build-system]
-#requires = ["setuptools>=68", "pybindgen"]
-#build-backend = "setuptools.build_meta:__legacy__"
-[build-system]
-requires = ["hatchling", "uv-dynamic-versioning"]
-build-backend = "hatchling.build"
-
 [project]
 name = "ogopego"
 dynamic = ["version"]
-description = "PEG Parser Generator in Go with Python bindings"
+version = "0.1.0"
+description = "A PEG Parser generator in Go"
 readme = "README.md"
-license = { file = "LICENSE" }
 authors = [
-    { name = "Juancarlo Añez", email = "apalala@gmail.com" },
+    { name = "Juancarlo Añez", email = "apalala@gmail.com" }
 ]
 requires-python = ">=3.12"
-keywords = ["PEG", "parser", "generator", "Go"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Go",
-    "License :: OSI Approved :: Apache Software License",
-    "Topic :: Software Development :: Code Generators",
-#    "Topic :: Text Processing :: Parsing",
-]
-urls = { Homepage = "https://github.com/neogeny/ogopego" }
+dependencies = []
 
-[tool.setuptools-git-versioning]
-enabled = true
-
-[tool.hatch.version]
-source = "uv-dynamic-versioning"
-
-[tool.setuptools.packages.find]
-where = ["ogopego"]
-include = ["*"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["ogopego"]
-include = [
-    "ogopego/*.py",
-    "ogopego/*.so",
-    "ogopego/*.pyd",
-]
+packages = ["python/ogopego"]
 
-[tool.setuptools.package-data]
-"*" = ["*.so", "*.pyd", "*.dll", "*.dylib"]
+# Exclude all compiled binaries by default from standard packaging passes
+exclude = [
+    "python/ogopego/lib/*"
+]
+# Dynamically override and inject the correct binary into the target wheel location.
+# This maps the workspace file directly to the embedded distribution 'lib' directory.
+[tool.hatch.build.targets.wheel.force-include]
+"python/ogopego/lib/{env:HATCH_BIN_NAME:placeholder}" = "ogopego/lib/{env:HATCH_BIN_NAME:placeholder}"
+
+#[tool.hatch.build.targets.wheel.hooks.custom]
+#path = "python/ogopego/build.py" # Keeps Hatchling happy during sdist fallbacks
+
+#    ogopego/
+#    ├── api/
+#    ├── go.mod
+#    ├── Justfile
+#    ├── pyproject.toml
+#    └── python/
+#        └── ogopego/
+#            ├── __init__.py
+#            ├── __main__.py
+#            └── lib/
+#                ├── ogopego_darwin_arm64
+#                ├── ogopego_linux_amd64
+#                └── ogopego_windows_amd64.exe

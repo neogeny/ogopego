@@ -12,7 +12,7 @@ PACKAGES := "\
 ./test \
 "
 
-TARGET := "./target"
+TARGET := "target"
 
 default: check
 
@@ -93,7 +93,7 @@ tools:
 # ------------------------------------------------------------------------------
 PYAPI_PKG := "./pyapi"
 PYTHON    := `pwd` + "/.venv/bin/python"
-GOPY_BIN  := "{{TARGET}}/gopy"
+GOPY      := "target/gopy"
 PYOUT     := "python/ogopego/_ogo"
 
 
@@ -101,7 +101,7 @@ PYOUT     := "python/ogopego/_ogo"
 # Build the gopy CLI tool from the forked source in lib/gopy/
 gopy-bin:
 	mkdir -p {{TARGET}}
-	cd lib/gopy && go build -o ../../{{GOPY_BIN}} .
+	cd lib/gopy && go build -o ../../{{GOPY}} .
 
 
 # Clean all Python build artifacts (project-root level)
@@ -110,3 +110,10 @@ pyapi-clean:
 	rm -rf python/dist
 	rm -rf python/build
 	rm -rf python/*.egg-info
+
+gopy-init:
+    uv run {{GOPY}} pkg -output=./python/ogopego -vm=python3 \
+        github.com/neogeny/ogopego ./api/pyapi.go
+
+gopy-build:
+    uv run {{GOPY}} build -output=./python/ogopego -vm=python3 .
