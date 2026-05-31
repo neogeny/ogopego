@@ -82,7 +82,7 @@ func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 	if p == nil {
 		return &FileProgress{}
 	}
-	yellow := func(s string) string { return color.YellowString(s) }
+	yellow := func(s string) string { return color.GreenString(s) }
 	bar := p.New(0,
 		mpb.BarStyle().
 			Lbound(" ").
@@ -135,13 +135,13 @@ func (fp *FileProgress) Fail() {
 	fp.bar.Abort(true)
 }
 
-// ProgressUI manages the overall progress display for the CLI.
+// ProgressUI manages the overall progress display for the cli.
 type ProgressUI struct {
 	p     *mpb.Progress
 	files *mpb.Bar
 }
 
-// NewProgressUI constructs the terminal progress UI used by the CLI and
+// NewProgressUI constructs the terminal progress UI used by the cli and
 // returns a manager for creating per-file and load progress handles.
 // When quiet is true, all progress bar calls are no-ops.
 func NewProgressUI(total int, quiet bool) *ProgressUI {

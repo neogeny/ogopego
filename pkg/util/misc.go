@@ -72,3 +72,7 @@ func FileExists(path string) bool {
 	// File might exist, but we failed to read it (e.g., permission denied)
 	return false
 }
+
+func IsTerminal() bool {
+	return os.Getenv("TERM") != "dumb"
+}

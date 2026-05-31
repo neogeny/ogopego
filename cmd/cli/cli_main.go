@@ -31,14 +31,15 @@ type outputItem struct {
 }
 
 func Main() {
-	for _, arg := range os.Args[1:] {
-		if arg == "--version" || arg == "-v" {
-			fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
-			os.Exit(0)
-		}
-	}
+	var (
+		cliCfg         *config.Cfg
+		useColorOutput bool
+		outputs        []outputItem
+		lang           string
+	)
 
-	ctx = kong.Parse(&CLI,
+	var ctx *kong.Context
+	ctx = kong.Parse(&cli,
 		kong.Name("ogo"),
 		kong.Description("ogopego: A PEG parser generator in Go"),
 		kong.UsageOnError(),
@@ -48,14 +49,17 @@ func Main() {
 		}),
 	)
 
-	if err := validateExclusive("format"); err != nil {
+	if cli.Version {
+		fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
+		os.Exit(0)
+	}
+
+	if err := validateExclusive(ctx, "format"); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	cmd := ctx.Selected()
-
-	switch CLI.Color {
+	switch cli.Color {
 	case "always":
 		useColorOutput = true
 		color.NoColor = false
@@ -63,7 +67,7 @@ func Main() {
 		useColorOutput = false
 		color.NoColor = true
 	case "auto":
-		if IsTerminal() {
+		if util.IsTerminal() {
 			useColorOutput = true
 			color.NoColor = false
 		} else {
@@ -72,211 +76,210 @@ func Main() {
 		}
 	}
 	cliCfg = &config.Cfg{
-		Trace:    CLI.Trace,
+		Trace:    cli.Trace,
 		Colorize: useColorOutput,
 	}
 
-	var outputs []outputItem
-	var lang string
+	cmd := ctx.Selected()
+	if cmd == nil {
+		return
+	}
+	switch cmd.Name {
+	case "run":
+		var errcount int
+		var sourceLines int
+		start := time.Now()
 
-	if cmd != nil {
-		switch cmd.Name {
-		case "run":
-			var errcount int
-			var sourceLines int
-			start := time.Now()
+		if cli.Run.Start != "" {
+			cliCfg.Start = cli.Run.Start
+		}
+		var inputs []string
+		for _, path := range cli.Run.Inputs {
+			if util.FileExists(path) {
+				inputs = append(inputs, path)
+			} else {
+				_, _ = color.New(color.FgRed).
+					Fprintf(os.Stderr, "warning: input file not found: %s\n", path)
+			}
+		}
 
-			var inputs []string
-			for _, path := range CLI.Run.Inputs {
-				if util.FileExists(path) {
-					inputs = append(inputs, path)
-				} else {
-					_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "warning: input file not found:", path)
-				}
+		if len(inputs) > 0 {
+			//panic(fmt.Sprintf("HERE %v", CLI.Run.Inputs))
+			prog := NewProgressUI(len(cli.Run.Inputs), cli.Quiet)
+			loader := prog.Loading("loading grammar")
+			loadCfg := *cliCfg
+			loadCfg.Heartbeat = loader.Heartbeat()
+			gram, err := loadGrammar(cli.Run.Grammar, &loadCfg)
+			loader.Finish()
+			if err != nil {
+				_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "\nerror:", err)
+				os.Exit(1)
 			}
 
-			if len(inputs) > 0 {
-				//panic(fmt.Sprintf("HERE %v", CLI.Run.Inputs))
-				prog := NewProgressUI(len(CLI.Run.Inputs), CLI.Quiet)
-				loader := prog.Loading("loading grammar")
-				loadCfg := *cliCfg
-				loadCfg.Heartbeat = loader.Heartbeat()
-				gram, err := loadGrammar(CLI.Run.Grammar, &loadCfg)
-				loader.Finish()
-				if err != nil {
-					_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "\nerror:", err)
-					os.Exit(1)
-				}
-
-				var mu sync.Mutex
-				var wg sync.WaitGroup
-
-				maxWorkers := CLI.Run.Nproc
-				if maxWorkers <= 0 {
-					maxWorkers = runtime.GOMAXPROCS(0)
-				}
-				sem := make(chan int, maxWorkers)
-				for i, path := range inputs {
-					fileName := filepath.Base(path)
-					fp := prog.AddFile(fileName)
+			maxWorkers := cli.Run.Nproc
+			if maxWorkers <= 0 {
+				maxWorkers = runtime.GOMAXPROCS(0)
+			}
+			var mu sync.Mutex
+			var wg sync.WaitGroup
+			var sem = make(chan int, maxWorkers)
+			for i, path := range inputs {
+				wg.Add(1)
+				sem <- i
+				go func(path string) {
+					defer wg.Done()
+					fName := filepath.Base(path)
+					fp := prog.AddFile(fName)
 
 					data, err := os.ReadFile(path)
 					if err != nil {
 						_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
 						errcount++
 						prog.IncFiles()
-						continue
+						return
 					}
+					input := string(data)
 					fp.SetLength(len(data))
 
-					wg.Add(1)
-					sem <- i
-					go func(path string, d []byte, fProgress *FileProgress) {
-						defer wg.Done()
-						fName := filepath.Base(path)
+					fileCfg := *cliCfg
+					fileCfg.Heartbeat = fp.Heartbeat()
+					fileCfg.Source, _ = util.PathRelativeToCwd(path)
 
-						fileCfg := *cliCfg
-						fileCfg.Heartbeat = fProgress.Heartbeat()
-						fileCfg.Source, _ = util.PathRelativeToCwd(path)
-						if CLI.Run.Start != "" {
-							fileCfg.Start = CLI.Run.Start
+					tree, err := api.ParseInput(gram, input, &fileCfg)
+					// Thread-safe accumulation block
+					prog.IncFiles()
+					<-sem
+					mu.Lock()
+					defer mu.Unlock()
+
+					if err != nil {
+						errcount++
+						fp.Fail()
+						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+							err = &report.Memento
 						}
-
-						tree, err := api.ParseInput(gram, string(d), &fileCfg)
-						// Thread-safe accumulation block
-						<-sem
-						prog.IncFiles()
-						mu.Lock()
-						defer mu.Unlock()
-
-						if err != nil {
-							errcount++
-							fProgress.Fail()
-							if report, ok := errors.AsType[*context.ParseFailure](err); ok {
-								err = &report.Memento
-							}
-							_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-						} else {
-							sourceLines += util.CountLines(string(d)).Code
-							fProgress.Success()
-							var payload string
-							switch {
-							case CLI.Run.Model:
-								payload = util.Repr(tree)
-							default:
-								payload = trees.TreeToJSONStr(tree)
-							}
-							outputs = append(outputs, outputItem{Name: fName, Payload: payload})
+						_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+					} else {
+						sourceLines += util.CountLines(input).Code
+						fp.Success()
+						var payload string
+						switch {
+						case cli.Run.Model:
+							payload = util.Repr(tree)
+						default:
+							payload = trees.TreeToJSONStr(tree)
+							item := outputItem{Name: fName, Payload: payload}
+							outputs = append(outputs, item)
 						}
-					}(path, data, fp)
-				}
-
-				// Block the main thread until every individual parsing worker finishes
-				wg.Wait()
-				prog.Finish()
-			}
-			passed := len(CLI.Run.Inputs) - errcount
-			elapsed := time.Since(start)
-			rate := int(float64(sourceLines) / elapsed.Seconds())
-			_, _ = fmt.Fprintf(os.Stderr, "%s %s %s %s\n",
-				color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(CLI.Run.Inputs)),
-				color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
-				color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
-				color.New(color.FgCyan).Sprintf("%d sloc/s", rate),
-			)
-			switch {
-			case CLI.Run.Model:
-				lang = "go"
-			default:
-				lang = "json"
+					}
+				}(path)
 			}
 
-		case "boot":
-			gram, err := api.BootGrammar()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
-				os.Exit(1)
-			}
-			var payload string
-			switch {
-			case CLI.Boot.Json:
-				payload = peg.ModelToJSONStr(gram)
-				lang = "json"
-			case CLI.Boot.Pretty:
-				payload = gram.PrettyPrint()
-				lang = "ebnf"
-			case CLI.Boot.Railroads:
-				payload = gram.Railroads()
-				lang = "apl"
-			case CLI.Boot.Model:
-				payload = util.Repr(gram)
-				lang = "go"
-			default:
-				payload = gram.PrettyPrint()
-				lang = "ebnf"
-			}
-			outputs = append(outputs, outputItem{Name: "boot", Payload: payload})
+			// Block the main thread until every individual parsing worker finishes
+			wg.Wait()
+			prog.Finish()
+		}
+		passed := len(cli.Run.Inputs) - errcount
+		elapsed := time.Since(start)
+		rate := int(float64(sourceLines) / elapsed.Seconds())
+		_, _ = fmt.Fprintf(os.Stderr, "%s %s %s %s\n",
+			color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(cli.Run.Inputs)),
+			color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
+			color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
+			color.New(color.FgCyan).Sprintf("%d sloc/s", rate),
+		)
+		switch {
+		case cli.Run.Model:
+			lang = "go"
+		default:
+			lang = "json"
+		}
 
-		case "grammar":
-			var p *mpb.Progress
-			if !CLI.Quiet {
-				p = mpb.New(mpb.WithOutput(os.Stderr))
-			}
-			fileName := filepath.Base(CLI.Grammar.Grammar)
-			fp := NewFileProgress(p, fileName)
+	case "boot":
+		gram, err := api.BootGrammar()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
+			os.Exit(1)
+		}
+		var payload string
+		switch {
+		case cli.Boot.Json:
+			payload = peg.ModelToJSONStr(gram)
+			lang = "json"
+		case cli.Boot.Pretty:
+			payload = gram.PrettyPrint()
+			lang = "ebnf"
+		case cli.Boot.Railroads:
+			payload = gram.Railroads()
+			lang = "apl"
+		case cli.Boot.Model:
+			payload = util.Repr(gram)
+			lang = "go"
+		default:
+			payload = gram.PrettyPrint()
+			lang = "ebnf"
+		}
+		outputs = append(outputs, outputItem{Name: "boot", Payload: payload})
 
-			data, err := os.ReadFile(CLI.Grammar.Grammar)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "\nerror reading grammar:", err)
-				os.Exit(1)
-			}
-			fp.SetLength(len(data))
+	case "grammar":
+		var p *mpb.Progress
+		if !cli.Quiet {
+			p = mpb.New(mpb.WithOutput(os.Stderr))
+		}
+		fileName := filepath.Base(cli.Grammar.Grammar)
+		fp := NewFileProgress(p, fileName)
 
-			loadCfg := *cliCfg
-			loadCfg.Heartbeat = fp.Heartbeat()
-			gram, err := loadGrammar(CLI.Grammar.Grammar, &loadCfg)
-			if err != nil {
-				fp.Fail()
-				if p != nil {
-					p.Wait()
-				}
-				fmt.Fprintln(os.Stderr, "\nerror:", err)
-				os.Exit(1)
-			}
-			fp.Success()
+		data, err := os.ReadFile(cli.Grammar.Grammar)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "\nerror reading grammar:", err)
+			os.Exit(1)
+		}
+		fp.SetLength(len(data))
+
+		loadCfg := *cliCfg
+		loadCfg.Heartbeat = fp.Heartbeat()
+		gram, err := loadGrammar(cli.Grammar.Grammar, &loadCfg)
+		if err != nil {
+			fp.Fail()
 			if p != nil {
 				p.Wait()
 			}
-			var payload string
-			switch {
-			case CLI.Grammar.Json:
-				payload = peg.ModelToJSONStr(gram)
-				lang = "json"
-			case CLI.Grammar.Pretty:
-				payload = gram.PrettyPrint()
-				lang = "ebnf"
-			case CLI.Grammar.Railroads:
-				payload = gram.Railroads()
-				lang = "apl"
-			case CLI.Grammar.Model:
-				payload = util.Repr(gram)
-				lang = "go"
-			case CLI.Grammar.Parser != "":
-				payload = peg.ParserRepr(*gram, CLI.Grammar.Parser)
-				lang = "go"
-			case CLI.Grammar.ModelGen != "":
-				payload = tool.ModelRepr(*gram, CLI.Grammar.ModelGen)
-				lang = "go"
-			default:
-				payload = gram.PrettyPrint()
-				lang = "ebnf"
-			}
-			outputs = append(outputs, outputItem{Name: filepath.Base(CLI.Grammar.Grammar), Payload: payload})
+			fmt.Fprintln(os.Stderr, "\nerror:", err)
+			os.Exit(1)
 		}
+		fp.Success()
+		if p != nil {
+			p.Wait()
+		}
+		var payload string
+		switch {
+		case cli.Grammar.Json:
+			payload = peg.ModelToJSONStr(gram)
+			lang = "json"
+		case cli.Grammar.Pretty:
+			payload = gram.PrettyPrint()
+			lang = "ebnf"
+		case cli.Grammar.Railroads:
+			payload = gram.Railroads()
+			lang = "apl"
+		case cli.Grammar.Model:
+			payload = util.Repr(gram)
+			lang = "go"
+		case cli.Grammar.Parser != "":
+			payload = peg.ParserRepr(*gram, cli.Grammar.Parser)
+			lang = "go"
+		case cli.Grammar.ModelGen != "":
+			payload = tool.ModelRepr(*gram, cli.Grammar.ModelGen)
+			lang = "go"
+		default:
+			payload = gram.PrettyPrint()
+			lang = "ebnf"
+		}
+		outputs = append(outputs, outputItem{Name: filepath.Base(cli.Grammar.Grammar), Payload: payload})
 	}
 
 	if len(outputs) > 0 {
-		if err := writeOutputs(outputs, lang, CLI.Output, useColorOutput); err != nil {
+		if err := writeOutputs(outputs, lang, cli.Output, useColorOutput); err != nil {
 			fmt.Fprintln(os.Stderr, "error writing output:", err)
 			os.Exit(1)
 		}

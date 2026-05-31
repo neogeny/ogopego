@@ -17,11 +17,11 @@ func IsTerminal() bool {
 	return os.Getenv("TERM") != "dumb"
 }
 
-// CLI is the command-line interface structure for the ogo tool.
+// cli is the command-line interface structure for the ogo tool.
 //
 //goland:noinspection GoVetStructTag
 //nolint:govet // Kong uses non-standard tag syntax
-var CLI struct {
+var cli struct {
 	// Run subcommand executes a grammar against one or more input files.
 	Run struct {
 		Grammar string   `arg required name:"grammar" help:"Path to the grammar in EBNF or JSON format"`
@@ -82,48 +82,48 @@ func validateExclusive(groups ...string) error {
 		case "run":
 			switch group {
 			case "format":
-				if CLI.Run.Json {
+				if cli.Run.Json {
 					set = append(set, "--json")
 				}
-				if CLI.Run.Model {
+				if cli.Run.Model {
 					set = append(set, "--model")
 				}
 			}
 		case "boot":
 			switch group {
 			case "format":
-				if CLI.Boot.Json {
+				if cli.Boot.Json {
 					set = append(set, "--json")
 				}
 				//if CLI.Boot.Model {
 				//	set = append(set, "--model")
 				//}
-				if CLI.Boot.Pretty {
+				if cli.Boot.Pretty {
 					set = append(set, "--pretty")
 				}
-				if CLI.Boot.Railroads {
+				if cli.Boot.Railroads {
 					set = append(set, "--railroads")
 				}
 			}
 		case "grammar":
 			switch group {
 			case "format":
-				if CLI.Grammar.Json {
+				if cli.Grammar.Json {
 					set = append(set, "--json")
 				}
-				if CLI.Grammar.Model {
+				if cli.Grammar.Model {
 					set = append(set, "--model")
 				}
-				if CLI.Grammar.Parser != "" {
-					set = append(set, "--parser="+CLI.Grammar.Parser)
+				if cli.Grammar.Parser != "" {
+					set = append(set, "--parser="+cli.Grammar.Parser)
 				}
-				if CLI.Grammar.ModelGen != "" {
-					set = append(set, "--model-gen="+CLI.Grammar.ModelGen)
+				if cli.Grammar.ModelGen != "" {
+					set = append(set, "--model-gen="+cli.Grammar.ModelGen)
 				}
-				if CLI.Grammar.Pretty {
+				if cli.Grammar.Pretty {
 					set = append(set, "--pretty")
 				}
-				if CLI.Grammar.Railroads {
+				if cli.Grammar.Railroads {
 					set = append(set, "--railroads")
 				}
 			}
