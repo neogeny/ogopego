@@ -26,20 +26,14 @@ jobs:
       - name: build
         run: go build -mod=mod ./...
 
+      - name: just
+        run: sudo apt update && sudo apt install -y just
+
+      - name: tools
+        run: just tools
+
       - name: lint
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
-          golangci-lint run ./...
+        run: just lint
 
       - name: test
-        run: go test -mod=mod -count=1 \
-          ./api \
-          ./cmd \
-          ./cmd/cli \
-          ./pkg/config \
-          ./pkg/context \
-          ./pkg/input \
-          ./pkg/asjson \
-          ./pkg/peg \
-          ./pkg/trees \
-          ./pkg/util/ \
+        run: just test-v
