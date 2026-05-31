@@ -26,9 +26,10 @@ func NewMemoMache(capacity int) MemoCache {
 
 func PruneMemoCache(cache MemoCache, cutpoint int) {
 	cache.Retain(func(key MemoKey, memo Memo) bool {
-		// WARNING
-		// return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
-		return key.Mark >= cutpoint
+		// NOTE
+		// 	Keep trees.BOTTOM for the sake of left recursion
+		//  To keep them is easier than to calculate when they can be prunned
+		return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
 	})
 }
 
