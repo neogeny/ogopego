@@ -87,21 +87,31 @@ func (ctx *CoreCtx) Merge(other Ctx) {
 	ctx.furthest = other.FurthestFailure()
 }
 
+func (ctx *CoreCtx) muLock() {
+	if ctx.heavy.cfg.Concurrency {
+		ctx.heavy.mu.Lock()
+	}
+}
+
+func (ctx *CoreCtx) muUnlock() {
+	if ctx.heavy.cfg.Concurrency {
+		ctx.heavy.mu.Unlock()
+	}
+}
+
 func (ctx *CoreCtx) Cfg() Cfg {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 	return ctx.heavy.cfg
 }
 
 func (ctx *CoreCtx) Configure(cfg Cfg) {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
-
+	ctx.muLock()
 	ctx.heavy.cfg = ctx.heavy.cfg.Override(&cfg)
-	ctx.heavy.mu.Unlock()
+	ctx.muUnlock()
 	ctx.cursor.Configure(cfg)
 
-	ctx.heavy.mu.Lock()
+	ctx.muLock()
 	ctx.setKeywords(cfg.Keywords)
 
 	if cfg.Trace {
@@ -116,12 +126,13 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 	if cfg.Heartbeat != nil {
 		ctx.heavy.heartbeat = cfg.Heartbeat
 	}
+	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) SetTracer(tracer Tracer) {
-	ctx.heavy.mu.Lock()
+	ctx.muLock()
 	ctx.heavy.tracer = tracer
-	ctx.heavy.mu.Unlock()
+	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) Cursor() Cursor { return ctx.cursor }
@@ -133,8 +144,8 @@ func (ctx *CoreCtx) CallStack() CallStack {
 }
 
 func (ctx *CoreCtx) Tracer() Tracer {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 	return ctx.heavy.tracer
 }
 
@@ -165,8 +176,8 @@ func (ctx *CoreCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
 func (ctx *CoreCtx) NextToken() { ctx.cursor.NextToken() }
 
 func (ctx *CoreCtx) HeartbeatTick() {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 
 	if time.Since(ctx.heavy.heartbeatTime) < 128*time.Millisecond {
 		return
@@ -181,8 +192,8 @@ func (ctx *CoreCtx) HeartbeatTick() {
 }
 
 func (ctx *CoreCtx) pruneCache(cutPoint int) {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 	if ctx.heavy.cfg.NoPruneMemosOnCut {
 		return
 	}
@@ -194,8 +205,8 @@ func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 }
 
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 	return ctx.heavy.memoCache.Get(key)
 }
 
@@ -203,9 +214,9 @@ func (ctx *CoreCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
 	if !key.CanMemo {
 		return
 	}
-	ctx.heavy.mu.Lock()
+	ctx.muLock()
 	ctx.heavy.memoCache.Set(key, Memo{Tree: tree, Mark: mark})
-	ctx.heavy.mu.Unlock()
+	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) TrackRecursionDepth(key MemoKey) error {
@@ -234,8 +245,8 @@ func (ctx *CoreCtx) Untrack(key MemoKey) {
 func (ctx *CoreCtx) Intern(s string) string { return s }
 
 func (ctx *CoreCtx) IsKeyword(name string) bool {
-	ctx.heavy.mu.Lock()
-	defer ctx.heavy.mu.Unlock()
+	ctx.muLock()
+	defer ctx.muUnlock()
 	_, ok := ctx.heavy.keywords[name]
 	return ok
 }
@@ -383,6 +394,7 @@ func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 func (ctx *CoreCtx) Cut() {
 	ctx.cutStack[len(ctx.cutStack)-1] = true
 	ctx.Tracer().TraceCut(ctx)
+
 	if ctx.lookaheadDepth == 0 {
 		mark := ctx.Mark()
 		if mark > ctx.lastCutMark {
@@ -406,9 +418,9 @@ func (ctx *CoreCtx) CutStackPop() bool {
 }
 
 func (ctx *CoreCtx) ApplySemantics(node trees.Tree, ruleName string, params []string) (trees.Tree, bool) {
-	ctx.heavy.mu.Lock()
+	ctx.muLock()
 	sem := ctx.heavy.cfg.Semantics
-	ctx.heavy.mu.Unlock()
+	ctx.muUnlock()
 	if sem != nil {
 		return sem(node, ruleName, params)
 	}

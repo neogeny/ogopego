@@ -17,7 +17,7 @@ import (
 const ProgramName = "OGoPEGo"
 
 // DefaultPerLineMemos is the default number of memo entries per input line.
-const DefaultPerLineMemos = 8
+const DefaultPerLineMemos = 8 // NOTE: Magic !!!
 
 // Configurable is implemented by types that can be configured using a Cfg.
 type Configurable interface {
@@ -34,6 +34,7 @@ type Cfg struct {
 	Source string // source description for error messages
 	Start  string // start rule name (default: "start")
 
+	Concurrency       bool    // enable concurrent Choice evaluation (experimental)
 	NoMemo            bool    // disable memoization
 	NoPruneMemosOnCut bool    // disable pruning memos on cut (~)
 	PerLineMemos      float64 // memo entries per input line

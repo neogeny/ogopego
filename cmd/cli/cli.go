@@ -51,6 +51,8 @@ var CLI struct {
 		Railroads bool   `help:"Print a railroad diagram" short:"r" group:"format"`
 	} `cmd:"grammar" help:"Grammar transformations"`
 
+	// Profile enables CPU and memory profiling, writing pprof files to $TMPDIR.
+	Profile bool `help:"Enable CPU and memory profiling, output to $TMPDIR"`
 	// Output specifies a file to write output to instead of stdout.
 	Output string `help:"Output to a file or directory instead of stdout" short:"o"`
 	// Color controls colorized output for API results.
