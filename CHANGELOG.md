@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file. The format 
 
 
 [Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.9...HEAD
-[0.1.9]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.9
-[0.1.6]: https://github.com/neogeny/ogopego/compare/v0.1.5...v0.1.6
-[0.1.5]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.5
-[0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
+[v0.1.9]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.9
+[v0.1.6]: https://github.com/neogeny/ogopego/compare/v0.1.5...v0.1.6
+[v0.1.5]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.5
+[v0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
 
 ## [Unreleased]
 
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. The format 
 
 [alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2
 
-## [0.1.9] 2026-05-30 Python 
+## [v0.1.9] 2026-05-30 Python 
 
 ### Added
 
@@ -34,7 +34,7 @@ All notable changes to this project will be documented in this file. The format 
 - The implementation of concurrent `Choice` options is in, but.. it doesn't work!
 
 
-## [0.1.6] 2026-05-27 Debug
+## [v0.1.6] 2026-05-27 Debug
 
 ### Changed
 - Solved more issues with `NameGuard`, which has complex semantics in legacy **TatSu**. 
@@ -49,7 +49,7 @@ All notable changes to this project will be documented in this file. The format 
 - Re-implemented `Cursor.MatchToken()` using only string operations, without regular expression tricks. Peformance improved considerably with the change.
 
 
-## [0.1.5] 2026-05-26 Optimize
+## [v0.1.5] 2026-05-26 Optimize
 
 ### Changed
 - Implement `NameGuard` semantics with string and rune comparisons, replacing the previous implementation that used regular expressions. `NameGuard` avoids matching a token when it is not a complete word in the input, like not matching`"new"` when the input at the cursor is `newVar...`. 
@@ -62,7 +62,7 @@ All notable changes to this project will be documented in this file. The format 
 - Verified non-local/third-party builds through GitHub workflow.
 - To be friendly with the ecosystem, skip the use of a `vendor` directory. A `_vendor` directory remains in the repo to guarantee build stability if a dependency becomes unreliable.
 
-## [0.1.2] 2026-05-23 - Release
+## [v0.1.2] 2026-05-23 Release
 
 
 ### Added
