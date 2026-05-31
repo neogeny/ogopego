@@ -3,8 +3,8 @@
 
 package cli
 
-// Config holds the parsed command-line configuration for the ogo tool.
-type Config struct {
+// CLIConfig holds the parsed command-line configuration for the ogo tool.
+type CLIConfig struct {
 	Run struct {
 		Grammar string   `arg:"required,name=grammar" help:"Path to the grammar in EBNF or JSON format"`
 		Inputs  []string `arg:"required,name=inputs" help:"The files to be parsed"`

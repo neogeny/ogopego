@@ -13,6 +13,8 @@ package api
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -166,4 +168,25 @@ func ParseInputToJSONString(parser *peg.Grammar, text string, cfg *Cfg) (string,
 //	CompileToJSON or peg.serializeGrammar.
 func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 	return peg.LoadGrammarFromJSON(data)
+}
+
+func LoadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading %s: %w", path, err)
+	}
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".json":
+		g, err := peg.LoadGrammarFromJSON(data)
+		if err != nil {
+			return nil, err
+		}
+		if err := g.Initialize(); err != nil {
+			return nil, err
+		}
+		return g, nil
+	default:
+		return Compile(string(data), cfg)
+	}
 }

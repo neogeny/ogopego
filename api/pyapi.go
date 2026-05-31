@@ -141,6 +141,15 @@ func PyCompile(grammar string, cfgJSON string) (GrammarHandle, error) {
 	return storeGrammar(g), nil
 }
 
+func PyLoadGrammar(path string, cfgJSON string) (GrammarHandle, error) {
+	cfg := decodeConfig(cfgJSON)
+	g, err := LoadGrammar(path, cfg)
+	if err != nil {
+		return 0, err
+	}
+	return storeGrammar(g), nil
+}
+
 func PyParseToJSONString(grammar string, text string, cfgJSON string) (string, error) {
 	cfg := decodeConfig(cfgJSON)
 	g, err := Compile(grammar, cfg)
