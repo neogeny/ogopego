@@ -28,7 +28,7 @@ run *args:
 grammar FILE="grammar/tatsu.ebnf":
     go run ./cmd/ogo grammar -m {{FILE}}
 
-    test: gofmt-check build
+test: gofmt-check build
     gotestsum -- -mod=mod {{PACKAGES}}
 
 test-v: build
@@ -85,6 +85,8 @@ tools:
     go install golang.org/x/tools/cmd/goimports@latest
     go install gotest.tools/gotestsum@latest
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+graphviz:
     go install golang.org/x/exp/cmd/modgraphviz@latest
 
 
