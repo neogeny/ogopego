@@ -63,7 +63,7 @@ func TestJavaEndToEnd(t *testing.T) {
 	t.Run("imports_field", func(t *testing.T) {
 		v, ok := m.Entries["imports"]
 		assert.True(t, ok, "missing 'imports' entry")
-		impList, ok := v.(*trees.List)
+		impList, ok := v.(*trees.Array)
 		assert.True(t, ok, "imports: expected *trees.List, got %T", v)
 		assert.Equal(t, 1, len(impList.Items), "imports: expected 1 item")
 		impNode, ok := impList.Items[0].(*trees.Node)
@@ -148,7 +148,7 @@ func TestJavaEndToEnd(t *testing.T) {
 		// Build a CompilationUnit tree with package present
 		pkgTree := &trees.Node{TypeName: "PackageDeclaration", Tree: &trees.MapNode{
 			Entries: map[string]trees.Tree{
-				"annotations": &trees.List{Items: []trees.Tree{}},
+				"annotations": &trees.Array{Items: []trees.Tree{}},
 				"name": &trees.Node{TypeName: "QualifiedName", Tree: &trees.MapNode{
 					Entries: map[string]trees.Tree{
 						"qualifiers": &trees.Seq{Items: []trees.Tree{
@@ -172,7 +172,7 @@ func TestJavaEndToEnd(t *testing.T) {
 			&trees.Node{TypeName: "CompilationUnit", Tree: &trees.MapNode{
 				Entries: map[string]trees.Tree{
 					"package":      pkgTree,
-					"imports":      &trees.List{Items: []trees.Tree{}},
+					"imports":      &trees.Array{Items: []trees.Tree{}},
 					"declarations": &trees.Seq{Items: []trees.Tree{}},
 					"linecount":    &trees.Nil{},
 				},
@@ -191,7 +191,7 @@ func TestJavaEndToEnd(t *testing.T) {
 			&trees.Node{TypeName: "CompilationUnit", Tree: &trees.MapNode{
 				Entries: map[string]trees.Tree{
 					"package":      &trees.Nil{},
-					"imports":      &trees.List{Items: []trees.Tree{}},
+					"imports":      &trees.Array{Items: []trees.Tree{}},
 					"declarations": &trees.Seq{Items: []trees.Tree{}},
 					"linecount":    &trees.Nil{},
 				},
@@ -393,7 +393,7 @@ func compilationUnitFromTree(tree trees.Tree) (*CompilationUnit, error) {
 		}
 	}
 	if v, ok := m.Entries["imports"]; ok {
-		list, ok := v.(*trees.List)
+		list, ok := v.(*trees.Array)
 		if !ok {
 			return nil, fmt.Errorf("CompilationUnit.Imports: expected List, got %T", v)
 		}

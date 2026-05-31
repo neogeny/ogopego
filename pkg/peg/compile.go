@@ -104,7 +104,7 @@ func listValue(tree trees.Tree) []trees.Tree {
 	switch t := tree.(type) {
 	case *trees.Seq:
 		return t.Items
-	case *trees.List:
+	case *trees.Array:
 		return t.Items
 	default:
 		return nil

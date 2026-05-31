@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file. The format 
 
 [alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2
 
+* Renamed `trees.List` to `trees.Array` for matching semantics and closeness to Go and JSON.
+
 ## [v0.1.9] 2026-05-30 Python 
 
 ### Added
@@ -55,7 +57,7 @@ All notable changes to this project will be documented in this file. The format 
 - Implement `NameGuard` semantics with string and rune comparisons, replacing the previous implementation that used regular expressions. `NameGuard` avoids matching a token when it is not a complete word in the input, like not matching`"new"` when the input at the cursor is `newVar...`. 
 
   `NameGuard`can be activated with the `@nameguard:: true` grammar directive, or with the `Cfg.nameguard` configuration option. It is activated by default for grammars that define patterns for whitespace or comments.
-- Use `BoundedMap` for the `Memo` cache. Parsing is faster with with a smaller cache that speeds up `Memo` lookups. The cache capacity is calculared using the heuristic `Cfg.PerLineMemos * Cursor.LineCount`. 
+- Use `BoundedMap` for the `Memo` cache. Parsing is faster with a smaller cache that speeds up `Memo` lookups. The cache capacity is calculared using the heuristic `Cfg.PerLineMemos * Cursor.LineCount`. 
 - The `Memo` cache is pruned when a `Cut`expression is parsed. Entries with marks lower than that of the previous cut are removed if they are not failure (`Tree.Bottom`) markers.
 
 ### Fixed

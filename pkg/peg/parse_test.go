@@ -142,7 +142,7 @@ func TestParseClosureMultiple(t *testing.T) {
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.List)
+	lst, ok := result.(*trees.Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 3, len(lst.Items))
 }
@@ -152,7 +152,7 @@ func TestParseClosureZero(t *testing.T) {
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.List)
+	lst, ok := result.(*trees.Array)
 	assert.True(t, ok, "expected List for zero closure, got %T", result)
 	assert.Equal(t, 0, len(lst.Items))
 }
@@ -162,7 +162,7 @@ func TestParsePositiveClosure(t *testing.T) {
 	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.List)
+	lst, ok := result.(*trees.Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 3, len(lst.Items))
 }

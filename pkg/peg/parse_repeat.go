@@ -43,7 +43,7 @@ func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
 		}
 		items = append(items, result)
 	}
-	return &trees.List{Items: items}, nil
+	return &trees.Array{Items: items}, nil
 }
 
 // repeatWithSep parses an expression separated by another expression.
@@ -63,7 +63,7 @@ func repeatWithSep(
 		if positive {
 			return nil, err
 		}
-		return &trees.List{Items: nil}, nil
+		return &trees.Array{Items: nil}, nil
 	}
 	items = append(items, first)
 
@@ -99,5 +99,5 @@ func repeatWithSep(
 		}
 		items = append(items, result)
 	}
-	return &trees.List{Items: items}, nil
+	return &trees.Array{Items: items}, nil
 }

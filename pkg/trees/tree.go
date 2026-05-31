@@ -50,7 +50,7 @@ func TreeToJSON(t Tree) any {
 			items[i] = TreeToJSON(item)
 		}
 		return items
-	case *List:
+	case *Array:
 		items := make([]any, len(v.Items))
 		for i, item := range v.Items {
 			items[i] = TreeToJSON(item)
@@ -114,7 +114,7 @@ func finish(g *treeMerge, base Tree) Tree {
 
 func closed(t Tree) Tree {
 	if s, ok := t.(*Seq); ok {
-		return &List{Items: s.Items}
+		return &Array{Items: s.Items}
 	}
 	return t
 }

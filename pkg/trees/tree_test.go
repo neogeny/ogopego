@@ -9,9 +9,9 @@ import (
 	"github.com/alecthomas/assert/v2"
 )
 
-func text(s string) *Text      { return &Text{Value: s} }
-func seq(items ...Tree) *Seq   { return &Seq{Items: items} }
-func list(items ...Tree) *List { return &List{Items: items} }
+func text(s string) *Text       { return &Text{Value: s} }
+func seq(items ...Tree) *Seq    { return &Seq{Items: items} }
+func list(items ...Tree) *Array { return &Array{Items: items} }
 
 func TestFoldNil(t *testing.T) {
 	result := Fold(&Nil{})
@@ -54,7 +54,7 @@ func TestFoldNumber(t *testing.T) {
 
 func TestFoldSeqToSeq(t *testing.T) {
 	result := Fold(seq(text("a"), text("b"), text("c")))
-	l, ok := result.(*List)
+	l, ok := result.(*Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 3, len(l.Items))
 	assert.Equal(t, "a", l.Items[0].(*Text).Value, "expected 'a'")
@@ -62,7 +62,7 @@ func TestFoldSeqToSeq(t *testing.T) {
 
 func TestFoldListToList(t *testing.T) {
 	result := Fold(list(text("a"), text("b"), text("c")))
-	l, ok := result.(*List)
+	l, ok := result.(*Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 3, len(l.Items))
 	assert.Equal(t, "a", l.Items[0].(*Text).Value, "expected 'a'")
@@ -141,7 +141,7 @@ func TestFoldOverrideAsList(t *testing.T) {
 		&OverrideAsList{Value: text("a")},
 		&OverrideAsList{Value: text("b")},
 	))
-	l, ok := result.(*List)
+	l, ok := result.(*Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 2, len(l.Items))
 }
@@ -166,7 +166,7 @@ func TestFoldNestedNamed(t *testing.T) {
 
 func TestFoldSeqWithNil(t *testing.T) {
 	result := Fold(seq(text("a"), &Nil{}, text("b")))
-	l, ok := result.(*List)
+	l, ok := result.(*Array)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 2, len(l.Items))
 }

@@ -18,17 +18,17 @@ func (s *Seq) fold(gather *treeMerge) Tree {
 	return out
 }
 
-// List represents a closed list node produced after folding sequences.
-type List struct {
+// Array represents a closed list node produced after folding sequences.
+type Array struct {
 	TreeBase
 	Items []Tree
 }
 
-func (List) tree() {}
-func (l *List) fold(gather *treeMerge) Tree {
+func (Array) tree() {}
+func (l *Array) fold(gather *treeMerge) Tree {
 	items := make([]Tree, len(l.Items))
 	for i, item := range l.Items {
 		items[i] = item.fold(gather)
 	}
-	return &List{Items: items}
+	return &Array{Items: items}
 }

@@ -25,7 +25,7 @@ func printTreeRec(t *testing.T, indent string, node trees.Tree) {
 			printTreeRec(t, indent+"  ", item)
 		}
 		t.Logf("%s]", indent)
-	case *trees.List:
+	case *trees.Array:
 		t.Logf("%sList [", indent)
 		for _, item := range n.Items {
 			printTreeRec(t, indent+"  ", item)
