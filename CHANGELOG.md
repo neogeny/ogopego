@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file. The format 
 
 * Converted tests to use [alecthomas/assert/v2] for better readability and maintainability. The new assertion library provides a more expressive and concise way to write tests, improving the overall quality of the test suite.
 
-[alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2#section-readme
+[alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2
 
 ## [0.1.8] 2026-05-30 Python 
 
