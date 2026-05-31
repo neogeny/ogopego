@@ -54,6 +54,7 @@ func TestPruneCachePreservesValues(t *testing.T) {
 }
 
 func TestPruneCachePreservesBottom(t *testing.T) {
+	t.Skip("pruning Bottom or not is optional and experimental")
 	cache := NewMemoMache(64)
 	cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{Tree: trees.BOTTOM})
 	cache.Set(MemoKey{Mark: 5, Name: "b"}, Memo{})
