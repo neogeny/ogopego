@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
-[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.8...HEAD
-[0.1.8]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.8
+[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.9...HEAD
+[0.1.9]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.9
 [0.1.6]: https://github.com/neogeny/ogopego/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/neogeny/ogopego/compare/v0.1.2...v0.1.5
 [0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. The format 
 
 [alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2
 
-## [0.1.8] 2026-05-30 Python 
+## [0.1.9] 2026-05-30 Python 
 
 ### Added
 
