@@ -22,7 +22,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/tool"
 	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util"
-	mpb "github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8"
 )
 
 type outputItem struct {
@@ -82,86 +82,99 @@ func Main() {
 	if cmd != nil {
 		switch cmd.Name {
 		case "run":
-			prog := NewProgressUI(len(CLI.Run.Inputs), CLI.Quiet)
-			loader := prog.Loading("loading grammar")
-			loadCfg := *cliCfg
-			loadCfg.Heartbeat = loader.Heartbeat()
-			gram, err := loadGrammar(CLI.Run.Grammar, &loadCfg)
-			loader.Finish()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "\nerror:", err)
-				os.Exit(1)
-			}
 			var errcount int
+			var sourceLines int
 			start := time.Now()
-			sourceLines := 0
 
-			var mu sync.Mutex
-			var wg sync.WaitGroup
-
-			maxWorkers := CLI.Run.Nproc
-			if maxWorkers <= 0 {
-				maxWorkers = runtime.GOMAXPROCS(0)
-			}
-			sem := make(chan int, maxWorkers)
-			for i, path := range CLI.Run.Inputs {
-				fileName := filepath.Base(path)
-				fp := prog.AddFile(fileName)
-
-				data, err := os.ReadFile(path)
-				if err != nil {
-					_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
-					errcount++
-					prog.IncFiles()
-					continue
+			var inputs []string
+			for _, path := range CLI.Run.Inputs {
+				if util.FileExists(path) {
+					inputs = append(inputs, path)
+				} else {
+					_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "warning: input file not found:", path)
 				}
-				fp.SetLength(len(data))
-
-				wg.Add(1)
-				sem <- i
-				go func(p string, d []byte, fProgress *FileProgress, fName string) {
-					defer wg.Done()
-
-					fileCfg := *cliCfg
-					fileCfg.Heartbeat = fProgress.Heartbeat()
-					fileCfg.Source, _ = util.PathRelativeToCwd(path)
-					if CLI.Run.Start != "" {
-						fileCfg.Start = CLI.Run.Start
-					}
-
-					tree, err := api.ParseInput(gram, string(d), &fileCfg)
-					prog.IncFiles()
-
-					// Thread-safe accumulation block
-					<-sem
-					mu.Lock()
-					defer mu.Unlock()
-
-					if err != nil {
-						errcount++
-						fProgress.Fail()
-						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
-							err = &report.Memento
-						}
-						_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-					} else {
-						sourceLines += util.CountLines(string(d)).Code
-						fProgress.Success()
-						var payload string
-						switch {
-						case CLI.Run.Model:
-							payload = util.Repr(tree)
-						default:
-							payload = trees.TreeToJSONStr(tree)
-						}
-						outputs = append(outputs, outputItem{Name: fName, Payload: payload})
-					}
-				}(path, data, fp, fileName)
 			}
 
-			// Block the main thread until every individual parsing worker finishes
-			wg.Wait()
-			prog.Finish()
+			if len(inputs) > 0 {
+				//panic(fmt.Sprintf("HERE %v", CLI.Run.Inputs))
+				prog := NewProgressUI(len(CLI.Run.Inputs), CLI.Quiet)
+				loader := prog.Loading("loading grammar")
+				loadCfg := *cliCfg
+				loadCfg.Heartbeat = loader.Heartbeat()
+				gram, err := loadGrammar(CLI.Run.Grammar, &loadCfg)
+				loader.Finish()
+				if err != nil {
+					_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "\nerror:", err)
+					os.Exit(1)
+				}
+
+				var mu sync.Mutex
+				var wg sync.WaitGroup
+
+				maxWorkers := CLI.Run.Nproc
+				if maxWorkers <= 0 {
+					maxWorkers = runtime.GOMAXPROCS(0)
+				}
+				sem := make(chan int, maxWorkers)
+				for i, path := range inputs {
+					fileName := filepath.Base(path)
+					fp := prog.AddFile(fileName)
+
+					data, err := os.ReadFile(path)
+					if err != nil {
+						_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
+						errcount++
+						prog.IncFiles()
+						continue
+					}
+					fp.SetLength(len(data))
+
+					wg.Add(1)
+					sem <- i
+					go func(path string, d []byte, fProgress *FileProgress) {
+						defer wg.Done()
+						fName := filepath.Base(path)
+
+						fileCfg := *cliCfg
+						fileCfg.Heartbeat = fProgress.Heartbeat()
+						fileCfg.Source, _ = util.PathRelativeToCwd(path)
+						if CLI.Run.Start != "" {
+							fileCfg.Start = CLI.Run.Start
+						}
+
+						tree, err := api.ParseInput(gram, string(d), &fileCfg)
+						// Thread-safe accumulation block
+						<-sem
+						prog.IncFiles()
+						mu.Lock()
+						defer mu.Unlock()
+
+						if err != nil {
+							errcount++
+							fProgress.Fail()
+							if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+								err = &report.Memento
+							}
+							_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+						} else {
+							sourceLines += util.CountLines(string(d)).Code
+							fProgress.Success()
+							var payload string
+							switch {
+							case CLI.Run.Model:
+								payload = util.Repr(tree)
+							default:
+								payload = trees.TreeToJSONStr(tree)
+							}
+							outputs = append(outputs, outputItem{Name: fName, Payload: payload})
+						}
+					}(path, data, fp)
+				}
+
+				// Block the main thread until every individual parsing worker finishes
+				wg.Wait()
+				prog.Finish()
+			}
 			passed := len(CLI.Run.Inputs) - errcount
 			elapsed := time.Since(start)
 			rate := int(float64(sourceLines) / elapsed.Seconds())

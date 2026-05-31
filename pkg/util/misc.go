@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"iter"
 	"os"
 
@@ -58,4 +59,16 @@ func Chunks[T any](slice []T, chunkSize int) iter.Seq[[]T] {
 			}
 		}
 	}
+}
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true // File exists cleanly
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false // File definitively does not exist
+	}
+	// File might exist, but we failed to read it (e.g., permission denied)
+	return false
 }
