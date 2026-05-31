@@ -8,13 +8,24 @@ package pyre
 const LookaheadSupport = false
 
 func Compile(pattern string) (Pattern, error) {
-	return NewGoPattern(pattern)
+	return NewRegexp2V2Pattern(pattern)
 }
 
 func MustCompile(pattern string) Pattern {
-	p, err := NewGoPattern(pattern)
+	p, err := NewRegexp2V2Pattern(pattern)
 	if err != nil {
 		panic(err)
 	}
 	return p
+}
+
+func rtoByte(s string, runePos int) int {
+	i := 0
+	for pos := range s {
+		if i == runePos {
+			return pos
+		}
+		i++
+	}
+	return len(s)
 }

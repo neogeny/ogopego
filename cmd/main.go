@@ -11,9 +11,9 @@ import (
 func main() {
 	debug.SetGCPercent(500)
 	debug.SetMemoryLimit(4 * 1024 * 1024 * 1024)
-	//profileMain(cliMain)
-	var _ = profileMain
-	cli.Main()
+	profileMain(cli.Main)
+	//var _ = profileMain
+	//cli.Main()
 }
 
 func profileMain(actualMain func()) {
