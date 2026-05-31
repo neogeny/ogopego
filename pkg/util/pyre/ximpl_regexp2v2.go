@@ -259,3 +259,76 @@ func (m *Regexp2V2Match) Expand(template string) string {
 	result, _ := m.re.Replace(m.match.String(), template, 0, 1)
 	return result
 }
+
+func (p *Regexp2V2Pattern) MatchRunes(runes []rune) (Match, bool) {
+	m, err := p.re.FindRunesMatchStartingAt(runes, 0)
+	if err != nil || m == nil {
+		return nil, false
+	}
+	if m.RuneIndex != 0 {
+		return nil, false
+	}
+	return &Regexp2V2RuneMatch{match: m, re: p.re}, true
+}
+
+type Regexp2V2RuneMatch struct {
+	match *regexp2.Match
+	re    *regexp2.Regexp
+}
+
+func (m *Regexp2V2RuneMatch) Group(i int) (string, bool) {
+	g := m.match.GroupByNumber(i)
+	if g == nil || g.RuneIndex < 0 {
+		return "", false
+	}
+	return g.String(), true
+}
+
+func (m *Regexp2V2RuneMatch) Groups() []*string {
+	groups := make([]*string, m.match.GroupCount()-1)
+	for i := 1; i < m.match.GroupCount(); i++ {
+		g := m.match.GroupByNumber(i)
+		if g.RuneIndex >= 0 {
+			groups[i-1] = new(g.String())
+		}
+	}
+	return groups
+}
+
+func (m *Regexp2V2RuneMatch) Start() int {
+	return m.match.RuneIndex
+}
+
+func (m *Regexp2V2RuneMatch) End() int {
+	return m.match.RuneIndex + m.match.RuneLength
+}
+
+func (m *Regexp2V2RuneMatch) Span() (int, int) {
+	return m.Start(), m.End()
+}
+
+func (m *Regexp2V2RuneMatch) GroupName(name string) (string, bool) {
+	g := m.match.GroupByName(name)
+	if g == nil || g.RuneIndex < 0 {
+		return "", false
+	}
+	return g.String(), true
+}
+
+func (m *Regexp2V2RuneMatch) GroupDict() map[string]*string {
+	groups := m.match.Groups()
+	result := make(map[string]*string)
+	for _, g := range groups {
+		if g.Name != "" {
+			if g.RuneIndex >= 0 {
+				result[g.Name] = new(g.String())
+			}
+		}
+	}
+	return result
+}
+
+func (m *Regexp2V2RuneMatch) Expand(template string) string {
+	result, _ := m.re.Replace(m.match.String(), template, 0, 1)
+	return result
+}

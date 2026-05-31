@@ -269,12 +269,11 @@ func (c *RuneCursor) MatchPattern(pattern string) (string, bool) {
 	if pat == nil {
 		return "", false
 	}
-	text := string(c.runes[c.runePos:])
-	m, ok := pat.Match(text)
+	m, ok := pat.MatchRunes(c.runes[c.runePos:])
 	if !ok {
 		return "", false
 	}
-	c.runePos += utf8.RuneCountInString(text[:m.End()])
+	c.runePos += m.End()
 	if g, ok := m.Group(1); ok {
 		return g, true
 	}
@@ -334,10 +333,9 @@ func (c *RuneCursor) eatPattern(pat pyre2.Pattern) bool {
 	if pat == nil || c.AtEnd() || pat.Pattern() == "" {
 		return false
 	}
-	text := string(c.runes[c.runePos:])
-	m, ok := pat.Match(text)
+	m, ok := pat.MatchRunes(c.runes[c.runePos:])
 	if ok && m.End() > 0 {
-		c.runePos += utf8.RuneCountInString(text[:m.End()])
+		c.runePos += m.End()
 		return true
 	}
 	return false

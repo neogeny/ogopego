@@ -34,6 +34,10 @@ func (p *GoPattern) Match(text string) (Match, bool) {
 	return &GoMatch{text: text, match: loc, re: p.re}, true
 }
 
+func (p *GoPattern) MatchRunes(runes []rune) (Match, bool) {
+	return p.Match(string(runes))
+}
+
 func (p *GoPattern) Search(text string) (Match, bool) {
 	loc := p.re.FindStringSubmatchIndex(text)
 	if loc == nil {

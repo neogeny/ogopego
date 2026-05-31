@@ -16,6 +16,7 @@ type Match interface {
 
 type Pattern interface {
 	Match(text string) (Match, bool)
+	MatchRunes(runes []rune) (Match, bool)
 	Search(text string) (Match, bool)
 	FullMatch(text string) (Match, bool)
 	Split(text string, maxSplit int) []string

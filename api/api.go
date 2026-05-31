@@ -54,7 +54,7 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 
 	boot = boot.Optimized()
 
-	cursor := input.NewStrCursor(grammar)
+	cursor := input.NewRuneCursor(grammar)
 
 	directivesCfg := boot.CfgFromDirectives()
 	if directivesCfg.Semantics == nil {
@@ -138,7 +138,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 // ParseInput parses the given text using a compiled Grammar and returns the
 // resulting AST as a Tree value.
 func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
-	ctx := context.NewCtx(input.NewStrCursor(text), cfg)
+	ctx := context.NewCtx(input.NewRuneCursor(text), cfg)
 	return parser.ParseAt(ctx, cfg)
 }
 
