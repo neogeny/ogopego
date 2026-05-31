@@ -6,77 +6,63 @@ package peg
 import (
 	"strings"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestPrettyToken(t *testing.T) {
 	m := &Token{Token: "hello"}
 	got := m.PrettyPrint()
 	want := `"hello"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyPattern(t *testing.T) {
 	m := &Pattern{Pattern: `\w+`}
 	got := m.PrettyPrint()
 	want := `/\w+/`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyPatternWithSlash(t *testing.T) {
 	m := &Pattern{Pattern: `a/b`}
 	got := m.PrettyPrint()
 	want := `?"a/b"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyConstant(t *testing.T) {
 	m := &Constant{Literal: "hello"}
 	got := m.PrettyPrint()
 	want := "`hello`"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyConstantMultiLine(t *testing.T) {
 	m := &Constant{Literal: "line1\nline2\nline3"}
 	got := m.PrettyPrint()
 	want := "```line1\nline2\nline3```"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyAlert(t *testing.T) {
 	m := &Alert{Constant: Constant{Literal: "warning"}, Level: 2}
 	got := m.PrettyPrint()
 	want := "^^`warning`"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyCall(t *testing.T) {
 	m := &Call{Name: "expr"}
 	got := m.PrettyPrint()
-	if got != "expr" {
-		t.Errorf("got %q, want %q", got, "expr")
-	}
+	assert.Equal(t, "expr", got)
 }
 
 func TestPrettyRuleInclude(t *testing.T) {
 	m := &RuleInclude{Name: "base_rule"}
 	got := m.PrettyPrint()
 	want := ">base_rule"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyLeafTerminals(t *testing.T) {
@@ -95,9 +81,7 @@ func TestPrettyLeafTerminals(t *testing.T) {
 	}
 	for _, tt := range tests {
 		got := tt.m.PrettyPrint()
-		if got != tt.want {
-			t.Errorf("%T.PrettyPrint() = %q, want %q", tt.m, got, tt.want)
-		}
+		assert.Equal(t, tt.want, got, "%T.PrettyPrint()", tt.m)
 	}
 }
 
@@ -106,9 +90,7 @@ func TestPrettyGroup(t *testing.T) {
 	m := &Group{Exp: inner}
 	got := m.PrettyPrint()
 	want := `("x")`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyGroupMultiLine(t *testing.T) {
@@ -120,111 +102,85 @@ func TestPrettyGroupMultiLine(t *testing.T) {
 	seq := &Sequence{Sequence: items}
 	m := &Group{Exp: seq}
 	got := m.PrettyPrint()
-	if !strings.HasPrefix(got, "(\n") {
-		t.Errorf("expected multi-line group, got %q", got)
-	}
-	if !strings.HasSuffix(got, ")") {
-		t.Errorf("expected group to end with ')', got %q", got)
-	}
+	assert.True(t, strings.HasPrefix(got, "(\n"), "expected multi-line group, got %q", got)
+	assert.True(t, strings.HasSuffix(got, ")"), "expected group to end with ')', got %q", got)
 }
 
 func TestPrettyOptional(t *testing.T) {
 	m := &Optional{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `["x"]`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyClosure(t *testing.T) {
 	m := &Closure{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `{"x"}*`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyPositiveClosure(t *testing.T) {
 	m := &PositiveClosure{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `{"x"}+`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyLookahead(t *testing.T) {
 	m := &Lookahead{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `&"x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyNegativeLookahead(t *testing.T) {
 	m := &NegativeLookahead{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `!"x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettySkipTo(t *testing.T) {
 	m := &SkipTo{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `->"x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettySkipGroup(t *testing.T) {
 	m := &SkipGroup{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `(?:` + `"x"` + `)`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyOverride(t *testing.T) {
 	m := &Override{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `="x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyOverrideList(t *testing.T) {
 	m := &OverrideList{Exp: &Token{Token: "x"}}
 	got := m.PrettyPrint()
 	want := `+="x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyNamed(t *testing.T) {
 	m := &Named{Exp: &Token{Token: "x"}, Name: "value"}
 	got := m.PrettyPrint()
 	want := `value="x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyNamedList(t *testing.T) {
 	m := &NamedList{Exp: &Token{Token: "x"}, Name: "values"}
 	got := m.PrettyPrint()
 	want := `values+="x"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettySequence(t *testing.T) {
@@ -236,9 +192,7 @@ func TestPrettySequence(t *testing.T) {
 	}
 	got := m.PrettyPrint()
 	want := `"hello" "world"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyChoice(t *testing.T) {
@@ -251,9 +205,7 @@ func TestPrettyChoice(t *testing.T) {
 	}
 	got := m.PrettyPrint()
 	want := `"a" | "b" | "c"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyJoin(t *testing.T) {
@@ -263,9 +215,7 @@ func TestPrettyJoin(t *testing.T) {
 	}
 	got := m.PrettyPrint()
 	want := `","%{` + "`x`" + `}*`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyGather(t *testing.T) {
@@ -275,9 +225,7 @@ func TestPrettyGather(t *testing.T) {
 	}
 	got := m.PrettyPrint()
 	want := "\",\".{`x`}*"
-	if got != want {
-		t.Errorf("got %s, want %s", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyPositiveGather(t *testing.T) {
@@ -287,9 +235,7 @@ func TestPrettyPositiveGather(t *testing.T) {
 	}
 	got := m.PrettyPrint()
 	want := "\",\".{`x`}+"
-	if got != want {
-		t.Errorf("got %s, want %s", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPrettyRule(t *testing.T) {
@@ -303,12 +249,9 @@ func TestPrettyRule(t *testing.T) {
 		Name: "greeting",
 	}
 	got := r.PrettyPrint()
-	if !strings.Contains(got, "greeting:") {
-		t.Errorf("expected rule name in output, got %q", got)
-	}
-	if !strings.Contains(got, `"hello"`) || !strings.Contains(got, `"world"`) {
-		t.Errorf("expected options in output, got %q", got)
-	}
+	assert.True(t, strings.Contains(got, "greeting:"), "expected rule name in output, got %q", got)
+	assert.True(t, strings.Contains(got, `"hello"`), "expected 'hello' option in output, got %q", got)
+	assert.True(t, strings.Contains(got, `"world"`), "expected 'world' option in output, got %q", got)
 }
 
 func TestPrettyRuleWithFlags(t *testing.T) {
@@ -319,12 +262,8 @@ func TestPrettyRuleWithFlags(t *testing.T) {
 		NoMemo: true,
 	}
 	got := r.PrettyPrint()
-	if !strings.Contains(got, "@nostak") {
-		t.Errorf("expected @nostak, got %q", got)
-	}
-	if !strings.Contains(got, "@nomemo") {
-		t.Errorf("expected @nomemo, got %q", got)
-	}
+	assert.True(t, strings.Contains(got, "@nostak"), "expected @nostak, got %q", got)
+	assert.True(t, strings.Contains(got, "@nomemo"), "expected @nomemo, got %q", got)
 }
 
 func TestPrettyGrammar(t *testing.T) {
@@ -338,12 +277,8 @@ func TestPrettyGrammar(t *testing.T) {
 		},
 	}
 	got := g.PrettyPrint()
-	if !strings.Contains(got, "@@grammar :: Test") {
-		t.Errorf("expected grammar directive, got %q", got)
-	}
-	if !strings.Contains(got, "start:") {
-		t.Errorf("expected rule, got %q", got)
-	}
+	assert.True(t, strings.Contains(got, "@@grammar :: Test"), "expected grammar directive, got %q", got)
+	assert.True(t, strings.Contains(got, "start:"), "expected rule, got %q", got)
 }
 
 func TestPrettyGrammarWithKeywords(t *testing.T) {
@@ -358,9 +293,7 @@ func TestPrettyGrammarWithKeywords(t *testing.T) {
 		},
 	}
 	got := g.PrettyPrint()
-	if !strings.Contains(got, "@@keyword") {
-		t.Errorf("expected keyword directive, got %q", got)
-	}
+	assert.True(t, strings.Contains(got, "@@keyword"), "expected keyword directive, got %q", got)
 }
 
 func TestPrettyGrammarWithDirectives(t *testing.T) {
@@ -378,29 +311,21 @@ func TestPrettyGrammarWithDirectives(t *testing.T) {
 		},
 	}
 	got := g.PrettyPrint()
-	if !strings.Contains(got, "@@whitespace :: /\\s+/") {
-		t.Errorf("expected whitespace directive, got %q", got)
-	}
-	if !strings.Contains(got, "@@comments :: /#.*/") {
-		t.Errorf("expected comments directive, got %q", got)
-	}
+	assert.True(t, strings.Contains(got, "@@whitespace :: /\\s+/"), "expected whitespace directive, got %q", got)
+	assert.True(t, strings.Contains(got, "@@comments :: /#.*/"), "expected comments directive, got %q", got)
 }
 
 func TestRailroadsToken(t *testing.T) {
 	m := &Token{Token: "hello"}
 	got := m.Railroads()
 	want := `"hello"`
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestRailroadsCall(t *testing.T) {
 	m := &Call{Name: "expr"}
 	got := m.Railroads()
-	if got != "expr" {
-		t.Errorf("got %q, want %q", got, "expr")
-	}
+	assert.Equal(t, "expr", got)
 }
 
 func TestRailroadsDot(t *testing.T) {

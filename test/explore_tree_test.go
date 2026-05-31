@@ -3,6 +3,7 @@ package test
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
@@ -81,9 +82,7 @@ func TestExploreCalcTree(t *testing.T) {
 	for _, input := range []string{"42", "1 + 2", "1 + 2 * 3", "(1 + 2) * 3"} {
 		t.Run(input, func(t *testing.T) {
 			tree, err := api.ParseInput(g, input, nil)
-			if err != nil {
-				t.Fatalf("parse: %v", err)
-			}
+			assert.NoError(t, err, "parse")
 			t.Logf("input: %s", input)
 			t.Logf("JSON:  %s", trees.TreeToJSONStr(tree))
 			t.Logf("type:  %T", tree)

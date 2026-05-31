@@ -3,6 +3,7 @@ package test
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/pkg/peg"
 )
@@ -33,44 +34,26 @@ func TestRoundtripJSON(t *testing.T) {
 	`
 
 	g1, err := api.Compile(grammar, nil)
-	if err != nil {
-		t.Fatalf("compile: %v", err)
-	}
+	assert.NoError(t, err, "compile")
 
 	r1, err := api.ParseInputToJSONString(g1, "3 + 5 * (10 - 20 )", nil)
-	if err != nil {
-		t.Fatalf("g1 parse: %v", err)
-	}
+	assert.NoError(t, err, "g1 parse")
 
 	jsonStr := peg.ModelToJSONStr(g1)
 
 	g2, err := peg.LoadGrammarFromJSON([]byte(jsonStr))
-	if err != nil {
-		t.Fatalf("parse JSON: %v\nJSON:\n%s", err, jsonStr)
-	}
-	if err := g2.Initialize(); err != nil {
-		t.Fatalf("init: %v", err)
-	}
+	assert.NoError(t, err, "parse JSON:\nJSON:\n%s", jsonStr)
+	assert.NoError(t, g2.Initialize(), "init")
 
-	if len(g1.Rules) != len(g2.Rules) {
-		t.Errorf("rule count: %d vs %d", len(g1.Rules), len(g2.Rules))
-	}
+	assert.Equal(t, len(g1.Rules), len(g2.Rules), "rule count")
 	for i := range g1.Rules {
-		if g1.Rules[i].Name != g2.Rules[i].Name {
-			t.Errorf("rule %d name: %q vs %q", i, g1.Rules[i].Name, g2.Rules[i].Name)
-		}
+		assert.Equal(t, g1.Rules[i].Name, g2.Rules[i].Name, "rule %d name", i)
 	}
-	if g1.Name != g2.Name {
-		t.Errorf("name: %q vs %q", g1.Name, g2.Name)
-	}
+	assert.Equal(t, g1.Name, g2.Name, "name")
 
 	r2, err := api.ParseInputToJSONString(g2, "3 + 5 * (10 - 20 )", nil)
-	if err != nil {
-		t.Fatalf("g2 parse: %v", err)
-	}
-	if r1 != r2 {
-		t.Errorf("parse mismatch:\ng1: %s\ng2: %s", r1, r2)
-	}
+	assert.NoError(t, err, "g2 parse")
+	assert.Equal(t, r1, r2, "parse mismatch")
 }
 
 func TestRoundtripPrettyPrint(t *testing.T) {
@@ -99,31 +82,19 @@ func TestRoundtripPrettyPrint(t *testing.T) {
 	`
 
 	g1, err := api.Compile(grammar, nil)
-	if err != nil {
-		t.Fatalf("compile: %v", err)
-	}
+	assert.NoError(t, err, "compile")
 
 	r1, err := api.ParseInputToJSONString(g1, "3 + 5", nil)
-	if err != nil {
-		t.Fatalf("g1 parse: %v", err)
-	}
+	assert.NoError(t, err, "g1 parse")
 
 	pretty := g1.PrettyPrint()
 
 	g2, err := api.Compile(pretty, nil)
-	if err != nil {
-		t.Fatalf("recompile: %v\npretty:\n%s", err, pretty)
-	}
+	assert.NoError(t, err, "recompile:\npretty:\n%s", pretty)
 
 	r2, err := api.ParseInputToJSONString(g2, "3 + 5", nil)
-	if err != nil {
-		t.Fatalf("g2 parse: %v", err)
-	}
+	assert.NoError(t, err, "g2 parse")
 
-	if r1 != r2 {
-		t.Errorf("mismatch:\ng1: %s\ng2: %s", r1, r2)
-	}
-	if len(g1.Rules) != len(g2.Rules) {
-		t.Errorf("rule count: %d vs %d", len(g1.Rules), len(g2.Rules))
-	}
+	assert.Equal(t, r1, r2, "mismatch")
+	assert.Equal(t, len(g1.Rules), len(g2.Rules), "rule count")
 }

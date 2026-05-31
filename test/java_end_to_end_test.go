@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/pkg/peg"
 	"github.com/neogeny/ogopego/pkg/tool"
@@ -19,126 +20,73 @@ func TestJavaEndToEnd(t *testing.T) {
 	}
 	// 1. Load pre-compiled Java grammar
 	data, err := os.ReadFile("../grammar/java.json")
-	if err != nil {
-		t.Fatalf("read java.json: %v", err)
-	}
+	assert.NoError(t, err, "read java.json")
 	g, err := peg.LoadGrammarFromJSON(data)
-	if err != nil {
-		t.Fatalf("parse grammar: %v", err)
-	}
-	if err := g.Initialize(); err != nil {
-		t.Fatalf("init grammar: %v", err)
-	}
+	assert.NoError(t, err, "parse grammar")
+	assert.NoError(t, g.Initialize(), "init grammar")
 
 	// 2. Verify tool.ModelRepr produces valid Go source
 	code := tool.ModelRepr(*g, "java")
 	fset := token.NewFileSet()
 	_, err = parser.ParseFile(fset, "", code, parser.AllErrors)
-	if err != nil {
-		t.Fatalf("generated code is not valid Go:\n%s\n\nError: %v", code, err)
-	}
+	assert.NoError(t, err, "generated code is not valid Go:\n%s", code)
 
 	// 3. Parse a Java source snippet
 	javaSrc := "package com.example;\nimport java.util.List;\npublic class Hello {}\n"
 	tree, err := api.ParseInput(g, javaSrc, nil)
-	if err != nil {
-		t.Fatalf("parse Java: %v", err)
-	}
+	assert.NoError(t, err, "parse Java")
 
 	// 4. Walk the tree manually to validate structure
 	n, ok := tree.(*trees.Node)
-	if !ok {
-		t.Fatalf("expected *trees.Node, got %T", tree)
-	}
-	if n.TypeName != "CompilationUnit" {
-		t.Fatalf("expected TypeName CompilationUnit, got %q", n.TypeName)
-	}
+	assert.True(t, ok, "expected *trees.Node, got %T", tree)
+	assert.Equal(t, "CompilationUnit", n.TypeName)
 	m, ok := n.Tree.(*trees.MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", n.Tree)
-	}
+	assert.True(t, ok, "expected MapNode, got %T", n.Tree)
 
 	// 5. Validate concrete types of each MapNode entry
 	t.Run("package_field", func(t *testing.T) {
 		v, ok := m.Entries["package"]
-		if !ok {
-			t.Fatal("missing 'package' entry")
-		}
+		assert.True(t, ok, "missing 'package' entry")
 		pn, ok := v.(*trees.Node)
-		if !ok {
-			t.Fatalf("package: expected *trees.Node, got %T", v)
-		}
-		if pn.TypeName != "PackageDeclaration" {
-			t.Fatalf("package TypeName: expected PackageDeclaration, got %q", pn.TypeName)
-		}
+		assert.True(t, ok, "package: expected *trees.Node, got %T", v)
+		assert.Equal(t, "PackageDeclaration", pn.TypeName, "package TypeName")
 		pm, ok := pn.Tree.(*trees.MapNode)
-		if !ok {
-			t.Fatalf("PackageDeclaration.Tree: expected MapNode, got %T", pn.Tree)
-		}
+		assert.True(t, ok, "PackageDeclaration.Tree: expected MapNode, got %T", pn.Tree)
 		// name field is *trees.Node{QualifiedName}
 		name, ok := pm.Entries["name"]
-		if !ok {
-			t.Fatal("PackageDeclaration missing 'name' entry")
-		}
+		assert.True(t, ok, "PackageDeclaration missing 'name' entry")
 		qn, ok := name.(*trees.Node)
-		if !ok {
-			t.Fatalf("PackageDeclaration.name: expected *trees.Node, got %T", name)
-		}
-		if qn.TypeName != "QualifiedName" {
-			t.Fatalf("PackageDeclaration.name TypeName: expected QualifiedName, got %q", qn.TypeName)
-		}
+		assert.True(t, ok, "PackageDeclaration.name: expected *trees.Node, got %T", name)
+		assert.Equal(t, "QualifiedName", qn.TypeName, "PackageDeclaration.name TypeName")
 	})
 
 	t.Run("imports_field", func(t *testing.T) {
 		v, ok := m.Entries["imports"]
-		if !ok {
-			t.Fatal("missing 'imports' entry")
-		}
+		assert.True(t, ok, "missing 'imports' entry")
 		impList, ok := v.(*trees.List)
-		if !ok {
-			t.Fatalf("imports: expected *trees.List, got %T", v)
-		}
-		if len(impList.Items) != 1 {
-			t.Fatalf("imports: expected 1 item, got %d", len(impList.Items))
-		}
+		assert.True(t, ok, "imports: expected *trees.List, got %T", v)
+		assert.Equal(t, 1, len(impList.Items), "imports: expected 1 item")
 		impNode, ok := impList.Items[0].(*trees.Node)
-		if !ok {
-			t.Fatalf("imports[0]: expected *trees.Node, got %T", impList.Items[0])
-		}
-		if impNode.TypeName != "ImportDeclaration" {
-			t.Fatalf("imports[0] TypeName: expected ImportDeclaration, got %q", impNode.TypeName)
-		}
+		assert.True(t, ok, "imports[0]: expected *trees.Node, got %T", impList.Items[0])
+		assert.Equal(t, "ImportDeclaration", impNode.TypeName, "imports[0] TypeName")
 	})
 
 	t.Run("declarations_field", func(t *testing.T) {
 		v, ok := m.Entries["declarations"]
-		if !ok {
-			t.Fatal("missing 'declarations' entry")
-		}
+		assert.True(t, ok, "missing 'declarations' entry")
 		seq, ok := v.(*trees.Seq)
-		if !ok {
-			t.Fatalf("declarations: expected *trees.Seq, got %T", v)
-		}
-		if len(seq.Items) != 1 {
-			t.Fatalf("declarations: expected 1 item, got %d", len(seq.Items))
-		}
+		assert.True(t, ok, "declarations: expected *trees.Seq, got %T", v)
+		assert.Equal(t, 1, len(seq.Items), "declarations: expected 1 item")
 		classNode, ok := seq.Items[0].(*trees.Node)
-		if !ok {
-			t.Fatalf("declarations[0]: expected *trees.Node, got %T", seq.Items[0])
-		}
-		if classNode.TypeName != "ClassDeclaration" {
-			t.Fatalf("declarations[0] TypeName: expected ClassDeclaration, got %q", classNode.TypeName)
-		}
+		assert.True(t, ok, "declarations[0]: expected *trees.Node, got %T", seq.Items[0])
+		assert.Equal(t, "ClassDeclaration", classNode.TypeName, "declarations[0] TypeName")
 	})
 
 	t.Run("linecount_field", func(t *testing.T) {
 		v, ok := m.Entries["linecount"]
-		if !ok {
-			t.Fatal("missing 'linecount' entry")
-		}
-		if _, ok := v.(*trees.Nil); !ok {
-			t.Fatalf("linecount: expected *trees.Nil, got %T", v)
-		}
+		assert.True(t, ok, "missing 'linecount' entry")
+		_, ok = v.(*trees.Nil)
+		assert.True(t, ok, "linecount: expected *trees.Nil, got %T", v)
 	})
 
 	// 6. Test FromTree with hand-authored model types
@@ -150,16 +98,10 @@ func TestJavaEndToEnd(t *testing.T) {
 				},
 			}},
 		)
-		if err != nil {
-			t.Fatalf("IdentifierFromTree: %v", err)
-		}
+		assert.NoError(t, err, "IdentifierFromTree")
 		txt, ok := id.Value.(*trees.Text)
-		if !ok {
-			t.Fatalf("Identifier.Value: expected *trees.Text, got %T", id.Value)
-		}
-		if txt.Value != "Hello" {
-			t.Fatalf("Identifier.Value = %q, want %q", txt.Value, "Hello")
-		}
+		assert.True(t, ok, "Identifier.Value: expected *trees.Text, got %T", id.Value)
+		assert.Equal(t, "Hello", txt.Value, "Identifier.Value")
 	})
 
 	t.Run("from_tree_qualified_name", func(t *testing.T) {
@@ -187,31 +129,19 @@ func TestJavaEndToEnd(t *testing.T) {
 				},
 			}},
 		)
-		if err != nil {
-			t.Fatalf("QualifiedNameFromTree: %v", err)
-		}
+		assert.NoError(t, err, "QualifiedNameFromTree")
 
 		// Validate concrete types
-		if len(qn.Qualifiers) != 2 {
-			t.Fatalf("Qualifiers: len=%d, want 2", len(qn.Qualifiers))
-		}
+		assert.Equal(t, 2, len(qn.Qualifiers))
 		com := qn.Qualifiers[0]
 		comTxt, ok := com.Value.(*trees.Text)
-		if !ok {
-			t.Fatalf("Qualifiers[0].Value: expected *trees.Text, got %T", com.Value)
-		}
-		if comTxt.Value != "com" {
-			t.Fatalf("Qualifiers[0].Value = %q, want %q", comTxt.Value, "com")
-		}
+		assert.True(t, ok, "Qualifiers[0].Value: expected *trees.Text, got %T", com.Value)
+		assert.Equal(t, "com", comTxt.Value, "Qualifiers[0].Value")
 
 		list := qn.Name
 		listTxt, ok := list.Value.(*trees.Text)
-		if !ok {
-			t.Fatalf("Name.Value: expected *trees.Text, got %T", list.Value)
-		}
-		if listTxt.Value != "List" {
-			t.Fatalf("Name.Value = %q, want %q", listTxt.Value, "List")
-		}
+		assert.True(t, ok, "Name.Value: expected *trees.Text, got %T", list.Value)
+		assert.Equal(t, "List", listTxt.Value, "Name.Value")
 	})
 
 	t.Run("from_tree_package_via_optional", func(t *testing.T) {
@@ -248,17 +178,11 @@ func TestJavaEndToEnd(t *testing.T) {
 				},
 			}},
 		)
-		if err != nil {
-			t.Fatalf("CompilationUnitFromTree: %v", err)
-		}
+		assert.NoError(t, err, "CompilationUnitFromTree")
 
 		pkg, ok := cu.Package.(*PackageDeclaration)
-		if !ok {
-			t.Fatalf("Package: expected *PackageDeclaration, got %T", cu.Package)
-		}
-		if pkg.Name == nil {
-			t.Fatal("Package.Name is nil")
-		}
+		assert.True(t, ok, "Package: expected *PackageDeclaration, got %T", cu.Package)
+		assert.NotZero(t, pkg.Name, "Package.Name is nil")
 	})
 
 	t.Run("from_tree_no_package", func(t *testing.T) {
@@ -273,12 +197,8 @@ func TestJavaEndToEnd(t *testing.T) {
 				},
 			}},
 		)
-		if err != nil {
-			t.Fatalf("CompilationUnitFromTree (no package): %v", err)
-		}
-		if cu.Package != nil {
-			t.Fatal("expected nil Package when entry is Nil")
-		}
+		assert.NoError(t, err, "CompilationUnitFromTree (no package)")
+		assert.Zero(t, cu.Package, "expected nil Package when entry is Nil")
 	})
 
 	// 7. Validate field types via reflect against the generated code structure
@@ -295,21 +215,13 @@ func TestJavaEndToEnd(t *testing.T) {
 			{"Value any", false},
 		}
 		for _, tt := range tests {
-			if !contains(code, tt.field) {
-				t.Errorf("generated code should contain %q", tt.field)
-			}
+			assert.True(t, contains(code, tt.field), "generated code should contain %q", tt.field)
 		}
 
 		// Verify the generated code references the expected types via reflect
-		if !contains(code, "*PackageDeclaration") {
-			t.Error("expected *PackageDeclaration in generated code")
-		}
-		if !contains(code, "[]*ImportDeclaration") {
-			t.Error("expected []*ImportDeclaration in generated code")
-		}
-		if !contains(code, "IdentifierFromTree") {
-			t.Error("expected IdentifierFromTree in generated code")
-		}
+		assert.True(t, contains(code, "*PackageDeclaration"), "expected *PackageDeclaration in generated code")
+		assert.True(t, contains(code, "[]*ImportDeclaration"), "expected []*ImportDeclaration in generated code")
+		assert.True(t, contains(code, "IdentifierFromTree"), "expected IdentifierFromTree in generated code")
 	})
 }
 

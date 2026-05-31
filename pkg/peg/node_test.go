@@ -7,43 +7,28 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
 func TestNodeNilSafety(t *testing.T) {
 	var n *Node
-	if p := n.Parent(); p != nil {
-		t.Error("expected nil parent")
-	}
+	assert.Zero(t, n.Parent())
 	n.setParent(&Node{})
-	if s := n.Text(); s != "" {
-		t.Errorf("expected empty text, got %q", s)
-	}
-	if l := n.Line(); l != 0 {
-		t.Errorf("expected 0 line, got %d", l)
-	}
-	if p := n.Path(); p != nil {
-		t.Error("expected nil path")
-	}
+	assert.Equal(t, "", n.Text())
+	assert.Equal(t, 0, n.Line())
+	assert.Zero(t, n.Path())
 	b, err := json.Marshal(asjson.AsJSON(n))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(b) != "null" {
-		t.Errorf("expected null, got %s", b)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "null", string(b))
 }
 
 func TestNodeParent(t *testing.T) {
 	parent := &Node{}
 	child := &Node{}
 	child.setParent(parent)
-	if child.Parent() != parent {
-		t.Error("expected parent to match")
-	}
-	if parent.Parent() != nil {
-		t.Error("expected root parent to be nil")
-	}
+	assert.Equal(t, parent, child.Parent())
+	assert.Zero(t, parent.Parent())
 }
 
 func TestNodeText(t *testing.T) {
@@ -54,32 +39,24 @@ func TestNodeText(t *testing.T) {
 			Mark:   11,
 		},
 	}
-	if s := n.Text(); s != "world" {
-		t.Errorf("expected 'world', got %q", s)
-	}
+	assert.Equal(t, "world", n.Text())
 }
 
 func TestNodeTextNilPos(t *testing.T) {
 	n := &Node{}
-	if s := n.Text(); s != "" {
-		t.Errorf("expected empty text, got %q", s)
-	}
+	assert.Equal(t, "", n.Text())
 }
 
 func TestNodeLine(t *testing.T) {
 	n := &Node{
 		ParseInfo: &ParseInfo{Line: 3},
 	}
-	if l := n.Line(); l != 3 {
-		t.Errorf("expected line 3, got %d", l)
-	}
+	assert.Equal(t, 3, n.Line())
 }
 
 func TestNodeLineNilPos(t *testing.T) {
 	n := &Node{}
-	if l := n.Line(); l != 0 {
-		t.Errorf("expected 0, got %d", l)
-	}
+	assert.Equal(t, 0, n.Line())
 }
 
 func TestNodePath(t *testing.T) {
@@ -89,33 +66,22 @@ func TestNodePath(t *testing.T) {
 	mid.setParent(root)
 	leaf.setParent(mid)
 	path := leaf.Path()
-	if len(path) != 3 {
-		t.Fatalf("expected 3 ancestors, got %d", len(path))
-	}
-	if path[0] != root {
-		t.Error("expected root first")
-	}
-	if path[1] != mid {
-		t.Error("expected mid second")
-	}
-	if path[2] != leaf {
-		t.Error("expected leaf third")
-	}
+	assert.Equal(t, 3, len(path))
+	assert.Equal(t, root, path[0])
+	assert.Equal(t, mid, path[1])
+	assert.Equal(t, leaf, path[2])
 }
 
 func TestNodePathSingle(t *testing.T) {
 	n := &Node{}
 	path := n.Path()
-	if len(path) != 1 || path[0] != n {
-		t.Errorf("expected [self], got %v", path)
-	}
+	assert.Equal(t, 1, len(path))
+	assert.Equal(t, n, path[0])
 }
 
 func TestNodePathNil(t *testing.T) {
 	var n *Node
-	if p := n.Path(); p != nil {
-		t.Error("expected nil path")
-	}
+	assert.Zero(t, n.Path())
 }
 
 func TestNodeMarshalJSON(t *testing.T) {
@@ -130,38 +96,25 @@ func TestNodeMarshalJSON(t *testing.T) {
 		},
 	}
 	b, err := json.Marshal(asjson.AsJSON(n))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
-	if out["__class__"] != "peg.Node" {
-		t.Errorf("expected __class__ peg.Node, got %v", out["__class__"])
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
+	assert.Equal(t, "peg.Node", out["__class__"])
 	// FIXME
 	//if out["ast"] != nil {
 	//	t.Errorf("expected no ast, got %v", out["ast"])
 	//}
 	parseInfo, ok := out["parse_info"].(map[string]any)
-	if !ok {
-		t.Errorf("expected pos map")
-	}
-	if parseInfo["source"] != "src" {
-		t.Errorf("expected Source 'src', got %v", parseInfo["Source"])
-	}
+	assert.True(t, ok, "expected pos map")
+	assert.Equal(t, "src", parseInfo["source"])
 }
 
 func TestNodeMarshalJSONNil(t *testing.T) {
 	var n *Node
 	b, err := json.Marshal(asjson.AsJSON(n))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(b) != "null" {
-		t.Errorf("expected null, got %s", b)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "null", string(b))
 }
 
 func TestNodeMarshalJSONAstMap(t *testing.T) {
@@ -172,23 +125,14 @@ func TestNodeMarshalJSONAstMap(t *testing.T) {
 		},
 	}
 	b, err := json.Marshal(asjson.AsJSON(n))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
 	ast, ok := out["ast"].(map[string]any)
-	if !ok {
-		t.Fatal("expected ast to be object")
-	}
-	if ast["key"] != "value" {
-		t.Errorf("expected value, got %v", ast["key"])
-	}
-	if ast["num"] != float64(42) {
-		t.Errorf("expected 42, got %v", ast["num"])
-	}
+	assert.True(t, ok, "expected ast to be object")
+	assert.Equal(t, "value", ast["key"])
+	assert.Equal[any](t, float64(42), ast["num"])
 }
 
 func TestNodeMarshalJSONAstSlice(t *testing.T) {
@@ -196,20 +140,13 @@ func TestNodeMarshalJSONAstSlice(t *testing.T) {
 		Ast: []any{"a", "b", 3},
 	}
 	b, err := json.Marshal(asjson.AsJSON(n))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
 	ast, ok := out["ast"].([]any)
-	if !ok {
-		t.Fatal("expected ast to be array")
-	}
-	if len(ast) != 3 {
-		t.Fatalf("expected 3 items, got %d", len(ast))
-	}
+	assert.True(t, ok, "expected ast to be array")
+	assert.Equal(t, 3, len(ast))
 }
 
 func TestParseInfo(t *testing.T) {
@@ -221,12 +158,8 @@ func TestParseInfo(t *testing.T) {
 		Line:    2,
 		EndLine: 2,
 	}
-	if pi.Source != "test.ebnf" {
-		t.Errorf("expected 'test.ebnf', got %q", pi.Source)
-	}
-	if pi.Rule != "number" {
-		t.Errorf("expected 'number', got %q", pi.Rule)
-	}
+	assert.Equal(t, "test.ebnf", pi.Source)
+	assert.Equal(t, "number", pi.Rule)
 }
 
 func TestNodeChildren(t *testing.T) {
@@ -238,10 +171,6 @@ func TestNodeChildren(t *testing.T) {
 		},
 	}
 	children := parent.Children()
-	if len(children) != 1 {
-		t.Fatalf("expected 1 child, got %d", len(children))
-	}
-	if children[0] != child {
-		t.Error("expected child")
-	}
+	assert.Equal(t, 1, len(children))
+	assert.Equal(t, child, children[0])
 }

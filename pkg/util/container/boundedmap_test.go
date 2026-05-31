@@ -1,8 +1,9 @@
 package container
 
 import (
-	"slices"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestOrdered_ZeroCapacity(t *testing.T) {
@@ -11,18 +12,12 @@ func TestOrdered_ZeroCapacity(t *testing.T) {
 	for i := range n {
 		bm.Set(intToKey(i), i)
 	}
-	if got := bm.Len(); got != n {
-		t.Errorf("Len() = %d, want %d", got, n)
-	}
+	assert.Equal(t, n, bm.Len())
 	for i := range n {
 		key := intToKey(i)
 		v, ok := bm.Get(key)
-		if !ok {
-			t.Errorf("Get(%q) missing", key)
-		}
-		if v != i {
-			t.Errorf("Get(%q) = %d, want %d", key, v, i)
-		}
+		assert.True(t, ok, "Get(%q) missing", key)
+		assert.Equal(t, i, v, "Get(%q)", key)
 	}
 }
 
@@ -32,9 +27,7 @@ func TestOrdered_NegativeCapacity(t *testing.T) {
 	for i := range n {
 		bm.Set(intToKey(i), i)
 	}
-	if got := bm.Len(); got != n {
-		t.Errorf("Len() = %d, want %d", got, n)
-	}
+	assert.Equal(t, n, bm.Len())
 }
 
 func TestOrdered_NoEviction(t *testing.T) {
@@ -43,9 +36,7 @@ func TestOrdered_NoEviction(t *testing.T) {
 	for i := range n {
 		bm.Set(intToKey(i), i)
 	}
-	if got := bm.Len(); got != n {
-		t.Errorf("Len() = %d, want %d", got, n)
-	}
+	assert.Equal(t, n, bm.Len())
 }
 
 func TestOrdered_EntriesAll(t *testing.T) {
@@ -57,18 +48,12 @@ func TestOrdered_EntriesAll(t *testing.T) {
 	count := 0
 	seen := make(map[string]bool)
 	for k, v := range bm.Entries() {
-		if seen[k] {
-			t.Errorf("duplicate key %q in Entries", k)
-		}
+		assert.False(t, seen[k], "duplicate key %q in Entries", k)
 		seen[k] = true
-		if v != keyToInt(k) {
-			t.Errorf("Entries key %q has value %d, want %d", k, v, keyToInt(k))
-		}
+		assert.Equal(t, keyToInt(k), v, "Entries key %q", k)
 		count++
 	}
-	if count != n {
-		t.Errorf("Entries yielded %d items, want %d", count, n)
-	}
+	assert.Equal(t, n, count)
 }
 
 func TestOrdered_Delete(t *testing.T) {
@@ -77,20 +62,13 @@ func TestOrdered_Delete(t *testing.T) {
 		bm.Set(intToKey(i), i)
 	}
 	bm.Delete(intToKey(2))
-	if got := bm.Len(); got != 4 {
-		t.Errorf("Len() after Delete = %d, want 4", got)
-	}
-	if _, ok := bm.Get(intToKey(2)); ok {
-		t.Error("Get(deleted key) should miss")
-	}
+	assert.Equal(t, 4, bm.Len())
+	_, ok := bm.Get(intToKey(2))
+	assert.False(t, ok, "Get(deleted key) should miss")
 	for _, i := range []int{0, 1, 3, 4} {
 		v, ok := bm.Get(intToKey(i))
-		if !ok {
-			t.Errorf("Get(%q) should hit", intToKey(i))
-		}
-		if v != i {
-			t.Errorf("Get(%q) = %d, want %d", intToKey(i), v, i)
-		}
+		assert.True(t, ok, "Get(%q) should hit", intToKey(i))
+		assert.Equal(t, i, v, "Get(%q)", intToKey(i))
 	}
 }
 
@@ -102,16 +80,13 @@ func TestOrdered_Retain(t *testing.T) {
 	bm.Retain(func(k string, v int) bool {
 		return v%2 == 0
 	})
-	if got := bm.Len(); got != 5 {
-		t.Errorf("Len() after Retain = %d, want 5", got)
-	}
+	assert.Equal(t, 5, bm.Len())
 	for i := range 10 {
 		_, ok := bm.Get(intToKey(i))
-		if i%2 == 0 && !ok {
-			t.Errorf("even key %q should survive Retain", intToKey(i))
-		}
-		if i%2 != 0 && ok {
-			t.Errorf("odd key %q should be removed by Retain", intToKey(i))
+		if i%2 == 0 {
+			assert.True(t, ok, "even key %q should survive Retain", intToKey(i))
+		} else {
+			assert.False(t, ok, "odd key %q should be removed by Retain", intToKey(i))
 		}
 	}
 }
@@ -120,16 +95,10 @@ func TestOrdered_UpdateNoDupe(t *testing.T) {
 	bm := NewBoundedMap[string, int](0)
 	bm.Set("k", 1)
 	bm.Set("k", 2)
-	if got := bm.Len(); got != 1 {
-		t.Errorf("Len() after update = %d, want 1", got)
-	}
+	assert.Equal(t, 1, bm.Len())
 	v, ok := bm.Get("k")
-	if !ok {
-		t.Fatal("Get(k) missing after update")
-	}
-	if v != 2 {
-		t.Errorf("Get(k) = %d, want 2", v)
-	}
+	assert.True(t, ok, "Get(k) missing after update")
+	assert.Equal(t, 2, v, "Get(k)")
 }
 
 func TestOrdered_EntriesOrderAfterSet(t *testing.T) {
@@ -139,9 +108,7 @@ func TestOrdered_EntriesOrderAfterSet(t *testing.T) {
 	bm.Set("c", 3)
 	keys := collectKeys(bm)
 	want := []string{"a", "b", "c"}
-	if !slices.Equal(keys, want) {
-		t.Errorf("Entries order = %v, want %v (insertion order)", keys, want)
-	}
+	assert.Equal(t, want, keys, "Entries order (insertion order)")
 }
 
 func TestOrdered_GetDoesNotReorderWhenUnbounded(t *testing.T) {
@@ -152,9 +119,7 @@ func TestOrdered_GetDoesNotReorderWhenUnbounded(t *testing.T) {
 	bm.Get("a")
 	keys := collectKeys(bm)
 	want := []string{"a", "b", "c"}
-	if !slices.Equal(keys, want) {
-		t.Errorf("Entries order after Get = %v, want %v (Get should not reorder with capacity<=0)", keys, want)
-	}
+	assert.Equal(t, want, keys, "Entries order after Get (Get should not reorder with capacity<=0)")
 }
 
 func TestBounded_EvictionAtCapacity(t *testing.T) {
@@ -162,18 +127,14 @@ func TestBounded_EvictionAtCapacity(t *testing.T) {
 	for i := range 5 {
 		bm.Set(intToKey(i), i)
 	}
-	if got := bm.Len(); got != 3 {
-		t.Errorf("Len() = %d, want 3", got)
-	}
+	assert.Equal(t, 3, bm.Len())
 	for _, i := range []int{0, 1} {
-		if _, ok := bm.Get(intToKey(i)); ok {
-			t.Errorf("old key %q should have been evicted", intToKey(i))
-		}
+		_, ok := bm.Get(intToKey(i))
+		assert.False(t, ok, "old key %q should have been evicted", intToKey(i))
 	}
 	for _, i := range []int{2, 3, 4} {
-		if _, ok := bm.Get(intToKey(i)); !ok {
-			t.Errorf("recent key %q should survive", intToKey(i))
-		}
+		_, ok := bm.Get(intToKey(i))
+		assert.True(t, ok, "recent key %q should survive", intToKey(i))
 	}
 }
 
@@ -184,13 +145,11 @@ func TestBounded_LruPromotion(t *testing.T) {
 	bm.Set("c", 3)
 	bm.Get("a")
 	bm.Set("d", 4)
-	if _, ok := bm.Get("b"); ok {
-		t.Error("Get(b) should miss — 'b' should be evicted as LRU")
-	}
+	_, ok := bm.Get("b")
+	assert.False(t, ok, "Get(b) should miss — 'b' should be evicted as LRU")
 	for _, k := range []string{"a", "c", "d"} {
-		if _, ok := bm.Get(k); !ok {
-			t.Errorf("Get(%s) should hit", k)
-		}
+		_, ok := bm.Get(k)
+		assert.True(t, ok, "Get(%s) should hit", k)
 	}
 }
 

@@ -7,85 +7,64 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/util/pyre"
 )
 
 func TestStrCursorMatchPattern(t *testing.T) {
 	s := NewStrCursor("abc123def")
 	m, ok := s.MatchPattern(`\d+`)
-	if ok {
-		t.Errorf("expected no match at start, got %q", m)
-	}
+	assert.False(t, ok, "expected no match at start, got %q", m)
 }
 
 func TestStrCursorMatchToken(t *testing.T) {
 	s := NewStrCursor("hello world")
-	if !s.MatchToken("hello") {
-		t.Error("expected MatchToken to succeed")
-	}
-	if s.offset != 5 {
-		t.Errorf("expected offset 5, got %d", s.offset)
-	}
+	assert.True(t, s.MatchToken("hello"), "expected MatchToken to succeed")
+	assert.Equal(t, 5, s.offset)
 }
 
 func TestStrCursorPeekToken(t *testing.T) {
 	s := NewStrCursor("hello")
-	if !s.PeekToken("hello") {
-		t.Error("expected PeekToken to succeed")
-	}
-	if s.offset != 0 {
-		t.Errorf("expected offset unchanged, got %d", s.offset)
-	}
+	assert.True(t, s.PeekToken("hello"), "expected PeekToken to succeed")
+	assert.Equal(t, 0, s.offset, "expected offset unchanged")
 }
 
 func TestStrCursorNextPeek(t *testing.T) {
 	s := NewStrCursor("ab")
 	r, ok := s.Peek()
-	if !ok || r != 'a' {
-		t.Errorf("expected 'a', got %c", r)
-	}
+	assert.True(t, ok)
+	assert.Equal(t, 'a', r)
 	r, ok = s.Next()
-	if !ok || r != 'a' {
-		t.Errorf("expected 'a', got %c", r)
-	}
-	if s.offset != 1 {
-		t.Errorf("expected offset 1, got %d", s.offset)
-	}
+	assert.True(t, ok)
+	assert.Equal(t, 'a', r)
+	assert.Equal(t, 1, s.offset)
 }
 
 func TestStrCursorAtEnd(t *testing.T) {
 	s := NewStrCursor("a")
-	if s.AtEnd() {
-		t.Error("expected not at end")
-	}
+	assert.False(t, s.AtEnd(), "expected not at end")
 	s.Next()
-	if !s.AtEnd() {
-		t.Error("expected at end")
-	}
+	assert.True(t, s.AtEnd(), "expected at end")
 }
 
 func TestStrCursorPos(t *testing.T) {
 	s := NewStrCursor("hello\nworld")
 	line, col := s.Pos()
-	if line != 1 || col != 1 {
-		t.Errorf("expected (1,1), got (%d,%d)", line, col)
-	}
+	assert.Equal(t, 1, line)
+	assert.Equal(t, 1, col)
 	for range 6 {
 		s.Next()
 	}
 	line, col = s.Pos()
-	if line != 2 || col != 1 {
-		t.Errorf("expected (1,5) after newline, got (%d,%d)", line, col)
-	}
+	assert.Equal(t, 2, line)
+	assert.Equal(t, 1, col)
 }
 
 func TestStrCursorClone(t *testing.T) {
 	s := NewStrCursor("hello")
 	c := s.Clone()
 	s.Next()
-	if s.Mark() == c.Mark() {
-		t.Error("expected clone to have independent offset")
-	}
+	assert.True(t, s.Mark() != c.Mark(), "expected clone to have independent offset")
 }
 
 func TestMatchPatternSuccess(t *testing.T) {
@@ -95,26 +74,16 @@ func TestMatchPatternSuccess(t *testing.T) {
 	s.Next()
 	s.Next()
 	m, ok := s.MatchPattern(`\d+`)
-	if !ok {
-		t.Fatal("expected match")
-	}
-	if m != "123" {
-		t.Errorf("expected '123', got %q", m)
-	}
-	if s.offset != 6 {
-		t.Errorf("expected offset 6, got %d", s.offset)
-	}
+	assert.True(t, ok, "expected match")
+	assert.Equal(t, "123", m)
+	assert.Equal(t, 6, s.offset)
 }
 
 func TestMatchPatternWithGroup(t *testing.T) {
 	s := NewStrCursor("foo bar baz")
 	m, ok := s.MatchPattern(`(foo)\s+(bar)`)
-	if !ok {
-		t.Fatal("expected match")
-	}
-	if m != "foo" {
-		t.Errorf("expected 'foo' from group 1, got %q", m)
-	}
+	assert.True(t, ok, "expected match")
+	assert.Equal(t, "foo", m, "expected 'foo' from group 1")
 }
 
 func TestMatchEOL(t *testing.T) {
@@ -132,28 +101,18 @@ func TestMatchEOL(t *testing.T) {
 	for _, tt := range tests {
 		s := NewStrCursor(tt.input)
 		got := s.MatchEOL()
-		if got != tt.want {
-			t.Errorf("MatchEOL(%q) = %v, want %v", tt.input, got, tt.want)
-		}
-		if s.offset != tt.off {
-			t.Errorf("MatchEOL(%q) offset = %d, want %d", tt.input, s.offset, tt.off)
-		}
+		assert.Equal(t, tt.want, got, "MatchEOL(%q)", tt.input)
+		assert.Equal(t, tt.off, s.offset, "MatchEOL(%q) offset", tt.input)
 	}
 }
 
 func TestMatchEOLWithWhitespace(t *testing.T) {
 	p, err := pyre.Compile(`[ \t]+`)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	s := NewStrCursor("   \nnext")
 	s.SetPatterns(&TokenizingPatterns{Wsp: p})
-	if !s.MatchEOL() {
-		t.Error("expected MatchEOL to skip whitespace and match newline")
-	}
-	if s.offset != 4 {
-		t.Errorf("expected offset 4 (whitespace+newline), got %d", s.offset)
-	}
+	assert.True(t, s.MatchEOL(), "expected MatchEOL to skip whitespace and match newline")
+	assert.Equal(t, 4, s.offset, "expected offset 4 (whitespace+newline)")
 }
 
 func TestPosAt(t *testing.T) {
@@ -170,46 +129,28 @@ func TestPosAt(t *testing.T) {
 		return ""
 	}
 
-	if err := testPos(0, 1, 1); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(5, 1, 5); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(3, 1, 3); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(6, 2, 1); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(11, 2, 5); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(12, 3, 1); err != "" {
-		t.Error(err)
-	}
-	if err := testPos(15, 3, 3); err != "" {
-		t.Error(err)
-	}
+	assert.Equal(t, "", testPos(0, 1, 1))
+	assert.Equal(t, "", testPos(5, 1, 5))
+	assert.Equal(t, "", testPos(3, 1, 3))
+	assert.Equal(t, "", testPos(6, 2, 1))
+	assert.Equal(t, "", testPos(11, 2, 5))
+	assert.Equal(t, "", testPos(12, 3, 1))
+	assert.Equal(t, "", testPos(15, 3, 3))
 }
 
 func TestPosAtPastEnd(t *testing.T) {
 	s := NewStrCursor("hi")
 	line, col := s.PosAt(100)
-	if line != 1 || col != 2 {
-		t.Errorf("expected (1,2) at past-end, got (%d,%d)", line, col)
-	}
+	assert.Equal(t, 1, line)
+	assert.Equal(t, 2, col)
 }
 
 func TestLocation(t *testing.T) {
 	s := NewStrCursorFromSource("test.txt", "hello\nworld", 0)
 	loc := s.Location()
-	if loc.Source != "test.txt" {
-		t.Errorf("expected Source 'test.txt', got %q", loc.Source)
-	}
-	if loc.Line != 1 || loc.Col != 1 {
-		t.Errorf("expected (1,1), got (%d,%d)", loc.Line, loc.Col)
-	}
+	assert.Equal(t, "test.txt", loc.Source)
+	assert.Equal(t, 1, loc.Line)
+	assert.Equal(t, 1, loc.Col)
 	s.Next()
 	s.Next()
 	s.Next()
@@ -217,99 +158,69 @@ func TestLocation(t *testing.T) {
 	s.Next()
 	s.Next() // past newline
 	loc = s.Location()
-	if loc.Source != "test.txt" {
-		t.Errorf("expected Source 'test.txt', got %q", loc.Source)
-	}
-	if loc.Line != 2 || loc.Col != 1 {
-		t.Errorf("expected (2,1), got (%d,%d)", loc.Line, loc.Col)
-	}
+	assert.Equal(t, "test.txt", loc.Source)
+	assert.Equal(t, 2, loc.Line)
+	assert.Equal(t, 1, loc.Col)
 }
 
 func TestLocationAt(t *testing.T) {
 	s := NewStrCursorFromSource("src", "abc\ndef", 0)
 	loc := s.LocationAt(4)
-	if loc.Source != "src" {
-		t.Errorf("expected 'src', got %q", loc.Source)
-	}
-	if loc.Line != 2 || loc.Col != 1 {
-		t.Errorf("expected (2,3) at pos 4, got (%d,%d)", loc.Line, loc.Col)
-	}
+	assert.Equal(t, "src", loc.Source)
+	assert.Equal(t, 2, loc.Line)
+	assert.Equal(t, 1, loc.Col)
 }
 
 func TestInputSource(t *testing.T) {
 	s := NewStrCursorFromSource("myfile.ebnf", "grammar", 0)
-	if src := s.InputSource(); src != "myfile.ebnf" {
-		t.Errorf("expected 'myfile.ebnf', got %q", src)
-	}
+	assert.Equal(t, "myfile.ebnf", s.InputSource())
 }
 
 func TestAsStr(t *testing.T) {
 	s := NewStrCursor("some text")
-	if str := s.AsStr(); str != "some text" {
-		t.Errorf("expected 'some text', got %q", str)
-	}
+	assert.Equal(t, "some text", s.AsStr())
 }
 
 func TestAsRef(t *testing.T) {
 	s := NewStrCursor("ref text")
-	if ref := s.AsRef(); ref != "ref text" {
-		t.Errorf("expected 'ref text', got %q", ref)
-	}
+	assert.Equal(t, "ref text", s.AsRef())
 }
 
 func TestIgnoreCase(t *testing.T) {
 	s := NewStrCursor("HELLO")
-	if s.IgnoreCase() {
-		t.Error("expected IgnoreCase false by default")
-	}
+	assert.False(t, s.IgnoreCase(), "expected IgnoreCase false by default")
 }
 
 func TestNameGuard(t *testing.T) {
 	s := NewStrCursor("hello")
-	if s.NameGuard() {
-		t.Error("expected NameGuard false by default")
-	}
+	assert.False(t, s.NameGuard(), "expected NameGuard false by default")
 }
 
 func TestLookahead(t *testing.T) {
 	s := NewStrCursor("hello world\nnext line")
 	la := s.Lookahead(0)
-	if la != "hello world" {
-		t.Errorf("expected 'hello world', got %q", la)
-	}
+	assert.Equal(t, "hello world", la)
 	la = s.Lookahead(12)
-	if la != "next line" {
-		t.Errorf("expected 'next line', got %q", la)
-	}
+	assert.Equal(t, "next line", la)
 	la = s.Lookahead(100)
-	if la != "" {
-		t.Errorf("expected empty, got %q", la)
-	}
+	assert.Equal(t, "", la)
 }
 
 func TestLookaheadNoNewline(t *testing.T) {
 	s := NewStrCursor("single line")
 	la := s.Lookahead(0)
-	if la != "single line" {
-		t.Errorf("expected 'single line', got %q", la)
-	}
+	assert.Equal(t, "single line", la)
 }
 
 func TestNewStrCursorFromSourceStart(t *testing.T) {
 	s := NewStrCursorFromSource("src", "hello world", 6)
-	if s.offset != 6 {
-		t.Errorf("expected offset 6, got %d", s.offset)
-	}
-	if s.InputSource() != "src" {
-		t.Errorf("expected 'src', got %q", s.InputSource())
-	}
+	assert.Equal(t, 6, s.offset)
+	assert.Equal(t, "src", s.InputSource())
 }
 
 func TestNewStrCursorFromSourceClamp(t *testing.T) {
 	s := NewStrCursorFromSource("src", "hi", 100)
-	if s.offset != 2 {
-		t.Errorf("expected offset clamped to 2, got %d", s.offset)
-	}
+	assert.Equal(t, 2, s.offset)
 }
 
 func TestSetPatternsAndNextToken(t *testing.T) {
@@ -319,66 +230,49 @@ func TestSetPatternsAndNextToken(t *testing.T) {
 	s := NewStrCursor("  # comment \n  hello")
 	s.SetPatterns(&TokenizingPatterns{Wsp: wsp, Cmt: cmt, Eol: eol})
 	s.NextToken()
-	if !s.MatchToken("hello") {
-		t.Error("expected to match 'hello' after skipping whitespace and comment")
-	}
+	assert.True(t, s.MatchToken("hello"), "expected to match 'hello' after skipping whitespace and comment")
 }
 
 func TestSetPatternsNoPatterns(t *testing.T) {
 	s := NewStrCursor("hello")
 	s.SetPatterns(nil)
 	s.NextToken()
-	if !s.MatchToken("hello") {
-		t.Error("expected to match 'hello' with nil patterns")
-	}
+	assert.True(t, s.MatchToken("hello"), "expected to match 'hello' with nil patterns")
 }
 
 func TestReset(t *testing.T) {
 	s := NewStrCursor("hello")
 	s.offset = 3
 	s.Reset(1)
-	if s.offset != 1 {
-		t.Errorf("expected offset 1 after reset, got %d", s.offset)
-	}
+	assert.Equal(t, 1, s.offset)
 }
 
 func TestCloneCursor(t *testing.T) {
 	s := NewStrCursor("hello world")
 	s.offset = 6
 	c := s.Clone()
-	if c.Mark() != 6 {
-		t.Errorf("expected cloned offset 6, got %d", c.Mark())
-	}
+	assert.Equal(t, 6, c.Mark())
 	s.offset = 0
-	if c.Mark() != 6 {
-		t.Errorf("expected clone independent after original move, got %d", c.Mark())
-	}
+	assert.Equal(t, 6, c.Mark(), "expected clone independent after original move")
 }
 
 func TestPosEmpty(t *testing.T) {
 	s := NewStrCursor("")
 	line, col := s.Pos()
-	if line != 1 || col != 1 {
-		t.Errorf("expected (0,0) for empty string, got (%d,%d)", line, col)
-	}
+	assert.Equal(t, 1, line)
+	assert.Equal(t, 1, col)
 }
 
 func TestStrCursorGetPattern(t *testing.T) {
 	s := NewStrCursor("")
 	p1 := s.GetPattern(`\d+`)
-	if p1 == nil {
-		t.Fatal("expected non-nil pattern")
-	}
+	assert.NotZero(t, p1, "expected non-nil pattern")
 	p2 := s.GetPattern(`\d+`)
-	if p2 != p1 {
-		t.Error("expected cached pattern to be same instance")
-	}
+	assert.True(t, p2 == p1, "expected cached pattern to be same instance")
 }
 
 func TestStrCursorGetPatternInvalid(t *testing.T) {
 	s := NewStrCursor("")
 	p := s.GetPattern(`[invalid`)
-	if p != nil {
-		t.Error("expected nil for invalid pattern")
-	}
+	assert.Zero(t, p, "expected nil for invalid pattern")
 }

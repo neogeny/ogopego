@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/input"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
@@ -17,34 +18,20 @@ func TestBaseCtxCallStack(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.Enter("rule_a")
 	ctx.Enter("rule_b")
-	if len(ctx.CallStack()) != 2 {
-		t.Fatalf("expected 2 entries, got %d", len(ctx.CallStack()))
-	}
-	if ctx.CallStack()[0] != "rule_a" {
-		t.Errorf("expected 'rule_a', got %q", ctx.CallStack()[0])
-	}
-	if ctx.CallStack()[1] != "rule_b" {
-		t.Errorf("expected 'rule_b', got %q", ctx.CallStack()[1])
-	}
+	assert.Equal(t, 2, len(ctx.CallStack()), "expected 2 entries")
+	assert.Equal(t, "rule_a", ctx.CallStack()[0])
+	assert.Equal(t, "rule_b", ctx.CallStack()[1])
 	ctx.Leave()
-	if len(ctx.CallStack()) != 1 {
-		t.Fatalf("expected 1 entry after leave, got %d", len(ctx.CallStack()))
-	}
-	if ctx.CallStack()[0] != "rule_a" {
-		t.Errorf("expected 'rule_a', got %q", ctx.CallStack()[0])
-	}
+	assert.Equal(t, 1, len(ctx.CallStack()), "expected 1 entry after leave")
+	assert.Equal(t, "rule_a", ctx.CallStack()[0])
 	ctx.Leave()
-	if len(ctx.CallStack()) != 0 {
-		t.Errorf("expected empty callstack, got %d", len(ctx.CallStack()))
-	}
+	assert.Equal(t, 0, len(ctx.CallStack()), "expected empty callstack")
 }
 
 func TestBaseCtxCallStackLeaveEmpty(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.Leave()
-	if len(ctx.CallStack()) != 0 {
-		t.Errorf("expected empty callstack after leave on empty, got %d", len(ctx.CallStack()))
-	}
+	assert.Equal(t, 0, len(ctx.CallStack()), "expected empty callstack after leave on empty")
 }
 
 func TestBaseCtxFailureNoRegress(t *testing.T) {
@@ -52,12 +39,7 @@ func TestBaseCtxFailureNoRegress(t *testing.T) {
 	_ = ctx.Failure(10, errors.New("first"))
 	_ = ctx.Failure(3, errors.New("second"))
 	furthest := ctx.FurthestFailure()
-	if furthest.Mark() != 10 {
-		t.Errorf(
-			"expected furthest to stay 'first', got %d",
-			furthest.Mark(),
-		)
-	}
+	assert.Equal(t, 10, furthest.Mark(), "expected furthest to stay 'first'")
 }
 
 func TestBaseCtxFailureProgression(t *testing.T) {
@@ -65,185 +47,131 @@ func TestBaseCtxFailureProgression(t *testing.T) {
 	_ = ctx.Failure(5, errors.New("first"))
 	_ = ctx.Failure(15, errors.New("second"))
 	furthest := ctx.FurthestFailure()
-	if furthest.Mark() != 15 {
-		t.Errorf(
-			"expected furthest to update to 'second', got %d",
-			furthest.Mark(),
-		)
-	}
+	assert.Equal(t, 15, furthest.Mark(), "expected furthest to update to 'second'")
 }
 
 func TestBaseCtxTokenMatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	if !ctx.MatchToken("some") {
-		t.Fatalf("expecting: \"error\"")
-	}
+	assert.True(t, ctx.MatchToken("some"), `expecting: "error"`)
 }
 
 func TestBaseCtxTokenMismatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
-	if ctx.MatchToken("wrong") {
-		t.Fatal("expected no match")
-	}
+	assert.False(t, ctx.MatchToken("wrong"), "expected no match")
 }
 
 func TestBaseCtxPatternMatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
 	matched, err := ctx.MatchPattern(`\w+`)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if matched != "some" {
-		t.Errorf("expected 'some', got %q", matched)
-	}
+	assert.NoError(t, err, "unexpected error")
+	assert.Equal(t, "some", matched)
 }
 
 func TestBaseCtxPatternMismatch(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.NextToken()
 	_, err := ctx.MatchPattern(`\d+`)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	assert.Error(t, err, "expected error")
 }
 
 func TestBaseCtxConstant(t *testing.T) {
 	ctx := newTestBaseCtx()
 	t1, _ := ctx.Constant("hello")
-	if tt, ok := t1.(*trees.Text); !ok || tt.Value != "hello" {
-		t.Errorf("expected Text{hello}, got %T %+v", t1, t1)
-	}
+	tt, ok := t1.(*trees.Text)
+	assert.True(t, ok, "expected Text, got %T", t1)
+	assert.Equal(t, "hello", tt.Value)
 	t2, _ := ctx.Constant(42)
-	if tn, ok := t2.(*trees.Number); !ok || tn.Value != 42 {
-		t.Errorf("expected Number{42}, got %T %+v", t2, t2)
-	}
+	tn, ok := t2.(*trees.Number)
+	assert.True(t, ok, "expected Number, got %T", t2)
+	assert.Equal(t, 42, tn.Value)
 	t3, _ := ctx.Constant(true)
-	if tb, ok := t3.(*trees.Bool); !ok || tb.Value != true {
-		t.Errorf("expected Bool{true}, got %T %+v", t3, t3)
-	}
+	tb, ok := t3.(*trees.Bool)
+	assert.True(t, ok, "expected Bool, got %T", t3)
+	assert.Equal(t, true, tb.Value)
 	t4, _ := ctx.Constant(nil)
-	if _, ok := t4.(*trees.Nil); !ok {
-		t.Errorf("expected Nil, got %T", t4)
-	}
+	_, ok = t4.(*trees.Nil)
+	assert.True(t, ok, "expected Nil, got %T", t4)
 }
 
 func TestBaseCtxEof(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.Eof() {
-		t.Error("expected Eof false")
-	}
+	assert.False(t, ctx.Eof(), "expected Eof false")
 	c := input.NewStrCursor("")
 	ctx2 := NewCtx(c, nil)
-	if !ctx2.Eof() {
-		t.Error("expected Eof true on empty input")
-	}
+	assert.True(t, ctx2.Eof(), "expected Eof true on empty input")
 }
 
 func TestBaseCtxKeywords(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.IsKeyword("if") {
-		t.Error("expected 'if' not a keyword initially")
-	}
+	assert.False(t, ctx.IsKeyword("if"), "expected 'if' not a keyword initially")
 	ctx.setKeywords([]string{"if", "else", "for"})
-	if !ctx.IsKeyword("if") {
-		t.Error("expected 'if' to be a keyword")
-	}
-	if !ctx.IsKeyword("else") {
-		t.Error("expected 'else' to be a keyword")
-	}
-	if ctx.IsKeyword("while") {
-		t.Error("expected 'while' not to be a keyword")
-	}
+	assert.True(t, ctx.IsKeyword("if"), "expected 'if' to be a keyword")
+	assert.True(t, ctx.IsKeyword("else"), "expected 'else' to be a keyword")
+	assert.False(t, ctx.IsKeyword("while"), "expected 'while' not to be a keyword")
 }
 
 func TestBaseCtxIntern(t *testing.T) {
 	ctx := newTestBaseCtx()
 	s1 := ctx.Intern("hello")
 	s2 := ctx.Intern("hello")
-	if s1 != s2 {
-		t.Error("expected interned strings to match")
-	}
+	assert.Equal(t, s2, s1, "expected interned strings to match")
 }
 
 func TestBaseCtxMarkReset(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if m := ctx.Mark(); m != 0 {
-		t.Errorf("expected Mark 0, got %d", m)
-	}
+	assert.Equal(t, 0, ctx.Mark(), "expected Mark 0")
 	ctx.Reset(5)
-	if m := ctx.Mark(); m != 5 {
-		t.Errorf("expected Mark 5 after Reset, got %d", m)
-	}
+	assert.Equal(t, 5, ctx.Mark(), "expected Mark 5 after Reset")
 }
 
 func TestBaseCtxCursorDelegation(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.AtEnd() {
-		t.Error("expected not at end")
-	}
+	assert.False(t, ctx.AtEnd(), "expected not at end")
 	r, ok := ctx.Next()
-	if !ok || r != 's' {
-		t.Errorf("expected 's', got %c", r)
-	}
+	assert.True(t, ok, "expected ok from Next")
+	assert.Equal(t, 's', r)
 	r, ok = ctx.Peek()
-	if !ok || r != 'o' {
-		t.Errorf("expected 'o', got %c", r)
-	}
+	assert.True(t, ok, "expected ok from Peek")
+	assert.Equal(t, 'o', r)
 }
 
 func TestBaseCtxDot(t *testing.T) {
 	ctx := newTestBaseCtx()
 	r, err := ctx.Dot()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if r != 's' {
-		t.Errorf("expected 's', got %c", r)
-	}
+	assert.NoError(t, err, "unexpected error")
+	assert.Equal(t, 's', r)
 }
 
 func TestBaseCtxParseEOF(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.ParseEOF() {
-		t.Error("expected ParseEOF false on non-empty input")
-	}
+	assert.False(t, ctx.ParseEOF(), "expected ParseEOF false on non-empty input")
 }
 
 func TestBaseCtxParseEOFAtEnd(t *testing.T) {
 	c := input.NewStrCursor("")
 	ctx := NewCtx(c, nil)
-	if !ctx.ParseEOF() {
-		t.Error("expected ParseEOF true on empty input")
-	}
+	assert.True(t, ctx.ParseEOF(), "expected ParseEOF true on empty input")
 }
 
 func TestBaseCtxMatchToken(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ok := ctx.MatchToken("some")
-	if !ok {
-		t.Error("expected MatchToken 'some'")
-	}
+	assert.True(t, ok, "expected MatchToken 'some'")
 }
 
 func TestBaseCtxMatchPattern(t *testing.T) {
 	ctx := newTestBaseCtx()
 	m, err := ctx.MatchPattern(`\w+`)
-	if err != nil {
-		t.Errorf("expected pattern matchi %v", err)
-	}
-	if m != "some" {
-		t.Errorf("expected 'some', got %q", m)
-	}
+	assert.NoError(t, err, "expected pattern matchi")
+	assert.Equal(t, "some", m)
 }
 
 func TestBaseCtxMatchEOL(t *testing.T) {
 	ctx := newTestBaseCtx()
-	if ctx.MatchEOL() {
-		t.Error("expected no EOL match in 'some input text'")
-	}
+	assert.False(t, ctx.MatchEOL(), "expected no EOL match in 'some input text'")
 }
 
 func TestBaseCtxVoid(t *testing.T) {
@@ -254,24 +182,18 @@ func TestBaseCtxVoid(t *testing.T) {
 func TestBaseCtxFail(t *testing.T) {
 	ctx := newTestBaseCtx()
 	err := ctx.Fail()
-	if err == nil {
-		t.Error("expected error from Fail()")
-	}
+	assert.Error(t, err, "expected error from Fail()")
 }
 
 func TestBaseCtxEofCheck(t *testing.T) {
 	ctx := newTestBaseCtx()
 	err := ctx.EofCheck()
-	if err == nil {
-		t.Error("expected error from EofCheck on non-empty input")
-	}
+	assert.Error(t, err, "expected error from EofCheck on non-empty input")
 }
 
 func TestBaseCtxEofCheckAtEnd(t *testing.T) {
 	c := input.NewStrCursor("")
 	ctx := NewCtx(c, nil)
 	err := ctx.EofCheck()
-	if err != nil {
-		t.Errorf("expected nil, got %v", err)
-	}
+	assert.NoError(t, err, "expected nil")
 }

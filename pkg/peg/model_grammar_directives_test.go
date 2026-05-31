@@ -5,50 +5,26 @@ package peg
 
 import (
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestBootGrammarCfgFromDirectives(t *testing.T) {
 	g, err := BootGrammar()
-	if err != nil {
-		t.Fatalf("LoadBootGrammar: %v", err)
-	}
+	assert.NoError(t, err, "LoadBootGrammar")
 
 	cfg := *g.CfgFromDirectives()
 
-	if cfg.Grammar != "TatSu" {
-		t.Errorf("expected Grammar 'TatSu', got %q", cfg.Grammar)
-	}
-	if cfg.Name != "" {
-		t.Errorf("expected empty Name, got %q", cfg.Name)
-	}
-	if cfg.Whitespace == nil {
-		t.Fatal("expected Whitespace pattern")
-	}
-	if *cfg.Whitespace != `(?m)\s+` {
-		t.Errorf("expected whitespace pattern, got %q", *cfg.Whitespace)
-	}
-	if cfg.Comments == "" {
-		t.Error("expected Comments pattern")
-	}
-	if cfg.EolComments == "" {
-		t.Error("expected EolComments pattern")
-	}
-	if !cfg.ParseInfo {
-		t.Error("expected ParseInfo to be true")
-	}
-	if !cfg.NoLeftRecursion {
-		t.Error("expected NoLeftRecursion to be true (from left_recursion: false)")
-	}
-	if cfg.IgnoreCase {
-		t.Error("expected IgnoreCase to be false")
-	}
-	if cfg.Source != "" {
-		t.Errorf("expected empty Source, got %q", cfg.Source)
-	}
-	if cfg.Keywords != nil {
-		t.Errorf("expected Keywords to be nil, got %v", cfg.Keywords)
-	}
-	if cfg.Semantics == nil {
-		t.Error("expected Semantics to be non-nil")
-	}
+	assert.Equal(t, "TatSu", cfg.Grammar)
+	assert.Equal(t, "", cfg.Name)
+	assert.NotZero(t, cfg.Whitespace, "expected Whitespace pattern")
+	assert.Equal(t, `(?m)\s+`, *cfg.Whitespace)
+	assert.NotZero(t, cfg.Comments, "expected Comments pattern")
+	assert.NotZero(t, cfg.EolComments, "expected EolComments pattern")
+	assert.True(t, cfg.ParseInfo, "expected ParseInfo to be true")
+	assert.True(t, cfg.NoLeftRecursion, "expected NoLeftRecursion to be true (from left_recursion: false)")
+	assert.False(t, cfg.IgnoreCase, "expected IgnoreCase to be false")
+	assert.Equal(t, "", cfg.Source)
+	assert.Zero(t, cfg.Keywords, "expected Keywords to be nil")
+	assert.NotZero(t, cfg.Semantics, "expected Semantics to be non-nil")
 }

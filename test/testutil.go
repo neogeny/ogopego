@@ -2,9 +2,9 @@ package test
 
 import (
 	"encoding/json"
-	"reflect"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/peg"
@@ -20,35 +20,27 @@ func Dedent(s string) string {
 func Compile(t testing.TB, grammar string, cfg *config.Cfg) *peg.Grammar {
 	t.Helper()
 	g, err := api.Compile(grammar, cfg)
-	if err != nil {
-		t.Fatalf("compile: %v", err)
-	}
+	assert.NoError(t, err, "compile")
 	return g
 }
 
 func ParseJSON(t testing.TB, g *peg.Grammar, text string) any {
 	t.Helper()
 	result, err := api.ParseInputToJSON(g, text, nil)
-	if err != nil {
-		t.Fatalf("parse %q: %v", text, err)
-	}
+	assert.NoError(t, err, "parse %q", text)
 	return result
 }
 
 func ParseFail(t testing.TB, g *peg.Grammar, text string) {
 	t.Helper()
 	_, err := api.ParseInputToJSON(g, text, nil)
-	if err == nil {
-		t.Fatalf("expected parse error for %q", text)
-	}
+	assert.Error(t, err, "expected parse error for %q", text)
 }
 
 func AssertJSON(t testing.TB, g *peg.Grammar, text string, want any) {
 	t.Helper()
 	got := ParseJSON(t, g, text)
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("input %q\ngot:  %#v\nwant: %#v", text, got, want)
-	}
+	assert.Equal(t, want, got, "input %q", text)
 }
 
 func AssertJSONStr(t testing.TB, g *peg.Grammar, text string, wantJSON string) {

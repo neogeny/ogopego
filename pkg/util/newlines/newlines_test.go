@@ -1,12 +1,14 @@
 package newlines
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/alecthomas/assert/v2"
+)
 
 func eq(t *testing.T, label string, got, want int) {
 	t.Helper()
-	if got != want {
-		t.Errorf("%s: got %d, want %d", label, got, want)
-	}
+	assert.Equal(t, want, got, label)
 }
 
 func TestTakeLinebreakLen(t *testing.T) {

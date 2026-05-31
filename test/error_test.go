@@ -3,6 +3,7 @@ package test
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 )
 
@@ -11,7 +12,5 @@ func TestMissingRule(t *testing.T) {
 		@@grammar :: TestGrammar
 		block = test
 	`, nil)
-	if err == nil {
-		t.Fatal("expected error for missing rule 'test'")
-	}
+	assert.Error(t, err, "expected error for missing rule 'test'")
 }

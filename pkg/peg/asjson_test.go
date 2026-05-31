@@ -6,6 +6,7 @@ package peg
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
@@ -23,15 +24,11 @@ func TestNodeAsJSON(t *testing.T) {
 	}
 	result := asjson.AsJSON(n)
 	om, ok := result.(map[string]any)
-	if !ok {
-		t.Fatalf("expected map, got %T", result)
-	}
-	if cls, _ := om["__class__"]; cls != "peg.Node" {
-		t.Errorf("expected __class__ peg.Node, got %v", cls)
-	}
-	parseinfoRaw, hasPI := om["parse_info"]
-	if !hasPI {
-		t.Fatal("expected non-nil ParseInfo")
-	}
-	_ = parseinfoRaw
+	assert.True(t, ok, "expected map, got %T", result)
+
+	cls, _ := om["__class__"]
+	assert.Equal(t, "peg.Node", cls)
+
+	_, hasPI := om["parse_info"]
+	assert.True(t, hasPI, "expected non-nil ParseInfo")
 }

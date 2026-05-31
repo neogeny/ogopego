@@ -6,6 +6,8 @@ package asjson
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestAsJSONPrimitives(t *testing.T) {
@@ -23,47 +25,32 @@ func TestAsJSONPrimitives(t *testing.T) {
 	}
 	for _, tt := range tests {
 		got := AsJSONStr(tt.in)
-		if got != tt.want {
-			t.Errorf("AsJSONStr(%v) = %s, want %s", tt.in, got, tt.want)
-		}
+		assert.Equal(t, tt.want, got, "AsJSONStr(%v) = %s, want %s", tt.in, got, tt.want)
 	}
 }
 
 func TestAsJSONSlice(t *testing.T) {
 	v := []any{1, "two", true}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(b) != `[1,"two",true]` {
-		t.Errorf("got %s", string(b))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, `[1,"two",true]`, string(b))
 }
 
 func TestAsJSONMap(t *testing.T) {
 	v := map[string]any{"a": 1, "b": "hello"}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
-	if out["a"] != float64(1) {
-		t.Errorf("expected 1, got %v", out["a"])
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
+	assert.Equal[any](t, float64(1), out["a"], "expected 1, got %v", out["a"])
 }
 
 func TestAsJSONNestedSlice(t *testing.T) {
 	v := [][]any{{1, 2}, {3, 4}}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(b) != `[[1,2],[3,4]]` {
-		t.Errorf("got %s", string(b))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, `[[1,2],[3,4]]`, string(b))
 }
 
 type testStruct struct {
@@ -75,22 +62,14 @@ type testStruct struct {
 func TestAsJSONStruct(t *testing.T) {
 	v := testStruct{Name: "foo", Value: 42, hidden: "secret"}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
-	if out["name"] != "foo" {
-		t.Errorf("expected foo, got %v", out["Name"])
-	}
-	if out["value"] != float64(42) {
-		t.Errorf("expected 42, got %v", out["Value"])
-	}
-	if _, ok := out["hidden"]; ok {
-		t.Error("unexported field 'hidden' should not appear")
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
+	assert.Equal[any](t, "foo", out["name"], "expected foo, got %v", out["Name"])
+	assert.Equal[any](t, float64(42), out["value"], "expected 42, got %v", out["Value"])
+	_, ok := out["hidden"]
+	assert.False(t, ok, "unexported field 'hidden' should not appear")
 }
 
 type jsonStruct struct {
@@ -104,19 +83,12 @@ func (s *jsonStruct) MarshalJSON() ([]byte, error) {
 func TestAsJSONJSONMarshaler(t *testing.T) {
 	v := &jsonStruct{Name: "test"}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		t.Fatal(err)
-	}
-	if out["__class__"] != "asjson.jsonStruct" {
-		t.Errorf("expected __class__ asjson.jsonStruct, got %v", out["__class__"])
-	}
-	if out["name"] != "test" {
-		t.Errorf("expected test, got %v", out["name"])
-	}
+	err = json.Unmarshal(b, &out)
+	assert.NoError(t, err)
+	assert.Equal[any](t, "asjson.jsonStruct", out["__class__"], "expected __class__ asjson.jsonStruct, got %v", out["__class__"])
+	assert.Equal[any](t, "test", out["name"], "expected test, got %v", out["name"])
 }
 
 func TestAsJSONCycle(t *testing.T) {
@@ -131,37 +103,21 @@ func TestAsJSONCycle(t *testing.T) {
 
 	result := AsJSON(a)
 	m, ok := result.(map[string]any)
-	if !ok {
-		t.Fatalf("expected map, got %T", result)
-	}
-	if m["name"] != "a" {
-		t.Errorf("expected 'a', got %v", m["Name"])
-	}
-	// The cycle reference should produce a string marker, not a recursive struct
+	assert.True(t, ok, "expected map, got %T", result)
+	assert.Equal[any](t, "a", m["name"], "expected 'a', got %v", m["Name"])
 	next, ok := m["next"].(map[string]any)
-	if !ok {
-		t.Fatalf("expected map for Next, got %T", m["Next"])
-	}
-	if next["name"] != "b" {
-		t.Errorf("expected 'b', got %v", next["Name"])
-	}
-	// b.Next should be a cycle marker string
+	assert.True(t, ok, "expected map for Next, got %T", m["Next"])
+	assert.Equal[any](t, "b", next["name"], "expected 'b', got %v", next["Name"])
 	cycle, ok := next["next"].(string)
-	if !ok {
-		t.Fatalf("expected string cycle marker, got %T", next["Next"])
-	}
-	if len(cycle) < 3 {
-		t.Errorf("expected meaningful cycle marker, got %q", cycle)
-	}
+	assert.True(t, ok, "expected string cycle marker, got %T", next["Next"])
+	assert.True(t, len(cycle) >= 3, "expected meaningful cycle marker, got %q", cycle)
 }
 
 func TestAsJSONs(t *testing.T) {
 	v := map[string]any{"x": 1}
 	s := AsJSONStr(v)
 	want := "{\n  \"x\": 1\n}"
-	if s != want {
-		t.Errorf("got %q, want %q", s, want)
-	}
+	assert.Equal(t, want, s, "got %q, want %q", s, want)
 }
 
 func TestAsJSONChanFunc(t *testing.T) {
@@ -169,10 +125,6 @@ func TestAsJSONChanFunc(t *testing.T) {
 	fn := func() {}
 	v := []any{ch, fn}
 	b, err := json.Marshal(AsJSON(v))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(b) != `[null,null]` {
-		t.Errorf("expected [null,null], got %s", string(b))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, `[null,null]`, string(b))
 }

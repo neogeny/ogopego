@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/input"
 )
 
@@ -67,18 +68,14 @@ func TestConsoleTracerTraceMatch(t *testing.T) {
 	ctx := newTestCtxWithTracer(ConsoleTracer{})
 	et := ctx.Tracer()
 	result := et.TraceMatch(ctx, "hello", "greeting")
-	if !result {
-		t.Error("TraceMatch should return true")
-	}
+	assert.True(t, result, "TraceMatch should return true")
 }
 
 func TestConsoleTracerTraceNoMatch(t *testing.T) {
 	ctx := newTestCtxWithTracer(ConsoleTracer{})
 	et := ctx.Tracer()
 	result := et.TraceNoMatch(ctx, "", "pattern")
-	if result {
-		t.Error("TraceNoMatch should return false")
-	}
+	assert.False(t, result, "TraceNoMatch should return false")
 }
 
 func TestConsoleTracerTraceRecursion(t *testing.T) {
@@ -109,28 +106,20 @@ func TestNullTracerMethodsNoPanic(t *testing.T) {
 }
 
 func TestEventConstants(t *testing.T) {
-	if EventEntry != 0 {
-		t.Errorf("EventEntry should be 0, got %d", EventEntry)
-	}
-	if EventNoMatch != 6 {
-		t.Errorf("EventNoMatch should be 6, got %d", EventNoMatch)
-	}
+	assert.Equal(t, 0, EventEntry, "EventEntry should be 0")
+	assert.Equal(t, 6, EventNoMatch, "EventNoMatch should be 6")
 }
 
 func TestBaseCtxTracerDefault(t *testing.T) {
 	ctx := newTestCtx()
 	tr := ctx.Tracer()
-	if tr == nil {
-		t.Error("expected non-nil default tracer")
-	}
+	assert.NotZero(t, tr, "expected non-nil default tracer")
 }
 
 func TestBaseCtxWithTracer(t *testing.T) {
 	ct := ConsoleTracer{}
 	ctx := newTestCtxWithTracer(ct)
-	if ctx.Tracer() != ct {
-		t.Error("expected tracer to match")
-	}
+	assert.True(t, ctx.Tracer() == ct, "expected tracer to match")
 }
 
 func TestTraceWithCallstack(t *testing.T) {
@@ -140,9 +129,7 @@ func TestTraceWithCallstack(t *testing.T) {
 	ctx.Enter("term")
 	et := ctx.Tracer()
 	et.TraceEntry(ctx)
-	if len(ctx.CallStack()) != 3 {
-		t.Errorf("expected 3 callstack entries, got %d", len(ctx.CallStack()))
-	}
+	assert.Equal(t, 3, len(ctx.CallStack()), "expected 3 callstack entries")
 }
 
 func TestBaseCtxNewWithTracer(t *testing.T) {
@@ -150,9 +137,7 @@ func TestBaseCtxNewWithTracer(t *testing.T) {
 	ctx := NewCtx(c, nil)
 	ctx.SetTracer(ConsoleTracer{})
 	_, ok := ctx.Tracer().(ConsoleTracer)
-	if !ok {
-		t.Error("expected ConsoleTracer")
-	}
+	assert.True(t, ok, "expected ConsoleTracer")
 }
 
 func TestConsoleTracerTraceEventMatch(t *testing.T) {
@@ -189,18 +174,14 @@ func TestConsoleTracerTraceMatchWithName(t *testing.T) {
 	ctx := newTestCtxWithTracer(ConsoleTracer{})
 	et := ctx.Tracer()
 	result := et.TraceMatch(ctx, "if", "keyword")
-	if !result {
-		t.Error("TraceMatch should return true")
-	}
+	assert.True(t, result, "TraceMatch should return true")
 }
 
 func TestConsoleTracerTraceNoMatchPattern(t *testing.T) {
 	ctx := newTestCtxWithTracer(ConsoleTracer{})
 	et := ctx.Tracer()
 	result := et.TraceNoMatch(ctx, "", "\\d+")
-	if result {
-		t.Error("TraceNoMatch should return false")
-	}
+	assert.False(t, result, "TraceNoMatch should return false")
 }
 
 func TestEventSymbols(t *testing.T) {
@@ -218,8 +199,6 @@ func TestEventSymbols(t *testing.T) {
 	}
 	for _, tt := range tests {
 		got := eventSymbol(tt.event)
-		if !strings.Contains(got, tt.want) {
-			t.Errorf("eventSymbol(%d) should contain %q, got %q", tt.event, tt.want, got)
-		}
+		assert.True(t, strings.Contains(got, tt.want), "eventSymbol(%d) should contain %q, got %q", tt.event, tt.want, got)
 	}
 }

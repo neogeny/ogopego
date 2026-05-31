@@ -6,6 +6,7 @@ package peg
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/pkg/context"
 	"github.com/neogeny/ogopego/pkg/input"
 	"github.com/neogeny/ogopego/pkg/trees"
@@ -26,35 +27,27 @@ func TestParseToken(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Token{Token: "hello"}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt, ok := result.(*trees.Text)
-	if !ok || tt.Value != "hello" {
-		t.Errorf("expected Text{hello}, got %T %+v", result, result)
-	}
+	assert.True(t, ok, "expected Text{hello}, got %T %+v", result, result)
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseTokenFail(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Token{Token: "wrong"}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	assert.Error(t, err, "expected error")
 }
 
 func TestParsePattern(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Pattern{Pattern: `\w+`}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt, ok := result.(*trees.Text)
-	if !ok || tt.Value != "hello" {
-		t.Errorf("expected Text{hello}, got %T %+v", result, result)
-	}
+	assert.True(t, ok, "expected Text{hello}, got %T %+v", result, result)
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseSequence(t *testing.T) {
@@ -66,33 +59,23 @@ func TestParseSequence(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	seq, ok := result.(*trees.Seq)
-	if !ok {
-		t.Fatalf("expected Seq, got %T", result)
-	}
-	if len(seq.Items) != 2 {
-		t.Fatalf("expected 2 items, got %d", len(seq.Items))
-	}
+	assert.True(t, ok, "expected Seq, got %T", result)
+	assert.Equal(t, 2, len(seq.Items), "expected 2 items, got %d", len(seq.Items))
 	t1 := seq.Items[0].(*trees.Text)
 	t2 := seq.Items[1].(*trees.Text)
-	if t1.Value != "hello" || t2.Value != "world" {
-		t.Errorf("expected hello, world, got %q, %q", t1.Value, t2.Value)
-	}
+	assert.Equal(t, "hello", t1.Value)
+	assert.Equal(t, "world", t2.Value)
 }
 
 func TestParseSequenceEmpty(t *testing.T) {
 	ctx := ctxFrom("anything")
 	expr := &Sequence{Sequence: []Model{}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil for empty sequence, got %T", result)
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil for empty sequence, got %T", result)
 }
 
 func TestParseChoiceFirst(t *testing.T) {
@@ -104,13 +87,9 @@ func TestParseChoiceFirst(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
-	}
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseChoiceSecond(t *testing.T) {
@@ -122,13 +101,9 @@ func TestParseChoiceSecond(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "world" {
-		t.Errorf("expected 'world', got %q", tt.Value)
-	}
+	assert.Equal(t, "world", tt.Value)
 }
 
 func TestParseChoiceFail(t *testing.T) {
@@ -140,184 +115,126 @@ func TestParseChoiceFail(t *testing.T) {
 		},
 	}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error when no option matches")
-	}
+	assert.Error(t, err, "expected error when no option matches")
 }
 
 func TestParseOptionalMatches(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
-	}
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseOptionalNoMatch(t *testing.T) {
 	ctx := ctxFrom("world")
 	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil for failed optional, got %T", result)
-	}
-	if ctx.Mark() != 0 {
-		t.Errorf("expected cursor at 0 after failed optional, got %d", ctx.Mark())
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil for failed optional, got %T", result)
+	assert.Equal(t, 0, ctx.Mark(), "expected cursor at 0 after failed optional, got %d", ctx.Mark())
 }
 
 func TestParseClosureMultiple(t *testing.T) {
 	ctx := ctxFrom("aaa")
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	lst, ok := result.(*trees.List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(lst.Items) != 3 {
-		t.Errorf("expected 3 items, got %d", len(lst.Items))
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 3, len(lst.Items))
 }
 
 func TestParseClosureZero(t *testing.T) {
 	ctx := ctxFrom("bbb")
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	lst, ok := result.(*trees.List)
-	if !ok {
-		t.Fatalf("expected List for zero closure, got %T", result)
-	}
-	if len(lst.Items) != 0 {
-		t.Errorf("expected 0 items, got %d", len(lst.Items))
-	}
+	assert.True(t, ok, "expected List for zero closure, got %T", result)
+	assert.Equal(t, 0, len(lst.Items))
 }
 
 func TestParsePositiveClosure(t *testing.T) {
 	ctx := ctxFrom("aaa")
 	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	lst, ok := result.(*trees.List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(lst.Items) != 3 {
-		t.Errorf("expected 3 items, got %d", len(lst.Items))
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 3, len(lst.Items))
 }
 
 func TestParsePositiveClosureFail(t *testing.T) {
 	ctx := ctxFrom("bbb")
 	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error when positive closure can't match at least once")
-	}
+	assert.Error(t, err, "expected error when positive closure can't match at least once")
 }
 
 func TestParseGroup(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Group{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
-	}
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseLookahead(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Lookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil after lookahead, got %T", result)
-	}
-	if ctx.Mark() != 0 {
-		t.Errorf("expected cursor restored to 0 after lookahead, got %d", ctx.Mark())
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil after lookahead, got %T", result)
+	assert.Equal(t, 0, ctx.Mark(), "expected cursor restored to 0 after lookahead, got %d", ctx.Mark())
 }
 
 func TestParseLookaheadFail(t *testing.T) {
 	ctx := ctxFrom("world")
 	expr := &Lookahead{Exp: &Token{Token: "hello"}}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	assert.Error(t, err, "expected error")
 }
 
 func TestParseNegativeLookahead(t *testing.T) {
 	ctx := ctxFrom("world")
 	expr := &NegativeLookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil, got %T", result)
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil, got %T", result)
 }
 
 func TestParseNegativeLookaheadFail(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &NegativeLookahead{Exp: &Token{Token: "hello"}}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error when negative lookahead matches")
-	}
+	assert.Error(t, err, "expected error when negative lookahead matches")
 }
 
 func TestParseNamed(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Named{Exp: &Token{Token: "hello"}, Name: "greeting"}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	named, ok := result.(*trees.Named)
-	if !ok {
-		t.Fatalf("expected Named, got %T", result)
-	}
-	if named.Name != "greeting" {
-		t.Errorf("expected name 'greeting', got %q", named.Name)
-	}
+	assert.True(t, ok, "expected Named, got %T", result)
+	assert.Equal(t, "greeting", named.Name)
 	tt := named.Value.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
-	}
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseOverride(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Override{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Override); !ok {
-		t.Fatalf("expected Override, got %T", result)
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Override)
+	assert.True(t, ok, "expected Override, got %T", result)
 }
 
 func TestParseRule(t *testing.T) {
@@ -328,20 +245,12 @@ func TestParseRule(t *testing.T) {
 		Params: []string{"test"},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	rn, ok := result.(*trees.Node)
-	if !ok {
-		t.Fatalf("expected RuleNode, got %T", result)
-	}
-	if rn.TypeName != "test" {
-		t.Errorf("expected 'test', got %q", rn.TypeName)
-	}
+	assert.True(t, ok, "expected RuleNode, got %T", result)
+	assert.Equal(t, "test", rn.TypeName)
 	tt := rn.Tree.(*trees.Text)
-	if tt.Value != "hello" {
-		t.Errorf("expected 'hello', got %q", tt.Value)
-	}
+	assert.Equal(t, "hello", tt.Value)
 }
 
 func TestParseGrammar(t *testing.T) {
@@ -357,16 +266,10 @@ func TestParseGrammar(t *testing.T) {
 		},
 	}
 	result, err := expr.ParseAt(ctx, nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	rn, ok := result.(*trees.Node)
-	if !ok {
-		t.Fatalf("expected RuleNode, got %T", result)
-	}
-	if rn.TypeName != "start" {
-		t.Errorf("expected 'start', got %q", rn.TypeName)
-	}
+	assert.True(t, ok, "expected RuleNode, got %T", result)
+	assert.Equal(t, "start", rn.TypeName)
 }
 
 func TestParseGrammarMultipleRules(t *testing.T) {
@@ -387,93 +290,67 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 		},
 	}
 	result, err := expr.ParseAt(ctx, nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	rn, ok := result.(*trees.Node)
-	if !ok {
-		t.Fatalf("expected Node, got %T", result)
-	}
-	if rn.TypeName != "first" {
-		t.Errorf("expected 'first', got %q", rn.TypeName)
-	}
+	assert.True(t, ok, "expected Node, got %T", result)
+	assert.Equal(t, "first", rn.TypeName)
 }
 
 func TestParseEOF(t *testing.T) {
 	ctx := ctxFrom("")
 	expr := &EOF{}
 	_, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestParseEOFFail(t *testing.T) {
 	ctx := ctxFrom("not empty")
 	expr := &EOF{}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	assert.Error(t, err, "expected error")
 }
 
 func TestParseDot(t *testing.T) {
 	ctx := ctxFrom("x")
 	expr := &Dot{}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "x" {
-		t.Errorf("expected 'x', got %q", tt.Value)
-	}
+	assert.Equal(t, "x", tt.Value)
 }
 
 func TestParseVoid(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Void{}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil, got %T", result)
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil, got %T", result)
 }
 
 func TestParseFail(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Fail{}
 	_, err := expr.Parse(ctx)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+	assert.Error(t, err, "expected error")
 }
 
 func TestParseNull(t *testing.T) {
 	ctx := ctxFrom("anything")
 	expr := &NULL{}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := result.(*trees.Nil); !ok {
-		t.Errorf("expected Nil, got %T", result)
-	}
+	assert.NoError(t, err)
+	_, ok := result.(*trees.Nil)
+	assert.True(t, ok, "expected Nil, got %T", result)
 }
 
 func TestParseConstant(t *testing.T) {
 	ctx := ctxFrom("anything")
 	expr := &Constant{Literal: "test"}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	tt := result.(*trees.Text)
-	if tt.Value != "test" {
-		t.Errorf("expected 'test', got %q", tt.Value)
-	}
+	assert.Equal(t, "test", tt.Value)
 }
 
 func TestParseChoiceResetsCursor(t *testing.T) {
@@ -489,13 +366,9 @@ func TestParseChoiceResetsCursor(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	seq := result.(*trees.Seq)
-	if len(seq.Items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(seq.Items))
-	}
+	assert.Equal(t, 2, len(seq.Items))
 }
 
 func TestParseClosureIncremental(t *testing.T) {
@@ -509,21 +382,15 @@ func TestParseClosureIncremental(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	seq := result.(*trees.Seq)
-	if len(seq.Items) != 2 {
-		t.Errorf("expected 2 items (a + closure containing b c), got %d", len(seq.Items))
-	}
+	assert.Equal(t, 2, len(seq.Items), "expected 2 items (a + closure containing b c), got %d", len(seq.Items))
 }
 
 func TestParseKeywordIsKeyword(t *testing.T) {
 	ctx := ctxFrom("if")
 	ctx.Configure(input.Cfg{Keywords: []string{"if", "else"}})
-	if !ctx.IsKeyword("if") {
-		t.Error("expected 'if' to be keyword")
-	}
+	assert.True(t, ctx.IsKeyword("if"), "expected 'if' to be keyword")
 }
 
 func TestParseFoldIntegration(t *testing.T) {
@@ -541,18 +408,11 @@ func TestParseFoldIntegration(t *testing.T) {
 		},
 	}
 	result, err := expr.Parse(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	assert.NoError(t, err)
 	folded := trees.Fold(result)
 	mn, ok := folded.(*trees.MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode after Fold, got %T", folded)
-	}
-	if len(mn.Entries) != 2 {
-		t.Errorf("expected 2 entries, got %d", len(mn.Entries))
-	}
-	if mn.Entries["first"] == nil || mn.Entries["second"] == nil {
-		t.Errorf("missing keys: first=%v, second=%v", mn.Entries["first"], mn.Entries["second"])
-	}
+	assert.True(t, ok, "expected MapNode after Fold, got %T", folded)
+	assert.Equal(t, 2, len(mn.Entries))
+	assert.NotZero(t, mn.Entries["first"], "missing key 'first'")
+	assert.NotZero(t, mn.Entries["second"], "missing key 'second'")
 }

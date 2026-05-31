@@ -5,34 +5,28 @@ package peg
 
 import (
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func mustLink(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.LinkGrammar(); err != nil {
-		t.Fatalf("Link() error: %v", err)
-	}
+	assert.NoError(t, g.LinkGrammar())
 }
 
 func mustValidateLinked(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.ValidateLinked(); err != nil {
-		t.Fatalf("ValidateLinked() error: %v", err)
-	}
+	assert.NoError(t, g.ValidateLinked())
 }
 
 func expectLinkError(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.LinkGrammar(); err == nil {
-		t.Fatal("expected Link() error, got nil")
-	}
+	assert.Error(t, g.LinkGrammar(), "expected Link() error, got nil")
 }
 
 func expectValidateError(t *testing.T, g *Grammar) {
 	t.Helper()
-	if err := g.ValidateLinked(); err == nil {
-		t.Fatal("expected ValidateLinked() error, got nil")
-	}
+	assert.Error(t, g.ValidateLinked(), "expected ValidateLinked() error, got nil")
 }
 
 // linkTestGrammar builds a simple grammar:
@@ -69,19 +63,11 @@ func TestLinkCall(t *testing.T) {
 	mustValidateLinked(t, g)
 
 	seq, ok := g.Rules[0].Exp.(*Sequence)
-	if !ok {
-		t.Fatal("expr.Exp is not *Sequence")
-	}
+	assert.True(t, ok, "expr.Exp is not *Sequence")
 	call, ok := seq.Sequence[0].(*Call)
-	if !ok {
-		t.Fatal("seq[0] is not *Call")
-	}
-	if call.rule == nil {
-		t.Fatal("Call.rule is nil after Link")
-	}
-	if call.rule.Name != "atom" {
-		t.Fatalf("Call.rule.Name = %q, want %q", call.rule.Name, "atom")
-	}
+	assert.True(t, ok, "seq[0] is not *Call")
+	assert.NotZero(t, call.rule, "Call.rule is nil after Link")
+	assert.Equal(t, "atom", call.rule.Name)
 }
 
 func TestLinkCallUnlinked(t *testing.T) {
@@ -121,18 +107,11 @@ func TestLinkRuleInclude(t *testing.T) {
 	mustValidateLinked(t, g)
 
 	ri, ok := g.Rules[0].Exp.(*RuleInclude)
-	if !ok {
-		t.Fatal("rule_b.Exp is not *RuleInclude")
-	}
-	if ri.exp == nil {
-		t.Fatal("RuleInclude.exp is nil after Link")
-	}
-	if _, ok := ri.exp.(*Token); !ok {
-		t.Fatalf("RuleInclude.exp is %T, want *Token", ri.exp)
-	}
-	if ri.exp.(*Token).Token != "a" {
-		t.Fatalf("RuleInclude.exp.Token = %q, want %q", ri.exp.(*Token).Token, "a")
-	}
+	assert.True(t, ok, "rule_b.Exp is not *RuleInclude")
+	assert.NotZero(t, ri.exp, "RuleInclude.exp is nil after Link")
+	_, ok = ri.exp.(*Token)
+	assert.True(t, ok, "RuleInclude.exp is %T, want *Token", ri.exp)
+	assert.Equal(t, "a", ri.exp.(*Token).Token)
 }
 
 func TestLinkRuleIncludeUnlinked(t *testing.T) {

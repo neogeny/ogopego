@@ -3,6 +3,8 @@ package test
 import (
 	"strings"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestGrammarHasRules(t *testing.T) {
@@ -10,9 +12,7 @@ func TestGrammarHasRules(t *testing.T) {
 		@@grammar :: Test
 		start := 'a' | 'b' | 'c'
 	`, nil)
-	if len(g.Rules) < 1 {
-		t.Fatal("expected at least 1 rule")
-	}
+	assert.NotZero(t, len(g.Rules), "expected at least 1 rule")
 }
 
 func TestFirstRuleIsDefault(t *testing.T) {
@@ -29,7 +29,6 @@ func TestPrettyPrint(t *testing.T) {
 		start := 'a'
 	`, nil)
 	s := g.PrettyPrint()
-	if !strings.Contains(s, "Test") && !strings.Contains(s, "start") {
-		t.Errorf("expected pretty print to contain 'Test' or 'start', got %q", s)
-	}
+	assert.True(t, strings.Contains(s, "Test") || strings.Contains(s, "start"),
+		"expected pretty print to contain 'Test' or 'start', got %q", s)
 }

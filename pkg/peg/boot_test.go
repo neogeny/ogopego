@@ -5,31 +5,20 @@ package peg
 
 import (
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestLoadBootGrammar(t *testing.T) {
 	g, err := BootGrammar()
-	if err != nil {
-		t.Fatalf("LoadBootGrammar error: %v", err)
-	}
-	if g.Name == "" {
-		t.Error("expected non-empty grammar name")
-	}
-	if !g.Analyzed {
-		t.Error("expected grammar to be analyzed after Initialize")
-	}
-	if len(g.Rules) < 10 {
-		t.Errorf("expected at least 10 rules, got %d", len(g.Rules))
-	}
+	assert.NoError(t, err, "LoadBootGrammar")
+	assert.NotZero(t, g.Name, "expected non-empty grammar name")
+	assert.True(t, g.Analyzed, "expected grammar to be analyzed after Initialize")
+	assert.True(t, len(g.Rules) >= 10, "expected at least 10 rules, got %d", len(g.Rules))
 	required := []string{"start", "grammar", "rule", "expre", "choice", "sequence"}
 	for _, name := range required {
 		rule, err := g.GetRule(name)
-		if err != nil {
-			t.Errorf("missing required rule %q: %v", name, err)
-			continue
-		}
-		if rule == nil {
-			t.Errorf("GetRule(%q) returned nil", name)
-		}
+		assert.NoError(t, err, "missing required rule %q", name)
+		assert.NotZero(t, rule, "GetRule(%q) returned nil", name)
 	}
 }

@@ -3,6 +3,7 @@ package util
 import (
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	ctn "github.com/neogeny/ogopego/pkg/util/container"
 )
 
@@ -33,9 +34,7 @@ func TestReprPrimitives(t *testing.T) {
 	}
 	for _, tt := range tests {
 		got := Repr(tt.input)
-		if got != tt.want {
-			t.Errorf("Repr(%v) = %q, want %q", tt.input, got, tt.want)
-		}
+		assert.Equal(t, tt.want, got, "Repr(%v)", tt.input)
 	}
 }
 
@@ -43,25 +42,19 @@ func TestReprStruct(t *testing.T) {
 	s := &ReprTestStruct{Name: "foo", Value: 7, Ok: true}
 	got := Repr(s)
 	want := `&util.ReprTestStruct{Name: "foo", Value: 7, Ok: true}`
-	if got != want {
-		t.Errorf("Repr(%v) = %q, want %q", s, got, want)
-	}
+	assert.Equal(t, want, got, "Repr(%v)", s)
 }
 
 func TestReprSlice(t *testing.T) {
 	got := Repr([]any{1, "two", true})
 	want := `[]any{1, "two", true}`
-	if got != want {
-		t.Errorf("Repr() = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprFlatMap(t *testing.T) {
 	got := Repr(map[string]any{"a": 1, "b": 2})
 	want := `map[string]any{a: 1, b: 2}`
-	if got != want {
-		t.Errorf("Repr(map) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprMapWithClass(t *testing.T) {
@@ -72,9 +65,7 @@ func TestReprMapWithClass(t *testing.T) {
 	}
 	got := Repr(m)
 	want := `MyType{name: "foo", value: 42}`
-	if got != want {
-		t.Errorf("Repr(__class__ map) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprNestedStruct(t *testing.T) {
@@ -84,26 +75,20 @@ func TestReprNestedStruct(t *testing.T) {
 	}
 	got := Repr(s)
 	want := "&util.ReprNested{\n  Label: \"top\",\n  Inner: &util.ReprTestStruct{Name: \"inner\", Value: 1, Ok: false},\n}"
-	if got != want {
-		t.Errorf("Repr(%v) = %q, want %q", s, got, want)
-	}
+	assert.Equal(t, want, got, "Repr(%v)", s)
 }
 
 func TestReprTypedSlice(t *testing.T) {
 	type item struct{ Name string }
 	got := Repr([]*item{{Name: "a"}, {Name: "b"}})
 	want := `[]*util.item{&util.item{Name: "a"}, &util.item{Name: "b"}}`
-	if got != want {
-		t.Errorf("Repr([]*item) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprTypedStringSlice(t *testing.T) {
 	got := Repr([]string{"x", "y"})
 	want := `[]string{"x", "y"}`
-	if got != want {
-		t.Errorf("Repr([]string) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprOrderedMap(t *testing.T) {
@@ -112,25 +97,19 @@ func TestReprOrderedMap(t *testing.T) {
 	om.Set("hello", "world")
 	got := Repr(&om)
 	want := `map[string]any{count: 42, hello: "world"}`
-	if got != want {
-		t.Errorf("Repr(OrderedMap) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprEmptyOrderedMap(t *testing.T) {
 	om := ctn.NewBoundedMap[string, any](0)
 	got := Repr(&om)
 	want := "map[string]any{}"
-	if got != want {
-		t.Errorf("Repr(empty OrderedMap) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestReprPointerToInt(t *testing.T) {
 	n := 42
 	got := Repr(&n)
 	want := "&42"
-	if got != want {
-		t.Errorf("Repr(&int) = %q, want %q", got, want)
-	}
+	assert.Equal(t, want, got)
 }

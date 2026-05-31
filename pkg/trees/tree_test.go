@@ -5,6 +5,8 @@ package trees
 
 import (
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func text(s string) *Text      { return &Text{Value: s} }
@@ -13,102 +15,72 @@ func list(items ...Tree) *List { return &List{Items: items} }
 
 func TestFoldNil(t *testing.T) {
 	result := Fold(&Nil{})
-	if _, ok := result.(*Nil); !ok {
-		t.Errorf("expected Nil, got %T", result)
-	}
+	_, ok := result.(*Nil)
+	assert.True(t, ok, "expected Nil, got %T", result)
 }
 
 func TestFoldBottom(t *testing.T) {
 	result := Fold(&Bottom{})
-	if _, ok := result.(*Bottom); !ok {
-		t.Errorf("expected Bottom, got %T", result)
-	}
+	_, ok := result.(*Bottom)
+	assert.True(t, ok, "expected Bottom, got %T", result)
 }
 
 func TestFoldGoNil(t *testing.T) {
 	result := Fold(nil)
-	if _, ok := result.(*Nil); !ok {
-		t.Errorf("expected Nil, got %T", result)
-	}
+	_, ok := result.(*Nil)
+	assert.True(t, ok, "expected Nil, got %T", result)
 }
 
 func TestFoldText(t *testing.T) {
 	result := Fold(text("hello"))
 	txt, ok := result.(*Text)
-	if !ok || txt.Value != "hello" {
-		t.Errorf("expected Text(hello), got %T %v", result, result)
-	}
+	assert.True(t, ok, "expected Text, got %T", result)
+	assert.Equal(t, "hello", txt.Value)
 }
 
 func TestFoldBool(t *testing.T) {
 	result := Fold(&Bool{Value: true})
 	b, ok := result.(*Bool)
-	if !ok || b.Value != true {
-		t.Errorf("expected Bool(true), got %T %v", result, result)
-	}
+	assert.True(t, ok, "expected Bool, got %T", result)
+	assert.Equal(t, true, b.Value)
 }
 
 func TestFoldNumber(t *testing.T) {
 	result := Fold(&Number{Value: 42.5})
 	n, ok := result.(*Number)
-	if !ok || n.Value != 42.5 {
-		t.Errorf("expected Number(42.5), got %T %v", result, result)
-	}
+	assert.True(t, ok, "expected Number, got %T", result)
+	assert.Equal(t, 42.5, n.Value)
 }
 
 func TestFoldSeqToSeq(t *testing.T) {
-	// Seq with no Named/Override becomes List after fold (closed)
 	result := Fold(seq(text("a"), text("b"), text("c")))
 	l, ok := result.(*List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(l.Items) != 3 {
-		t.Fatalf("expected 3 items, got %d", len(l.Items))
-	}
-	if l.Items[0].(*Text).Value != "a" {
-		t.Errorf("expected 'a', got %v", l.Items[0])
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 3, len(l.Items))
+	assert.Equal(t, "a", l.Items[0].(*Text).Value, "expected 'a'")
 }
 
 func TestFoldListToList(t *testing.T) {
-	// Seq with no Named/Override becomes List after fold (closed)
 	result := Fold(list(text("a"), text("b"), text("c")))
 	l, ok := result.(*List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(l.Items) != 3 {
-		t.Fatalf("expected 3 items, got %d", len(l.Items))
-	}
-	if l.Items[0].(*Text).Value != "a" {
-		t.Errorf("expected 'a', got %v", l.Items[0])
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 3, len(l.Items))
+	assert.Equal(t, "a", l.Items[0].(*Text).Value, "expected 'a'")
 }
 
 func TestFoldNamedToMap(t *testing.T) {
 	result := Fold(&Named{Name: "x", Value: text("hello")})
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	if m.Entries["x"] == nil {
-		t.Fatal("expected key 'x'")
-	}
-	if m.Entries["x"].(*Text).Value != "hello" {
-		t.Errorf("expected 'hello', got %v", m.Entries["x"])
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	assert.NotZero(t, m.Entries["x"], "expected key 'x'")
+	assert.Equal(t, "hello", m.Entries["x"].(*Text).Value, "expected 'hello'")
 }
 
 func TestFoldOverride(t *testing.T) {
 	result := Fold(&Override{Value: text("result")})
 	txt, ok := result.(*Text)
-	if !ok {
-		t.Fatalf("expected Text, got %T", result)
-	}
-	if txt.Value != "result" {
-		t.Errorf("expected 'result', got %v", txt.Value)
-	}
+	assert.True(t, ok, "expected Text, got %T", result)
+	assert.Equal(t, "result", txt.Value, "expected 'result'")
 }
 
 func TestFoldMultipleNamed(t *testing.T) {
@@ -117,15 +89,9 @@ func TestFoldMultipleNamed(t *testing.T) {
 		&Named{Name: "b", Value: text("2")},
 	))
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	if m.Entries["a"].(*Text).Value != "1" {
-		t.Errorf("expected '1', got %v", m.Entries["a"])
-	}
-	if m.Entries["b"].(*Text).Value != "2" {
-		t.Errorf("expected '2', got %v", m.Entries["b"])
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	assert.Equal(t, "1", m.Entries["a"].(*Text).Value, "expected '1'")
+	assert.Equal(t, "2", m.Entries["b"].(*Text).Value, "expected '2'")
 }
 
 func TestFoldNamedAccumulates(t *testing.T) {
@@ -134,31 +100,17 @@ func TestFoldNamedAccumulates(t *testing.T) {
 		&Named{Name: "x", Value: text("b")},
 	))
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	s := m.Entries["x"].(*Seq)
-	if s.Items[0].(*Text).Value != "a" {
-		t.Errorf("expected 'a', got %v", s.Items[0])
-	}
-	if s.Items[1].(*Text).Value != "b" {
-		t.Errorf("expected 'b', got %v", s.Items[1])
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	assert.Equal(t, "a", m.Entries["x"].(*Seq).Items[0].(*Text).Value, "expected 'a'")
+	assert.Equal(t, "b", m.Entries["x"].(*Seq).Items[1].(*Text).Value, "expected 'b'")
 }
 
 func TestFoldNamedAsList(t *testing.T) {
 	result := Fold(&NamedAsList{Name: "items", Value: text("x")})
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	s := m.Entries["items"].(*Seq)
-	if len(s.Items) != 1 {
-		t.Fatalf("expected 1 item, got %d", len(s.Items))
-	}
-	if s.Items[0].(*Text).Value != "x" {
-		t.Errorf("expected 'x', got %v", s.Items[0])
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	assert.Equal(t, 1, len(m.Entries["items"].(*Seq).Items))
+	assert.Equal(t, "x", m.Entries["items"].(*Seq).Items[0].(*Text).Value, "expected 'x'")
 }
 
 func TestFoldNamedAsListAccumulates(t *testing.T) {
@@ -167,19 +119,10 @@ func TestFoldNamedAsListAccumulates(t *testing.T) {
 		&NamedAsList{Name: "items", Value: text("b")},
 	))
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	s := m.Entries["items"].(*Seq)
-	if len(s.Items) != 2 {
-		t.Fatalf("expected 2 items, got %d", len(s.Items))
-	}
-	if s.Items[0].(*Text).Value != "a" {
-		t.Errorf("expected 'a', got %v", s.Items[0])
-	}
-	if s.Items[1].(*Text).Value != "b" {
-		t.Errorf("expected 'b', got %v", s.Items[1])
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	assert.Equal(t, 2, len(m.Entries["items"].(*Seq).Items))
+	assert.Equal(t, "a", m.Entries["items"].(*Seq).Items[0].(*Text).Value, "expected 'a'")
+	assert.Equal(t, "b", m.Entries["items"].(*Seq).Items[1].(*Text).Value, "expected 'b'")
 }
 
 func TestFoldOverrideWins(t *testing.T) {
@@ -189,12 +132,8 @@ func TestFoldOverrideWins(t *testing.T) {
 		&Override{Value: text("result")},
 	))
 	txt, ok := result.(*Text)
-	if !ok {
-		t.Fatalf("expected Text, got %T", result)
-	}
-	if txt.Value != "result" {
-		t.Errorf("expected 'result', got %v", txt.Value)
-	}
+	assert.True(t, ok, "expected Text, got %T", result)
+	assert.Equal(t, "result", txt.Value, "expected 'result'")
 }
 
 func TestFoldOverrideAsList(t *testing.T) {
@@ -203,12 +142,8 @@ func TestFoldOverrideAsList(t *testing.T) {
 		&OverrideAsList{Value: text("b")},
 	))
 	l, ok := result.(*List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(l.Items) != 2 {
-		t.Fatalf("expected 2 items, got %d", len(l.Items))
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 2, len(l.Items))
 }
 
 func TestFoldNestedNamed(t *testing.T) {
@@ -220,60 +155,41 @@ func TestFoldNestedNamed(t *testing.T) {
 		),
 	})
 	m, ok := result.(*MapNode)
-	if !ok {
-		t.Fatalf("expected MapNode, got %T", result)
-	}
-	if _, exists := m.Entries["x"]; !exists {
-		t.Fatal("expected key 'x'")
-	}
-	if _, exists := m.Entries["a"]; !exists {
-		t.Fatal("expected key 'a'")
-	}
-	if _, exists := m.Entries["b"]; !exists {
-		t.Fatal("expected key 'b'")
-	}
+	assert.True(t, ok, "expected MapNode, got %T", result)
+	_, exists := m.Entries["x"]
+	assert.True(t, exists, "expected key 'x'")
+	_, exists = m.Entries["a"]
+	assert.True(t, exists, "expected key 'a'")
+	_, exists = m.Entries["b"]
+	assert.True(t, exists, "expected key 'b'")
 }
 
 func TestFoldSeqWithNil(t *testing.T) {
 	result := Fold(seq(text("a"), &Nil{}, text("b")))
 	l, ok := result.(*List)
-	if !ok {
-		t.Fatalf("expected List, got %T", result)
-	}
-	if len(l.Items) != 2 {
-		t.Fatalf("expected 2 items, got %d", len(l.Items))
-	}
+	assert.True(t, ok, "expected List, got %T", result)
+	assert.Equal(t, 2, len(l.Items))
 }
 
 func TestTextAsJSON(t *testing.T) {
 	result := TreeToJSONStr(&Text{Value: "hello"})
-	if result != `"hello"` {
-		t.Errorf("got %s", result)
-	}
+	assert.Equal(t, `"hello"`, result)
 }
 
 func TestNumberAsJSON(t *testing.T) {
 	result := TreeToJSONStr(&Number{Value: 42.5})
-	if result != "42.5" {
-		t.Errorf("got %s", result)
-	}
+	assert.Equal(t, "42.5", result)
 }
 
 func TestNodeAsJSONTree(t *testing.T) {
 	result := TreeToJSONStr(&Node{TypeName: "expr", Tree: text("42")})
 	want := "{\n  \"__class__\": \"expr\",\n  \"ast\": \"42\"\n}"
-	if result != want {
-		t.Errorf("got:\n%s\nwant:\n%s", result, want)
-	}
+	assert.Equal(t, want, result)
 }
 
 func TestFoldRuleNode(t *testing.T) {
 	result := Fold(&Node{TypeName: "expr", Tree: text("42")})
 	r, ok := result.(*Node)
-	if !ok {
-		t.Fatalf("expected RuleNode, got %T", result)
-	}
-	if r.TypeName != "expr" {
-		t.Errorf("expected 'expr', got %q", r.TypeName)
-	}
+	assert.True(t, ok, "expected RuleNode, got %T", result)
+	assert.Equal(t, "expr", r.TypeName, "expected 'expr'")
 }

@@ -83,9 +83,9 @@ pre-push: clean check build release
 
 tools:
     go install golang.org/x/tools/cmd/goimports@latest
-    go install github.com/go-python/gopy@latest
     go install gotest.tools/gotestsum@latest
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+    go install golang.org/x/exp/cmd/modgraphviz@latest
 
 
 # ------------------------------------------------------------------------------
