@@ -36,7 +36,9 @@ grammar/java.*
 
 
 # Other projects symlinked
-x/
+internal/pegen
+internal/tatsu
+internal/tiexiu
 tmp/
 
 _out/

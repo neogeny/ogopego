@@ -70,7 +70,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Fixed
 - Verified non-local/third-party builds through GitHub workflow.
-- To be friendly with the ecosystem, skip the use of a `vendor` directory. A `_vendor` directory remains in the repo to guarantee build stability if a dependency becomes unreliable.
+- To be friendly with the ecosystem, skip the use of a `vendor` directory. An `internal/_vendor` directory remains in the repo to guarantee build stability if a dependency becomes unreliable.
 
 ## [v0.1.2] 2026-05-23 Release
 

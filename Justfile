@@ -13,6 +13,7 @@ PACKAGES := "\
 "
 
 TARGET := "target"
+VENDOR := "./internal/_vendor/*"
 
 default: check
 
@@ -48,10 +49,10 @@ lint: fmt vet
     golangci-lint run ./... --exclude-dirs ./tmp
 
 fmt:
-    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path {{VENDOR}} -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
 
 gofmt:
-    find . -name '*.go' -not -path './_vendor/*' -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
+    find . -name '*.go' -not -path {{VENDOR}} -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
 
 gofmt-check: gofmt
 
@@ -59,7 +60,7 @@ deps:
     go mod download
 
 vendor: tidy
-    go mod vendor -o _vendor
+    go mod vendor -o '{{VENDOR}}'
 
 vet:
     go vet -structtag=false {{PACKAGES}}
