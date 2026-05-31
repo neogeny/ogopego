@@ -41,6 +41,8 @@ type Ctx interface {
 	// MatchPattern matches a regular expression pattern.
 	MatchPattern(pattern string) (string, error)
 	Void()
+	// InLookahead return `true` if currently inside a lookahead operation.
+	InLookahead() bool
 	// EnterLookahead increments the lookahead depth counter.
 	EnterLookahead()
 	// LeaveLookahead decrements the lookahead depth counter.

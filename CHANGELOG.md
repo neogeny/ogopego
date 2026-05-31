@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Added
+
+* Optimized the `Parse()` success path so no `Tree` is constructed during lookaheads.
+
 ### Changed
 
 * Define `RuneCursor` and refactor `pyre.Pattern` and friends to take advantage of `rune` matching in [dlclark/regexp2/v2]. Performances improved considerably. 

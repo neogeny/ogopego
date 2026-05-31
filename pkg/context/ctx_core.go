@@ -194,9 +194,6 @@ func (ctx *CoreCtx) HeartbeatTick() {
 func (ctx *CoreCtx) pruneCache(cutPoint int) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	if ctx.heavy.cfg.NoPruneMemosOnCut {
-		return
-	}
 	PruneMemoCache(ctx.heavy.memoCache, cutPoint)
 }
 
@@ -334,6 +331,10 @@ func (ctx *CoreCtx) Void() {
 	ctx.NextToken()
 }
 
+func (ctx *CoreCtx) InLookahead() bool {
+	return ctx.lookaheadDepth > 0
+}
+
 func (ctx *CoreCtx) EnterLookahead() {
 	ctx.lookaheadDepth++
 }
@@ -395,7 +396,7 @@ func (ctx *CoreCtx) Cut() {
 	ctx.cutStack[len(ctx.cutStack)-1] = true
 	ctx.Tracer().TraceCut(ctx)
 
-	if ctx.lookaheadDepth == 0 {
+	if !ctx.heavy.cfg.NoPruneMemosOnCut && !ctx.InLookahead() {
 		mark := ctx.Mark()
 		if mark > ctx.lastCutMark {
 			ctx.pruneCache(ctx.lastCutMark)
