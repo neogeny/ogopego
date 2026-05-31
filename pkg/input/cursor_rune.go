@@ -205,22 +205,28 @@ func (c *RuneCursor) Peek() (rune, bool) {
 }
 
 func (c *RuneCursor) PeekToken(token string) bool {
-	tok := []rune(token)
-	if c.runePos+len(tok) > len(c.runes) {
-		return false
-	}
 	if c.IgnoreCase() {
-		for i, r := range tok {
+		i := 0
+		for _, r := range token {
+			if c.runePos+i >= len(c.runes) {
+				return false
+			}
 			if unicode.ToLower(c.runes[c.runePos+i]) != unicode.ToLower(r) {
 				return false
 			}
+			i++
 		}
 		return true
 	}
-	for i, r := range tok {
+	i := 0
+	for _, r := range token {
+		if c.runePos+i >= len(c.runes) {
+			return false
+		}
 		if c.runes[c.runePos+i] != r {
 			return false
 		}
+		i++
 	}
 	return true
 }
@@ -234,14 +240,15 @@ func (c *RuneCursor) IsName(token string) bool {
 	if token == "" {
 		return false
 	}
-	runes := []rune(token)
-	first := runes[0]
-	if first != '_' && !unicode.IsLetter(first) &&
-		!strings.ContainsRune(c.heavy.NameChars, first) {
-		return false
-	}
-	for _, r := range runes[1:] {
-		if !c.IsNameChar(r) {
+	first := true
+	for _, r := range token {
+		if first {
+			if r != '_' && !unicode.IsLetter(r) &&
+				!strings.ContainsRune(c.heavy.NameChars, r) {
+				return false
+			}
+			first = false
+		} else if !c.IsNameChar(r) {
 			return false
 		}
 	}
@@ -253,8 +260,7 @@ func (c *RuneCursor) MatchToken(token string) bool {
 		return false
 	}
 	mark := c.runePos
-	tok := []rune(token)
-	c.runePos += len(tok)
+	c.runePos += utf8.RuneCountInString(token)
 	if c.heavy.NameGuard && c.IsName(token) {
 		if c.runePos < len(c.runes) && c.IsNameChar(c.runes[c.runePos]) {
 			c.runePos = mark
