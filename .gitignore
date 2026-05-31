@@ -37,9 +37,12 @@ grammar/java.*
 
 # Other projects symlinked
 x/
-.corpus/
 tmp/
-.aider*
 
 _out/
 *.pprof
+
+# AI
+.aider*
+.corpus/
+opencode.json
