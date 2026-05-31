@@ -35,6 +35,8 @@ include = [
 ]
 exclude = [
     "/_*",
+    "internal/_*",
+    "internal/x",
     "python/ogopego/bin",
 ]
 

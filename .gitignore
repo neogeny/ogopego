@@ -36,12 +36,12 @@ grammar/java.*
 
 
 # Other projects symlinked
-internal/pegen
-internal/tatsu
-internal/tiexiu
+internal/x/
+internal/_x/
 tmp/
 
 _out/
+out/
 *.pprof
 
 # AI

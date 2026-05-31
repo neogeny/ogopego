@@ -17,7 +17,7 @@ VENDOR := "./internal/_vendor/*"
 
 default: check
 
-build: gofmt-check
+build: lint
     go build -mod=mod -o {{TARGET}}/debug/ogo ./cmd
 
 release:
@@ -49,12 +49,7 @@ lint: fmt vet
     golangci-lint run ./... --exclude-dirs ./tmp
 
 fmt:
-    find . -name '*.go' -not -path {{VENDOR}} -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
-
-gofmt:
-    find . -name '*.go' -not -path {{VENDOR}} -not -path './_fragments/*' -not -path './lib/*' -exec gofmt -l -w -s {} +
-
-gofmt-check: gofmt
+    gofmt -l -w -s {{PACKAGES}}
 
 deps:
     go mod download
