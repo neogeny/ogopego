@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/neogeny/ogopego/pkg/trees"
 )
@@ -270,7 +271,8 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 	noStak := slices.Contains(decorators, "nostak")
 
 	trimmed := strings.TrimLeft(name, "_")
-	isTokn := len(trimmed) > 0 && unicode.IsUpper(rune(trimmed[0])) ||
+	firstRune, _ := utf8.DecodeRuneInString(trimmed)
+	isTokn := unicode.IsUpper(firstRune) ||
 		slices.Contains(decorators, "token") ||
 		slices.Contains(decorators, "tokn")
 

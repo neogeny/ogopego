@@ -97,12 +97,12 @@ func PythonizeName(s string) string {
 	if len(s) == 0 {
 		return s
 	}
+	runes := []rune(s)
 	var result strings.Builder
-	for i, r := range s {
+	for i, r := range runes {
 		if unicode.IsUpper(r) {
 			if i > 0 {
-				prev := rune(s[i-1])
-				if unicode.IsLower(prev) || (i+1 < len(s) && unicode.IsLower(rune(s[i+1]))) {
+				if unicode.IsLower(runes[i-1]) || (i+1 < len(runes) && unicode.IsLower(runes[i+1])) {
 					result.WriteByte('_')
 				}
 			}
