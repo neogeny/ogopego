@@ -96,9 +96,8 @@ func (g *Grammar) Initialize() error {
 	g.markLeftRecursion()
 	g.computeAnalysis()
 	// NOTE
-	//  Do not Optimize here so comparisons with sibling output is possible
+	//  Do not call `Optimized()` here so comparisons with sibling output is possible
 	//  Optimization can be postoned until model is used to Parse()
-	//g.Optimize()
 	g.Analyzed = true
 	return nil
 }

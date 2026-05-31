@@ -23,18 +23,18 @@ release:
     go build -ldflags="-s -w" -o {{TARGET}}/release/ogo ./cmd
 
 run *args:
-    go run ./cmd/ogo {{args}}
+    go run ./cmd {{args}}
 
 grammar FILE="grammar/tatsu.ebnf":
     go run ./cmd/ogo grammar -m {{FILE}}
 
-test: gofmt-check build
+test: lint build
     gotestsum -- -mod=mod {{PACKAGES}}
 
 test-v: build
     gotestsum --format testname -- -v {{PACKAGES}}
 
-test-fast: gofmt-check lint vet
+test-fast: lint build
     gotestsum -- -run 'Test[^P]' {{PACKAGES}}
 
 bench:
@@ -44,7 +44,7 @@ cover:
     go test -coverprofile=coverage.out {{PACKAGES}}
     go tool cover -html=coverage.out
 
-lint:
+lint: fmt vet
     golangci-lint run ./... --exclude-dirs ./tmp
 
 fmt:

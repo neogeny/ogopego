@@ -8,6 +8,7 @@ import "fmt"
 // optimizeExpr recursively simplifies a grammar model tree.
 // It returns the optimized model, which may be a different concrete type
 // (e.g., *Group is eliminated, returning its inner expression).
+// The original tree is not modified.
 func optimizeExpr(m Model) Model {
 	switch e := m.(type) {
 	// --- Leaves ---
@@ -16,100 +17,89 @@ func optimizeExpr(m Model) Model {
 		*EmptyClosure, *NULL, *Call, *RuleInclude:
 		return e
 
-	// --- Unary containers: recurse into Exp, keep self ---
+	// --- Unary containers: clone and recurse into Exp ---
 	case *Optional:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Optional{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Closure:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Closure{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *PositiveClosure:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &PositiveClosure{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Lookahead:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Lookahead{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *NegativeLookahead:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &NegativeLookahead{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *SkipGroup:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &SkipGroup{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *SkipTo:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &SkipTo{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Override:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Override{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *OverrideList:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &OverrideList{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Named:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Named{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Name: e.Name}
 	case *NamedList:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &NamedList{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Name: e.Name}
 	case *Option:
-		e.Exp = optimizeExpr(e.Exp)
-		return e
+		return &Option{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Synth:
 		return optimizeExpr(e.Exp)
 
-	// --- Binary containers: recurse into both ---
+	// --- Binary containers: clone and recurse into both ---
 	case *Join:
-		e.Exp = optimizeExpr(e.Exp)
-		e.Sep = optimizeExpr(e.Sep)
-		return e
+		return &Join{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
 	case *PositiveJoin:
-		e.Exp = optimizeExpr(e.Exp)
-		e.Sep = optimizeExpr(e.Sep)
-		return e
+		return &PositiveJoin{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
 	case *Gather:
-		e.Exp = optimizeExpr(e.Exp)
-		e.Sep = optimizeExpr(e.Sep)
-		return e
+		return &Gather{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
 	case *PositiveGather:
-		e.Exp = optimizeExpr(e.Exp)
-		e.Sep = optimizeExpr(e.Sep)
-		return e
+		return &PositiveGather{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
 
 	// --- Eliminated: Group unwraps to its inner expression ---
 	case *Group:
 		return optimizeExpr(e.Exp)
 
-	// --- Collections: recurse into children ---
+	// --- Collections: clone and recurse into children ---
 	case *Choice:
-		for _, o := range e.Options {
-			o.Exp = optimizeExpr(o.Exp)
+		opts := make([]*Option, len(e.Options))
+		for i, o := range e.Options {
+			opts[i] = &Option{ModelBase: o.ModelBase, Exp: optimizeExpr(o.Exp)}
 		}
-		if len(e.Options) == 1 {
-			return e.Options[0].Exp
+		if len(opts) == 1 {
+			return opts[0].Exp
 		}
-		return e
+		return &Choice{ModelBase: e.ModelBase, Options: opts}
 
 	case *Sequence:
+		seq := make([]Model, len(e.Sequence))
 		for i, s := range e.Sequence {
-			e.Sequence[i] = optimizeExpr(s)
+			seq[i] = optimizeExpr(s)
 		}
-		if len(e.Sequence) == 1 {
-			return e.Sequence[0]
+		if len(seq) == 1 {
+			return seq[0]
 		}
-		return e
+		return &Sequence{ModelBase: e.ModelBase, Sequence: seq}
 
 	default:
 		panic(fmt.Sprintf("optimizeExpr: unhandled model type %T", m))
 	}
 }
 
-// Optimize simplifies the rule's expression tree.
-func (r *Rule) Optimize() {
-	r.Exp = optimizeExpr(r.Exp)
+// Optimized simplifies the rule's expression tree and returns a new rule.
+// The original rule is not modified.
+func (r *Rule) Optimized() *Rule {
+	r2 := *r
+	r2.Exp = optimizeExpr(r.Exp)
+	return &r2
 }
 
-// Optimize simplifies all rules in the grammar.
-func (g *Grammar) Optimize() {
-	for _, r := range g.Rules {
-		r.Optimize()
+// Optimized simplifies all rules in the grammar and returns a new grammar.
+// The original grammar is not modified.
+func (g *Grammar) Optimized() *Grammar {
+	g2 := *g
+	g2.Rules = make([]*Rule, len(g.Rules))
+	for i, r := range g.Rules {
+		g2.Rules[i] = r.Optimized()
 	}
+	return &g2
 }

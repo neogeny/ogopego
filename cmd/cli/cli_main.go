@@ -22,6 +22,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/tool"
 	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util"
+	mpb "github.com/vbauerster/mpb/v8"
 )
 
 type outputItem struct {
@@ -204,10 +205,34 @@ func Main() {
 			outputs = append(outputs, outputItem{Name: "boot", Payload: payload})
 
 		case "grammar":
-			gram, err := loadGrammar(CLI.Grammar.Grammar, cliCfg)
+			var p *mpb.Progress
+			if !CLI.Quiet {
+				p = mpb.New(mpb.WithOutput(os.Stderr))
+			}
+			fileName := filepath.Base(CLI.Grammar.Grammar)
+			fp := NewFileProgress(p, fileName)
+
+			data, err := os.ReadFile(CLI.Grammar.Grammar)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "error:", err)
+				fmt.Fprintln(os.Stderr, "\nerror reading grammar:", err)
 				os.Exit(1)
+			}
+			fp.SetLength(len(data))
+
+			loadCfg := *cliCfg
+			loadCfg.Heartbeat = fp.Heartbeat()
+			gram, err := loadGrammar(CLI.Grammar.Grammar, &loadCfg)
+			if err != nil {
+				fp.Fail()
+				if p != nil {
+					p.Wait()
+				}
+				fmt.Fprintln(os.Stderr, "\nerror:", err)
+				os.Exit(1)
+			}
+			fp.Success()
+			if p != nil {
+				p.Wait()
 			}
 			var payload string
 			switch {

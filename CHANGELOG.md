@@ -14,11 +14,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Changed
 
+* Make `Model.Optimize()` be value-based so the original `Grammar` model remains unchanged.
+
 * Converted tests to use [alecthomas/assert/v2] for better readability and maintainability. The new assertion library provides a more expressive and concise way to write tests, improving the overall quality of the test suite.
 
 [alecthomas/assert/v2]: https://pkg.go.dev/github.com/alecthomas/assert/v2
 
 * Renamed `trees.List` to `trees.Array` for matching semantics and closeness to Go and JSON.
+
+* Added a progress bar to the `grammar` sub-command of the CLI.
 
 ## [v0.1.9] 2026-05-30 Python 
 

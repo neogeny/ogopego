@@ -52,6 +52,8 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 		return nil, fmt.Errorf("boot grammar semantics not set")
 	}
 
+	boot = boot.Optimized()
+
 	cursor := input.NewStrCursor(grammar)
 
 	directivesCfg := boot.CfgFromDirectives()
