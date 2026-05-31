@@ -32,4 +32,14 @@ jobs:
           golangci-lint run ./...
 
       - name: test
-        run: go test -mod=mod -count=1 ./api ./cmd/ogo ./config ./context ./input ./json ./peg ./test ./trees ./util/...
+        run: go test -mod=mod -count=1 \
+          ./api \
+          ./cmd \
+          ./cmd/cli \
+          ./pkg/config \
+          ./pkg/context \
+          ./pkg/input \
+          ./pkg/asjson \
+          ./pkg/peg \
+          ./pkg/trees \
+          ./pkg/util/ \
