@@ -30,16 +30,9 @@ type outputItem struct {
 	Payload string
 }
 
-func Main() {
-	var (
-		cliCfg         *config.Cfg
-		useColorOutput bool
-		outputs        []outputItem
-		lang           string
-	)
-
-	var ctx *kong.Context
-	ctx = kong.Parse(&cli,
+func parseCLI() (Config, *kong.Context) {
+	var cfg Config
+	ctx := kong.Parse(&cfg,
 		kong.Name("ogo"),
 		kong.Description("ogopego: A PEG parser generator in Go"),
 		kong.UsageOnError(),
@@ -48,18 +41,24 @@ func Main() {
 			Summary: false,
 		}),
 	)
+	return cfg, ctx
+}
 
-	if cli.Version {
+func Main() {
+	cfg, ctx := parseCLI()
+
+	if cfg.Version {
 		fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
 		os.Exit(0)
 	}
 
-	if err := validateExclusive(ctx, "format"); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	var (
+		useColorOutput bool
+		outputs        []outputItem
+		lang           string
+	)
 
-	switch cli.Color {
+	switch cfg.Color {
 	case "always":
 		useColorOutput = true
 		color.NoColor = false
@@ -75,8 +74,9 @@ func Main() {
 			color.NoColor = true
 		}
 	}
-	cliCfg = &config.Cfg{
-		Trace:    cli.Trace,
+
+	cliCfg := &config.Cfg{
+		Trace:    cfg.Trace,
 		Colorize: useColorOutput,
 	}
 
@@ -84,17 +84,19 @@ func Main() {
 	if cmd == nil {
 		return
 	}
+
 	switch cmd.Name {
 	case "run":
 		var errcount int
 		var sourceLines int
 		start := time.Now()
 
-		if cli.Run.Start != "" {
-			cliCfg.Start = cli.Run.Start
+		if cfg.Run.Start != "" {
+			cliCfg.Start = cfg.Run.Start
 		}
+
 		var inputs []string
-		for _, path := range cli.Run.Inputs {
+		for _, path := range cfg.Run.Inputs {
 			if util.FileExists(path) {
 				inputs = append(inputs, path)
 			} else {
@@ -104,25 +106,25 @@ func Main() {
 		}
 
 		if len(inputs) > 0 {
-			//panic(fmt.Sprintf("HERE %v", CLI.Run.Inputs))
-			prog := NewProgressUI(len(cli.Run.Inputs), cli.Quiet)
+			prog := NewProgressUI(len(cfg.Run.Inputs), cfg.Quiet)
 			loader := prog.Loading("loading grammar")
 			loadCfg := *cliCfg
 			loadCfg.Heartbeat = loader.Heartbeat()
-			gram, err := loadGrammar(cli.Run.Grammar, &loadCfg)
+			gram, err := loadGrammar(cfg.Run.Grammar, &loadCfg)
 			loader.Finish()
 			if err != nil {
 				_, _ = color.New(color.FgRed).Fprintln(os.Stderr, "\nerror:", err)
 				os.Exit(1)
 			}
 
-			maxWorkers := cli.Run.Nproc
+			maxWorkers := cfg.Run.Nproc
 			if maxWorkers <= 0 {
 				maxWorkers = runtime.GOMAXPROCS(0)
 			}
 			var mu sync.Mutex
 			var wg sync.WaitGroup
 			var sem = make(chan int, maxWorkers)
+
 			for i, path := range inputs {
 				wg.Add(1)
 				sem <- i
@@ -146,7 +148,6 @@ func Main() {
 					fileCfg.Source, _ = util.PathRelativeToCwd(path)
 
 					tree, err := api.ParseInput(gram, input, &fileCfg)
-					// Thread-safe accumulation block
 					prog.IncFiles()
 					<-sem
 					mu.Lock()
@@ -164,32 +165,31 @@ func Main() {
 						fp.Success()
 						var payload string
 						switch {
-						case cli.Run.Model:
+						case cfg.Run.Model:
 							payload = util.Repr(tree)
 						default:
 							payload = trees.TreeToJSONStr(tree)
-							item := outputItem{Name: fName, Payload: payload}
-							outputs = append(outputs, item)
 						}
+						outputs = append(outputs, outputItem{Name: fName, Payload: payload})
 					}
 				}(path)
 			}
 
-			// Block the main thread until every individual parsing worker finishes
 			wg.Wait()
 			prog.Finish()
 		}
-		passed := len(cli.Run.Inputs) - errcount
+
+		passed := len(cfg.Run.Inputs) - errcount
 		elapsed := time.Since(start)
 		rate := int(float64(sourceLines) / elapsed.Seconds())
 		_, _ = fmt.Fprintf(os.Stderr, "%s %s %s %s\n",
-			color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(cli.Run.Inputs)),
+			color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(cfg.Run.Inputs)),
 			color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
 			color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
 			color.New(color.FgCyan).Sprintf("%d sloc/s", rate),
 		)
 		switch {
-		case cli.Run.Model:
+		case cfg.Run.Model:
 			lang = "go"
 		default:
 			lang = "json"
@@ -203,16 +203,16 @@ func Main() {
 		}
 		var payload string
 		switch {
-		case cli.Boot.Json:
+		case cfg.Boot.Json:
 			payload = peg.ModelToJSONStr(gram)
 			lang = "json"
-		case cli.Boot.Pretty:
+		case cfg.Boot.Pretty:
 			payload = gram.PrettyPrint()
 			lang = "ebnf"
-		case cli.Boot.Railroads:
+		case cfg.Boot.Railroads:
 			payload = gram.Railroads()
 			lang = "apl"
-		case cli.Boot.Model:
+		case cfg.Boot.Model:
 			payload = util.Repr(gram)
 			lang = "go"
 		default:
@@ -223,13 +223,13 @@ func Main() {
 
 	case "grammar":
 		var p *mpb.Progress
-		if !cli.Quiet {
+		if !cfg.Quiet {
 			p = mpb.New(mpb.WithOutput(os.Stderr))
 		}
-		fileName := filepath.Base(cli.Grammar.Grammar)
+		fileName := filepath.Base(cfg.Grammar.Grammar)
 		fp := NewFileProgress(p, fileName)
 
-		data, err := os.ReadFile(cli.Grammar.Grammar)
+		data, err := os.ReadFile(cfg.Grammar.Grammar)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\nerror reading grammar:", err)
 			os.Exit(1)
@@ -238,7 +238,7 @@ func Main() {
 
 		loadCfg := *cliCfg
 		loadCfg.Heartbeat = fp.Heartbeat()
-		gram, err := loadGrammar(cli.Grammar.Grammar, &loadCfg)
+		gram, err := loadGrammar(cfg.Grammar.Grammar, &loadCfg)
 		if err != nil {
 			fp.Fail()
 			if p != nil {
@@ -253,40 +253,39 @@ func Main() {
 		}
 		var payload string
 		switch {
-		case cli.Grammar.Json:
+		case cfg.Grammar.Json:
 			payload = peg.ModelToJSONStr(gram)
 			lang = "json"
-		case cli.Grammar.Pretty:
+		case cfg.Grammar.Pretty:
 			payload = gram.PrettyPrint()
 			lang = "ebnf"
-		case cli.Grammar.Railroads:
+		case cfg.Grammar.Railroads:
 			payload = gram.Railroads()
 			lang = "apl"
-		case cli.Grammar.Model:
+		case cfg.Grammar.Model:
 			payload = util.Repr(gram)
 			lang = "go"
-		case cli.Grammar.Parser != "":
-			payload = peg.ParserRepr(*gram, cli.Grammar.Parser)
+		case cfg.Grammar.Parser != "":
+			payload = peg.ParserRepr(*gram, cfg.Grammar.Parser)
 			lang = "go"
-		case cli.Grammar.ModelGen != "":
-			payload = tool.ModelRepr(*gram, cli.Grammar.ModelGen)
+		case cfg.Grammar.ModelGen != "":
+			payload = tool.ModelRepr(*gram, cfg.Grammar.ModelGen)
 			lang = "go"
 		default:
 			payload = gram.PrettyPrint()
 			lang = "ebnf"
 		}
-		outputs = append(outputs, outputItem{Name: filepath.Base(cli.Grammar.Grammar), Payload: payload})
+		outputs = append(outputs, outputItem{Name: filepath.Base(cfg.Grammar.Grammar), Payload: payload})
 	}
 
 	if len(outputs) > 0 {
-		if err := writeOutputs(outputs, lang, cli.Output, useColorOutput); err != nil {
+		if err := writeOutputs(outputs, lang, cfg.Output, useColorOutput); err != nil {
 			fmt.Fprintln(os.Stderr, "error writing output:", err)
 			os.Exit(1)
 		}
 	}
 }
 
-// outputMode classifies an output path as stdout, file, or directory mode.
 func outputMode(path string) int {
 	if path == "" || path == "-" {
 		return modeStdout
@@ -312,7 +311,6 @@ const (
 	modeDir
 )
 
-// langExt returns the file extension for a given output language.
 func langExt(lang string) string {
 	switch lang {
 	case "json":
@@ -324,8 +322,6 @@ func langExt(lang string) string {
 	}
 }
 
-// replaceExt replaces the extension of name with newExt.
-// If name has no extension, newExt is appended.
 func replaceExt(name, newExt string) string {
 	if old := filepath.Ext(name); old != "" {
 		name = name[:len(name)-len(old)]
@@ -333,7 +329,6 @@ func replaceExt(name, newExt string) string {
 	return name + newExt
 }
 
-// writeOutputs routes outputs to stdout, a single file, or a directory.
 func writeOutputs(outputs []outputItem, lang string, path string, color bool) error {
 	switch outputMode(path) {
 	case modeStdout:
@@ -369,7 +364,6 @@ func joinOutputs(outputs []outputItem) string {
 	return strings.Join(payloads, "\n")
 }
 
-// loadGrammar loads a grammar from the given path, handling both EBNF and JSON formats.
 func loadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
