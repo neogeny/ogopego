@@ -28,10 +28,10 @@ run *args:
 grammar FILE="grammar/tatsu.ebnf":
     go run ./cmd/ogo grammar -m {{FILE}}
 
-test: gofmt-check
+    test: gofmt-check build
     gotestsum -- -mod=mod {{PACKAGES}}
 
-test-v:
+test-v: build
     gotestsum --format testname -- -v {{PACKAGES}}
 
 test-fast: gofmt-check lint vet

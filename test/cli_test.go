@@ -32,18 +32,12 @@ func runOgo(t *testing.T, args ...string) (string, error) {
 }
 
 func TestCLIBoot(t *testing.T) {
-	if os.Getenv("XONSH_VERSION") == "" {
-		t.Skip("XONSH_VERSION not set — local test only")
-	}
 	out, err := runOgo(t, "boot", "--pretty")
 	assert.NoError(t, err, "ogo boot:\n%s", out)
 	assert.NotZero(t, len(out), "expected non-empty output")
 }
 
 func TestCLIGrammar(t *testing.T) {
-	if os.Getenv("XONSH_VERSION") == "" {
-		t.Skip("XONSH_VERSION not set — local test only")
-	}
 	// Construct a grammar on the fly: write a temp file, run ogo on it
 	ebnf := "@@grammar :: Test\nstart := 'hello' ;\n"
 	tmp := filepath.Join(t.TempDir(), "test.ebnf")
@@ -165,9 +159,6 @@ replace github.com/neogeny/ogopego => %s
 }
 
 func TestCLIRun(t *testing.T) {
-	if os.Getenv("XONSH_VERSION") == "" {
-		t.Skip("XONSH_VERSION not set — local test only")
-	}
 	ebnf := "@@grammar :: Test\nstart := 'hello' ;\n"
 	grm := filepath.Join(t.TempDir(), "test.ebnf")
 	err := os.WriteFile(grm, []byte(ebnf), 0644)

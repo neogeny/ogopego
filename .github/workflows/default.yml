@@ -23,11 +23,11 @@ jobs:
       - name: download dependencies
         run: go mod download
 
-      - name: build
-        run: go build -mod=mod ./...
-
       - name: just
         run: sudo apt update && sudo apt install -y just
+
+      - name: build
+        run: just build
 
       - name: tools
         run: just tools
