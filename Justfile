@@ -13,7 +13,7 @@ PACKAGES := "\
 "
 
 TARGET := "target"
-VENDOR := "./internal/_vendor/*"
+VENDOR := "./internal/_vendor"
 
 default: check
 
@@ -55,7 +55,7 @@ deps:
     go mod download
 
 vendor: tidy
-    go mod vendor -o '{{VENDOR}}'
+    go mod vendor -o {{VENDOR}}
 
 vet:
     go vet -structtag=false {{PACKAGES}}
