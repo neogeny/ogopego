@@ -33,32 +33,33 @@ func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	key := ctx.Key(name, rule.IsMemoizable())
 
 	if rule.ShouldTrace() {
-		ctx.Enter(name)
 		ctx.Tracer().TraceEntry(ctx)
 	}
 
+	ctx.Enter(name)
 	result, err := c.doCall(ctx, name, rule, key, start)
-
-	if rule.ShouldTrace() {
-		ctx.Leave()
-	}
+	ctx.Leave()
 
 	if err != nil {
 		ctx.Tracer().TraceFailure(ctx, name)
-		ctx.Memoize(key, trees.BOTTOM, ctx.Mark())
+		ctx.Memoize(key, trees.BOTTOM, start)
 		return nil, err
 	}
 
 	if rule.IsName {
 		if text, ok := result.(*trees.Text); ok && ctx.IsKeyword(text.Value) {
-			ctx.Memoize(key, trees.BOTTOM, ctx.Mark())
-			ctx.Tracer().TraceFailure(ctx, text.Value)
+			ctx.Memoize(key, trees.BOTTOM, start)
+			if rule.ShouldTrace() {
+				ctx.Tracer().TraceFailure(ctx, text.Value)
+			}
 			return nil, ctx.Failure(start, fmt.Errorf("'%s' is a reserved word", text.Value))
 		}
 	}
 
 	ctx.Memoize(key, result, ctx.Mark())
-	ctx.Tracer().TraceSuccess(ctx)
+	if rule.ShouldTrace() {
+		ctx.Tracer().TraceSuccess(ctx)
+	}
 	ctx.HeartbeatTick()
 
 	return result, nil

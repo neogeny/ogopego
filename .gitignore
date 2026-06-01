@@ -38,6 +38,7 @@ grammar/java.*
 # Other projects symlinked
 internal/x/
 internal/_x/
+x/
 tmp/
 
 _out/
