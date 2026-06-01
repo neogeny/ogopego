@@ -4,8 +4,8 @@
   "directives": {
     "grammar": "TatSu",
     "whitespace": "(?m)\\s+",
-    "comments": "(?ms)[(][*]\\\\s*(.*?)\\\\s*[*][)]|[\\\\/][*]\\\\s*(.*?)\\\\s*[*][\\\\/]",
-    "eol_comments": "(?ms)(?:[#]|[\\/][\\/])(.*?)$",
+    "comments": "(?ms)[(][*]\\s*(.*?)\\s*[*][)]|[/][*]\\s*(.*?)\\s*[*][/]",
+    "eol_comments": "(?ms)(?:[#]|[/][/])(.*?)$",
     "parseinfo": true,
     "left_recursion": false
   },
