@@ -41,7 +41,7 @@ func NewPatterns(wsp string, cmt string, eol string) (*TokenizingPatterns, error
 }
 
 func DefaultPatterns() TokenizingPatterns {
-	pat, err := NewPatterns(`(?m)\s+`, `(?m)#.*`, `(?m)#.*$`)
+	pat, err := NewPatterns(`(?m)\s+`, `[^\s\S]`, `[^\s\S]`)
 	if err != nil {
 		panic("failed to compile default patterns: " + err.Error())
 	}
