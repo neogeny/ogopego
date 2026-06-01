@@ -170,6 +170,7 @@ func LoadGrammarFromJSON(data []byte) (*peg.Grammar, error) {
 	return peg.LoadGrammarFromJSON(data)
 }
 
+// LoadGrammar load a grammar in .json or .ebnf format from a path
 func LoadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -189,4 +190,9 @@ func LoadGrammar(path string, cfg *config.Cfg) (*peg.Grammar, error) {
 	default:
 		return Compile(string(data), cfg)
 	}
+}
+
+// Railroads returns a string containing a text "railroads" diagram for the grammar.
+func Railroads(g *peg.Grammar) string {
+	return g.Railroads()
 }
