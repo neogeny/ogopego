@@ -17,10 +17,10 @@ VENDOR := "./internal/_vendor/*"
 
 default: check
 
-build: lint
+@build: lint
     go build -mod=mod -o {{TARGET}}/debug/ogo ./cmd
 
-release:
+@release:
     go build -ldflags="-s -w" -o {{TARGET}}/release/ogo ./cmd
 
 run *args:

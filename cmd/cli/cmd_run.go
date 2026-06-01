@@ -56,7 +56,6 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		var mu sync.Mutex
 		var wg sync.WaitGroup
 		var sem = make(chan int, maxWorkers)
-
 		for i, path := range inputs {
 			wg.Add(1)
 			sem <- i
@@ -82,28 +81,30 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 				tree, err := api.ParseInput(gram, input, &fileCfg)
 				prog.IncFiles()
 				<-sem
+
 				mu.Lock()
 				defer mu.Unlock()
-
 				if err != nil {
-					errcount++
 					fp.Fail()
+					errcount++
 					if report, ok := errors.AsType[*context.ParseFailure](err); ok {
 						err = &report.Memento
 					}
-					_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-				} else {
-					sourceLines += util.CountLines(input).Code
-					fp.Success()
-					var payload string
-					switch {
-					case cli.Run.Model:
-						payload = util.Repr(tree)
-					default:
-						payload = trees.TreeToJSONStr(tree)
-					}
-					outputs = append(outputs, outputItem{Name: fName, Payload: payload})
+					_, _ = fmt.Fprintf(os.Stderr, "\n%v\n", err)
+					return
 				}
+
+				sourceLines += util.CountLines(input).Code
+				fp.Success()
+				var payload string
+				switch {
+				case cli.Run.Model:
+					payload = util.Repr(tree)
+				default:
+					payload = trees.TreeToJSONStr(tree)
+				}
+				item := outputItem{Name: fName, Payload: payload}
+				outputs = append(outputs, item)
 			}(path)
 		}
 
