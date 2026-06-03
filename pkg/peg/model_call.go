@@ -24,6 +24,10 @@ func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 
 	name := c.Name
 	rule := c.rule
+	return call(ctx, name, rule)
+}
+
+func call(ctx Ctx, name string, rule *Rule) (trees.Tree, error) {
 	start := ctx.Mark()
 
 	if !rule.IsToken() {
@@ -37,7 +41,7 @@ func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	}
 
 	ctx.Enter(name)
-	result, err := c.doCall(ctx, name, rule, key, start)
+	result, err := ruleCall(ctx, name, rule, key, start)
 	ctx.Leave()
 
 	if err != nil {
@@ -65,7 +69,7 @@ func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	return result, nil
 }
 
-func (c *Call) doCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
+func ruleCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
 	if memo, ok := ctx.Memo(key); ok {
 		ctx.Reset(memo.Mark)
 		if _, isBottom := memo.Tree.(*trees.Bottom); isBottom {
@@ -75,13 +79,13 @@ func (c *Call) doCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) 
 	}
 
 	if rule.IsLeftRecursive() {
-		return c.callRecursive(ctx, name, rule, key, start)
+		return recursiveCall(ctx, name, rule, key, start)
 	}
 
 	return rule.Parse(ctx)
 }
 
-func (c *Call) callRecursive(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
+func recursiveCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
 	ctx.Tracer().TraceRecursion(ctx)
 
 	ctx.Memoize(key, trees.BOTTOM, start)

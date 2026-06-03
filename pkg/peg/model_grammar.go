@@ -139,7 +139,7 @@ func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
 		}
 		rule = g.Rules[0]
 	}
-	result, err := rule.Parse(ctx)
+	result, err := call(ctx, start, rule)
 	if err != nil {
 		if dis := ctx.FurthestFailure(); dis != nil {
 			return nil, dis
