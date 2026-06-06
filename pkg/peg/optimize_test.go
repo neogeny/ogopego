@@ -20,7 +20,7 @@ func TestOptimizePreservesOriginalRule(t *testing.T) {
 
 	orig := rule.Exp
 
-	_ = g.Optimized()
+	_, _ = g.Optimized()
 
 	assert.Equal(t, orig, rule.Exp,
 		"Optimize should not mutate the original rule's Exp")
@@ -38,7 +38,7 @@ func TestOptimizeReturnsOptimizedGrammar(t *testing.T) {
 		Rules: []*Rule{rule},
 	}
 
-	got := g.Optimized()
+	got, _ := g.Optimized()
 
 	gotRule := got.Rules[0]
 	_, isGroup := gotRule.Exp.(*Group)

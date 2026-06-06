@@ -94,7 +94,7 @@ func (g *Grammar) Initialize() error {
 		return err
 	}
 	g.markLeftRecursion()
-	g.computeAnalysis()
+	g.computeLokaheads()
 	// NOTE
 	//  Do not call `Optimized()` here so comparisons with sibling output is possible
 	//  Optimization can be postoned until model is used to Parse()
@@ -102,7 +102,7 @@ func (g *Grammar) Initialize() error {
 	return nil
 }
 
-func (g *Grammar) computeAnalysis() {
+func (g *Grammar) computeLokaheads() {
 	for _, rule := range g.Rules {
 		computeLA(rule.Exp)
 	}

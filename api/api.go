@@ -54,10 +54,7 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 		return nil, fmt.Errorf("boot grammar semantics not set")
 	}
 
-	boot = boot.Optimized()
-
 	cursor := input.NewRuneCursor(grammar)
-
 	directivesCfg := boot.CfgFromDirectives()
 	if directivesCfg.Semantics == nil {
 		// FIXME: this looks like debugging boot Grammar semantics
@@ -70,6 +67,10 @@ func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
 		return nil, fmt.Errorf("boot semantics not passed to Ctx")
 	}
 
+	opt, err := boot.Optimized()
+	if err == nil && opt != nil {
+		return opt.ParseAt(ctx, cfg)
+	}
 	return boot.ParseAt(ctx, cfg)
 }
 
@@ -141,6 +142,11 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 // resulting AST as a Tree value.
 func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
 	ctx := context.NewCtx(input.NewRuneCursor(text), cfg)
+
+	opt, err := parser.Optimized()
+	if err == nil && opt != nil {
+		return opt.ParseAt(ctx, cfg)
+	}
 	return parser.ParseAt(ctx, cfg)
 }
 

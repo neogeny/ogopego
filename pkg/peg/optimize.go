@@ -95,11 +95,15 @@ func (r *Rule) Optimized() *Rule {
 
 // Optimized simplifies all rules in the grammar and returns a new grammar.
 // The original grammar is not modified.
-func (g *Grammar) Optimized() *Grammar {
+func (g *Grammar) Optimized() (*Grammar, error) {
 	g2 := *g
 	g2.Rules = make([]*Rule, len(g.Rules))
 	for i, r := range g.Rules {
 		g2.Rules[i] = r.Optimized()
 	}
-	return &g2
+	err := g2.Initialize()
+	if err != nil {
+		return nil, err
+	}
+	return &g2, nil
 }
