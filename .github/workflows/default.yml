@@ -26,11 +26,11 @@ jobs:
       - name: just
         run: sudo apt update && sudo apt install -y just
 
-      - name: build
-        run: just build
-
       - name: tools
         run: just tools
+
+      - name: build
+        run: just build
 
       - name: lint
         run: just lint
