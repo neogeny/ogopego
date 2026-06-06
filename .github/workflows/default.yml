@@ -29,11 +29,11 @@ jobs:
       - name: tools
         run: just tools
 
-      - name: build
-        run: just build
-
       - name: lint
         run: just lint
+
+      - name: build
+        run: just build
 
       - name: test
         run: just test-v
