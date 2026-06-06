@@ -41,12 +41,14 @@ func parseCLI() (CLIConfig, *kong.Context) {
 }
 
 func Main() {
-	cli, ctx := parseCLI()
-
-	if cli.Version {
-		fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
-		os.Exit(0)
+	for _, arg := range os.Args[1:] {
+		if arg == "--version" {
+			fmt.Printf("%s %s\n", config.ProgramName, util.GetVersion())
+			os.Exit(0)
+		}
 	}
+
+	cli, ctx := parseCLI()
 
 	var (
 		useColorOutput bool
