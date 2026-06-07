@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
-[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.11...HEAD
+[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.12...HEAD
+[v0.1.12]: https://github.com/neogeny/ogopego/compare/v0.1.11...v0.1.12
 [v0.1.11]: https://github.com/neogeny/ogopego/compare/v0.1.9...v0.1.11
 [v0.1.9]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.9
 [v0.1.6]: https://github.com/neogeny/ogopego/compare/v0.1.5...v0.1.6
@@ -12,6 +13,12 @@ All notable changes to this project will be documented in this file. The format 
 [v0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
 
 ## [Unreleased]
+
+## [v0.1.12] 2026-06-06 Optimize
+
+### Changed
+
+* `Rule.Optimized()` recursively optimizes the expression tree, unwraps single-element `Sequence` containers, and inlines alias rules whose body is a single `Call`. `optimizeExpr` always clones nodes so the original grammar's expression tree remains immutable after `Initialize()` links them using the optimized `Rule`. `Model.Optimized()` is value-based so the original `Grammar` model remains unchanged.
 
 ## [v0.1.11] 2026-05-31 Optimize
 
@@ -21,7 +28,6 @@ All notable changes to this project will be documented in this file. The format 
 
 [dlclark/regexp2/v2]:https://pkg.go.dev/github.com/dlclark/regexp2/v2
 
-* Make `Model.Optimized()` be value-based so the original `Grammar` model remains unchanged.
 
 * Converted tests to use [alecthomas/assert/v2] for better readability and maintainability. The new assertion library provides a more expressive and concise way to write tests, improving the overall quality of the test suite.
 

@@ -1,4 +1,4 @@
-You are likely thinking of **Mizushima, Maeda, and Yamaguchi** (2010), who introduced the formal concept of the **"Cut" operator** in PEG parsing to control backtracking and prevent the worst-case exponential time complexity of Packrat parsing, specifically addressing memory consumption. Another notable researcher in this exact space is **Roberto Ierusalimschy** (the creator of Lua and LPeg), who wrote extensively on syntactic sugar and semantic actions in PEGs.
+Ylou are likely thinking of **Mizushima, Maeda, and Yamaguchi** (2010), who introduced the formal concept of the **"Cut" operator** in PEG parsing to control backtracking and prevent the worst-case exponential time complexity of Packrat parsing, specifically addressing memory consumption. Another notable researcher in this exact space is **Roberto Ierusalimschy** (the creator of Lua and LPeg), who wrote extensively on syntactic sugar and semantic actions in PEGs.
 
 Your empirical discovery is entirely correct: **a Cut executed on a successful path must not propagate upward past the choice sequence that successfully consumed it.**
 
