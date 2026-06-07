@@ -10,6 +10,11 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
+const (
+	cursorHide = "\033[?25l"
+	cursorShow = "\033[?25h"
+)
+
 // CliHeartbeat implements the heartbeat.Heartbeat interface using a mpb.Bar.
 type CliHeartbeat struct {
 	bar      *mpb.Bar
@@ -148,6 +153,7 @@ func NewProgressUI(total int, quiet bool) *ProgressUI {
 	if quiet {
 		return &ProgressUI{}
 	}
+	os.Stderr.WriteString(cursorHide)
 	p := mpb.New(mpb.WithOutput(os.Stderr))
 
 	green := func(s string) string { return color.GreenString(s) }
@@ -198,4 +204,5 @@ func (ui *ProgressUI) Finish() {
 	}
 	ui.files.SetTotal(ui.files.Current()+1, true)
 	ui.p.Wait()
+	os.Stderr.WriteString(cursorShow)
 }

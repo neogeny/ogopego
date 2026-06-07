@@ -115,11 +115,11 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	passed := len(cli.Run.Inputs) - errcount
 	elapsed := time.Since(start)
 	rate := int(float64(sourceLines) / elapsed.Seconds())
-	_, _ = fmt.Fprintf(os.Stderr, "%s %s %s %s\n",
-		color.New(color.FgWhite, color.Bold).Sprintf("Parsed %d files", len(cli.Run.Inputs)),
-		color.New(color.FgGreen, color.Bold).Sprintf("%d passed", passed),
-		color.New(color.FgRed, color.Bold).Sprintf("%d errors", errcount),
-		color.New(color.FgCyan).Sprintf("%d sloc/s", rate),
+	_, _ = fmt.Fprintf(os.Stderr, "Parsed%s%s%s%s\n",
+		color.New(color.FgWhite, color.Bold).Sprintf(" %d files", len(cli.Run.Inputs)),
+		color.New(color.FgGreen).Sprintf(" %d passed", passed),
+		color.New(color.FgRed).Sprintf(" %d errors", errcount),
+		color.New(color.FgCyan).Sprintf(" %d sloc/s", rate),
 	)
 
 	var lang string
