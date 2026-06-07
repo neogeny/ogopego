@@ -19,6 +19,7 @@ type Grammar struct {
 	Keywords   []string
 	Rules      []*Rule
 	Analyzed   bool
+	optimized  bool
 	// Allow setting semantics filtering at the grammar definition level
 	// Can be used on the boot grammar to implement grammar-parser semantics
 	Semantics config.SemanticsFunc

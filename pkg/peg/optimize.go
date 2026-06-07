@@ -3,7 +3,9 @@
 
 package peg
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // optimizeExpr recursively simplifies a grammar model tree.
 // It returns the optimized model, which may be a different concrete type
@@ -14,7 +16,7 @@ func optimizeExpr(m Model) Model {
 	// --- Leaves ---
 	case *Dot, *Cut, *Void, *Fail, *EOF, *EOL,
 		*Token, *Pattern, *Constant, *Alert,
-		*EmptyClosure, *NULL, *Call, *RuleInclude:
+		*EmptyClosure, *NULL:
 		return e
 
 	// --- Unary containers: clone and recurse into Exp ---
@@ -43,7 +45,7 @@ func optimizeExpr(m Model) Model {
 	case *Option:
 		return &Option{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 	case *Synth:
-		return optimizeExpr(e.Exp)
+		return &Synth{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp)}
 
 	// --- Binary containers: clone and recurse into both ---
 	case *Join:
@@ -54,6 +56,14 @@ func optimizeExpr(m Model) Model {
 		return &Gather{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
 	case *PositiveGather:
 		return &PositiveGather{ModelBase: e.ModelBase, Exp: optimizeExpr(e.Exp), Sep: optimizeExpr(e.Sep)}
+
+	// --- Call: always clone (re-linked by Initialize) ---
+	case *Call:
+		return &Call{ModelBase: e.ModelBase, Name: e.Name}
+
+	// --- RuleInclude: copy and recurse into inner exp ---
+	case *RuleInclude:
+		return &RuleInclude{ModelBase: e.ModelBase, Name: e.Name, exp: optimizeExpr(e.exp)}
 
 	// --- Eliminated: Group unwraps to its inner expression ---
 	case *Group:
@@ -87,23 +97,44 @@ func optimizeExpr(m Model) Model {
 
 // Optimized simplifies the rule's expression tree and returns a new rule.
 // The original rule is not modified.
+//
+//  1. Recursively optimize the expression tree.
+//  2. Unwrap single-element Sequences that result from optimization.
+//  3. If the optimized expression is a single Call with a linked target rule,
+//     inline the target rule's optimized body (alias resolution).
 func (r *Rule) Optimized() *Rule {
-	r2 := *r
-	r2.Exp = optimizeExpr(r.Exp)
-	return &r2
+	opt := *r
+	opt.Exp = optimizeExpr(r.Exp)
+
+	// Unwrap single-element Sequences (matching Python's Rule.optimized)
+	for seq, ok := opt.Exp.(*Sequence); ok && len(seq.Sequence) == 1; {
+		opt.Exp = seq.Sequence[0]
+		seq, ok = opt.Exp.(*Sequence)
+	}
+
+	// If the body is a single Call to another rule, inline that rule's body
+	if call, ok := opt.Exp.(*Call); ok && call.rule != nil {
+		opt.Exp = optimizeExpr(call.rule.Exp)
+	}
+
+	return &opt
 }
 
 // Optimized simplifies all rules in the grammar and returns a new grammar.
 // The original grammar is not modified.
 func (g *Grammar) Optimized() (*Grammar, error) {
-	g2 := *g
-	g2.Rules = make([]*Rule, len(g.Rules))
-	for i, r := range g.Rules {
-		g2.Rules[i] = r.Optimized()
+	if g.optimized {
+		return g, nil
 	}
-	err := g2.Initialize()
+	opt := *g
+	opt.Rules = make([]*Rule, len(g.Rules))
+	for i, r := range g.Rules {
+		opt.Rules[i] = r.Optimized()
+	}
+	err := opt.Initialize()
 	if err != nil {
 		return nil, err
 	}
-	return &g2, nil
+	opt.optimized = true
+	return &opt, nil
 }
