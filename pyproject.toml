@@ -49,3 +49,8 @@ include = [
 
 [tool.hatch.build.hooks.custom]
 path = "python/hatch_build.py"
+
+[dependency-groups]
+doc = [
+    "vale>=3.13.0.0",
+]
