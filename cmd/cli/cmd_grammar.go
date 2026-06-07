@@ -17,7 +17,7 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	var outputs []outputItem
 	var p *mpb.Progress
 	if !cli.Quiet {
-		os.Stderr.WriteString(cursorHide)
+		hideCursor()
 		p = mpb.New(mpb.WithOutput(os.Stderr))
 	}
 	fileName := filepath.Base(cli.Grammar.Grammar)
@@ -37,7 +37,7 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		fp.Fail()
 		if p != nil {
 			p.Wait()
-			os.Stderr.WriteString(cursorShow)
+			showCursor()
 		}
 		fmt.Fprintln(os.Stderr, "\nerror:", err)
 		os.Exit(1)
@@ -45,7 +45,7 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	fp.Success()
 	if p != nil {
 		p.Wait()
-		os.Stderr.WriteString(cursorShow)
+		showCursor()
 	}
 	var payload string
 	var lang string

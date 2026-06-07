@@ -8,12 +8,25 @@ import (
 	"github.com/neogeny/ogopego/pkg/util/heartbeat"
 	mpb "github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
+	"golang.org/x/term"
 )
 
 const (
 	cursorHide = "\033[?25l"
 	cursorShow = "\033[?25h"
 )
+
+func hideCursor() {
+	if term.IsTerminal(int(os.Stderr.Fd())) {
+		os.Stderr.WriteString(cursorHide)
+	}
+}
+
+func showCursor() {
+	if term.IsTerminal(int(os.Stderr.Fd())) {
+		os.Stderr.WriteString(cursorShow)
+	}
+}
 
 // CliHeartbeat implements the heartbeat.Heartbeat interface using a mpb.Bar.
 type CliHeartbeat struct {
@@ -153,7 +166,7 @@ func NewProgressUI(total int, quiet bool) *ProgressUI {
 	if quiet {
 		return &ProgressUI{}
 	}
-	os.Stderr.WriteString(cursorHide)
+	hideCursor()
 	p := mpb.New(mpb.WithOutput(os.Stderr))
 
 	green := func(s string) string { return color.GreenString(s) }
@@ -204,5 +217,5 @@ func (ui *ProgressUI) Finish() {
 	}
 	ui.files.SetTotal(ui.files.Current()+1, true)
 	ui.p.Wait()
-	os.Stderr.WriteString(cursorShow)
+	showCursor()
 }
