@@ -55,6 +55,9 @@ func ModelToJSON(v Model) any {
 		return mapClass("Cut")
 	case *Synth:
 		return mapClass("Synth", "exp", ModelToJSON(m.Exp))
+	case *MetaExp:
+		return mapClass("Meta", "kind", m.Kind)
+
 	case *EmptyClosure:
 		return mapClass("EmptyClosure", "ast", []any{})
 	case *SkipTo:

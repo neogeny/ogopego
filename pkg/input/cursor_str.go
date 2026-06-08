@@ -4,6 +4,7 @@
 package input
 
 import (
+	"strconv"
 	"strings"
 	"sync"
 	"unicode"
@@ -397,6 +398,157 @@ func (s *StrCursor) Clone() Cursor {
 	}
 }
 
+func (s *StrCursor) MatchName() (string, bool) {
+	if s.AtEnd() {
+		return "", false
+	}
+	mark := s.offset
+	r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+	if r != '_' && !unicode.IsLetter(r) &&
+		!strings.ContainsRune(s.heavy.NameChars, r) {
+		return "", false
+	}
+	s.offset += size
+	for s.offset < len(s.text) {
+		r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+		if !s.IsNameChar(r) {
+			break
+		}
+		s.offset += size
+	}
+	return s.text[mark:s.offset], true
+}
+
+func (s *StrCursor) consumeSignedInt() bool {
+	mark := s.offset
+	s.consumeSign()
+	if !s.consumeUInt() {
+		s.offset = mark
+		return false
+	}
+	return true
+}
+
+func (s *StrCursor) consumeSign() bool {
+	r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+	if r == '+' || r == '-' {
+		s.offset += size
+		return true
+	}
+	return false
+}
+
+func (s *StrCursor) consumeUInt() bool {
+	start := s.offset
+	for s.offset < len(s.text) {
+		r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+		if r >= '0' && r <= '9' {
+			s.offset += size
+		} else if r == '_' {
+			nextOff := s.offset + size
+			if nextOff < len(s.text) {
+				nextR, _ := utf8.DecodeRuneInString(s.text[nextOff:])
+				if nextR >= '0' && nextR <= '9' {
+					s.offset = nextOff
+				} else {
+					s.offset = start
+					return false
+				}
+			} else {
+				s.offset = start
+				return false
+			}
+		} else if unicode.IsLetter(r) {
+			s.offset = start
+			return false
+		} else {
+			break
+		}
+	}
+	return s.offset != start
+}
+
+func (s *StrCursor) MatchInt() (int, bool) {
+	mark := s.offset
+	if !s.consumeSignedInt() {
+		return 0, false
+	}
+	raw := s.text[mark:s.offset]
+	n, err := strconv.Atoi(cleanNumber(raw))
+	if err != nil {
+		s.offset = mark
+		return 0, false
+	}
+	return n, true
+}
+
+func (s *StrCursor) MatchUInt() (uint64, bool) {
+	mark := s.offset
+	if !s.consumeUInt() {
+		return 0, false
+	}
+	raw := s.text[mark:s.offset]
+	n, err := strconv.ParseUint(cleanNumber(raw), 10, 64)
+	if err != nil {
+		s.offset = mark
+		return 0, false
+	}
+	return n, true
+}
+
+func (s *StrCursor) MatchFloat() (float64, bool) {
+	mark := s.offset
+	if !s.consumeSignedInt() {
+		s.offset = mark
+		return 0, false
+	}
+	if s.offset < len(s.text) {
+		r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+		if r == '.' {
+			s.offset += size
+			s.consumeUInt()
+		}
+	}
+	if s.offset < len(s.text) {
+		r, size := utf8.DecodeRuneInString(s.text[s.offset:])
+		if r == 'e' || r == 'E' {
+			expMark := s.offset
+			s.offset += size
+			if !s.consumeSignedInt() {
+				s.offset = expMark
+			}
+		}
+	}
+	raw := s.text[mark:s.offset]
+	f, err := strconv.ParseFloat(cleanNumber(raw), 64)
+	if err != nil {
+		s.offset = mark
+		return 0, false
+	}
+	return f, true
+}
+
+func (s *StrCursor) MatchBool() (bool, bool) {
+	if s.AtEnd() {
+		return false, false
+	}
+	mark := s.offset
+	r, _ := utf8.DecodeRuneInString(s.text[s.offset:])
+	first := unicode.ToLower(r)
+	if first == 't' {
+		if mark+4 <= len(s.text) && s.text[mark+1:mark+4] == "rue" {
+			s.offset = mark + 4
+			return true, true
+		}
+	} else if first == 'f' {
+		if mark+5 <= len(s.text) && s.text[mark+1:mark+5] == "alse" {
+			s.offset = mark + 5
+			return false, true
+		}
+	}
+	return false, false
+}
+
 func (s *StrCursor) eatPattern(pat pyre2.Pattern) bool {
 	if pat == nil || s.AtEnd() || pat.Pattern() == "" {
 		return false
@@ -447,3 +599,5 @@ func takeNonNewlineWhitespaceLen(s string) int {
 	}
 	return len(s)
 }
+
+var _ Cursor = (*StrCursor)(nil)

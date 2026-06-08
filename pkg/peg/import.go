@@ -579,6 +579,10 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 	case "EmptyClosure":
 		return &EmptyClosure{}, nil
 
+	case "Meta":
+		kind := h.optString("kind")
+		return &MetaExp{Kind: kind}, nil
+
 	case "RuleInclude":
 		name, err := h.getString("name")
 		if err != nil {

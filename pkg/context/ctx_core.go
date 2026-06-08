@@ -327,6 +327,56 @@ func (ctx *CoreCtx) MatchPattern(pattern string) (string, error) {
 	return m, nil
 }
 
+func (ctx *CoreCtx) MatchName() (string, error) {
+	ctx.NextToken()
+	mark := ctx.Mark()
+	m, ok := ctx.cursor.MatchName()
+	if !ok {
+		return "", ctx.Failure(mark, fmt.Errorf("expected name"))
+	}
+	return m, nil
+}
+
+func (ctx *CoreCtx) MatchInt() (int, error) {
+	ctx.NextToken()
+	mark := ctx.Mark()
+	n, ok := ctx.cursor.MatchInt()
+	if !ok {
+		return 0, ctx.Failure(mark, fmt.Errorf("expected integer"))
+	}
+	return n, nil
+}
+
+func (ctx *CoreCtx) MatchUInt() (uint64, error) {
+	ctx.NextToken()
+	mark := ctx.Mark()
+	n, ok := ctx.cursor.MatchUInt()
+	if !ok {
+		return 0, ctx.Failure(mark, fmt.Errorf("expected unsigned integer"))
+	}
+	return n, nil
+}
+
+func (ctx *CoreCtx) MatchFloat() (float64, error) {
+	ctx.NextToken()
+	mark := ctx.Mark()
+	f, ok := ctx.cursor.MatchFloat()
+	if !ok {
+		return 0, ctx.Failure(mark, fmt.Errorf("expected float"))
+	}
+	return f, nil
+}
+
+func (ctx *CoreCtx) MatchBool() (bool, error) {
+	ctx.NextToken()
+	mark := ctx.Mark()
+	b, ok := ctx.cursor.MatchBool()
+	if !ok {
+		return false, ctx.Failure(mark, fmt.Errorf("expected boolean"))
+	}
+	return b, nil
+}
+
 func (ctx *CoreCtx) Void() {
 	ctx.NextToken()
 }

@@ -16,7 +16,8 @@ func optimizeExpr(m Model) Model {
 	// --- Leaves ---
 	case *Dot, *Cut, *Void, *Fail, *EOF, *EOL,
 		*Token, *Pattern, *Constant, *Alert,
-		*EmptyClosure, *NULL:
+		*EmptyClosure, *NULL,
+		*MetaExp:
 		return e
 
 	// --- Unary containers: clone and recurse into Exp ---

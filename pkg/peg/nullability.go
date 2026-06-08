@@ -54,6 +54,9 @@ func isNullable(exp Model) bool {
 	case *Token, *Pattern, *Dot, *EOF, *Fail, *SkipTo:
 		return false
 
+	case *MetaExp:
+		return false
+
 	default:
 		panic(fmt.Sprintf("isNullable: unhandled model type %T", exp))
 	}

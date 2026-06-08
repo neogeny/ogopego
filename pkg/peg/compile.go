@@ -374,6 +374,21 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 	case "EOL", "Eol":
 		exp = &EOL{}
 
+	case "NameMeta":
+		exp = &MetaExp{Kind: "name"}
+
+	case "IntMeta":
+		exp = &MetaExp{Kind: "int"}
+
+	case "UIntMeta":
+		exp = &MetaExp{Kind: "uint"}
+
+	case "FloatMeta":
+		exp = &MetaExp{Kind: "float"}
+
+	case "BoolMeta":
+		exp = &MetaExp{Kind: "bool"}
+
 	case "EmptyClosure":
 		exp = &EmptyClosure{}
 

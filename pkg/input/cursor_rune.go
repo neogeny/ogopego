@@ -1,6 +1,7 @@
 package input
 
 import (
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -289,6 +290,138 @@ func (c *RuneCursor) MatchPattern(pattern string) (string, bool) {
 	return "", false
 }
 
+func (c *RuneCursor) MatchName() (string, bool) {
+	if c.AtEnd() {
+		return "", false
+	}
+	mark := c.runePos
+	first := c.runes[mark]
+	if first != '_' && !unicode.IsLetter(first) &&
+		!strings.ContainsRune(c.heavy.NameChars, first) {
+		return "", false
+	}
+	c.runePos++
+	for c.runePos < len(c.runes) && c.IsNameChar(c.runes[c.runePos]) {
+		c.runePos++
+	}
+	return string(c.runes[mark:c.runePos]), true
+}
+
+func (c *RuneCursor) MatchInt() (int, bool) {
+	mark := c.runePos
+	if !c.consumeSignedInt() {
+		return 0, false
+	}
+	raw := string(c.runes[mark:c.runePos])
+	n, err := strconv.Atoi(cleanNumber(raw))
+	if err != nil {
+		c.runePos = mark
+		return 0, false
+	}
+	return n, true
+}
+
+func (c *RuneCursor) MatchUInt() (uint64, bool) {
+	mark := c.runePos
+	if !c.consumeUInt() {
+		return 0, false
+	}
+	raw := string(c.runes[mark:c.runePos])
+	n, err := strconv.ParseUint(cleanNumber(raw), 10, 64)
+	if err != nil {
+		c.runePos = mark
+		return 0, false
+	}
+	return n, true
+}
+
+func (c *RuneCursor) consumeSignedInt() bool {
+	mark := c.runePos
+	c.consumeSign()
+	if !c.consumeUInt() {
+		c.runePos = mark
+		return false
+	}
+	return true
+}
+
+func (c *RuneCursor) consumeSign() bool {
+	if c.runePos < len(c.runes) && (c.runes[c.runePos] == '+' || c.runes[c.runePos] == '-') {
+		c.runePos++
+		return true
+	}
+	return false
+}
+
+func (c *RuneCursor) consumeUInt() bool {
+	start := c.runePos
+	for c.runePos < len(c.runes) {
+		r := c.runes[c.runePos]
+		if r >= '0' && r <= '9' {
+			c.runePos++
+		} else if r == '_' {
+			if c.runePos+1 < len(c.runes) && c.runes[c.runePos+1] >= '0' && c.runes[c.runePos+1] <= '9' {
+				c.runePos++
+			} else {
+				c.runePos = start
+				return false
+			}
+		} else if unicode.IsLetter(r) {
+			c.runePos = start
+			return false
+		} else {
+			break
+		}
+	}
+	return c.runePos != start
+}
+
+func (c *RuneCursor) MatchFloat() (float64, bool) {
+	mark := c.runePos
+	if !c.consumeSignedInt() {
+		c.runePos = mark
+		return 0, false
+	}
+	if c.runePos < len(c.runes) && c.runes[c.runePos] == '.' {
+		c.runePos++
+		c.consumeUInt()
+	}
+	if c.runePos < len(c.runes) && (c.runes[c.runePos] == 'e' || c.runes[c.runePos] == 'E') {
+		expMark := c.runePos
+		c.runePos++
+		if !c.consumeSignedInt() {
+			c.runePos = expMark
+		}
+	}
+	raw := string(c.runes[mark:c.runePos])
+	f, err := strconv.ParseFloat(cleanNumber(raw), 64)
+	if err != nil {
+		c.runePos = mark
+		return 0, false
+	}
+	return f, true
+}
+
+func (c *RuneCursor) MatchBool() (bool, bool) {
+	if c.AtEnd() {
+		return false, false
+	}
+	mark := c.runePos
+	first := unicode.ToLower(c.runes[mark])
+	if first == 't' {
+		if mark+4 <= len(c.runes) && string(c.runes[mark+1:mark+4]) == "rue" {
+			c.runePos = mark + 4
+			return true, true
+		}
+	} else if first == 'f' {
+		if mark+5 <= len(c.runes) && string(c.runes[mark+1:mark+5]) == "alse" {
+			c.runePos = mark + 5
+			return false, true
+		}
+	}
+	return false, false
+}
+
 func (c *RuneCursor) GetPattern(pattern string) pyre2.Pattern {
 	c.heavy.mu.Lock()
 	defer c.heavy.mu.Unlock()
@@ -452,3 +585,5 @@ func (c *RuneCursor) Clone() Cursor {
 }
 
 var _ Cursor = (*RuneCursor)(nil)
+
+func cleanNumber(raw string) string { return strings.ReplaceAll(raw, "_", "") }

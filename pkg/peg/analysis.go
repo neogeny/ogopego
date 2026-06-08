@@ -60,6 +60,9 @@ func computeLA(exp Model) []string {
 	case *RuleInclude:
 		la = computeLA(e.exp)
 
+	case *MetaExp:
+		la = []string{"@" + e.Kind}
+
 	case *NULL, *Void, *Cut, *EmptyClosure,
 		*Fail, *Dot, *EOL:
 	// no contribution

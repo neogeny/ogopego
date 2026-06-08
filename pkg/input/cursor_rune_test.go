@@ -5,6 +5,8 @@ package input
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
@@ -552,4 +554,158 @@ func TestRuneCursorMatchTokenNonASCII(t *testing.T) {
 	s := NewRuneCursor("héllo world")
 	assert.True(t, s.MatchToken("hé"), "expected MatchToken to match non-ASCII")
 	assert.Equal(t, 2, s.Mark())
+}
+
+// Meta expression tests - ported from x/tatsu/tests/syntax/meta_test.py
+// These test at the cursor unit level rather than the full grammar level.
+
+func TestRuneCursorMatchName(t *testing.T) {
+	s := NewRuneCursor("hello")
+	n, ok := s.MatchName()
+	assert.True(t, ok)
+	assert.Equal(t, "hello", n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchNameUnderscoreStart(t *testing.T) {
+	s := NewRuneCursor("_hello")
+	n, ok := s.MatchName()
+	assert.True(t, ok)
+	assert.Equal(t, "_hello", n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchNameRejectsDigitStart(t *testing.T) {
+	s := NewRuneCursor("1hello")
+	_, ok := s.MatchName()
+	assert.False(t, ok)
+	assert.Equal(t, 0, s.Mark())
+}
+
+func TestRuneCursorMatchNameRejectsEmpty(t *testing.T) {
+	s := NewRuneCursor("")
+	_, ok := s.MatchName()
+	assert.False(t, ok)
+}
+
+func TestRuneCursorMatchIntSigned(t *testing.T) {
+	s := NewRuneCursor("+42")
+	n, ok := s.MatchInt()
+	assert.True(t, ok)
+	assert.Equal(t, 42, n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchIntNegative(t *testing.T) {
+	s := NewRuneCursor("-7")
+	n, ok := s.MatchInt()
+	assert.True(t, ok)
+	assert.Equal(t, -7, n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchIntUnsigned(t *testing.T) {
+	s := NewRuneCursor("99")
+	n, ok := s.MatchInt()
+	assert.True(t, ok)
+	assert.Equal(t, 99, n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchIntRejectsEmpty(t *testing.T) {
+	s := NewRuneCursor("")
+	_, ok := s.MatchInt()
+	assert.False(t, ok)
+}
+
+func TestRuneCursorMatchUIntUnsigned(t *testing.T) {
+	s := NewRuneCursor("42")
+	n, ok := s.MatchUInt()
+	assert.True(t, ok)
+	assert.Equal(t, uint64(42), n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchUIntRejectsNegative(t *testing.T) {
+	s := NewRuneCursor("-5")
+	_, ok := s.MatchUInt()
+	assert.False(t, ok)
+	assert.Equal(t, 0, s.Mark())
+}
+
+func TestRuneCursorMatchUIntRejectsPlus(t *testing.T) {
+	s := NewRuneCursor("+5")
+	_, ok := s.MatchUInt()
+	assert.False(t, ok)
+	assert.Equal(t, 0, s.Mark())
+}
+
+func TestRuneCursorMatchUIntUnderscores(t *testing.T) {
+	s := NewRuneCursor("1_000_000")
+	n, ok := s.MatchUInt()
+	assert.True(t, ok)
+	assert.Equal(t, uint64(1000000), n)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchFloatPi(t *testing.T) {
+	piStr := strconv.FormatFloat(math.Pi, 'g', -1, 64)
+	s := NewRuneCursor(piStr)
+	f, ok := s.MatchFloat()
+	assert.True(t, ok)
+	assert.Equal(t, math.Pi, f)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchFloatNegative(t *testing.T) {
+	s := NewRuneCursor("-2.5")
+	f, ok := s.MatchFloat()
+	assert.True(t, ok)
+	assert.Equal(t, -2.5, f)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchFloatRejectsText(t *testing.T) {
+	s := NewRuneCursor("abc")
+	_, ok := s.MatchFloat()
+	assert.False(t, ok)
+	assert.Equal(t, 0, s.Mark())
+}
+
+func TestRuneCursorMatchBoolTrue(t *testing.T) {
+	s := NewRuneCursor("true")
+	b, ok := s.MatchBool()
+	assert.True(t, ok)
+	assert.Equal(t, true, b)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchBoolCapitalizedTrue(t *testing.T) {
+	s := NewRuneCursor("True")
+	b, ok := s.MatchBool()
+	assert.True(t, ok)
+	assert.Equal(t, true, b)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchBoolFalse(t *testing.T) {
+	s := NewRuneCursor("false")
+	b, ok := s.MatchBool()
+	assert.True(t, ok)
+	assert.Equal(t, false, b)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchBoolCapitalizedFalse(t *testing.T) {
+	s := NewRuneCursor("False")
+	b, ok := s.MatchBool()
+	assert.True(t, ok)
+	assert.Equal(t, false, b)
+	assert.True(t, s.AtEnd())
+}
+
+func TestRuneCursorMatchBoolRejectsEmpty(t *testing.T) {
+	s := NewRuneCursor("")
+	_, ok := s.MatchBool()
+	assert.False(t, ok)
 }

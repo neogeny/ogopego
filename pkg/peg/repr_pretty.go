@@ -93,6 +93,8 @@ func (m *NULL) PrettyPrint() string         { return "" }
 func (m *Void) PrettyPrint() string         { return "()" }
 func (m *EmptyClosure) PrettyPrint() string { return "{}" }
 
+func (m *MetaExp) PrettyPrint() string { return "@" + m.Kind }
+
 // Option
 
 func (m *Option) PrettyPrint() string {

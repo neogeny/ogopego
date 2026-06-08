@@ -249,6 +249,9 @@ func walkExp(m Model) []string {
 	case *EOL:
 		return []string{fmt.Sprintf("⇥%s ", eol)}
 
+	case *MetaExp:
+		return []string{"@" + exp.Kind}
+
 	case *Token:
 		return []string{fmt.Sprintf("%q", exp.Token)}
 	case *Pattern:
@@ -391,6 +394,9 @@ func (m *Call) Railroads() string { return rails(walkExp(m)).String() }
 
 // Railroads implements the ToRailroad interface for RuleInclude.
 func (m *RuleInclude) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for MetaExp.
+func (m *MetaExp) Railroads() string { return rails(walkExp(m)).String() }
 
 // Railroads implements the ToRailroad interface for Cut.
 func (m *Cut) Railroads() string { return rails(walkExp(m)).String() }

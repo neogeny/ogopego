@@ -40,6 +40,16 @@ type Ctx interface {
 	MatchToken(token string) bool
 	// MatchPattern matches a regular expression pattern.
 	MatchPattern(pattern string) (string, error)
+	// MatchName matches a name/identifier at the current position.
+	MatchName() (string, error)
+	// MatchInt matches a signed integer at the current position.
+	MatchInt() (int, error)
+	// MatchUInt matches an unsigned integer at the current position.
+	MatchUInt() (uint64, error)
+	// MatchFloat matches a floating-point number at the current position.
+	MatchFloat() (float64, error)
+	// MatchBool matches a boolean literal (true/false) at the current position.
+	MatchBool() (bool, error)
 	Void()
 	// InLookahead return `true` if currently inside a lookahead operation.
 	InLookahead() bool

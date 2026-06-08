@@ -60,6 +60,16 @@ type Cursor interface {
 	MatchPattern(pattern string) (string, bool)
 	// GetPattern compiles and caches a regular expression pattern.
 	GetPattern(pattern string) pyre.Pattern
+	// MatchName attempts to match an identifier at the current position.
+	MatchName() (string, bool)
+	// MatchInt attempts to match a signed integer at the current position.
+	MatchInt() (int, bool)
+	// MatchUInt attempts to match an unsigned integer at the current position.
+	MatchUInt() (uint64, bool)
+	// MatchFloat attempts to match a floating-point number at the current position.
+	MatchFloat() (float64, bool)
+	// MatchBool attempts to match a boolean literal (true/false) at the current position.
+	MatchBool() (bool, bool)
 	// MatchEOL attempts to match an end-of-line sequence and advances the cursor if successful.
 	MatchEOL() bool
 	// NextToken advances the cursor past the current token (whitespace and comments).
