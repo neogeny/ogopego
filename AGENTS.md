@@ -31,3 +31,8 @@ This directory is home to the **ogopego** project, a PEG parser Generator writen
 * **Shared Understanding:** You will interview the User relentlessly about every aspect of a plan until it is certain that there is a shared understanding. Walk down each branch of the possible design tree resolving dependencies between decisions one-by-one.
 
 * **Strict Compliance:** Adhere strictly to all the rules specified in the mentioned documents.
+
+## Workflow
+
+* Use `just` targets (defined in `Justfile`) instead of running tools directly.
+* When you find bugs or issues in the codebase, stop and ask before fixing.
