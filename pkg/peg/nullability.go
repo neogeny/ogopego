@@ -54,7 +54,7 @@ func isNullable(exp Model) bool {
 	case *Token, *Pattern, *Dot, *EOF, *Fail, *SkipTo:
 		return false
 
-	case *MetaExp:
+	case *NameMeta, *IntMeta, *UIntMeta, *FloatMeta, *BoolMeta:
 		return false
 
 	default:

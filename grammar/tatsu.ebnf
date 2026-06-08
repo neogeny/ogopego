@@ -1,7 +1,7 @@
 @@grammar :: TatSu
 @@whitespace :: /(?m)\s+/
-@@comments :: ?"(?ms)[(][*]\s*(.*?)\s*[*][)]|[/][*]\s*(.*?)\s*[*][/]"
-@@eol_comments :: ?"(?ms)(?:[#]|[/][/])(.*?)$"
+@@comments :: ?"(?ms)[(][*]\s*(.*?)\s*[*][)]|/[*]\s*(.*?)\s*[*]/"
+@@eol_comments :: ?"(?ms)(?:[#]|[\/][\/])(.*?)$"
 @@parseinfo :: True
 @@left_recursion :: False
 
@@ -61,7 +61,7 @@ paramdef:
 
 rule[Rule]:
     decorators={decorator}
-    name=name
+    name=@name
     ~
     [>paramdef]
     ['<' ~ base=known_name]
@@ -97,26 +97,23 @@ sequence[Sequence]:
     | &(element ',') ','.{element}+
     | {!ENDRULE element}+
 
-element: named | term | override | rule_include
+element: meta | named | term | override | rule_include
 
 rule_include[RuleInclude]: '>' ~ =known_name
 
 named: named_list | named_single
 
-named_list[NamedList]: name=name /\+[:=]/ ~ exp=term
+named_list[NamedList]: name=@name /\+[:=]/ ~ exp=term
 
-named_single[Named]: name=name /[:=]/ ~ exp=term
+named_single[Named]: name=@name /[:=]/ ~ exp=term
 
 override:
     | override_list
     | override_single
-    | override_single_deprecated
 
 override_list[OverrideList]: /\+=|@\+:/ ~ =term
 
 override_single[Override]: /=|@:/ ~ =term
-
-override_single_deprecated[Override]: '@' ~ =term
 
 term:
     | gather
@@ -174,16 +171,19 @@ negative_lookahead[NegativeLookahead]: '!' ~ =term
 skip_to[SkipTo]: '->' ~ =term
 
 atom:
+    | meta
     | token
     | call
     | dot
     | pattern
+    | skip
     | group
     | eol
     | eof
-    | skip
     | alert
     | constant
+
+meta[Meta]: '@' =/(name|int|uint|float|bool)\b/
 
 call[Call]: word
 
@@ -195,9 +195,9 @@ cut[Cut]: '~' ~
 
 cut_deprecated[Cut]: '>>' ~
 
-known_name: name ~
+known_name: @name ~
 
-name: word
+name: @name
 
 constant[Constant]:
     &'`'
@@ -245,9 +245,9 @@ float: /[-+]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][-+]?\d+)?/
 
 int: /[-+]?\d+/
 
-path: /[_a-zA-Z]\w*(?:::[_a-zA-Z]\w*)+/
+path: /[_\w][_\w\d]*(?:::[_\w][_\w\d]*)+/
 
-word: /[_a-zA-Z]\w*/
+word: @name
 
 dot[Dot]: '/./'
 

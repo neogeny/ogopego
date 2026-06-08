@@ -55,7 +55,7 @@ func callableRuleIDs(exp Model, ruleIndex map[*Rule]int) []int {
 
 	case *Token, *Pattern, *Dot, *EOF, *EOL, *Void, *Fail,
 		*NULL, *EmptyClosure, *Cut, *Constant, *Alert,
-		*MetaExp:
+		*NameMeta, *IntMeta, *UIntMeta, *FloatMeta, *BoolMeta:
 		return nil
 
 	default:

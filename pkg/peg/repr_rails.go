@@ -249,8 +249,16 @@ func walkExp(m Model) []string {
 	case *EOL:
 		return []string{fmt.Sprintf("⇥%s ", eol)}
 
-	case *MetaExp:
-		return []string{"@" + exp.Kind}
+	case *NameMeta:
+		return []string{"@name"}
+	case *IntMeta:
+		return []string{"@int"}
+	case *UIntMeta:
+		return []string{"@uint"}
+	case *FloatMeta:
+		return []string{"@float"}
+	case *BoolMeta:
+		return []string{"@bool"}
 
 	case *Token:
 		return []string{fmt.Sprintf("%q", exp.Token)}
@@ -395,8 +403,20 @@ func (m *Call) Railroads() string { return rails(walkExp(m)).String() }
 // Railroads implements the ToRailroad interface for RuleInclude.
 func (m *RuleInclude) Railroads() string { return rails(walkExp(m)).String() }
 
-// Railroads implements the ToRailroad interface for MetaExp.
-func (m *MetaExp) Railroads() string { return rails(walkExp(m)).String() }
+// Railroads implements the ToRailroad interface for NameMeta.
+func (m *NameMeta) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for IntMeta.
+func (m *IntMeta) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for UIntMeta.
+func (m *UIntMeta) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for FloatMeta.
+func (m *FloatMeta) Railroads() string { return rails(walkExp(m)).String() }
+
+// Railroads implements the ToRailroad interface for BoolMeta.
+func (m *BoolMeta) Railroads() string { return rails(walkExp(m)).String() }
 
 // Railroads implements the ToRailroad interface for Cut.
 func (m *Cut) Railroads() string { return rails(walkExp(m)).String() }

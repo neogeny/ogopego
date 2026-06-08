@@ -93,7 +93,11 @@ func (m *NULL) PrettyPrint() string         { return "" }
 func (m *Void) PrettyPrint() string         { return "()" }
 func (m *EmptyClosure) PrettyPrint() string { return "{}" }
 
-func (m *MetaExp) PrettyPrint() string { return "@" + m.Kind }
+func (m *NameMeta) PrettyPrint() string  { return "@name" }
+func (m *IntMeta) PrettyPrint() string   { return "@int" }
+func (m *UIntMeta) PrettyPrint() string  { return "@uint" }
+func (m *FloatMeta) PrettyPrint() string { return "@float" }
+func (m *BoolMeta) PrettyPrint() string  { return "@bool" }
 
 // Option
 

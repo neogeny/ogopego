@@ -503,6 +503,42 @@ The `$->` (EOL) expression will consume the whitespace up to and including the n
 
 Comments, as defined for the grammar, will also be skipped by the `$->` expression in search of a newline, which means that newlines consummed by the comments patterns will not be *"seen"* by `$->`.
 
+### `@name`, `@int`, `@uint`, `@float`, `@bool`
+
+Meta-expressions that match typed values directly from the input:
+
+`@name`
+:   Match an identifier (letter or `namechars` followed by letters,
+    digits, underscores, or `namechars`). Returns the matched string.
+
+`@int`
+:   Match an optional sign (`+`/`-`) followed by digits (with optional
+    internal underscores). Returns an integer.
+
+`@uint`
+:   Match digits only (with optional internal underscores). Returns an
+    integer.
+
+`@float`
+:   Match a floating-point literal: optional sign, digits, optional
+    fractional part, optional exponent. Returns a float.
+
+`@bool`
+:   Match `true`, `false`, `True`, or `False`. Returns a boolean.
+
+The implementation is algorithmic (character-by-character scanning), not
+regex-based, making these expressions efficient for high-throughput parsing.
+
+These are useful when a grammar needs typed values without post-processing:
+
+```ebnf
+number: value=@int
+uvalue: value=@uint
+fvalue: value=@float
+flag:   value=@bool
+ident:  name=@name
+```
+
 
 ## Rules with Arguments
 

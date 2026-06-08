@@ -7,51 +7,62 @@ import (
 	"github.com/neogeny/ogopego/pkg/trees"
 )
 
-// MetaExp matches a meta-expression (@name, @int, @uint, @float, @bool).
+// MetaExp is the base type for meta-expressions.
 type MetaExp struct {
 	ModelBase
-	Kind string
 }
 
-// Parse implements the Model interface for MetaExp by dispatching on Kind.
-func (m *MetaExp) Parse(ctx Ctx) (Tree, error) {
-	switch m.Kind {
-	case "name":
-		s, err := ctx.MatchName()
-		if err != nil {
-			return nil, err
-		}
-		return &trees.Text{Value: s}, nil
+// NameMeta matches a @name meta-expression.
+type NameMeta struct{ MetaExp }
 
-	case "int":
-		n, err := ctx.MatchInt()
-		if err != nil {
-			return nil, err
-		}
-		return &trees.Number{Value: float64(n)}, nil
+// IntMeta matches a @int meta-expression.
+type IntMeta struct{ MetaExp }
 
-	case "uint":
-		n, err := ctx.MatchUInt()
-		if err != nil {
-			return nil, err
-		}
-		return &trees.Number{Value: float64(n)}, nil
+// UIntMeta matches a @uint meta-expression.
+type UIntMeta struct{ MetaExp }
 
-	case "float":
-		f, err := ctx.MatchFloat()
-		if err != nil {
-			return nil, err
-		}
-		return &trees.Number{Value: f}, nil
+// FloatMeta matches a @float meta-expression.
+type FloatMeta struct{ MetaExp }
 
-	case "bool":
-		b, err := ctx.MatchBool()
-		if err != nil {
-			return nil, err
-		}
-		return &trees.Bool{Value: b}, nil
+// BoolMeta matches a @bool meta-expression.
+type BoolMeta struct{ MetaExp }
 
-	default:
-		panic("unknown meta kind: " + m.Kind)
+func (m *NameMeta) Parse(ctx Ctx) (Tree, error) {
+	s, err := ctx.MatchName()
+	if err != nil {
+		return nil, err
 	}
+	return &trees.Text{Value: s}, nil
+}
+
+func (m *IntMeta) Parse(ctx Ctx) (Tree, error) {
+	n, err := ctx.MatchInt()
+	if err != nil {
+		return nil, err
+	}
+	return &trees.Number{Value: float64(n)}, nil
+}
+
+func (m *UIntMeta) Parse(ctx Ctx) (Tree, error) {
+	n, err := ctx.MatchUInt()
+	if err != nil {
+		return nil, err
+	}
+	return &trees.Number{Value: float64(n)}, nil
+}
+
+func (m *FloatMeta) Parse(ctx Ctx) (Tree, error) {
+	f, err := ctx.MatchFloat()
+	if err != nil {
+		return nil, err
+	}
+	return &trees.Number{Value: f}, nil
+}
+
+func (m *BoolMeta) Parse(ctx Ctx) (Tree, error) {
+	b, err := ctx.MatchBool()
+	if err != nil {
+		return nil, err
+	}
+	return &trees.Bool{Value: b}, nil
 }

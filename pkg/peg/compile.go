@@ -375,19 +375,19 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		exp = &EOL{}
 
 	case "NameMeta":
-		exp = &MetaExp{Kind: "name"}
+		exp = &NameMeta{}
 
 	case "IntMeta":
-		exp = &MetaExp{Kind: "int"}
+		exp = &IntMeta{}
 
 	case "UIntMeta":
-		exp = &MetaExp{Kind: "uint"}
+		exp = &UIntMeta{}
 
 	case "FloatMeta":
-		exp = &MetaExp{Kind: "float"}
+		exp = &FloatMeta{}
 
 	case "BoolMeta":
-		exp = &MetaExp{Kind: "bool"}
+		exp = &BoolMeta{}
 
 	case "EmptyClosure":
 		exp = &EmptyClosure{}
@@ -516,6 +516,20 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 			return nil, err
 		}
 		exp = &OverrideList{Exp: e}
+
+	case "Meta":
+		switch textValue(inner) {
+		case "name":
+			exp = &NameMeta{}
+		case "int":
+			exp = &IntMeta{}
+		case "uint":
+			exp = &UIntMeta{}
+		case "float":
+			exp = &FloatMeta{}
+		case "bool":
+			exp = &BoolMeta{}
+		}
 
 	case "Pattern":
 		exp = &Pattern{Pattern: textValue(inner)}

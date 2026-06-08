@@ -4,8 +4,8 @@
   "directives": {
     "grammar": "TatSu",
     "whitespace": "(?m)\\s+",
-    "comments": "(?ms)[(][*]\\s*(.*?)\\s*[*][)]|[/][*]\\s*(.*?)\\s*[*][/]",
-    "eol_comments": "(?ms)(?:[#]|[/][/])(.*?)$",
+    "comments": "(?ms)[(][*]\\s*(.*?)\\s*[*][)]|/[*]\\s*(.*?)\\s*[*]/",
+    "eol_comments": "(?ms)(?:[#]|[\\/][\\/])(.*?)$",
     "parseinfo": true,
     "left_recursion": false
   },
@@ -14,10 +14,6 @@
     {
       "__class__": "Rule",
       "name": "start",
-      "exp": {
-        "__class__": "Call",
-        "name": "grammar"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -27,11 +23,27 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "grammar"
+      }
     },
     {
       "__class__": "Rule",
       "name": "grammar",
+      "params": [
+        "Grammar"
+      ],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -115,10 +127,12 @@
             "__class__": "EOF"
           }
         ]
-      },
-      "params": [
-        "Grammar"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "directive",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -127,11 +141,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "directive",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -454,7 +464,11 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "keywords",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -464,18 +478,18 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "keywords",
+      "is_lrec": false,
       "exp": {
         "__class__": "PositiveClosure",
         "exp": {
           "__class__": "Call",
           "name": "keyword"
         }
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "keyword",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -485,11 +499,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "keyword",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -563,7 +573,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "params",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -573,11 +587,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "params",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -618,7 +628,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "first_param",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -628,11 +642,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "first_param",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -651,7 +661,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "kwparams",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -661,11 +675,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "kwparams",
+      "is_lrec": false,
       "exp": {
         "__class__": "PositiveGather",
         "exp": {
@@ -676,7 +686,11 @@
           "__class__": "Token",
           "token": ","
         }
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "the_params_at_last",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -686,11 +700,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "the_params_at_last",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -748,7 +758,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "paramdef",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -758,11 +772,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "paramdef",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -836,8 +846,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "rule",
+      "params": [
+        "Rule"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -846,11 +862,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "rule",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -869,8 +881,7 @@
             "__class__": "Named",
             "name": "name",
             "exp": {
-              "__class__": "Call",
-              "name": "name"
+              "__class__": "NameMeta"
             }
           },
           {
@@ -932,23 +943,21 @@
             "__class__": "Cut"
           }
         ]
-      },
-      "params": [
-        "Rule"
-      ],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "ENDRULE",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": true,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -980,7 +989,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "DEDENT",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -990,11 +1003,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "DEDENT",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1010,7 +1019,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "BLANK",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -1020,11 +1033,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "BLANK",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1037,7 +1046,11 @@
             "name": "EOL"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "EOL",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -1047,11 +1060,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "EOL",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1064,21 +1073,21 @@
             "pattern": "(?m)(?:\\r?\\n|\\r)?"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "decorator",
       "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
       "is_name": false,
-      "is_tokn": true,
+      "is_tokn": false,
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "decorator",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1104,7 +1113,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "pair",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -1114,11 +1127,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "pair",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1144,7 +1153,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "expre",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -1154,11 +1167,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "expre",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -1177,8 +1186,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "choice",
+      "params": [
+        "Choice"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1187,11 +1202,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "choice",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1240,27 +1251,11 @@
             }
           }
         ]
-      },
-      "params": [
-        "Choice"
-      ],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "option",
-      "exp": {
-        "__class__": "Call",
-        "name": "sequence"
-      },
       "params": [
         "Option"
       ],
@@ -1272,11 +1267,27 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "sequence"
+      }
     },
     {
       "__class__": "Rule",
       "name": "sequence",
+      "params": [
+        "Sequence"
+      ],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -1341,10 +1352,12 @@
             }
           }
         ]
-      },
-      "params": [
-        "Sequence"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "element",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1353,14 +1366,17 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "element",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
+          {
+            "__class__": "Option",
+            "exp": {
+              "__class__": "Call",
+              "name": "meta"
+            }
+          },
           {
             "__class__": "Option",
             "exp": {
@@ -1390,8 +1406,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "rule_include",
+      "params": [
+        "RuleInclude"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1400,11 +1422,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "rule_include",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1423,10 +1441,12 @@
             }
           }
         ]
-      },
-      "params": [
-        "RuleInclude"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "named",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1435,11 +1455,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "named",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -1458,8 +1474,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "named_list",
+      "params": [
+        "NamedList"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1468,11 +1490,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "named_list",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1480,8 +1498,7 @@
             "__class__": "Named",
             "name": "name",
             "exp": {
-              "__class__": "Call",
-              "name": "name"
+              "__class__": "NameMeta"
             }
           },
           {
@@ -1500,9 +1517,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "named_single",
       "params": [
-        "NamedList"
+        "Named"
       ],
       "kwparams": {},
       "decorators": [],
@@ -1512,11 +1533,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "named_single",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1524,8 +1541,7 @@
             "__class__": "Named",
             "name": "name",
             "exp": {
-              "__class__": "Call",
-              "name": "name"
+              "__class__": "NameMeta"
             }
           },
           {
@@ -1544,10 +1560,12 @@
             }
           }
         ]
-      },
-      "params": [
-        "Named"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "override",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1556,11 +1574,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "override",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -1577,17 +1591,16 @@
               "__class__": "Call",
               "name": "override_single"
             }
-          },
-          {
-            "__class__": "Option",
-            "exp": {
-              "__class__": "Call",
-              "name": "override_single_deprecated"
-            }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "override_list",
+      "params": [
+        "OverrideList"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1596,11 +1609,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "override_list",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1619,9 +1628,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "override_single",
       "params": [
-        "OverrideList"
+        "Override"
       ],
       "kwparams": {},
       "decorators": [],
@@ -1631,11 +1644,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "override_single",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1654,58 +1663,21 @@
             }
           }
         ]
-      },
-      "params": [
-        "Override"
-      ],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "override_single_deprecated",
-      "exp": {
-        "__class__": "Sequence",
-        "sequence": [
-          {
-            "__class__": "Token",
-            "token": "@"
-          },
-          {
-            "__class__": "Cut"
-          },
-          {
-            "__class__": "Override",
-            "exp": {
-              "__class__": "Call",
-              "name": "term"
-            }
-          }
-        ]
-      },
-      "params": [
-        "Override"
-      ],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "term",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -1815,8 +1787,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "group",
+      "params": [
+        "Group"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1825,11 +1803,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "group",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1862,9 +1836,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "skip",
       "params": [
-        "Group"
+        "SkipGroup"
       ],
       "kwparams": {},
       "decorators": [],
@@ -1874,11 +1852,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "skip",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1904,10 +1878,12 @@
             "__class__": "Cut"
           }
         ]
-      },
-      "params": [
-        "SkipGroup"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "gather",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1916,11 +1892,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "gather",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -1969,8 +1941,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "positive_gather",
+      "params": [
+        "PositiveGather"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -1979,11 +1957,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "positive_gather",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2026,9 +2000,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "normal_gather",
       "params": [
-        "PositiveGather"
+        "Gather"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2038,11 +2016,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "normal_gather",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2092,10 +2066,12 @@
             "__class__": "Cut"
           }
         ]
-      },
-      "params": [
-        "Gather"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "join",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -2104,11 +2080,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "join",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2157,8 +2129,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "positive_join",
+      "params": [
+        "PositiveJoin"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -2167,11 +2145,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "positive_join",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2214,9 +2188,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "normal_join",
       "params": [
-        "PositiveJoin"
+        "Join"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2226,11 +2204,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "normal_join",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2280,9 +2254,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "left_join",
       "params": [
-        "Join"
+        "LeftJoin"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2292,11 +2270,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "left_join",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2342,9 +2316,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "right_join",
       "params": [
-        "LeftJoin"
+        "RightJoin"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2354,11 +2332,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "right_join",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2404,9 +2378,13 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "positive_closure",
       "params": [
-        "RightJoin"
+        "PositiveClosure"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2416,11 +2394,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "positive_closure",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -2491,9 +2465,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "closure",
       "params": [
-        "PositiveClosure"
+        "Closure"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2503,11 +2481,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "closure",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -2567,9 +2541,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "empty_closure",
       "params": [
-        "Closure"
+        "EmptyClosure"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2579,11 +2557,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "empty_closure",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2601,9 +2575,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "optional",
       "params": [
-        "EmptyClosure"
+        "Optional"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2613,11 +2591,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "optional",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -2705,9 +2679,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "lookahead",
       "params": [
-        "Optional"
+        "Lookahead"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2717,11 +2695,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "lookahead",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2740,9 +2714,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "negative_lookahead",
       "params": [
-        "Lookahead"
+        "NegativeLookahead"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2752,11 +2730,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "negative_lookahead",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2775,9 +2749,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "skip_to",
       "params": [
-        "NegativeLookahead"
+        "SkipTo"
       ],
       "kwparams": {},
       "decorators": [],
@@ -2787,11 +2765,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "skip_to",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -2810,10 +2784,12 @@
             }
           }
         ]
-      },
-      "params": [
-        "SkipTo"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "atom",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -2822,14 +2798,17 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "atom",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
+          {
+            "__class__": "Option",
+            "exp": {
+              "__class__": "Call",
+              "name": "meta"
+            }
+          },
           {
             "__class__": "Option",
             "exp": {
@@ -2862,6 +2841,13 @@
             "__class__": "Option",
             "exp": {
               "__class__": "Call",
+              "name": "skip"
+            }
+          },
+          {
+            "__class__": "Option",
+            "exp": {
+              "__class__": "Call",
               "name": "group"
             }
           },
@@ -2883,13 +2869,6 @@
             "__class__": "Option",
             "exp": {
               "__class__": "Call",
-              "name": "skip"
-            }
-          },
-          {
-            "__class__": "Option",
-            "exp": {
-              "__class__": "Call",
               "name": "alert"
             }
           },
@@ -2901,8 +2880,14 @@
             }
           }
         ]
-      },
-      "params": [],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "meta",
+      "params": [
+        "Meta"
+      ],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -2911,15 +2896,27 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Sequence",
+        "sequence": [
+          {
+            "__class__": "Token",
+            "token": "@"
+          },
+          {
+            "__class__": "Override",
+            "exp": {
+              "__class__": "Pattern",
+              "pattern": "(name|int|uint|float|bool)\\b"
+            }
+          }
+        ]
+      }
     },
     {
       "__class__": "Rule",
       "name": "call",
-      "exp": {
-        "__class__": "Call",
-        "name": "word"
-      },
       "params": [
         "Call"
       ],
@@ -2931,23 +2928,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "word"
+      }
     },
     {
       "__class__": "Rule",
       "name": "void",
-      "exp": {
-        "__class__": "Sequence",
-        "sequence": [
-          {
-            "__class__": "Token",
-            "token": "()"
-          },
-          {
-            "__class__": "Cut"
-          }
-        ]
-      },
       "params": [
         "Void"
       ],
@@ -2959,23 +2948,23 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "fail",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
           {
             "__class__": "Token",
-            "token": "!()"
+            "token": "()"
           },
           {
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "fail",
       "params": [
         "Fail"
       ],
@@ -2987,11 +2976,35 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Sequence",
+        "sequence": [
+          {
+            "__class__": "Token",
+            "token": "!()"
+          },
+          {
+            "__class__": "Cut"
+          }
+        ]
+      }
     },
     {
       "__class__": "Rule",
       "name": "cut",
+      "params": [
+        "Cut"
+      ],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3003,7 +3016,11 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "cut_deprecated",
       "params": [
         "Cut"
       ],
@@ -3015,11 +3032,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "cut_deprecated",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3031,9 +3044,55 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "known_name",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Sequence",
+        "sequence": [
+          {
+            "__class__": "NameMeta"
+          },
+          {
+            "__class__": "Cut"
+          }
+        ]
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "name",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
+      "exp": {
+        "__class__": "NameMeta"
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "constant",
       "params": [
-        "Cut"
+        "Constant"
       ],
       "kwparams": {},
       "decorators": [],
@@ -3043,55 +3102,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "known_name",
-      "exp": {
-        "__class__": "Sequence",
-        "sequence": [
-          {
-            "__class__": "Call",
-            "name": "name"
-          },
-          {
-            "__class__": "Cut"
-          }
-        ]
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "name",
-      "exp": {
-        "__class__": "Call",
-        "name": "word"
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "constant",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3148,9 +3159,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "alert",
       "params": [
-        "Constant"
+        "Alert"
       ],
       "kwparams": {},
       "decorators": [],
@@ -3160,11 +3175,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "alert",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3185,9 +3196,13 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "token",
       "params": [
-        "Alert"
+        "Token"
       ],
       "kwparams": {},
       "decorators": [],
@@ -3197,11 +3212,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "token",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3220,10 +3231,12 @@
             }
           }
         ]
-      },
-      "params": [
-        "Token"
-      ],
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "literal",
+      "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
@@ -3232,11 +3245,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "literal",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3297,7 +3306,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "string",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3307,11 +3320,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "string",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3370,25 +3379,11 @@
             }
           }
         ]
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "singlequoted",
-      "exp": {
-        "__class__": "Call",
-        "name": "SINGLEQUOTED"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3398,15 +3393,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "SINGLEQUOTED"
+      }
     },
     {
       "__class__": "Rule",
       "name": "doublequoted",
-      "exp": {
-        "__class__": "Call",
-        "name": "DOUBLEQUOTED"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3416,11 +3411,25 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "DOUBLEQUOTED"
+      }
     },
     {
       "__class__": "Rule",
       "name": "raw_string",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3443,21 +3452,21 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "STRING",
       "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
       "is_name": false,
-      "is_tokn": false,
+      "is_tokn": true,
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "STRING",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3476,7 +3485,11 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "SINGLEQUOTED",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3486,11 +3499,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "SINGLEQUOTED",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3502,7 +3511,11 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "DOUBLEQUOTED",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3512,11 +3525,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "DOUBLEQUOTED",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3528,21 +3537,21 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "multiline_string",
       "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
       "is_name": false,
-      "is_tokn": true,
+      "is_tokn": false,
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "multiline_string",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3577,25 +3586,11 @@
             }
           }
         ]
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "hex",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "0[xX](?:\\d|[a-fA-F])+"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3605,15 +3600,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Pattern",
+        "pattern": "0[xX](?:\\d|[a-fA-F])+"
+      }
     },
     {
       "__class__": "Rule",
       "name": "float",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "[-+]?(?:\\d+\\.\\d*|\\d*\\.\\d+)(?:[Ee][-+]?\\d+)?"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3623,15 +3618,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Pattern",
+        "pattern": "[-+]?(?:\\d+\\.\\d*|\\d*\\.\\d+)(?:[Ee][-+]?\\d+)?"
+      }
     },
     {
       "__class__": "Rule",
       "name": "int",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "[-+]?\\d+"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3641,15 +3636,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Pattern",
+        "pattern": "[-+]?\\d+"
+      }
     },
     {
       "__class__": "Rule",
       "name": "path",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "[_a-zA-Z]\\w*(?:::[_a-zA-Z]\\w*)+"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3659,15 +3654,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Pattern",
+        "pattern": "[_\\w][_\\w\\d]*(?:::[_\\w][_\\w\\d]*)+"
+      }
     },
     {
       "__class__": "Rule",
       "name": "word",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "[_a-zA-Z]\\w*"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3677,15 +3672,14 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "NameMeta"
+      }
     },
     {
       "__class__": "Rule",
       "name": "dot",
-      "exp": {
-        "__class__": "Token",
-        "token": "/./"
-      },
       "params": [
         "Dot"
       ],
@@ -3697,15 +3691,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "/./"
+      }
     },
     {
       "__class__": "Rule",
       "name": "pattern",
-      "exp": {
-        "__class__": "Call",
-        "name": "regex"
-      },
       "params": [
         "Pattern"
       ],
@@ -3717,11 +3711,25 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Call",
+        "name": "regex"
+      }
     },
     {
       "__class__": "Rule",
       "name": "regex",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3782,21 +3790,21 @@
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "REGEX",
       "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
       "is_name": false,
-      "is_tokn": false,
+      "is_tokn": true,
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "REGEX",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3815,21 +3823,21 @@
             "__class__": "Cut"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "deprecated_regex",
       "params": [],
       "kwparams": {},
       "decorators": [],
       "base": null,
       "is_name": false,
-      "is_tokn": true,
+      "is_tokn": false,
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "deprecated_regex",
+      "is_lrec": false,
       "exp": {
         "__class__": "Sequence",
         "sequence": [
@@ -3855,7 +3863,11 @@
             "token": "/?"
           }
         ]
-      },
+      }
+    },
+    {
+      "__class__": "Rule",
+      "name": "boolean",
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3865,11 +3877,7 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
-    },
-    {
-      "__class__": "Rule",
-      "name": "boolean",
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -3888,25 +3896,11 @@
             }
           }
         ]
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "none",
-      "exp": {
-        "__class__": "Token",
-        "token": "None"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -3916,23 +3910,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "None"
+      }
     },
     {
       "__class__": "Rule",
       "name": "eof",
-      "exp": {
-        "__class__": "Sequence",
-        "sequence": [
-          {
-            "__class__": "Token",
-            "token": "$"
-          },
-          {
-            "__class__": "Cut"
-          }
-        ]
-      },
       "params": [
         "EOF"
       ],
@@ -3944,15 +3930,23 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Sequence",
+        "sequence": [
+          {
+            "__class__": "Token",
+            "token": "$"
+          },
+          {
+            "__class__": "Cut"
+          }
+        ]
+      }
     },
     {
       "__class__": "Rule",
       "name": "eol",
-      "exp": {
-        "__class__": "Token",
-        "token": "$->"
-      },
       "params": [
         "EOL"
       ],
@@ -3964,11 +3958,25 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "$->"
+      }
     },
     {
       "__class__": "Rule",
       "name": "value",
+      "params": [],
+      "kwparams": {},
+      "decorators": [],
+      "base": null,
+      "is_name": false,
+      "is_tokn": false,
+      "no_memo": false,
+      "no_stak": false,
+      "is_memo": true,
+      "is_lrec": false,
       "exp": {
         "__class__": "Choice",
         "options": [
@@ -4008,25 +4016,11 @@
             }
           }
         ]
-      },
-      "params": [],
-      "kwparams": {},
-      "decorators": [],
-      "base": null,
-      "is_name": false,
-      "is_tokn": false,
-      "no_memo": false,
-      "no_stak": false,
-      "is_memo": true,
-      "is_lrec": false
+      }
     },
     {
       "__class__": "Rule",
       "name": "number",
-      "exp": {
-        "__class__": "Pattern",
-        "pattern": "(?x)\n    -?                                  # Optional negative sign\n    (?:\n        0                               # Can be a lone zero\n        |\n        [1-9][0-9]* # Or a non-zero digit followed by any number of digits\n    )\n    (?: \\. [0-9]+ )?                    # Optional fraction: dot MUST be followed by 1+ digits\n    (?: [eE] [+-]? [0-9]+ )?            # Optional exponent component\n    \\b\n    "
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -4036,15 +4030,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Pattern",
+        "pattern": "(?x)\n    -?                                  # Optional negative sign\n    (?:\n        0                               # Can be a lone zero\n        |\n        [1-9][0-9]* # Or a non-zero digit followed by any number of digits\n    )\n    (?: \\. [0-9]+ )?                    # Optional fraction: dot MUST be followed by 1+ digits\n    (?: [eE] [+-]? [0-9]+ )?            # Optional exponent component\n    \\b\n    "
+      }
     },
     {
       "__class__": "Rule",
       "name": "true",
-      "exp": {
-        "__class__": "Token",
-        "token": "true"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -4054,15 +4048,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "true"
+      }
     },
     {
       "__class__": "Rule",
       "name": "false",
-      "exp": {
-        "__class__": "Token",
-        "token": "false"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -4072,15 +4066,15 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "false"
+      }
     },
     {
       "__class__": "Rule",
       "name": "null",
-      "exp": {
-        "__class__": "Token",
-        "token": "null"
-      },
       "params": [],
       "kwparams": {},
       "decorators": [],
@@ -4090,7 +4084,11 @@
       "no_memo": false,
       "no_stak": false,
       "is_memo": true,
-      "is_lrec": false
+      "is_lrec": false,
+      "exp": {
+        "__class__": "Token",
+        "token": "null"
+      }
     }
   ]
 }

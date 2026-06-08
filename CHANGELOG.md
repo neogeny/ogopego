@@ -14,6 +14,21 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Added
+
+- New `@name`, `@int`, `@uint`, `@float`, `@bool` meta-expressions for typed token matching (names, signed/unsigned ints, floats, bools)
+- `Cursor.MatchName`/`MatchInt`/`MatchUInt`/`MatchFloat`/`MatchBool` methods on `RuneCursor` and `StrCursor`
+- `Ctx` interface methods that delegate to cursor matching
+- Five concrete model types (`NameMeta`, `IntMeta`, `UIntMeta`, `FloatMeta`, `BoolMeta`) with `MetaExp` base
+- Full compilation pipeline: EBNF tree compile, JSON import/export, analysis passes, display (pretty-print & railroads)
+- 40 cursor-level tests ported from TatSu
+- Boot grammar usage of `@name` in rule definitions
+
+### Changed
+
+- Meta expression dispatch updated from single `*MetaExp` type case to five individual type cases across the compiler pipeline
+- All TatSu `@` meta features brought to parity with TatSu v5.21.1
+
 ## [v0.1.12] 2026-06-06 Optimize
 
 ### Changed
