@@ -473,7 +473,7 @@ func (ctx *CoreCtx) ApplySemantics(node trees.Tree, ruleName string, params []st
 	sem := ctx.heavy.cfg.Semantics
 	ctx.muUnlock()
 	if sem != nil {
-		return sem(node, ruleName, params)
+		return sem.Apply(node, ruleName, params)
 	}
 	return node, false
 }

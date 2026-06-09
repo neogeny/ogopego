@@ -22,7 +22,7 @@ type Grammar struct {
 	optimized  bool
 	// Allow setting semantics filtering at the grammar definition level
 	// Can be used on the boot grammar to implement grammar-parser semantics
-	Semantics config.SemanticsFunc
+	Semantics config.GrammarSemantics
 }
 
 // CfgFromDirectives creates a Cfg object based on the grammar's directives.

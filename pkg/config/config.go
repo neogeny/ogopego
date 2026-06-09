@@ -24,7 +24,9 @@ type Configurable interface {
 	Configure(cfg Cfg)
 }
 
-type SemanticsFunc func(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
+type GrammarSemantics interface {
+	Apply(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
+}
 
 // Cfg configures grammar compilation and input parsing. Use DefaultCfg() or
 // pass nil to API functions for defaults. Individual fields override
@@ -57,7 +59,7 @@ type Cfg struct {
 
 	ParseInfo bool // attach source position info to AST nodes
 
-	Semantics SemanticsFunc
+	Semantics GrammarSemantics
 	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
 }
 

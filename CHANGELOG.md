@@ -29,6 +29,10 @@ All notable changes to this project will be documented in this file. The format 
 - Meta expression dispatch updated from single `*MetaExp` type case to five individual type cases across the compiler pipeline
 - All TatSu `@` meta features brought to parity with TatSu v5.21.1
 
+### Changed
+
+- Refactored grammar semantics from function type (`SemanticsFunc`) to `GrammarSemantics` interface in `pkg/config`; replaced `GrammarParserSemantics` with `EBNFGrammarSemantics` struct adding meta-expression node production (`NameMeta`, `IntMeta`, `UIntMeta`, `FloatMeta`, `BoolMeta`) during boot grammar compilation of `@` expressions
+
 ## [v0.1.12] 2026-06-06 Optimize
 
 ### Changed
