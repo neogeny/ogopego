@@ -24,7 +24,7 @@ type CoreCtxHeavy struct {
 	memoCache     MemoCache
 	tracer        Tracer
 	keywords      map[string]struct{}
-	heartbeat     heartbeat.Heartbeat
+	heartbeat     heartbeat.Heart
 	heartbeatTime time.Time
 }
 
@@ -57,7 +57,7 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 		cfg:       cfgS,
 		memoCache: NewMemoMache(memoCapacity),
 		tracer:    NullTracer{},
-		heartbeat: heartbeat.NullHeartbeat{},
+		heartbeat: heartbeat.NullHeart{},
 	}
 	ctx := CoreCtx{
 		heavy:     heavy,
@@ -123,8 +123,8 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 	} else {
 		ctx.heavy.tracer = NullTracer{}
 	}
-	if cfg.Heartbeat != nil {
-		ctx.heavy.heartbeat = cfg.Heartbeat
+	if cfg.Heart != nil {
+		ctx.heavy.heartbeat = cfg.Heart
 	}
 	ctx.muUnlock()
 }
@@ -187,7 +187,7 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	if total == 0 {
 		return
 	}
-	ctx.heavy.heartbeat.Tick(mark, total)
+	ctx.heavy.heartbeat.Beat(mark, total)
 	ctx.heavy.heartbeatTime = time.Now()
 }
 

@@ -1,9 +1,9 @@
 package heartbeat
 
-type Heartbeat interface {
-	Tick(mark, total int)
+type Heart interface {
+	Beat(mark, total int)
 }
 
-type NullHeartbeat struct{}
+type NullHeart struct{}
 
-func (NullHeartbeat) Tick(_ int, _ int) {}
+func (NullHeart) Beat(_ int, _ int) {}

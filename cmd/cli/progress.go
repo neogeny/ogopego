@@ -28,19 +28,19 @@ func showCursor() {
 	}
 }
 
-// CliHeartbeat implements the heartbeat.Heartbeat interface using a mpb.Bar.
-type CliHeartbeat struct {
+// CliHeart implements the heartbeat.Heart interface using a mpb.Bar.
+type CliHeart struct {
 	bar      *mpb.Bar
 	lastMark int
 }
 
-// NewCliHeartbeat returns a heartbeat implementation backed by a mpb.Bar.
-func NewCliHeartbeat(bar *mpb.Bar) *CliHeartbeat {
-	return &CliHeartbeat{bar: bar}
+// NewCliHeart returns a heartbeat implementation backed by a mpb.Bar.
+func NewCliHeart(bar *mpb.Bar) *CliHeart {
+	return &CliHeart{bar: bar}
 }
 
-// Tick updates the progress bar with the given mark.
-func (h *CliHeartbeat) Tick(mark, _ int) {
+// Beat updates the progress bar with the given mark.
+func (h *CliHeart) Beat(mark, _ int) {
 	if h == nil || h.bar == nil {
 		return
 	}
@@ -53,7 +53,7 @@ func (h *CliHeartbeat) Tick(mark, _ int) {
 // LoadProgress manages a spinner-style progress tracker for load operations.
 type LoadProgress struct {
 	bar *mpb.Bar
-	hb  *CliHeartbeat
+	hb  *CliHeart
 }
 
 // NewLoadProgress creates a spinner-style progress tracker for long-running
@@ -67,13 +67,13 @@ func NewLoadProgress(p *mpb.Progress, msg string) *LoadProgress {
 		mpb.AppendDecorators(decor.Name(msg)),
 		mpb.BarRemoveOnComplete(),
 	)
-	return &LoadProgress{bar: bar, hb: NewCliHeartbeat(bar)}
+	return &LoadProgress{bar: bar, hb: NewCliHeart(bar)}
 }
 
 // Heartbeat returns the heartbeat interface for the load progress.
-func (lp *LoadProgress) Heartbeat() heartbeat.Heartbeat {
+func (lp *LoadProgress) Heartbeat() heartbeat.Heart {
 	if lp == nil || lp.hb == nil {
-		return heartbeat.NullHeartbeat{}
+		return heartbeat.NullHeart{}
 	}
 	return lp.hb
 }
@@ -90,7 +90,7 @@ func (lp *LoadProgress) Finish() {
 // FileProgress manages a progress bar for individual file processing.
 type FileProgress struct {
 	bar    *mpb.Bar
-	hb     *CliHeartbeat
+	hb     *CliHeart
 	length int
 }
 
@@ -116,13 +116,13 @@ func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 		),
 		mpb.BarRemoveOnComplete(),
 	)
-	return &FileProgress{bar: bar, hb: NewCliHeartbeat(bar)}
+	return &FileProgress{bar: bar, hb: NewCliHeart(bar)}
 }
 
 // Heartbeat returns the heartbeat interface for the file progress.
-func (fp *FileProgress) Heartbeat() heartbeat.Heartbeat {
+func (fp *FileProgress) Heartbeat() heartbeat.Heart {
 	if fp == nil || fp.hb == nil {
-		return heartbeat.NullHeartbeat{}
+		return heartbeat.NullHeart{}
 	}
 	return fp.hb
 }

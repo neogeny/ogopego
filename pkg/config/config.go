@@ -60,7 +60,7 @@ type Cfg struct {
 	ParseInfo bool // attach source position info to AST nodes
 
 	Semantics GrammarSemantics
-	Heartbeat heartbeat.Heartbeat // progress callback (CLI progress bars)
+	Heart     heartbeat.Heart // progress callback (CLI progress bars)
 }
 
 // DefaultCfg returns the default configuration. Pass nil to API functions
@@ -113,7 +113,7 @@ func (cfg *Cfg) Override(other *Cfg) Cfg {
 		EolComments:       util.Either(other.EolComments, cfg.EolComments),
 		Keywords:          util.EitherSlice(other.Keywords, cfg.Keywords),
 		ParseInfo:         util.Either(other.ParseInfo, cfg.ParseInfo),
-		Heartbeat:         util.Either(other.Heartbeat, cfg.Heartbeat),
+		Heart:             util.Either(other.Heart, cfg.Heart),
 	}
 	if other.Semantics != nil {
 		result.Semantics = other.Semantics

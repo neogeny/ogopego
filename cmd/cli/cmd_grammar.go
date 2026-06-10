@@ -31,7 +31,7 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	fp.SetLength(len(data))
 
 	loadCfg := *cliCfg
-	loadCfg.Heartbeat = fp.Heartbeat()
+	loadCfg.Heart = fp.Heartbeat()
 	gram, err := api.LoadGrammar(cli.Grammar.Grammar, &loadCfg)
 	if err != nil {
 		fp.Fail()

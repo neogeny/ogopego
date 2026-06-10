@@ -41,7 +41,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		prog := NewProgressUI(len(cli.Run.Inputs), cli.Quiet)
 		loader := prog.Loading("loading grammar")
 		loadCfg := *cliCfg
-		loadCfg.Heartbeat = loader.Heartbeat()
+		loadCfg.Heart = loader.Heartbeat()
 		gram, err := api.LoadGrammar(cli.Run.Grammar, &loadCfg)
 		loader.Finish()
 		if err != nil {
@@ -75,7 +75,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 				fp.SetLength(len(data))
 
 				fileCfg := *cliCfg
-				fileCfg.Heartbeat = fp.Heartbeat()
+				fileCfg.Heart = fp.Heartbeat()
 				fileCfg.Source, _ = util.PathRelativeToCwd(path)
 
 				tree, err := api.ParseInput(gram, input, &fileCfg)
