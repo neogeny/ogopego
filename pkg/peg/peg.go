@@ -3,8 +3,15 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/pkg/config"
+import (
+	"github.com/neogeny/ogopego/pkg/config"
+	"github.com/neogeny/ogopego/pkg/trees"
+)
 
 // Cfg is an alias for config.Cfg so code in the peg package can refer to the
 // project's configuration type without importing config at call sites.
 type Cfg = config.Cfg
+
+// Tree is an alias for trees.Tree so code in the peg package can refer to the
+// project's tree type without importing trees at call sites.
+type Tree = trees.Tree

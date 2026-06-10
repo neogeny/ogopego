@@ -19,9 +19,6 @@ type Ctx = context2.Ctx
 // MemoKey is an alias for the type used as memoization keys.
 type MemoKey = context2.MemoKey
 
-// Tree is an alias for the tree node interface used in parse results.
-type Tree = trees.Tree
-
 // OrderedMap is an alias for the JSON ordered map type used by models.
 type OrderedMap = asjson.OrderedMap
 
