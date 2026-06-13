@@ -30,7 +30,7 @@ type Model interface {
 	// Parse attempts to parse the input using the model.
 	Parse(ctx Ctx) (Tree, error)
 	// Link resolves rule references within the model.
-	Link(rules map[string]*Rule) error
+	Link(g *Grammar) error
 	// ValidateLinked checks if all rule references are resolved.
 	ValidateLinked() error
 	// followRef returns the underlying ModelBase.
@@ -59,7 +59,9 @@ func (m *ModelBase) Parse(ctx Ctx) (Tree, error) {
 }
 
 // Link is a placeholder for Model implementations.
-func (m *ModelBase) Link(rules map[string]*Rule) error { return nil }
+func (m *ModelBase) Link(g *Grammar) error {
+	return nil
+}
 
 // ValidateLinked is a placeholder for Model implementations.
 func (m *ModelBase) ValidateLinked() error { return nil }

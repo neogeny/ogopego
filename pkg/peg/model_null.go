@@ -9,6 +9,10 @@ type NULL struct {
 	ModelBase
 }
 
+func (n *NULL) Link(g *Grammar) error {
+	return nil
+}
+
 // Parse implements the Model interface for NULL.
 func (n *NULL) Parse(ctx Ctx) (Tree, error) {
 	return NIL, nil

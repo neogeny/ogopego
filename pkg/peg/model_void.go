@@ -9,6 +9,10 @@ type Void struct {
 	ModelBase
 }
 
+func (v *Void) Link(g *Grammar) error {
+	return nil
+}
+
 // Parse implements the Model interface for Void.
 func (v *Void) Parse(ctx Ctx) (Tree, error) {
 	ctx.Void()

@@ -18,6 +18,7 @@ type Grammar struct {
 	Directives [][]string
 	Keywords   []string
 	Rules      []*Rule
+	ruleMap    map[string]*Rule
 	Analyzed   bool
 	optimized  bool
 	// Allow setting semantics filtering at the grammar definition level
@@ -79,11 +80,14 @@ func (g *Grammar) CfgFromDirectives() *Cfg {
 }
 
 func (g *Grammar) RuleMap() map[string]*Rule {
-	m := make(map[string]*Rule, len(g.Rules))
-	for _, rule := range g.Rules {
-		m[rule.Name] = rule
+	if g.ruleMap == nil {
+		m := make(map[string]*Rule, len(g.Rules))
+		for _, rule := range g.Rules {
+			m[rule.Name] = rule
+		}
+		g.ruleMap = m
 	}
-	return m
+	return g.ruleMap
 }
 
 // Initialize links and validates the grammar, and marks left-recursive rules.
