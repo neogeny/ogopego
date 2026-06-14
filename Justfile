@@ -86,14 +86,20 @@ graphviz:
     go install golang.org/x/exp/cmd/modgraphviz@latest
 
 
-pyapi-clean:
+py-clean:
 	rm -rf dist
 	rm -rf python/dist
 	rm -rf python/build
 	rm -rf python/*.egg-info
 
-test-pypi: test
+py-test: test
+    uv run pytest python
+
+py-build: py-test
+    uv build
+
+py-test-publish: py-build
     gh workflow run publish.yml -f publish=false
 
-publish-pypi: test
+py-publish: py-build
     gh workflow run publish.yml -f publish=true

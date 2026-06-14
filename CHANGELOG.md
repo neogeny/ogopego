@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
-[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.12...HEAD
+[Unreleased]: https://github.com/neogeny/ogopego/compare/v0.1.13...HEAD
+[v0.1.13]: https://github.com/neogeny/ogopego/compare/v0.1.11...v0.1.13
 [v0.1.12]: https://github.com/neogeny/ogopego/compare/v0.1.11...v0.1.12
 [v0.1.11]: https://github.com/neogeny/ogopego/compare/v0.1.9...v0.1.11
 [v0.1.9]: https://github.com/neogeny/ogopego/compare/v0.1.6...v0.1.9
@@ -13,6 +14,8 @@ All notable changes to this project will be documented in this file. The format 
 [v0.1.2]: https://github.com/neogeny/ogopego/compare/v0.1.0...v0.1.2
 
 ## [Unreleased]
+
+## [v0.1.13] 2026-06-14 New syntax + optimized grammar models
 
 ### Added
 
