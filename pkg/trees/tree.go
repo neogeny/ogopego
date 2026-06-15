@@ -31,11 +31,11 @@ func Fold(tree any) any {
 	if tree == nil {
 		return nil
 	}
-	g := &FoldGather{Ast: make(map[string]any)}
-	return finish(g, fold(g, tree))
+	m := make(map[string]any)
+	return finish(m, fold(m, tree))
 }
 
-func fold(g *FoldGather, tree any) any {
+func fold(ast map[string]any, tree any) any {
 	if tree == BOTTOM {
 		return tree
 	}
@@ -47,26 +47,24 @@ func fold(g *FoldGather, tree any) any {
 		case *Seq:
 			var out any = nil
 			for _, item := range t.Items {
-				out = MergeTrees(out, fold(g, item))
+				out = MergeTrees(out, fold(ast, item))
 			}
 			return out
 		case *treeNamed:
-			v := fold(g, t.Value)
-			insert(g.Ast, t.Name, v)
+			v := fold(ast, t.Value)
+			insert(ast, t.Name, v)
 			return v
 		case *treeNamedAsList:
-			v := fold(g, t.Value)
-			insertAsSeq(g.Ast, t.Name, v)
+			v := fold(ast, t.Value)
+			insertAsSeq(ast, t.Name, v)
 			return v
 		case *treeOverride:
-			v := fold(g, t.Value)
-			insert(g.Ast, AtKey, v)
-			g.At = appendTree(g.At, v)
+			v := fold(ast, t.Value)
+			insert(ast, AtKey, v)
 			return v
 		case *treeOverrideAsList:
-			v := fold(g, t.Value)
-			insertAsSeq(g.Ast, AtKey, v)
-			g.At = appendAsSeq(g.At, v)
+			v := fold(ast, t.Value)
+			insertAsSeq(ast, AtKey, v)
 			return v
 		default:
 			panic(fmt.Sprintf("fold: unexpected Tree type %T", t))
@@ -82,14 +80,14 @@ func fold(g *FoldGather, tree any) any {
 		out := make(map[string]any, val.Len())
 		for _, k := range val.Keys() {
 			item, _ := val.Get(k)
-			out[k] = fold(g, item)
+			out[k] = fold(ast, item)
 		}
-		return fold(g, out)
+		return fold(ast, out)
 
 	case map[string]any:
 		out := make(map[string]any, len(val))
 		for k, item := range val {
-			out[k] = fold(g, item)
+			out[k] = fold(ast, item)
 		}
 		if len(out) != 1 {
 			return out
@@ -97,21 +95,19 @@ func fold(g *FoldGather, tree any) any {
 		for key := range out {
 			tree := val[key]
 			if key == AtListKey {
-				insertAsSeq(g.Ast, AtKey, tree)
-				g.At = appendAsSeq(g.At, tree)
+				insertAsSeq(ast, AtKey, tree)
 				return tree
 			}
 			if key == AtKey {
-				insert(g.Ast, AtKey, tree)
-				g.At = appendTree(g.At, tree)
+				insert(ast, AtKey, tree)
 				return tree
 			}
 			if len(key) > 2 && key[0:2] == NamedListKey {
-				insertAsSeq(g.Ast, key[2:], tree)
+				insertAsSeq(ast, key[2:], tree)
 				return tree
 			}
 			if len(key) > 1 && key[0:1] == NamedKey {
-				insert(g.Ast, key[1:], tree)
+				insert(ast, key[1:], tree)
 				return tree
 			}
 		}
@@ -120,7 +116,7 @@ func fold(g *FoldGather, tree any) any {
 	case []any:
 		out := make([]any, 0, len(val))
 		for _, item := range val {
-			out = append(out, fold(g, item))
+			out = append(out, fold(ast, item))
 		}
 		return out
 	default:
@@ -137,7 +133,7 @@ func fold(g *FoldGather, tree any) any {
 			length := rv.Len()
 			out := make([]any, 0, length)
 			for i := range length {
-				out = append(out, fold(g, rv.Index(i).Interface()))
+				out = append(out, fold(ast, rv.Index(i).Interface()))
 			}
 			return out
 
@@ -147,22 +143,15 @@ func fold(g *FoldGather, tree any) any {
 	}
 }
 
-func finish(g *FoldGather, base any) any {
-	if len(g.Ast) > 0 {
-		for k, v := range g.Ast {
-			g.Ast[k] = closed(v)
+func finish(ast map[string]any, base any) any {
+	if len(ast) > 0 {
+		for k, v := range ast {
+			ast[k] = closed(v)
 		}
-		if _, isAtSet := g.Ast[AtKey]; isAtSet {
-			return g.Ast[AtKey]
+		if _, isAtSet := ast[AtKey]; isAtSet {
+			return ast[AtKey]
 		}
-		return g.Ast
-	}
-	switch g.At.(type) {
-	case nil:
-		{
-		}
-	default:
-		return closed(g.At)
+		return ast
 	}
 	return closed(base)
 }
