@@ -9,7 +9,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/trees"
 )
 
-func printTreeRec(t *testing.T, indent string, node trees.Tree) {
+func printTreeRec(t *testing.T, indent string, node any) {
 	t.Helper()
 	switch n := node.(type) {
 	case *trees.Text:

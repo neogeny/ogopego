@@ -207,7 +207,7 @@ func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
 	return ctx.heavy.memoCache.Get(key)
 }
 
-func (ctx *CoreCtx) Memoize(key MemoKey, tree trees.Tree, mark int) {
+func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 	if !key.CanMemo {
 		return
 	}

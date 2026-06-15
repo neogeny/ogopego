@@ -8,7 +8,6 @@ import (
 	"slices"
 
 	"github.com/neogeny/ogopego/pkg/config"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // Grammar represents a parsed PEG grammar, containing rules, directives, and keywords.
@@ -124,7 +123,7 @@ func (g *Grammar) GetRule(name string) (*Rule, error) {
 }
 
 // ParseAt parses the input using the grammar, starting from the specified rule.
-func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (trees.Tree, error) {
+func (g *Grammar) ParseAt(ctx Ctx, cfg *Cfg) (any, error) {
 	acfg := g.CfgFromDirectives().New()
 	acfg = acfg.Override(cfg)
 	acfg.Keywords = g.Keywords

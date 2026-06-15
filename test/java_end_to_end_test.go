@@ -109,7 +109,7 @@ func TestJavaEndToEnd(t *testing.T) {
 		qn, err := qualifiedNameFromTree(
 			&trees.Node{TypeName: "QualifiedName", Tree: &trees.MapNode{
 				Entries: map[string]trees.Tree{
-					"qualifiers": &trees.Seq{Items: []trees.Tree{
+					"qualifiers": &trees.Seq{Items: []any{
 						&trees.Node{TypeName: "Identifier", Tree: &trees.MapNode{
 							Entries: map[string]trees.Tree{
 								"value": &trees.Text{Value: "com"},
@@ -148,10 +148,10 @@ func TestJavaEndToEnd(t *testing.T) {
 		// Build a CompilationUnit tree with package present
 		pkgTree := &trees.Node{TypeName: "PackageDeclaration", Tree: &trees.MapNode{
 			Entries: map[string]trees.Tree{
-				"annotations": &trees.Array{Items: []trees.Tree{}},
+				"annotations": &trees.Array{Items: []any{}},
 				"name": &trees.Node{TypeName: "QualifiedName", Tree: &trees.MapNode{
 					Entries: map[string]trees.Tree{
-						"qualifiers": &trees.Seq{Items: []trees.Tree{
+						"qualifiers": &trees.Seq{Items: []any{
 							&trees.Node{TypeName: "Identifier", Tree: &trees.MapNode{
 								Entries: map[string]trees.Tree{
 									"value": &trees.Text{Value: "com"},
@@ -172,8 +172,8 @@ func TestJavaEndToEnd(t *testing.T) {
 			&trees.Node{TypeName: "CompilationUnit", Tree: &trees.MapNode{
 				Entries: map[string]trees.Tree{
 					"package":      pkgTree,
-					"imports":      &trees.Array{Items: []trees.Tree{}},
-					"declarations": &trees.Seq{Items: []trees.Tree{}},
+					"imports":      &trees.Array{Items: []any{}},
+					"declarations": &trees.Seq{Items: []any{}},
 					"linecount":    &trees.Nil{},
 				},
 			}},
@@ -191,8 +191,8 @@ func TestJavaEndToEnd(t *testing.T) {
 			&trees.Node{TypeName: "CompilationUnit", Tree: &trees.MapNode{
 				Entries: map[string]trees.Tree{
 					"package":      &trees.Nil{},
-					"imports":      &trees.Array{Items: []trees.Tree{}},
-					"declarations": &trees.Seq{Items: []trees.Tree{}},
+					"imports":      &trees.Array{Items: []any{}},
+					"declarations": &trees.Seq{Items: []any{}},
 					"linecount":    &trees.Nil{},
 				},
 			}},
@@ -244,7 +244,7 @@ type Identifier struct {
 	Value any
 }
 
-func identifierFromTree(tree trees.Tree) (*Identifier, error) {
+func identifierFromTree(tree any) (*Identifier, error) {
 	n, ok := tree.(*trees.Node)
 	if !ok {
 		return nil, fmt.Errorf("IdentifierFromTree: expected *trees.Node, got %T", tree)
@@ -265,7 +265,7 @@ type QualifiedName struct {
 	Name       *Identifier
 }
 
-func qualifiedNameFromTree(tree trees.Tree) (*QualifiedName, error) {
+func qualifiedNameFromTree(tree any) (*QualifiedName, error) {
 	n, ok := tree.(*trees.Node)
 	if !ok {
 		return nil, fmt.Errorf("QualifiedNameFromTree: expected *trees.Node, got %T", tree)
@@ -305,7 +305,7 @@ type PackageDeclaration struct {
 	Name        *QualifiedName
 }
 
-func packageDeclarationFromTree(tree trees.Tree) (*PackageDeclaration, error) {
+func packageDeclarationFromTree(tree any) (*PackageDeclaration, error) {
 	n, ok := tree.(*trees.Node)
 	if !ok {
 		return nil, fmt.Errorf("PackageDeclarationFromTree: expected *trees.Node, got %T", tree)
@@ -336,7 +336,7 @@ type ImportDeclaration struct {
 	All    any
 }
 
-func importDeclarationFromTree(tree trees.Tree) (*ImportDeclaration, error) {
+func importDeclarationFromTree(tree any) (*ImportDeclaration, error) {
 	n, ok := tree.(*trees.Node)
 	if !ok {
 		return nil, fmt.Errorf("ImportDeclarationFromTree: expected *trees.Node, got %T", tree)
@@ -371,7 +371,7 @@ type CompilationUnit struct {
 	Linecount    any
 }
 
-func compilationUnitFromTree(tree trees.Tree) (*CompilationUnit, error) {
+func compilationUnitFromTree(tree any) (*CompilationUnit, error) {
 	n, ok := tree.(*trees.Node)
 	if !ok {
 		return nil, fmt.Errorf("CompilationUnitFromTree: expected *trees.Node, got %T", tree)

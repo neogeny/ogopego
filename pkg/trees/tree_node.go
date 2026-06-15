@@ -5,8 +5,8 @@ package trees
 
 type Node struct {
 	TypeName string
-	Tree     Tree
+	Tree     any
 }
 
-func (Node) tree()                          {}
-func (r *Node) fold(gather *treeMerge) Tree { return r }
+func (Node) tree()                         {}
+func (r *Node) fold(gather *treeMerge) any { return r }

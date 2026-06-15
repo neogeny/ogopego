@@ -85,13 +85,13 @@ func ruleCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (any, er
 	return rule.Parse(ctx)
 }
 
-func recursiveCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
+func recursiveCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (any, error) {
 	ctx.Tracer().TraceRecursion(ctx)
 
 	ctx.Memoize(key, trees.BOTTOM, start)
 
 	var lastMark = start
-	var lastTree trees.Tree
+	var lastTree any
 	var lastErr error
 
 	for {

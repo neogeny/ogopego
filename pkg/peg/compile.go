@@ -35,7 +35,7 @@ func (c *comp) error(msg string) error {
 }
 
 // CompileGrammar compiles a parse tree into a Grammar object.
-func CompileGrammar(tree trees.Tree) (*Grammar, error) {
+func CompileGrammar(tree any) (*Grammar, error) {
 	c := &comp{}
 	g, err := c.compileGrammar(tree)
 	if err != nil {
@@ -45,7 +45,7 @@ func CompileGrammar(tree trees.Tree) (*Grammar, error) {
 }
 
 // node extracts the type name and inner tree from a RuleNode.
-func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {
+func (c *comp) node(tree any) (string, any, error) {
 	rn, ok := tree.(*trees.Node)
 	if !ok {
 		return "", nil, c.error(fmt.Sprintf("expected RuleNode, got %T", tree))
@@ -54,7 +54,7 @@ func (c *comp) node(tree trees.Tree) (string, trees.Tree, error) {
 }
 
 // nodeCheck checks if a tree is a RuleNode of a specific type.
-func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
+func (c *comp) nodeCheck(tree any, typename string) (any, error) {
 	name, inner, err := c.node(tree)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (c *comp) nodeCheck(tree trees.Tree, typename string) (trees.Tree, error) {
 }
 
 // mapGet retrieves a value from a MapNode by key.
-func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
+func (c *comp) mapGet(tree any, key string) (trees.Tree, error) {
 	mn, ok := tree.(*trees.MapNode)
 	if !ok {
 		return nil, c.error(fmt.Sprintf("expected MapNode for key %q, got %T", key, tree))
@@ -79,7 +79,7 @@ func (c *comp) mapGet(tree trees.Tree, key string) (trees.Tree, error) {
 }
 
 // mapGetDefault retrieves a value from a MapNode by key, returning a default if not found.
-func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
+func (c *comp) mapGetDefault(tree any, key, def string) string {
 	mn, ok := tree.(*trees.MapNode)
 	if !ok {
 		return def
@@ -92,7 +92,7 @@ func (c *comp) mapGetDefault(tree trees.Tree, key, def string) string {
 }
 
 // textValue extracts the string value from a Text tree node.
-func textValue(tree trees.Tree) string {
+func textValue(tree any) string {
 	t, ok := tree.(*trees.Text)
 	if ok {
 		return t.Value
@@ -101,7 +101,7 @@ func textValue(tree trees.Tree) string {
 }
 
 // listValue extracts a slice of trees from a Seq or List tree node.
-func listValue(tree any) [] any {
+func listValue(tree any) []any {
 	switch t := tree.(type) {
 	case *trees.Seq:
 		return t.Items
@@ -113,7 +113,7 @@ func listValue(tree any) [] any {
 }
 
 // strListValue extracts a slice of strings from a list of Text tree nodes.
-func strListValue(tree trees.Tree) []string {
+func strListValue(tree any) []string {
 	items := listValue(tree)
 	if items == nil {
 		return []string{}
@@ -129,7 +129,7 @@ func strListValue(tree trees.Tree) []string {
 }
 
 // strPairsListValue extracts a slice of strings from a list of Text tree nodes.
-func strPairsListValue(tree trees.Tree) map[string]string {
+func strPairsListValue(tree any) map[string]string {
 	out := map[string]string{}
 	items := listValue(tree)
 	for _, item := range items {
@@ -142,7 +142,7 @@ func strPairsListValue(tree trees.Tree) map[string]string {
 }
 
 // compileGrammar compiles a "Grammar" tree node into a Grammar object.
-func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
+func (c *comp) compileGrammar(tree any) (*Grammar, error) {
 	cc := c.push("Grammar")
 	inner, err := cc.nodeCheck(tree, "Grammar")
 	if err != nil {
@@ -231,7 +231,7 @@ func (c *comp) compileGrammar(tree trees.Tree) (*Grammar, error) {
 }
 
 // compileRule compiles a "Rule" tree node into a Rule object.
-func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
+func (c *comp) compileRule(tree any) (*Rule, error) {
 	inner, err := c.nodeCheck(tree, "Rule")
 	if err != nil {
 		return nil, err
@@ -291,7 +291,7 @@ func (c *comp) compileRule(tree trees.Tree) (*Rule, error) {
 }
 
 // compileExp compiles an expression tree node into a Model object.
-func (c *comp) compileExp(tree trees.Tree) (Model, error) {
+func (c *comp) compileExp(tree any) (Model, error) {
 	typename, inner, err := c.node(tree)
 	if err != nil {
 		return nil, err
@@ -535,7 +535,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		exp = &Pattern{Pattern: textValue(inner)}
 
 	case "Patterns":
-		var items []trees.Tree
+		var items []any
 		if t, err := cc.mapGet(inner, "tree"); err == nil {
 			items = listValue(t)
 		} else {
@@ -611,7 +611,7 @@ func (c *comp) compileExp(tree trees.Tree) (Model, error) {
 		exp = &RuleInclude{Name: textValue(inner)}
 
 	case "Sequence":
-		var items []trees.Tree
+		var items []any
 		if t, err := cc.mapGet(inner, "tree"); err == nil {
 			items = listValue(t)
 		} else {

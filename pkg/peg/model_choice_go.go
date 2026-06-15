@@ -6,12 +6,12 @@ import (
 )
 
 type Result struct {
-	Tree Tree
+	Tree any
 	Err  error
 	Cut  bool
 }
 
-func (c *Choice) ParsePar(ctx Ctx) (Tree, error) {
+func (c *Choice) ParsePar(ctx Ctx) (any, error) {
 	startMark := ctx.Mark()
 	numOptions := len(c.Options)
 

@@ -12,7 +12,7 @@ import (
 type Tree interface {
 	As_JSON_() any
 	tree()
-	fold(gather *treeMerge) Tree
+	fold(gather *treeMerge) any
 }
 
 type treeMerge struct {

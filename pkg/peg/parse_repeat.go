@@ -10,8 +10,8 @@ import (
 )
 
 // repeat parses an expression zero or more times (or one or more if positive is true).
-func repeat(ctx Ctx, exp Model, positive bool) (trees.Tree, error) {
-	var items []trees.Tree
+func repeat(ctx Ctx, exp Model, positive bool) (any, error) {
+	var items []any
 
 	if positive {
 		ctx.CutStackPush()
@@ -53,8 +53,8 @@ func repeatWithSep(
 	sep Model,
 	positive bool,
 	keepsep bool,
-) (trees.Tree, error) {
-	var items []trees.Tree
+) (any, error) {
+	var items []any
 
 	ctx.CutStackPush()
 	first, err := exp.Parse(ctx)

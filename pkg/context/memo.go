@@ -14,8 +14,8 @@ type MemoKey struct {
 
 // Memo stores the result of a memoized parse operation.
 type Memo struct {
-	Tree trees.Tree // Tree is the parse tree produced by the rule.
-	Mark int        // Mark is the input position after the rule successfully parsed.
+	Tree any // Tree is the parse tree produced by the rule.
+	Mark int // Mark is the input position after the rule successfully parsed.
 }
 
 type MemoCache = cnt.BoundedMap[MemoKey, Memo]

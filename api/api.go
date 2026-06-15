@@ -23,7 +23,6 @@ import (
 	"github.com/neogeny/ogopego/pkg/context"
 	"github.com/neogeny/ogopego/pkg/input"
 	"github.com/neogeny/ogopego/pkg/peg"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // Cfg is an alias for config.Cfg. It controls parsing behavior including
@@ -44,7 +43,7 @@ func BootGrammar() (*peg.Grammar, error) {
 
 // ParseGrammar parses a grammar string using the boot grammar and returns
 // the raw parse tree. Use Compile instead to get a usable Grammar object.
-func ParseGrammar(grammar string, cfg *Cfg) (trees.Tree, error) {
+func ParseGrammar(grammar string, cfg *Cfg) (any, error) {
 	grammar = strings.TrimRight(grammar, " \t\r\n")
 	boot, err := BootGrammar()
 	if err != nil {
@@ -140,7 +139,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 
 // ParseInput parses the given text using a compiled Grammar and returns the
 // resulting AST as a Tree value.
-func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (trees.Tree, error) {
+func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
 	ctx := context.NewCtx(input.NewRuneCursor(text), cfg)
 
 	opt, err := parser.Optimized()

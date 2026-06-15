@@ -90,7 +90,7 @@ type Ctx interface {
 	// Memo retrieves a memoized result.
 	Memo(key MemoKey) (Memo, bool)
 	// Memoize stores a result in the memoization table.
-	Memoize(key MemoKey, tree trees.Tree, mark int)
+	Memoize(key MemoKey, tree any, mark int)
 	// TrackRecursionDepth tracks recursion depth for a given key.
 	TrackRecursionDepth(key MemoKey) error
 	// Untrack removes a key from recursion tracking.

@@ -27,7 +27,7 @@ func (s *Sequence) Parse(ctx Ctx) (any, error) {
 			items = append(items, result)
 		}
 	}
-	var tree Tree = NIL
+	var tree any = NIL
 	switch len(items) {
 	case 0:
 	case 1:

@@ -54,7 +54,7 @@ type ModelBase struct {
 func (m *ModelBase) followRef() *ModelBase { return m }
 
 // Parse is a placeholder for Model implementations.
-func (m *ModelBase) Parse(ctx Ctx) (Tree, error) {
+func (m *ModelBase) Parse(ctx Ctx) (any, error) {
 	return nil, ctx.Failure(ctx.Mark(), errors.New("method Parse() not implemented"))
 }
 
