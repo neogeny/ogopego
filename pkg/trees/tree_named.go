@@ -19,17 +19,17 @@ type treeNamedAsList struct {
 
 func (treeNamedAsList) tree() {}
 
-// Override indicates that the contained value should override other values
+// treeOverride indicates that the contained value should override other values
 // when folding into the result.
-type Override struct {
+type treeOverride struct {
 	Value any
 }
 
-func (Override) tree() {}
+func (treeOverride) tree() {}
 
-// OverrideAsList is a list-form override variant.
-type OverrideAsList struct {
+// treeOverrideAsList is a list-form override variant.
+type treeOverrideAsList struct {
 	Value any
 }
 
-func (OverrideAsList) tree() {}
+func (treeOverrideAsList) tree() {}

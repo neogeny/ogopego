@@ -58,11 +58,11 @@ func fold(g *FoldGather, tree any) any {
 			v := fold(g, t.Value)
 			g.insertAsList(t.Name, v)
 			return v
-		case *Override:
+		case *treeOverride:
 			v := fold(g, t.Value)
 			g.At = appendTree(g.At, v)
 			return v
-		case *OverrideAsList:
+		case *treeOverrideAsList:
 			v := fold(g, t.Value)
 			g.At = appendAsSeq(g.At, v)
 			return v

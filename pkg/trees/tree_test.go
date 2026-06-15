@@ -70,7 +70,7 @@ func TestFoldNamedToMap(t *testing.T) {
 }
 
 func TestFoldOverride(t *testing.T) {
-	result := Fold(&Override{Value: text("result")})
+	result := Fold(&treeOverride{Value: text("result")})
 	s, ok := result.(string)
 	assert.True(t, ok, "expected Text, got %T", result)
 	assert.Equal(t, "result", s, "expected 'result'")
@@ -122,7 +122,7 @@ func TestFoldOverrideWins(t *testing.T) {
 	result := Fold(seq(
 		&treeNamed{Name: "x", Value: text("ignored")},
 		text("also ignored"),
-		&Override{Value: text("result")},
+		&treeOverride{Value: text("result")},
 	))
 	s, ok := result.(string)
 	assert.True(t, ok, "expected Text, got %T", result)
@@ -131,8 +131,8 @@ func TestFoldOverrideWins(t *testing.T) {
 
 func TestFoldOverrideAsList(t *testing.T) {
 	result := Fold(seq(
-		&OverrideAsList{Value: text("a")},
-		&OverrideAsList{Value: text("b")},
+		&treeOverrideAsList{Value: text("a")},
+		&treeOverrideAsList{Value: text("b")},
 	))
 	l, ok := result.([]any)
 	assert.True(t, ok, "expected List, got %T", result)
