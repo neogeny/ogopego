@@ -74,5 +74,6 @@ func FileExists(path string) bool {
 }
 
 func IsTerminal() bool {
-	return os.Getenv("TERM") != "dumb"
+	return term.IsTerminal(int(os.Stdout.Fd())) ||
+		os.Getenv("TERM") != "dumb"
 }
