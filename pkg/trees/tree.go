@@ -52,18 +52,20 @@ func fold(g *FoldGather, tree any) any {
 			return out
 		case *treeNamed:
 			v := fold(g, t.Value)
-			g.insert(t.Name, v)
+			insert(g.Ast, t.Name, v)
 			return v
 		case *treeNamedAsList:
 			v := fold(g, t.Value)
-			g.insertAsList(t.Name, v)
+			insertAsSeq(g.Ast, t.Name, v)
 			return v
 		case *treeOverride:
 			v := fold(g, t.Value)
+			insert(g.Ast, AtKey, v)
 			g.At = appendTree(g.At, v)
 			return v
 		case *treeOverrideAsList:
 			v := fold(g, t.Value)
+			insertAsSeq(g.Ast, AtKey, v)
 			g.At = appendAsSeq(g.At, v)
 			return v
 		default:
@@ -95,19 +97,21 @@ func fold(g *FoldGather, tree any) any {
 		for key := range out {
 			tree := val[key]
 			if key == AtListKey {
+				insertAsSeq(g.Ast, AtKey, tree)
 				g.At = appendAsSeq(g.At, tree)
 				return tree
 			}
 			if key == AtKey {
+				insert(g.Ast, AtKey, tree)
 				g.At = appendTree(g.At, tree)
 				return tree
 			}
 			if len(key) > 2 && key[0:2] == NamedListKey {
-				g.insertAsList(key[2:], tree)
+				insertAsSeq(g.Ast, key[2:], tree)
 				return tree
 			}
 			if len(key) > 1 && key[0:1] == NamedKey {
-				g.insert(key[1:], tree)
+				insert(g.Ast, key[1:], tree)
 				return tree
 			}
 		}
@@ -144,18 +148,21 @@ func fold(g *FoldGather, tree any) any {
 }
 
 func finish(g *FoldGather, base any) any {
+	if len(g.Ast) > 0 {
+		for k, v := range g.Ast {
+			g.Ast[k] = closed(v)
+		}
+		if _, isAtSet := g.Ast[AtKey]; isAtSet {
+			return g.Ast[AtKey]
+		}
+		return g.Ast
+	}
 	switch g.At.(type) {
 	case nil:
 		{
 		}
 	default:
 		return closed(g.At)
-	}
-	if len(g.Ast) > 0 {
-		for k, v := range g.Ast {
-			g.Ast[k] = closed(v)
-		}
-		return g.Ast
 	}
 	return closed(base)
 }
@@ -228,21 +235,21 @@ func appendAsSeq(a, b any) any {
 	return &Seq{Items: []any{a, b}}
 }
 
-func (m *FoldGather) insert(key string, val any) {
-	existing, ok := m.Ast[key]
+func insert(m map[string]any, key string, val any) {
+	existing, ok := m[key]
 	if !ok {
-		m.Ast[key] = val
+		m[key] = val
 	} else {
-		m.Ast[key] = appendTree(existing, val)
+		m[key] = appendTree(existing, val)
 	}
 }
 
-func (m *FoldGather) insertAsList(key string, val any) {
-	existing, ok := m.Ast[key]
+func insertAsSeq(m map[string]any, key string, val any) {
+	existing, ok := m[key]
 	if !ok {
-		m.Ast[key] = &Seq{Items: []any{val}}
+		m[key] = &Seq{Items: []any{val}}
 	} else {
-		m.Ast[key] = appendAsSeq(existing, val)
+		m[key] = appendAsSeq(existing, val)
 	}
 }
 

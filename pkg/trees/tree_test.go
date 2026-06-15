@@ -125,7 +125,7 @@ func TestFoldOverrideWins(t *testing.T) {
 		&treeOverride{Value: text("result")},
 	))
 	s, ok := result.(string)
-	assert.True(t, ok, "expected Text, got %T", result)
+	assert.True(t, ok, "expected string, got %v", result)
 	assert.Equal(t, "result", s, "expected 'result'")
 }
 
