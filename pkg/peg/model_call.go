@@ -72,7 +72,7 @@ func call(ctx Ctx, name string, rule *Rule) (any, error) {
 func ruleCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (any, error) {
 	if memo, ok := ctx.Memo(key); ok {
 		ctx.Reset(memo.Mark)
-		if _, isBottom := memo.Tree.(*trees.Bottom); isBottom {
+		if memo.Tree == trees.BOTTOM {
 			return nil, ctx.Failure(start, fmt.Errorf("failed parsing %q", name))
 		}
 		return memo.Tree, nil
@@ -126,7 +126,7 @@ func recursiveCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (an
 	if lastTree == nil {
 		return nil, lastErr
 	}
-	if _, isBottom := lastTree.(*trees.Bottom); isBottom {
+	if lastTree == trees.BOTTOM {
 		return nil, lastErr
 	}
 	return lastTree, nil

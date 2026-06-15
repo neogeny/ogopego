@@ -3,7 +3,7 @@
 
 package trees
 
-var BOTTOM = &Bottom{}
+var BOTTOM = &typeBottomTree{}
 
 // Text is a leaf node representing plain text.
 type Text struct {
@@ -13,12 +13,12 @@ type Text struct {
 func (Text) tree()                          {}
 func (t *Text) fold(gather *FoldGather) any { return t }
 
-// Bottom is an internal sentinel node.
-type Bottom struct {
+// typeBottomTree is an internal sentinel node.
+type typeBottomTree struct {
 }
 
-func (Bottom) tree()                          {}
-func (b *Bottom) fold(gather *FoldGather) any { return b }
+func (typeBottomTree) tree()                          {}
+func (b *typeBottomTree) fold(gather *FoldGather) any { return b }
 
 // TrueValue A JSON-compatible true value.
 type TrueValue struct {

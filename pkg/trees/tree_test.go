@@ -14,8 +14,8 @@ func text(s string) *Text   { return &Text{Value: s} }
 func seq(items ...any) *Seq { return &Seq{Items: items} }
 
 func TestFoldBottom(t *testing.T) {
-	result := Fold(&Bottom{})
-	_, ok := result.(*Bottom)
+	result := Fold(&typeBottomTree{})
+	_, ok := result.(*typeBottomTree)
 	assert.True(t, ok, "expected Bottom, got %T", result)
 }
 

@@ -1,4 +1,4 @@
-# Changelog
+#.Tree Changelog
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -97,7 +97,7 @@ All notable changes to this project will be documented in this file. The format 
 
   `NameGuard`can be activated with the `@nameguard:: true` grammar directive, or with the `Cfg.nameguard` configuration option. It is activated by default for grammars that define patterns for whitespace or comments.
 - Use `BoundedMap` for the `Memo` cache. Parsing is faster with a smaller cache that speeds up `Memo` lookups. The cache capacity is calculared using the heuristic `Cfg.PerLineMemos * Cursor.LineCount`. 
-- The `Memo` cache is pruned when a `Cut`expression is parsed. Entries with marks lower than that of the previous cut are removed if they are not failure (`Tree.Bottom`) markers.
+- The `Memo` cache is pruned when a `Cut`expression is parsed. Entries with marks lower than that of the previous cut are removed if they are not failure (`Tree.BOTTOM`) markers.
 
 ### Fixed
 - Verified non-local/third-party builds through GitHub workflow.

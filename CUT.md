@@ -129,13 +129,13 @@ By limiting the backward pass of cut entirely to the failure path, the engine ac
 
 The fact that doing the right thing stripped the complexity out of your Rust and Go engines is the ultimate proof that the semantics match the math. The success path is freed from carrying control-flow baggage, leaving you with a fast, elegant tree-delivery system.
 
-## Bottom Entries
+## BOTTOM Entries
 
 You remembered accurately. Looking back at his 2010 paper (*"Packrat Parsers Can Handle Practical Grammars in Mostly Constant Space"*), Mizushima maps this out explicitly.
 
 When a Cut evaluates, it clears out alternative paths on the backtracking stack. Mizushima demonstrates that if the backtracking stack becomes empty up to token index $n$, **every single memoization entry for any position less than $n$ can be completely discarded.**
 
-The "Bottom entries" you are remembering are exactly what keeps this from breaking. Because his algorithm wipes the table linearly up to the current safe index $n$, anything *ahead* of the current structural pin (the lower-level lexical atoms and tokens that haven't been finalized yet) stays in the table.
+The "BOTTOM entries" you are remembering are exactly what keeps this from breaking. Because his algorithm wipes the table linearly up to the current safe index $n$, anything *ahead* of the current structural pin (the lower-level lexical atoms and tokens that haven't been finalized yet) stays in the table.
 
 ---
 

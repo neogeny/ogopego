@@ -35,6 +35,5 @@ func PruneMemoCache(cache MemoCache, cutpoint int) {
 
 // IsBottomEntry checks if the memo entry represents a "bottom" (failed) parse.
 func (m Memo) IsBottomEntry() bool {
-	_, isBottom := m.Tree.(*trees.Bottom)
-	return isBottom
+	return m.Tree == trees.BOTTOM
 }
