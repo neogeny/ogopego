@@ -5,8 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // Token matches a literal string token.
@@ -22,5 +20,5 @@ func (t *Token) Parse(ctx Ctx) (any, error) {
 		ctx.Reset(mark)
 		return nil, ctx.Failure(mark, fmt.Errorf("expected: %q", t.Token))
 	}
-	return &trees.Text{Value: t.Token}, nil
+	return t.Token, nil
 }

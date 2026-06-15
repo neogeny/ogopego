@@ -51,12 +51,12 @@ func call(ctx Ctx, name string, rule *Rule) (any, error) {
 	}
 
 	if rule.IsName {
-		if text, ok := result.(*trees.Text); ok && ctx.IsKeyword(text.Value) {
+		if text, ok := result.(string); ok && ctx.IsKeyword(text) {
 			ctx.Memoize(key, trees.BOTTOM, start)
 			if rule.ShouldTrace() {
-				ctx.Tracer().TraceFailure(ctx, text.Value)
+				ctx.Tracer().TraceFailure(ctx, text)
 			}
-			return nil, ctx.Failure(start, fmt.Errorf("'%s' is a reserved word", text.Value))
+			return nil, ctx.Failure(start, fmt.Errorf("'%s' is a reserved word", text))
 		}
 	}
 

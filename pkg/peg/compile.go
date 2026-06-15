@@ -93,9 +93,8 @@ func (c *comp) mapGetDefault(tree any, key, def string) string {
 
 // textValue extracts the string value from a Text tree node.
 func textValue(tree any) string {
-	t, ok := tree.(*trees.Text)
-	if ok {
-		return t.Value
+	if s, ok := tree.(string); ok {
+		return s
 	}
 	return ""
 }

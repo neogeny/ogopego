@@ -125,7 +125,7 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t\t}\n")
 					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(seq.Items))\n", f.goName, f.goType)
 					buf.WriteString("\t\tfor i, item := range seq.Items {\n")
-					fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(*trees.Text).Value\n", f.goName)
+					fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(string)\n", f.goName)
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
@@ -155,10 +155,10 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 
-				case f.goType == "string":
-					// Named with pattern/token — entry is *trees.Text
-					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					fmt.Fprintf(&buf, "\t\tresult.%s = v.(*trees.Text).Value\n", f.goName)
+			case f.goType == "string":
+				// Named with pattern/token — entry is string
+				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+				fmt.Fprintf(&buf, "\t\tresult.%s = v.(string)\n", f.goName)
 					buf.WriteString("\t}\n\n")
 
 				default:

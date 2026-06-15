@@ -3,10 +3,6 @@
 
 package peg
 
-import (
-	"github.com/neogeny/ogopego/pkg/trees"
-)
-
 // Dot matches any single rune (a dot in PEG) and returns it as text.
 type Dot struct {
 	ModelBase
@@ -20,5 +16,5 @@ func (d *Dot) Parse(ctx Ctx) (any, error) {
 		ctx.Reset(mark)
 		return nil, err
 	}
-	return &trees.Text{Value: string(r)}, nil
+	return string(r), nil
 }

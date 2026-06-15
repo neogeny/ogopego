@@ -81,7 +81,7 @@ func ModelRepr(g Grammar, pkg string) string {
 			buf.WriteString("\t}\n")
 			buf.WriteString(fmt.Sprintf("\treturn &%s{\n", ri.typeName))
 			for _, f := range ri.named {
-				buf.WriteString(fmt.Sprintf("\t\t%s: m[\"%s\"].(*trees.Text).Value,\n", f.goName, f.name))
+				buf.WriteString(fmt.Sprintf("\t\t%s: m[\"%s\"].(string),\n", f.goName, f.name))
 			}
 			buf.WriteString("\t}, nil\n")
 		} else {
@@ -89,7 +89,7 @@ func ModelRepr(g Grammar, pkg string) string {
 			buf.WriteString("\tif !ok {\n")
 			buf.WriteString(fmt.Sprintf("\t\treturn nil, fmt.Errorf(\"%sFromTree: expected *trees.Node, got %%T\", tree)\n", ri.typeName))
 			buf.WriteString("\t}\n")
-			buf.WriteString(fmt.Sprintf("\treturn &%s{Value: n.Tree.(*trees.Text).Value}, nil\n", ri.typeName))
+			buf.WriteString(fmt.Sprintf("\treturn &%s{Value: n.Tree.(string)}, nil\n", ri.typeName))
 		}
 
 		buf.WriteString("}\n\n")

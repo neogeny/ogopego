@@ -10,7 +10,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
-func text(s string) *Text   { return &Text{Value: s} }
+func text(s string) string  { return s }
 func seq(items ...any) *Seq { return &Seq{Items: items} }
 
 func TestFoldBottom(t *testing.T) {
@@ -25,10 +25,10 @@ func TestFoldGoNil(t *testing.T) {
 }
 
 func TestFoldText(t *testing.T) {
-	result := Fold(text("hello"))
-	txt, ok := result.(*Text)
-	assert.True(t, ok, "expected Text, got %T", result)
-	assert.Equal(t, "hello", txt.Value)
+	result := Fold("hello")
+	s, ok := result.(string)
+	assert.True(t, ok, "expected string, got %T", result)
+	assert.Equal(t, "hello", s)
 }
 
 func TestFoldBool(t *testing.T) {
@@ -50,7 +50,7 @@ func TestFoldSeqToSeq(t *testing.T) {
 	l, ok := result.([]any)
 	assert.True(t, ok, "expected List, got %T", result)
 	assert.Equal(t, 3, len(l))
-	assert.Equal(t, "a", l[0].(*Text).Value, "expected 'a'")
+	assert.Equal(t, "a", l[0].(string), "expected 'a'")
 }
 
 func TestFoldListToList(t *testing.T) {
@@ -58,7 +58,7 @@ func TestFoldListToList(t *testing.T) {
 	l, ok := result.([]any)
 	assert.True(t, ok, "expected list, got %T", result)
 	assert.Equal(t, 3, len(l))
-	assert.Equal(t, "a", l[0].(*Text).Value, "expected 'a'")
+	assert.Equal(t, "a", l[0].(string), "expected 'a'")
 }
 
 func TestFoldNamedToMap(t *testing.T) {
@@ -66,14 +66,14 @@ func TestFoldNamedToMap(t *testing.T) {
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.NotZero(t, m["x"], "expected key 'x'")
-	assert.Equal(t, "hello", m["x"].(*Text).Value, "expected 'hello'")
+	assert.Equal(t, "hello", m["x"].(string), "expected 'hello'")
 }
 
 func TestFoldOverride(t *testing.T) {
 	result := Fold(&Override{Value: text("result")})
-	txt, ok := result.(*Text)
+	s, ok := result.(string)
 	assert.True(t, ok, "expected Text, got %T", result)
-	assert.Equal(t, "result", txt.Value, "expected 'result'")
+	assert.Equal(t, "result", s, "expected 'result'")
 }
 
 func TestFoldMultipleNamed(t *testing.T) {
@@ -83,8 +83,8 @@ func TestFoldMultipleNamed(t *testing.T) {
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
-	assert.Equal(t, "1", m["a"].(*Text).Value, "expected '1'")
-	assert.Equal(t, "2", m["b"].(*Text).Value, "expected '2'")
+	assert.Equal(t, "1", m["a"].(string), "expected '1'")
+	assert.Equal(t, "2", m["b"].(string), "expected '2'")
 }
 
 func TestFoldNamedAccumulates(t *testing.T) {
@@ -94,8 +94,8 @@ func TestFoldNamedAccumulates(t *testing.T) {
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
-	assert.Equal(t, "a", m["x"].([]any)[0].(*Text).Value, "expected 'a'")
-	assert.Equal(t, "b", m["x"].([]any)[1].(*Text).Value, "expected 'b'")
+	assert.Equal(t, "a", m["x"].([]any)[0].(string), "expected 'a'")
+	assert.Equal(t, "b", m["x"].([]any)[1].(string), "expected 'b'")
 }
 
 func TestFoldNamedAsList(t *testing.T) {
@@ -103,7 +103,7 @@ func TestFoldNamedAsList(t *testing.T) {
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.Equal(t, 1, len(m["items"].([]any)))
-	assert.Equal(t, "x", m["items"].([]any)[0].(*Text).Value, "expected 'x'")
+	assert.Equal(t, "x", m["items"].([]any)[0].(string), "expected 'x'")
 }
 
 func TestFoldNamedAsListAccumulates(t *testing.T) {
@@ -114,8 +114,8 @@ func TestFoldNamedAsListAccumulates(t *testing.T) {
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.Equal(t, 2, len(m["items"].([]any)))
-	assert.Equal(t, "a", m["items"].([]any)[0].(*Text).Value, "expected 'a'")
-	assert.Equal(t, "b", m["items"].([]any)[1].(*Text).Value, "expected 'b'")
+	assert.Equal(t, "a", m["items"].([]any)[0].(string), "expected 'a'")
+	assert.Equal(t, "b", m["items"].([]any)[1].(string), "expected 'b'")
 }
 
 func TestFoldOverrideWins(t *testing.T) {
@@ -124,9 +124,9 @@ func TestFoldOverrideWins(t *testing.T) {
 		text("also ignored"),
 		&Override{Value: text("result")},
 	))
-	txt, ok := result.(*Text)
+	s, ok := result.(string)
 	assert.True(t, ok, "expected Text, got %T", result)
-	assert.Equal(t, "result", txt.Value, "expected 'result'")
+	assert.Equal(t, "result", s, "expected 'result'")
 }
 
 func TestFoldOverrideAsList(t *testing.T) {
@@ -165,9 +165,7 @@ func TestFoldSeqWithNil(t *testing.T) {
 }
 
 func TestTextAsJSON(t *testing.T) {
-	var aj asjson.AsJSONMixin = &Text{Value: "hello"}
-	result := asjson.AsJSONStr(aj.As_JSON_())
-	assert.Equal(t, `"hello"`, result)
+	assert.Equal(t, "hello", treeToJSON("hello"))
 }
 
 func TestNumberAsJSON(t *testing.T) {

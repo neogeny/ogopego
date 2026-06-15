@@ -17,8 +17,6 @@ func treeToJSON(t any) any {
 		return nil
 	}
 	switch v := t.(type) {
-	case *Text:
-		return v.Value
 	case *typeBottomTree:
 		return nil
 	case *Seq:
@@ -65,7 +63,6 @@ func treeToJSON(t any) any {
 
 // As_JSON_ implementations for each concrete tree type.
 
-func (t *Text) As_JSON_() any           { return treeToJSON(t) }
 func (*typeBottomTree) As_JSON_() any   { return nil }
 func (s *Seq) As_JSON_() any            { return treeToJSON(s) }
 func (n *Named) As_JSON_() any          { return treeToJSON(n) }

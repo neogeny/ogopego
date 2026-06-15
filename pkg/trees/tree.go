@@ -10,21 +10,28 @@ import (
 	"github.com/neogeny/ogopego/pkg/util"
 )
 
+const (
+	AtKey        = "@"
+	AtListKey    = "+@"
+	NamedKey     = ":"
+	NamedListKey = "+:"
+)
+
 type Tree interface {
 	As_JSON_() any
 	tree()
 }
 
 type FoldGather struct {
-	Root any
-	Map  map[string]any
+	At  any
+	Ast map[string]any
 }
 
 func Fold(tree any) any {
 	if tree == nil {
 		return nil
 	}
-	g := &FoldGather{Map: make(map[string]any)}
+	g := &FoldGather{Ast: make(map[string]any)}
 	return finish(g, fold(g, tree))
 }
 
@@ -35,7 +42,7 @@ func fold(g *FoldGather, tree any) any {
 	switch val := tree.(type) {
 	case Tree:
 		switch t := val.(type) {
-		case *Text, *Node:
+		case *Node:
 			return t
 		case *Seq:
 			var out any = nil
@@ -53,11 +60,11 @@ func fold(g *FoldGather, tree any) any {
 			return v
 		case *Override:
 			v := fold(g, t.Value)
-			g.Root = appendTree(g.Root, v)
+			g.At = appendTree(g.At, v)
 			return v
 		case *OverrideAsList:
 			v := fold(g, t.Value)
-			g.Root = appendAsSeq(g.Root, v)
+			g.At = appendAsSeq(g.At, v)
 			return v
 		default:
 			panic(fmt.Sprintf("fold: unexpected Tree type %T", t))
@@ -87,20 +94,20 @@ func fold(g *FoldGather, tree any) any {
 		}
 		for key := range out {
 			tree := val[key]
-			if key == "+@" {
-				g.Root = appendAsSeq(g.Root, tree)
+			if key == AtListKey {
+				g.At = appendAsSeq(g.At, tree)
 				return tree
 			}
-			if key == "@" {
-				g.Root = appendTree(g.Root, tree)
+			if key == AtKey {
+				g.At = appendTree(g.At, tree)
 				return tree
 			}
-			if len(key) > 2 && key[0:2] == "+:" {
+			if len(key) > 2 && key[0:2] == NamedListKey {
 				g.insertAsList(key[2:], tree)
 				return tree
 			}
-			if len(key) > 1 && key[0:1] == ":" {
-				g.insert(key[2:], tree)
+			if len(key) > 1 && key[0:1] == NamedKey {
+				g.insert(key[1:], tree)
 				return tree
 			}
 		}
@@ -137,18 +144,18 @@ func fold(g *FoldGather, tree any) any {
 }
 
 func finish(g *FoldGather, base any) any {
-	switch g.Root.(type) {
+	switch g.At.(type) {
 	case nil:
 		{
 		}
 	default:
-		return closed(g.Root)
+		return closed(g.At)
 	}
-	if len(g.Map) > 0 {
-		for k, v := range g.Map {
-			g.Map[k] = closed(v)
+	if len(g.Ast) > 0 {
+		for k, v := range g.Ast {
+			g.Ast[k] = closed(v)
 		}
-		return g.Map
+		return g.Ast
 	}
 	return closed(base)
 }
@@ -222,20 +229,20 @@ func appendAsSeq(a, b any) any {
 }
 
 func (m *FoldGather) insert(key string, val any) {
-	existing, ok := m.Map[key]
+	existing, ok := m.Ast[key]
 	if !ok {
-		m.Map[key] = val
+		m.Ast[key] = val
 	} else {
-		m.Map[key] = appendTree(existing, val)
+		m.Ast[key] = appendTree(existing, val)
 	}
 }
 
 func (m *FoldGather) insertAsList(key string, val any) {
-	existing, ok := m.Map[key]
+	existing, ok := m.Ast[key]
 	if !ok {
-		m.Map[key] = &Seq{Items: []any{val}}
+		m.Ast[key] = &Seq{Items: []any{val}}
 	} else {
-		m.Map[key] = appendAsSeq(existing, val)
+		m.Ast[key] = appendAsSeq(existing, val)
 	}
 }
 

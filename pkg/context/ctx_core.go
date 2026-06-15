@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util/heartbeat"
 )
 
@@ -428,7 +427,7 @@ func (ctx *CoreCtx) Eof() bool { return ctx.cursor.AtEnd() }
 func (ctx *CoreCtx) Constant(literal any) (any, error) {
 	switch v := literal.(type) {
 	case string:
-		return &trees.Text{Value: v}, nil
+		return v, nil
 	case float64:
 		return v, nil
 	case bool:
@@ -438,7 +437,7 @@ func (ctx *CoreCtx) Constant(literal any) (any, error) {
 	case int:
 		return float64(v), nil
 	default:
-		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
+		return fmt.Sprintf("%v", v), nil
 	}
 }
 

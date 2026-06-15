@@ -3,10 +3,6 @@
 
 package peg
 
-import (
-	"github.com/neogeny/ogopego/pkg/trees"
-)
-
 // MetaExp is the base type for meta-expressions.
 type MetaExp struct {
 	ModelBase
@@ -32,7 +28,7 @@ func (m *NameMeta) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Text{Value: s}, nil
+	return s, nil
 }
 
 func (m *IntMeta) Parse(ctx Ctx) (any, error) {

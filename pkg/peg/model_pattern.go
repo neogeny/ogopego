@@ -3,10 +3,6 @@
 
 package peg
 
-import (
-	"github.com/neogeny/ogopego/pkg/trees"
-)
-
 // Pattern matches input according to a configured pattern and returns text.
 type Pattern struct {
 	ModelBase
@@ -19,5 +15,5 @@ func (p *Pattern) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Text{Value: matched}, nil
+	return matched, nil
 }
