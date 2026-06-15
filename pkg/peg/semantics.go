@@ -12,11 +12,11 @@ func (EBNFGrammarSemantics) Apply(
 	params []string) (any, bool) {
 	switch ruleName {
 	case "true":
-		return trees.TRUE, true
+		return true, true
 	case "false":
-		return trees.FALSE, true
+		return false, true
 	case "null":
-		return trees.NULL, true
+		return nil, true
 	case "meta":
 		text := textValue(node)
 		switch text {

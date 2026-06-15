@@ -23,12 +23,6 @@ func treeToJSON(t any) any {
 		return v.Value
 	case *typeBottomTree:
 		return nil
-	case *TrueValue:
-		return true
-	case *FalseValue:
-		return false
-	case *NullValue:
-		return nil
 	case *Seq:
 		items := make([]any, len(v.Items))
 		for i, item := range v.Items {
@@ -76,9 +70,6 @@ func treeToJSON(t any) any {
 func (t *Text) As_JSON_() any           { return treeToJSON(t) }
 func (n *Number) As_JSON_() any         { return treeToJSON(n) }
 func (*typeBottomTree) As_JSON_() any   { return nil }
-func (*TrueValue) As_JSON_() any        { return true }
-func (*FalseValue) As_JSON_() any       { return false }
-func (*NullValue) As_JSON_() any        { return nil }
 func (s *Seq) As_JSON_() any            { return treeToJSON(s) }
 func (n *Named) As_JSON_() any          { return treeToJSON(n) }
 func (n *NamedAsList) As_JSON_() any    { return treeToJSON(n) }

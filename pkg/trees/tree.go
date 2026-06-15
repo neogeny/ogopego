@@ -32,7 +32,7 @@ func fold(g *FoldGather, tree any) any {
 	switch val := tree.(type) {
 	case Tree:
 		switch t := val.(type) {
-		case *Text, *Number, *TrueValue, *FalseValue, *NullValue, *typeBottomTree, *Node:
+		case *Text, *Number, *typeBottomTree, *Node:
 			return t
 		case *Seq:
 			var out any = nil
