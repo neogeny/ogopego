@@ -10,11 +10,11 @@ import (
 )
 
 var (
-	errStyle   = color.New(color.FgRed, color.Bold)
-	blueStyle  = color.New(color.FgBlue, color.Bold)
-	bold       = color.New(color.Bold)
-	grey       = color.New(color.FgHiBlack)
-	dimStyle   = color.New(color.Faint, color.FgWhite)
+	errStyle  = color.New(color.FgRed, color.Bold)
+	blueStyle = color.New(color.FgBlue, color.Bold)
+	bold      = color.New(color.Bold)
+	grey      = color.New(color.FgHiBlack)
+	dimStyle  = color.New(color.Faint, color.FgWhite)
 )
 
 // Memento captures the state of the parser at a specific point for error reporting.

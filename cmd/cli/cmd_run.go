@@ -18,11 +18,6 @@ import (
 )
 
 var (
-	summaryFilesStyle  = color.New(color.FgWhite, color.Bold)
-	summaryPassedStyle = color.New(color.FgGreen)
-	summaryFailStyle   = color.New(color.FgRed)
-	summaryRateStyle   = color.New(color.FgCyan)
-
 	tableLabelStyle = color.New(color.FgCyan, color.Faint)
 	tableValueStyle = color.New(color.FgWhite, color.Bold)
 	tableGoodStyle  = color.New(color.FgGreen)
@@ -114,17 +109,17 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 				cmntLines += lc.Comment
 				blnkLines += lc.Blank
 				runTime += time.Since(fileStart).Seconds()
-			if err != nil {
-				fp.Fail()
-				errcount++
-				if !cli.Quiet {
-					if report, ok := errors.AsType[*context.ParseFailure](err); ok {
-						err = &report.Memento
+				if err != nil {
+					fp.Fail()
+					errcount++
+					if !cli.Quiet {
+						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+							err = &report.Memento
+						}
+						_, _ = fmt.Fprintf(os.Stderr, "\n%v\n", err)
 					}
-					_, _ = fmt.Fprintf(os.Stderr, "\n%v\n", err)
+					return
 				}
-				return
-			}
 
 				succCount++
 				succLines += lc.Total
