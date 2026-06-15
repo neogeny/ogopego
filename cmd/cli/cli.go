@@ -9,6 +9,7 @@ type CLIConfig struct {
 		Grammar string   `arg:"required,name=grammar" help:"Path to the grammar in EBNF or JSON format"`
 		Inputs  []string `arg:"required,name=inputs" help:"The files to be parsed"`
 		Json    bool     `help:"Print the output tree in JSON format" short:"j" xor:"format"`
+		Jsonl   bool     `help:"Output JSON Lines (compact, one object per line)"`
 		Model   bool     `help:"Print the Go code for the tree construction" short:"m" xor:"format"`
 		Start   string   `help:"Name of the start rule (defaults to 'start')" short:"s"`
 		Nproc   int      `help:"Number of concurrent workers (default: number of CPUs)" short:"n" default:"0"`
@@ -35,6 +36,7 @@ type CLIConfig struct {
 	Output  string `help:"Output to a file or directory instead of stdout" short:"o"`
 	Color   string `help:"Control colorized output for API results" enum:"auto,always,never" default:"auto"`
 	Trace   bool   `help:"Display a detailed trace of the parsing process"`
+	Verbose bool   `help:"Display full error context with source lines" short:"v"`
 	Quiet   bool   `help:"Suppress progress bar and spinner output"`
 	Version bool   `help:"Print version information"`
 }

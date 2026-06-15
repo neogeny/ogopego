@@ -4,6 +4,8 @@
 package cli
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -125,6 +127,8 @@ func langExt(lang string) string {
 	switch lang {
 	case "json":
 		return ".json"
+	case "jsonl":
+		return ".jsonl"
 	case "go":
 		return ".go"
 	default:
@@ -142,12 +146,20 @@ func replaceExt(name, newExt string) string {
 func writeOutputs(outputs []outputItem, lang string, path string, color bool) error {
 	switch outputMode(path) {
 	case modeStdout:
-		fmt.Println(Pygmentize(joinOutputs(outputs), lang, color))
+		if lang == "jsonl" {
+			out, _ := formatOutputs(outputs, true)
+			_, _ = os.Stdout.Write(out)
+		} else {
+			fmt.Println(Pygmentize(joinOutputs(outputs), lang, color))
+		}
 		return nil
 
 	case modeFile:
-		joined := joinOutputs(outputs)
-		return os.WriteFile(path, []byte(joined), 0644)
+		out, err := formatOutputs(outputs, lang == "jsonl")
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(path, out, 0644)
 
 	case modeDir:
 		ext := langExt(lang)
@@ -155,15 +167,37 @@ func writeOutputs(outputs []outputItem, lang string, path string, color bool) er
 			return fmt.Errorf("creating output directory: %w", err)
 		}
 		for _, o := range outputs {
-			name := replaceExt(o.Name, ext)
-			outPath := filepath.Join(path, name)
-			if err := os.WriteFile(outPath, []byte(o.Payload), 0644); err != nil {
+			outPath := filepath.Join(path, replaceExt(o.Name, ext))
+			data := []byte(o.Payload)
+			if lang == "jsonl" {
+				var buf bytes.Buffer
+				if err := json.Compact(&buf, data); err != nil {
+					return fmt.Errorf("compacting json for %s: %w", o.Name, err)
+				}
+				buf.WriteByte('\n')
+				data = buf.Bytes()
+			}
+			if err := os.WriteFile(outPath, data, 0644); err != nil {
 				return fmt.Errorf("writing %s: %w", outPath, err)
 			}
 		}
 		return nil
 	}
 	return nil
+}
+
+func formatOutputs(outputs []outputItem, compact bool) ([]byte, error) {
+	if compact {
+		var buf bytes.Buffer
+		for _, o := range outputs {
+			if err := json.Compact(&buf, []byte(o.Payload)); err != nil {
+				return nil, fmt.Errorf("compacting json: %w", err)
+			}
+			buf.WriteByte('\n')
+		}
+		return buf.Bytes(), nil
+	}
+	return []byte(joinOutputs(outputs)), nil
 }
 
 func joinOutputs(outputs []outputItem) string {

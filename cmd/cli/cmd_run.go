@@ -82,7 +82,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 
 				data, err := os.ReadFile(path)
 				if err != nil {
-					if !cli.Quiet {
+					if cli.Verbose && !cli.Quiet {
 						_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
 					}
 					errcount++
@@ -112,7 +112,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 				if err != nil {
 					fp.Fail()
 					errcount++
-					if !cli.Quiet {
+					if cli.Verbose && !cli.Quiet {
 						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
 							err = &report.Memento
 						}
@@ -217,6 +217,8 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	switch {
 	case cli.Run.Model:
 		lang = "go"
+	case cli.Run.Jsonl:
+		lang = "jsonl"
 	default:
 		lang = "json"
 	}
