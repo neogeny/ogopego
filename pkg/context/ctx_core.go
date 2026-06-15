@@ -425,14 +425,14 @@ func (ctx *CoreCtx) EolCheck() error {
 
 func (ctx *CoreCtx) Eof() bool { return ctx.cursor.AtEnd() }
 
-func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
+func (ctx *CoreCtx) Constant(literal any) (any, error) {
 	switch v := literal.(type) {
 	case string:
 		return &trees.Text{Value: v}, nil
 	case float64:
 		return &trees.Number{Value: v}, nil
 	case bool:
-		return &trees.Bool{Value: v}, nil
+		return v, nil
 	case nil:
 		return nil, nil
 	case int:

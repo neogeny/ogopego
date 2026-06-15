@@ -25,8 +25,6 @@ func treeToJSON(t any) any {
 		return v.Value
 	case *Number:
 		return v.Value
-	case *Bool:
-		return v.Value
 	case *Bottom:
 		return nil
 	case *TrueValue:
@@ -81,7 +79,6 @@ func treeToJSON(t any) any {
 
 func (t *Text) As_JSON_() any           { return treeToJSON(t) }
 func (n *Number) As_JSON_() any         { return treeToJSON(n) }
-func (b *Bool) As_JSON_() any           { return treeToJSON(b) }
 func (*Bottom) As_JSON_() any           { return nil }
 func (*TrueValue) As_JSON_() any        { return true }
 func (*FalseValue) As_JSON_() any       { return false }

@@ -64,5 +64,5 @@ func (m *BoolMeta) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Bool{Value: b}, nil
+	return b, nil
 }

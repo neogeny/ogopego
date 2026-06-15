@@ -13,14 +13,6 @@ type Text struct {
 func (Text) tree()                          {}
 func (t *Text) fold(gather *FoldGather) any { return t }
 
-// Bool represents a boolean node.
-type Bool struct {
-	Value bool
-}
-
-func (Bool) tree()                          {}
-func (b *Bool) fold(gather *FoldGather) any { return b }
-
 // Bottom is an internal sentinel node.
 type Bottom struct {
 }

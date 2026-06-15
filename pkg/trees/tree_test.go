@@ -32,10 +32,10 @@ func TestFoldText(t *testing.T) {
 }
 
 func TestFoldBool(t *testing.T) {
-	result := Fold(&Bool{Value: true})
-	b, ok := result.(*Bool)
-	assert.True(t, ok, "expected Bool, got %T", result)
-	assert.Equal(t, true, b.Value)
+	result := Fold(true)
+	b, ok := result.(bool)
+	assert.True(t, ok, "expected bool, got %T", result)
+	assert.Equal(t, true, b)
 }
 
 func TestFoldNumber(t *testing.T) {

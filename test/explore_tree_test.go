@@ -16,8 +16,6 @@ func printTreeRec(t *testing.T, indent string, node any) {
 		t.Logf("%sText(%q)", indent, n.Value)
 	case *trees.Number:
 		t.Logf("%sNumber(%v)", indent, n.Value)
-	case *trees.Bool:
-		t.Logf("%sBool(%v)", indent, n.Value)
 	case *trees.Seq:
 		t.Logf("%sSeq [", indent)
 		for _, item := range n.Items {

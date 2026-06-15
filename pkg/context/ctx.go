@@ -1,9 +1,5 @@
 package context
 
-import (
-	"github.com/neogeny/ogopego/pkg/trees"
-)
-
 // Ctx represents the parsing context used during parse operations. It
 // abstracts cursor position, memoization, failure reporting and tracing.
 // See package documentation for details on life-cycle and semantics.
@@ -66,7 +62,7 @@ type Ctx interface {
 	// EolCheck checks for end of line and returns an error if not at EOL.
 	EolCheck() error
 	// Constant creates a tree node for a constant literal.
-	Constant(literal any) (trees.Tree, error)
+	Constant(literal any) (any, error)
 	// Enter pushes a rule onto the call stack for tracing.
 	Enter(name string)
 	// Leave pops a rule from the call stack.
