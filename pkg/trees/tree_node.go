@@ -4,7 +4,6 @@
 package trees
 
 type Node struct {
-	TreeBase
 	TypeName string
 	Tree     Tree
 }

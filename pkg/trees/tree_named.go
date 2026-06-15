@@ -5,7 +5,6 @@ package trees
 
 // Named represents a named key/value pair folded from the parse tree.
 type Named struct {
-	TreeBase
 	Name  string
 	Value Tree
 }
@@ -19,7 +18,6 @@ func (n *Named) fold(gather *treeMerge) Tree {
 
 // NamedAsList is like Named but its values are collected as a list.
 type NamedAsList struct {
-	TreeBase
 	Name  string
 	Value Tree
 }
@@ -34,7 +32,6 @@ func (n *NamedAsList) fold(gather *treeMerge) Tree {
 // Override indicates that the contained value should override other values
 // when folding into the result.
 type Override struct {
-	TreeBase
 	Value Tree
 }
 
@@ -47,7 +44,6 @@ func (o *Override) fold(gather *treeMerge) Tree {
 
 // OverrideAsList is a list-form override variant.
 type OverrideAsList struct {
-	TreeBase
 	Value Tree
 }
 

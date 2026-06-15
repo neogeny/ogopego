@@ -13,6 +13,20 @@ const MaxPointerDerefDepth = 4
 
 type OrderedMap = ctn.BoundedMap[string, any]
 
+func DeRef(ref any) any {
+	if ref == nil {
+		return nil
+	}
+	v := reflect.ValueOf(ref)
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+	return v.Interface()
+}
+
 // PubMapOf returns an OrderedMap containing the public fields of the given reference.
 func PubMapOf(ref any) any {
 	if ref == nil {

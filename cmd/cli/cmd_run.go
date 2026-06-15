@@ -11,9 +11,9 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/context"
-	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util"
 )
 
@@ -101,7 +101,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 				case cli.Run.Model:
 					payload = util.Repr(tree)
 				default:
-					payload = trees.TreeToJSONStr(tree)
+					payload = asjson.AsJSONStr(tree)
 				}
 				item := outputItem{Name: fName, Payload: payload}
 				outputs = append(outputs, item)

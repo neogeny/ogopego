@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
+	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
 func text(s string) *Text       { return &Text{Value: s} }
@@ -172,17 +173,21 @@ func TestFoldSeqWithNil(t *testing.T) {
 }
 
 func TestTextAsJSON(t *testing.T) {
-	result := TreeToJSONStr(&Text{Value: "hello"})
+	var aj asjson.AsJSONMixin = &Text{Value: "hello"}
+	result := asjson.AsJSONStr(aj.As_JSON_())
 	assert.Equal(t, `"hello"`, result)
 }
 
 func TestNumberAsJSON(t *testing.T) {
-	result := TreeToJSONStr(&Number{Value: 42.5})
+	var aj asjson.AsJSONMixin = &Number{Value: 42.5}
+	result := asjson.AsJSONStr(aj.As_JSON_())
 	assert.Equal(t, "42.5", result)
 }
 
 func TestNodeAsJSONTree(t *testing.T) {
-	result := TreeToJSONStr(&Node{TypeName: "expr", Tree: text("42")})
+	n := &Node{TypeName: "expr", Tree: text("42")}
+	var aj asjson.AsJSONMixin = n
+	result := asjson.AsJSONStr(aj.As_JSON_())
 	want := "{\n  \"__class__\": \"expr\",\n  \"ast\": \"42\"\n}"
 	assert.Equal(t, want, result)
 }

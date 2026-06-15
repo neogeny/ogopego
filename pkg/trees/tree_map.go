@@ -5,7 +5,6 @@ package trees
 
 // MapNode represents a keyed mapping of entries produced during folding.
 type MapNode struct {
-	TreeBase
 	Entries map[string]Tree
 }
 

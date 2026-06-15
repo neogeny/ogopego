@@ -5,6 +5,7 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
 
@@ -84,7 +85,7 @@ func TestExploreCalcTree(t *testing.T) {
 			tree, err := api.ParseInput(g, input, nil)
 			assert.NoError(t, err, "parse")
 			t.Logf("input: %s", input)
-			t.Logf("JSON:  %s", trees.TreeToJSONStr(tree))
+			t.Logf("JSON:  %s", asjson.AsJSONStr(tree))
 			t.Logf("type:  %T", tree)
 			printTreeRec(t, "", tree)
 		})
