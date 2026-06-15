@@ -10,10 +10,12 @@ import (
 )
 
 var (
-	errStyle   = color.New(color.FgRed, color.Bold)
-	blueStyle  = color.New(color.FgBlue, color.Bold)
-	bold       = color.New(color.Bold)
-	grey       = color.New(color.FgHiBlack)
+	errStyle    = color.New(color.FgRed, color.Bold)
+	gutStyle    = color.New(color.FgBlue, color.Bold)
+	bold        = color.New(color.Bold)
+	grey        = color.New(color.FgHiBlack)
+	dimWhite    = color.New(color.FgWhite, color.Faint)
+	dimRedStyle = color.New(color.FgRed, color.Faint)
 )
 
 // Memento captures the state of the parser at a specific point for error reporting.
@@ -50,13 +52,13 @@ func (m *Memento) Error() string {
 	var b strings.Builder
 
 	errLabel := errStyle.Sprint("error")
-	bluePipe := blueStyle.Sprint("|")
-	arrow := blueStyle.Sprint("-->")
+	gut := gutStyle.Sprint("│")
+	arrow := gutStyle.Sprint("─→")
 
 	b.WriteString(fmt.Sprintf("\n%s: %s\n", errLabel, bold.Sprint(m.Msg)))
-	b.WriteString(fmt.Sprintf("  %s %s @ [%d:%d]\n", arrow, m.Cursor.InputSource(), line, col))
+	b.WriteString(fmt.Sprintf("  %s %s[%d:%d]\n", arrow, m.Cursor.InputSource(), line, col))
 
-	b.WriteString(fmt.Sprintf(" %5s%s\n", "", bluePipe))
+	b.WriteString(fmt.Sprintf(" %5s%s\n", "", gut))
 	start := line - 4
 	if start < 0 {
 		start = 0
@@ -64,16 +66,16 @@ func (m *Memento) Error() string {
 	for i, linestr := range m.Cursor.LinesAt(start, line+1) {
 		linestr = util.StripRight(linestr)
 		disp := util.ExpandTabs(linestr)
-		lineno := blueStyle.Sprintf("%5d", start+i)
-		b.WriteString(fmt.Sprintf("%s %s %s\n", lineno, bluePipe, disp))
+		lineno := dimWhite.Sprintf("%5d", start+i)
+		b.WriteString(fmt.Sprintf("%s %s %s\n", lineno, gut, disp))
 	}
 	pad := strings.Repeat(" ", col-1)
-	_, _ = fmt.Fprintf(&b, " %5s%s %s\n", "", bluePipe, errStyle.Sprintf("%s^ %s", pad, m.Msg))
+	_, _ = fmt.Fprintf(&b, " %5s%s %s\n", "", gut, errStyle.Sprintf("%s⌃ %s", pad, m.Msg))
 
 	if len(m.CallStack) > 0 {
 		b.WriteString("\n")
 		for i := len(m.CallStack) - 1; i >= 0; i-- {
-			b.WriteString(fmt.Sprintf(" %s %s\n", errStyle.Sprint("→"), grey.Sprint(m.CallStack[i])))
+			b.WriteString(fmt.Sprintf(" %s %s\n", dimRedStyle.Sprint("→"), grey.Sprint(m.CallStack[i])))
 		}
 	}
 

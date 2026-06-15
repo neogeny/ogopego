@@ -64,7 +64,7 @@ func TestMementoErrorMultiLineSource(t *testing.T) {
 	m := NewMemento(idx, "error here", cursor, nil)
 	err := m.Error()
 	assert.True(t, strings.Contains(err, "fourth line"), "expected error line context, got: %s", err)
-	assert.True(t, strings.Contains(err, "^"), "expected caret marker, got: %s", err)
+	assert.True(t, strings.Contains(err, "⌃"), "expected caret marker, got: %s", err)
 }
 
 func TestMementoString(t *testing.T) {
