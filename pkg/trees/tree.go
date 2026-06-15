@@ -72,7 +72,7 @@ func fold(g *FoldGather, tree any) any {
 			item, _ := val.Get(k)
 			out[k] = fold(g, item)
 		}
-		return out
+		return fold(g, out)
 
 	case map[string]any:
 		out := make(map[string]any, len(val))
@@ -84,7 +84,7 @@ func fold(g *FoldGather, tree any) any {
 		}
 		for key := range out {
 			tree := val[key]
-			if key == "@+" {
+			if key == "+@" {
 				g.Root = appendAsSeq(g.Root, tree)
 				return tree
 			}
@@ -92,11 +92,11 @@ func fold(g *FoldGather, tree any) any {
 				g.Root = appendTree(g.Root, tree)
 				return tree
 			}
-			if key[0:2] == ":+" {
+			if len(key) > 2 && key[0:2] == "+:" {
 				g.insertAsList(key[2:], tree)
 				return tree
 			}
-			if key[0:1] == ":" {
+			if len(key) > 1 && key[0:1] == ":" {
 				g.insert(key[2:], tree)
 				return tree
 			}
