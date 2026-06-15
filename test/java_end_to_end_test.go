@@ -26,7 +26,7 @@ func TestJavaEndToEnd(t *testing.T) {
 	assert.NoError(t, g.Initialize(), "init grammar")
 
 	// 2. Verify tool.ModelRepr produces valid Go source
-	code := tool.ModelRepr(*g, "java")
+	code := tool.GenerateGrammarModel(*g, "java")
 	fset := token.NewFileSet()
 	_, err = parser.ParseFile(fset, "", code, parser.AllErrors)
 	assert.NoError(t, err, "generated code is not valid Go:\n%s", code)

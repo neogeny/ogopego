@@ -66,7 +66,7 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		payload = peg.ParserRepr(*gram, cli.Grammar.Parser)
 		lang = "go"
 	case cli.Grammar.ModelGen != "":
-		payload = tool.ModelRepr(*gram, cli.Grammar.ModelGen)
+		payload = tool.GenerateGrammarModel(*gram, cli.Grammar.ModelGen)
 		lang = "go"
 	default:
 		payload = gram.PrettyPrint()

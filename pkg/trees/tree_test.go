@@ -10,7 +10,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
-func text(s string) string  { return s }
+func text(s string) string      { return s }
 func seq(items ...any) *TreeSeq { return &TreeSeq{Items: items} }
 
 func TestFoldBottom(t *testing.T) {

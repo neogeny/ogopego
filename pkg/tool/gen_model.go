@@ -12,11 +12,11 @@ import (
 	"github.com/neogeny/ogopego/pkg/peg"
 )
 
-// ModelRepr generates Go source code for model types and conversion functions
+// GenerateGrammarModel generates Go source code for model types and conversion functions
 // from a compiled Grammar. The output is a Go package with struct types for each
 // rule that has a type annotation (::TypeName), and FromTree functions that
 // convert folded parse trees into model instances.
-func ModelRepr(g peg.Grammar, pkg string) string {
+func GenerateGrammarModel(g peg.Grammar, pkg string) string {
 	rules := g.RuleMap()
 
 	type ruleInfo struct {
@@ -100,49 +100,49 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 			for _, f := range ri.fields {
 				innerType := strings.TrimPrefix(f.goType, "[]")
 				switch {
-				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
-					// NamedList with typed refs — entry is *trees.TreeSeq
-					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					buf.WriteString("\t\tseq, ok := v.(*trees.TreeSeq)\n")
-					buf.WriteString("\t\tif !ok {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected TreeSeq, got %%T\", v)\n", ri.typeName, f.goName)
-					buf.WriteString("\t\t}\n")
-					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(seq.Items))\n", f.goName, f.goType)
-					buf.WriteString("\t\tfor i, item := range seq.Items {\n")
-					fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
-					buf.WriteString("\t\t\tif err != nil {\n")
-					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
-					buf.WriteString("\t\t\t}\n")
-					buf.WriteString("\t\t}\n")
-					buf.WriteString("\t}\n\n")
+			case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+				// NamedList with typed refs — entry is []any
+				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+				buf.WriteString("\t\titems, ok := v.([]any)\n")
+				buf.WriteString("\t\tif !ok {\n")
+				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+				buf.WriteString("\t\t}\n")
+				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+				buf.WriteString("\t\tfor i, item := range items {\n")
+				fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
+				buf.WriteString("\t\t\tif err != nil {\n")
+				fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
+				buf.WriteString("\t\t\t}\n")
+				buf.WriteString("\t\t}\n")
+				buf.WriteString("\t}\n\n")
 
-				case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
-					// NamedList of string — entry is *trees.TreeSeq
-					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					buf.WriteString("\t\tseq, ok := v.(*trees.TreeSeq)\n")
-					buf.WriteString("\t\tif !ok {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected TreeSeq, got %%T\", v)\n", ri.typeName, f.goName)
-					buf.WriteString("\t\t}\n")
-					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(seq.Items))\n", f.goName, f.goType)
-					buf.WriteString("\t\tfor i, item := range seq.Items {\n")
-					fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(string)\n", f.goName)
-					buf.WriteString("\t\t}\n")
-					buf.WriteString("\t}\n\n")
-				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
-					// Named with list-wrapped typed ref — entry is *trees.List
-					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					buf.WriteString("\t\tlist, ok := v.(*trees.List)\n")
-					buf.WriteString("\t\tif !ok {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected List, got %%T\", v)\n", ri.typeName, f.goName)
-					buf.WriteString("\t\t}\n")
-					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(list.Items))\n", f.goName, f.goType)
-					buf.WriteString("\t\tfor i, item := range list.Items {\n")
-					fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
-					buf.WriteString("\t\t\tif err != nil {\n")
-					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
-					buf.WriteString("\t\t\t}\n")
-					buf.WriteString("\t\t}\n")
-					buf.WriteString("\t}\n\n")
+			case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
+				// NamedList of string — entry is []any
+				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+				buf.WriteString("\t\titems, ok := v.([]any)\n")
+				buf.WriteString("\t\tif !ok {\n")
+				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+				buf.WriteString("\t\t}\n")
+				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+				buf.WriteString("\t\tfor i, item := range items {\n")
+				fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(string)\n", f.goName)
+				buf.WriteString("\t\t}\n")
+				buf.WriteString("\t}\n\n")
+			case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+				// Named with list-wrapped typed ref — entry is []any
+				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+				buf.WriteString("\t\titems, ok := v.([]any)\n")
+				buf.WriteString("\t\tif !ok {\n")
+				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+				buf.WriteString("\t\t}\n")
+				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+				buf.WriteString("\t\tfor i, item := range items {\n")
+				fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
+				buf.WriteString("\t\t\tif err != nil {\n")
+				fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
+				buf.WriteString("\t\t\t}\n")
+				buf.WriteString("\t\t}\n")
+				buf.WriteString("\t}\n\n")
 
 				case strings.HasPrefix(f.goType, "*"):
 					// Named with typed call — extract from *trees.Node (nil-safe for Optional)

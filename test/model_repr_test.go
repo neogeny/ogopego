@@ -18,7 +18,7 @@ func TestModelReprOutput(t *testing.T) {
 
 		pair::Pair = '(' key:/[a-z]+/ ':' val:/[0-9]+/ ')'
 	`, nil)
-	code := tool.ModelRepr(*g, "calc")
+	code := tool.GenerateGrammarModel(*g, "calc")
 	assert.NotZero(t, code, "empty output")
 }
 
@@ -47,7 +47,7 @@ func TestModelReprTypedRef(t *testing.T) {
 		pair::Pair = '(' key:/[a-z]+/ ':' val:/[0-9]+/ ')'
 		NUMBER::Num = /\d+/
 	`), nil)
-	code := tool.ModelRepr(*g, "calc")
+	code := tool.GenerateGrammarModel(*g, "calc")
 	assert.True(t, strings.Contains(code, "Child *Pair"), "expected Start.Child *Pair field")
 	assert.True(t, strings.Contains(code, "PairFromTree("), "expected PairFromTree call in StartFromTree")
 	assert.True(t, strings.Contains(code, "Value any"), "expected Num.Value any field")

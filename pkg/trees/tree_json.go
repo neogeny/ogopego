@@ -56,5 +56,5 @@ func treeToJSON(t any) any {
 // As_JSON_ implementations for each concrete tree type.
 
 func (*typeBottomTree) As_JSON_() any { return BOTTOM }
-func (s *TreeSeq) As_JSON_() any          { return treeToJSON(s) }
+func (s *TreeSeq) As_JSON_() any      { return treeToJSON(s) }
 func (n *Node) As_JSON_() any         { return treeToJSON(n) }
