@@ -74,19 +74,19 @@ func fold(ast map[string]any, tree any) any {
 		for key := range out {
 			tree := val[key]
 			if key == keyListAt {
-				insertAsSeq(ast, keyAt, tree)
+				mapTreeAsSeq(ast, keyAt, tree)
 				return tree
 			}
 			if key == keyAt {
-				insert(ast, keyAt, tree)
+				mapTree(ast, keyAt, tree)
 				return tree
 			}
 			if len(key) > len(keyListNamed) && key[0:len(keyListNamed)] == keyListNamed {
-				insertAsSeq(ast, key[len(keyListNamed):], tree)
+				mapTreeAsSeq(ast, key[len(keyListNamed):], tree)
 				return tree
 			}
 			if len(key) > len(keyNamed) && key[0:len(keyNamed)] == keyNamed {
-				insert(ast, key[len(keyNamed):], tree)
+				mapTree(ast, key[len(keyNamed):], tree)
 				return tree
 			}
 		}
@@ -203,7 +203,7 @@ func appendAsSeq(a, b any) any {
 	return &TreeSeq{Items: []any{a, b}}
 }
 
-func insert(m map[string]any, key string, val any) {
+func mapTree(m map[string]any, key string, val any) {
 	existing, ok := m[key]
 	if !ok {
 		m[key] = val
@@ -212,7 +212,7 @@ func insert(m map[string]any, key string, val any) {
 	}
 }
 
-func insertAsSeq(m map[string]any, key string, val any) {
+func mapTreeAsSeq(m map[string]any, key string, val any) {
 	existing, ok := m[key]
 	if !ok {
 		m[key] = &TreeSeq{Items: []any{val}}
