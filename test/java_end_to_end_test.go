@@ -9,9 +9,9 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/peg"
 	"github.com/neogeny/ogopego/pkg/tool"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestJavaEndToEnd(t *testing.T) {
@@ -36,144 +36,111 @@ func TestJavaEndToEnd(t *testing.T) {
 	tree, err := api.ParseInput(g, javaSrc, nil)
 	assert.NoError(t, err, "parse Java")
 
-	// 4. Walk the tree manually to validate structure
-	n, ok := tree.(*trees.Node)
-	assert.True(t, ok, "expected *trees.Node, got %T", tree)
-	assert.Equal(t, "CompilationUnit", n.TypeName)
-	m, ok := n.Tree.(map[string]any)
-	assert.True(t, ok, "expected map, got %T", n.Tree)
+	// 4. Validate structure via AsJSON
+	j := asjson.AsJSON(tree).(map[string]any)
+	assert.Equal(t, "CompilationUnit", j["__class__"])
 
 	// 5. Validate types of each entry
 	t.Run("package_field", func(t *testing.T) {
-		v, ok := m["package"]
+		v, ok := j["package"]
 		assert.True(t, ok, "missing 'package' entry")
-		pn, ok := v.(*trees.Node)
-		assert.True(t, ok, "package: expected *trees.Node, got %T", v)
-		assert.Equal(t, "PackageDeclaration", pn.TypeName, "package TypeName")
-		pm, ok := pn.Tree.(map[string]any)
-		assert.True(t, ok, "PackageDeclaration.Tree: expected map, got %T", pn.Tree)
-		// name field is *trees.Node{QualifiedName}
-		name, ok := pm["name"]
+		pn, ok := v.(map[string]any)
+		assert.True(t, ok, "package: expected map, got %T", v)
+		assert.Equal(t, "PackageDeclaration", pn["__class__"], "package TypeName")
+		name, ok := pn["name"]
 		assert.True(t, ok, "PackageDeclaration missing 'name' entry")
-		qn, ok := name.(*trees.Node)
-		assert.True(t, ok, "PackageDeclaration.name: expected *trees.Node, got %T", name)
-		assert.Equal(t, "QualifiedName", qn.TypeName, "PackageDeclaration.name TypeName")
+		qn, ok := name.(map[string]any)
+		assert.True(t, ok, "PackageDeclaration.name: expected map, got %T", name)
+		assert.Equal(t, "QualifiedName", qn["__class__"], "PackageDeclaration.name TypeName")
 	})
 
 	t.Run("imports_field", func(t *testing.T) {
-		v, ok := m["imports"]
+		v, ok := j["imports"]
 		assert.True(t, ok, "missing 'imports' entry")
 		impList, ok := v.([]any)
 		assert.True(t, ok, "imports: expected list, got %T", v)
 		assert.Equal(t, 1, len(impList), "imports: expected 1 item")
-		impNode, ok := impList[0].(*trees.Node)
-		assert.True(t, ok, "imports[0]: expected *trees.Node, got %T", impList[0])
-		assert.Equal(t, "ImportDeclaration", impNode.TypeName, "imports[0] TypeName")
+		impNode, ok := impList[0].(map[string]any)
+		assert.True(t, ok, "imports[0]: expected map, got %T", impList[0])
+		assert.Equal(t, "ImportDeclaration", impNode["__class__"], "imports[0] TypeName")
 	})
 
 	t.Run("declarations_field", func(t *testing.T) {
-		v, ok := m["declarations"]
+		v, ok := j["declarations"]
 		assert.True(t, ok, "missing 'declarations' entry")
 		items, ok := v.([]any)
 		assert.True(t, ok, "declarations: expected list, got %T", v)
 		assert.Equal(t, 1, len(items), "declarations: expected 1 item")
-		classNode, ok := items[0].(*trees.Node)
-		assert.True(t, ok, "declarations[0]: expected *trees.Node, got %T", items[0])
-		assert.Equal(t, "ClassDeclaration", classNode.TypeName, "declarations[0] TypeName")
+		classNode, ok := items[0].(map[string]any)
+		assert.True(t, ok, "declarations[0]: expected map, got %T", items[0])
+		assert.Equal(t, "ClassDeclaration", classNode["__class__"], "declarations[0] TypeName")
 	})
 
 	t.Run("linecount_field", func(t *testing.T) {
-		v, ok := m["linecount"]
+		v, ok := j["linecount"]
 		assert.True(t, ok, "missing 'linecount' entry")
 		assert.True(t, v == nil, "linecount: expected nil, got %T", v)
 	})
 
 	// 6. Test FromTree with hand-authored model types
 	t.Run("from_tree_identifier", func(t *testing.T) {
-		id, err := identifierFromTree(
-			&trees.Node{TypeName: "Identifier", Tree: map[string]any{
-				"value": &trees.Text{Value: "Hello"},
-			}},
-		)
+		id, err := identifierFromTree(map[string]any{
+			"__class__": "Identifier",
+			"value":     "Hello",
+		})
 		assert.NoError(t, err, "IdentifierFromTree")
-		txt, ok := id.Value.(*trees.Text)
-		assert.True(t, ok, "Identifier.Value: expected *trees.Text, got %T", id.Value)
-		assert.Equal(t, "Hello", txt.Value, "Identifier.Value")
+		assert.Equal(t, "Hello", id.Value, "Identifier.Value")
 	})
 
 	t.Run("from_tree_qualified_name", func(t *testing.T) {
-		// Build a tree for: com.example.List
-		qn, err := qualifiedNameFromTree(
-			&trees.Node{TypeName: "QualifiedName", Tree: map[string]any{
-				"qualifiers": []any{
-					&trees.Node{TypeName: "Identifier", Tree: map[string]any{
-						"value": &trees.Text{Value: "com"},
-					}},
-					&trees.Node{TypeName: "Identifier", Tree: map[string]any{
-						"value": &trees.Text{Value: "example"},
-					}},
-				},
-				"name": &trees.Node{TypeName: "Identifier", Tree: map[string]any{
-					"value": &trees.Text{Value: "List"},
-				}},
-			}},
-		)
+		qn, err := qualifiedNameFromTree(map[string]any{
+			"__class__": "QualifiedName",
+			"qualifiers": []any{
+				map[string]any{"__class__": "Identifier", "value": "com"},
+				map[string]any{"__class__": "Identifier", "value": "example"},
+			},
+			"name": map[string]any{"__class__": "Identifier", "value": "List"},
+		})
 		assert.NoError(t, err, "QualifiedNameFromTree")
-
-		// Validate concrete types
 		assert.Equal(t, 2, len(qn.Qualifiers))
-		com := qn.Qualifiers[0]
-		comTxt, ok := com.Value.(*trees.Text)
-		assert.True(t, ok, "Qualifiers[0].Value: expected *trees.Text, got %T", com.Value)
-		assert.Equal(t, "com", comTxt.Value, "Qualifiers[0].Value")
-
-		list := qn.Name
-		listTxt, ok := list.Value.(*trees.Text)
-		assert.True(t, ok, "Name.Value: expected *trees.Text, got %T", list.Value)
-		assert.Equal(t, "List", listTxt.Value, "Name.Value")
+		assert.Equal(t, "com", qn.Qualifiers[0].Value, "Qualifiers[0].Value")
+		assert.Equal(t, "List", qn.Name.Value, "Name.Value")
 	})
 
 	t.Run("from_tree_package_via_optional", func(t *testing.T) {
-		// Build a CompilationUnit tree with package present
-		pkgTree := &trees.Node{TypeName: "PackageDeclaration", Tree: map[string]any{
+		pkgTree := map[string]any{
+			"__class__":   "PackageDeclaration",
 			"annotations": []any{},
-			"name": &trees.Node{TypeName: "QualifiedName", Tree: map[string]any{
+			"name": map[string]any{
+				"__class__": "QualifiedName",
 				"qualifiers": []any{
-					&trees.Node{TypeName: "Identifier", Tree: map[string]any{
-						"value": &trees.Text{Value: "com"},
-					}},
+					map[string]any{"__class__": "Identifier", "value": "com"},
 				},
-				"name": &trees.Node{TypeName: "Identifier", Tree: map[string]any{
-					"value": &trees.Text{Value: "example"},
-				}},
-			}},
-		}}
+				"name": map[string]any{"__class__": "Identifier", "value": "example"},
+			},
+		}
 
-		cu, err := compilationUnitFromTree(
-			&trees.Node{TypeName: "CompilationUnit", Tree: map[string]any{
-				"package":      pkgTree,
-				"imports":      []any{},
-				"declarations": []any{},
-				"linecount":    nil,
-			}},
-		)
+		cu, err := compilationUnitFromTree(map[string]any{
+			"__class__":    "CompilationUnit",
+			"package":      pkgTree,
+			"imports":      []any{},
+			"declarations": []any{},
+			"linecount":    nil,
+		})
 		assert.NoError(t, err, "CompilationUnitFromTree")
-
 		pkg, ok := cu.Package.(*PackageDeclaration)
 		assert.True(t, ok, "Package: expected *PackageDeclaration, got %T", cu.Package)
 		assert.NotZero(t, pkg.Name, "Package.Name is nil")
 	})
 
 	t.Run("from_tree_no_package", func(t *testing.T) {
-		// Build a CompilationUnit tree WITHOUT package (simulating optional-nil)
-		cu, err := compilationUnitFromTree(
-			&trees.Node{TypeName: "CompilationUnit", Tree: map[string]any{
-				"package":      nil,
-				"imports":      []any{},
-				"declarations": []any{},
-				"linecount":    nil,
-			}},
-		)
+		cu, err := compilationUnitFromTree(map[string]any{
+			"__class__":    "CompilationUnit",
+			"package":      nil,
+			"imports":      []any{},
+			"declarations": []any{},
+			"linecount":    nil,
+		})
 		assert.NoError(t, err, "CompilationUnitFromTree (no package)")
 		assert.Zero(t, cu.Package, "expected nil Package when entry is Nil")
 	})
@@ -222,13 +189,9 @@ type Identifier struct {
 }
 
 func identifierFromTree(tree any) (*Identifier, error) {
-	n, ok := tree.(*trees.Node)
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("IdentifierFromTree: expected *trees.Node, got %T", tree)
-	}
-	m, ok := n.Tree.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("IdentifierFromTree: expected map, got %T", n.Tree)
+		return nil, fmt.Errorf("IdentifierFromTree: expected map, got %T", tree)
 	}
 	var result Identifier
 	if v, ok := m["value"]; ok {
@@ -243,13 +206,9 @@ type QualifiedName struct {
 }
 
 func qualifiedNameFromTree(tree any) (*QualifiedName, error) {
-	n, ok := tree.(*trees.Node)
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("QualifiedNameFromTree: expected *trees.Node, got %T", tree)
-	}
-	m, ok := n.Tree.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("QualifiedNameFromTree: expected map, got %T", n.Tree)
+		return nil, fmt.Errorf("QualifiedNameFromTree: expected map, got %T", tree)
 	}
 	var result QualifiedName
 	var err error
@@ -267,11 +226,9 @@ func qualifiedNameFromTree(tree any) (*QualifiedName, error) {
 		}
 	}
 	if v, ok := m["name"]; ok {
-		if n, ok := v.(*trees.Node); ok {
-			result.Name, err = identifierFromTree(n)
-			if err != nil {
-				return nil, fmt.Errorf("QualifiedName.Name: %w", err)
-			}
+		result.Name, err = identifierFromTree(v)
+		if err != nil {
+			return nil, fmt.Errorf("QualifiedName.Name: %w", err)
 		}
 	}
 	return &result, nil
@@ -283,13 +240,9 @@ type PackageDeclaration struct {
 }
 
 func packageDeclarationFromTree(tree any) (*PackageDeclaration, error) {
-	n, ok := tree.(*trees.Node)
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("PackageDeclarationFromTree: expected *trees.Node, got %T", tree)
-	}
-	m, ok := n.Tree.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("PackageDeclarationFromTree: expected map, got %T", n.Tree)
+		return nil, fmt.Errorf("PackageDeclarationFromTree: expected map, got %T", tree)
 	}
 	var result PackageDeclaration
 	var err error
@@ -297,11 +250,9 @@ func packageDeclarationFromTree(tree any) (*PackageDeclaration, error) {
 		result.Annotations = v
 	}
 	if v, ok := m["name"]; ok {
-		if n, ok := v.(*trees.Node); ok {
-			result.Name, err = qualifiedNameFromTree(n)
-			if err != nil {
-				return nil, fmt.Errorf("PackageDeclaration.Name: %w", err)
-			}
+		result.Name, err = qualifiedNameFromTree(v)
+		if err != nil {
+			return nil, fmt.Errorf("PackageDeclaration.Name: %w", err)
 		}
 	}
 	return &result, nil
@@ -314,13 +265,9 @@ type ImportDeclaration struct {
 }
 
 func importDeclarationFromTree(tree any) (*ImportDeclaration, error) {
-	n, ok := tree.(*trees.Node)
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("ImportDeclarationFromTree: expected *trees.Node, got %T", tree)
-	}
-	m, ok := n.Tree.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("ImportDeclarationFromTree: expected map, got %T", n.Tree)
+		return nil, fmt.Errorf("ImportDeclarationFromTree: expected map, got %T", tree)
 	}
 	var result ImportDeclaration
 	var err error
@@ -328,11 +275,9 @@ func importDeclarationFromTree(tree any) (*ImportDeclaration, error) {
 		result.Static = v
 	}
 	if v, ok := m["name"]; ok {
-		if n, ok := v.(*trees.Node); ok {
-			result.Name, err = qualifiedNameFromTree(n)
-			if err != nil {
-				return nil, fmt.Errorf("ImportDeclaration.Name: %w", err)
-			}
+		result.Name, err = qualifiedNameFromTree(v)
+		if err != nil {
+			return nil, fmt.Errorf("ImportDeclaration.Name: %w", err)
 		}
 	}
 	if v, ok := m["all"]; ok {
@@ -349,20 +294,16 @@ type CompilationUnit struct {
 }
 
 func compilationUnitFromTree(tree any) (*CompilationUnit, error) {
-	n, ok := tree.(*trees.Node)
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("CompilationUnitFromTree: expected *trees.Node, got %T", tree)
-	}
-	m, ok := n.Tree.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("CompilationUnitFromTree: expected map, got %T", n.Tree)
+		return nil, fmt.Errorf("CompilationUnitFromTree: expected map, got %T", tree)
 	}
 	var result CompilationUnit
 	var err error
 	if v, ok := m["package"]; ok {
-		if n, ok := v.(*trees.Node); ok {
+		if pkgMap, ok := v.(map[string]any); ok {
 			var pkg *PackageDeclaration
-			pkg, err = packageDeclarationFromTree(n)
+			pkg, err = packageDeclarationFromTree(pkgMap)
 			if err != nil {
 				return nil, fmt.Errorf("CompilationUnit.Package: %w", err)
 			}

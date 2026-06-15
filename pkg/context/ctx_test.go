@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/input"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func newTestBaseCtx() *CoreCtx {
@@ -80,19 +80,13 @@ func TestBaseCtxPatternMismatch(t *testing.T) {
 func TestBaseCtxConstant(t *testing.T) {
 	ctx := newTestBaseCtx()
 	t1, _ := ctx.Constant("hello")
-	tt, ok := t1.(*trees.Text)
-	assert.True(t, ok, "expected Text, got %T", t1)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(t1))
 	t2, _ := ctx.Constant(42)
-	tn, ok := t2.(*trees.Number)
-	assert.True(t, ok, "expected Number, got %T", t2)
-	assert.Equal(t, 42, tn.Value)
+	assert.Equal(t, 42.0, asjson.AsJSON(t2))
 	t3, _ := ctx.Constant(true)
-	tb, ok := t3.(bool)
-	assert.True(t, ok, "expected bool, got %T", t3)
-	assert.Equal(t, true, tb)
+	assert.Equal(t, true, asjson.AsJSON(t3))
 	t4, _ := ctx.Constant(nil)
-	assert.True(t, t4 == nil, "expected nil, got %T", t4)
+	assert.True(t, asjson.AsJSON(t4) == nil, "expected nil, got %T", t4)
 }
 
 func TestBaseCtxEof(t *testing.T) {

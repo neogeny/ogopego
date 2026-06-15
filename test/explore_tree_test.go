@@ -6,49 +6,34 @@ import (
 	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
 	"github.com/neogeny/ogopego/pkg/asjson"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func printTreeRec(t *testing.T, indent string, node any) {
 	t.Helper()
 	switch n := node.(type) {
-	case *trees.Text:
-		t.Logf("%sText(%q)", indent, n.Value)
-	case *trees.Number:
-		t.Logf("%sNumber(%v)", indent, n.Value)
-	case *trees.Seq:
-		t.Logf("%sSeq [", indent)
-		for _, item := range n.Items {
-			printTreeRec(t, indent+"  ", item)
-		}
-		t.Logf("%s]", indent)
+	case string:
+		t.Logf("%s%q", indent, n)
+	case float64:
+		t.Logf("%s%v", indent, n)
+	case bool:
+		t.Logf("%s%v", indent, n)
+	case nil:
+		t.Logf("%snil", indent)
 	case []any:
-		t.Logf("%s[]any [", indent)
+		t.Logf("%s[", indent)
 		for _, item := range n {
 			printTreeRec(t, indent+"  ", item)
 		}
 		t.Logf("%s]", indent)
 	case map[string]any:
-		t.Logf("%smap[string]any {", indent)
+		t.Logf("%s{", indent)
 		for k, v := range n {
 			t.Logf("%s  %s:", indent, k)
 			printTreeRec(t, indent+"    ", v)
 		}
 		t.Logf("%s}", indent)
-	case *trees.Named:
-		t.Logf("%sNamed(%s):", indent, n.Name)
-		printTreeRec(t, indent+"  ", n.Value)
-	case *trees.Node:
-		t.Logf("%sNode(%s):", indent, n.TypeName)
-		printTreeRec(t, indent+"  ", n.Tree)
-	case *trees.Override:
-		t.Logf("%sOverride:", indent)
-		printTreeRec(t, indent+"  ", n.Value)
-	case *trees.OverrideAsList:
-		t.Logf("%sOverrideAsList:", indent)
-		printTreeRec(t, indent+"  ", n.Value)
 	default:
-		t.Logf("%s%T", indent, n)
+		t.Logf("%s%T %+v", indent, n, n)
 	}
 }
 
@@ -80,10 +65,11 @@ func TestExploreCalcTree(t *testing.T) {
 		t.Run(input, func(t *testing.T) {
 			tree, err := api.ParseInput(g, input, nil)
 			assert.NoError(t, err, "parse")
+			j := asjson.AsJSON(tree)
 			t.Logf("input: %s", input)
 			t.Logf("JSON:  %s", asjson.AsJSONStr(tree))
-			t.Logf("type:  %T", tree)
-			printTreeRec(t, "", tree)
+			t.Logf("type:  %T", j)
+			printTreeRec(t, "", j)
 		})
 	}
 }

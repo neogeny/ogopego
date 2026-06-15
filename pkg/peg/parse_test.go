@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/context"
 	"github.com/neogeny/ogopego/pkg/input"
-	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util/pyre"
 )
 
@@ -28,9 +28,7 @@ func TestParseToken(t *testing.T) {
 	expr := &Token{Token: "hello"}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt, ok := result.(*trees.Text)
-	assert.True(t, ok, "expected Text{hello}, got %T %+v", result, result)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseTokenFail(t *testing.T) {
@@ -45,9 +43,7 @@ func TestParsePattern(t *testing.T) {
 	expr := &Pattern{Pattern: `\w+`}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt, ok := result.(*trees.Text)
-	assert.True(t, ok, "expected Text{hello}, got %T %+v", result, result)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseSequence(t *testing.T) {
@@ -60,13 +56,10 @@ func TestParseSequence(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	seq, ok := result.(*trees.Seq)
-	assert.True(t, ok, "expected Seq, got %T", result)
-	assert.Equal(t, 2, len(seq.Items), "expected 2 items, got %d", len(seq.Items))
-	t1 := seq.Items[0].(*trees.Text)
-	t2 := seq.Items[1].(*trees.Text)
-	assert.Equal(t, "hello", t1.Value)
-	assert.Equal(t, "world", t2.Value)
+	lst := asjson.AsJSON(result).([]any)
+	assert.Equal(t, 2, len(lst), "expected 2 items, got %d", len(lst))
+	assert.Equal(t, "hello", lst[0].(string))
+	assert.Equal(t, "world", lst[1].(string))
 }
 
 func TestParseSequenceEmpty(t *testing.T) {
@@ -87,8 +80,7 @@ func TestParseChoiceFirst(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseChoiceSecond(t *testing.T) {
@@ -101,8 +93,7 @@ func TestParseChoiceSecond(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "world", tt.Value)
+	assert.Equal(t, "world", asjson.AsJSON(result))
 }
 
 func TestParseChoiceFail(t *testing.T) {
@@ -122,8 +113,7 @@ func TestParseOptionalMatches(t *testing.T) {
 	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseOptionalNoMatch(t *testing.T) {
@@ -177,8 +167,7 @@ func TestParseGroup(t *testing.T) {
 	expr := &Group{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "hello", tt.Value)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseLookahead(t *testing.T) {
@@ -217,11 +206,8 @@ func TestParseNamed(t *testing.T) {
 	expr := &Named{Exp: &Token{Token: "hello"}, Name: "greeting"}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	named, ok := result.(*trees.Named)
-	assert.True(t, ok, "expected Named, got %T", result)
-	assert.Equal(t, "greeting", named.Name)
-	tt := named.Value.(*trees.Text)
-	assert.Equal(t, "hello", tt.Value)
+	m := asjson.AsJSON(result).(map[string]any)
+	assert.Equal(t, "hello", m["greeting"])
 }
 
 func TestParseOverride(t *testing.T) {
@@ -229,8 +215,7 @@ func TestParseOverride(t *testing.T) {
 	expr := &Override{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Override)
-	assert.True(t, ok, "expected Override, got %T", result)
+	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
 func TestParseRule(t *testing.T) {
@@ -242,11 +227,9 @@ func TestParseRule(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	rn, ok := result.(*trees.Node)
-	assert.True(t, ok, "expected RuleNode, got %T", result)
-	assert.Equal(t, "test", rn.TypeName)
-	tt := rn.Tree.(*trees.Text)
-	assert.Equal(t, "hello", tt.Value)
+	m := asjson.AsJSON(result).(map[string]any)
+	assert.Equal(t, "test", m["__class__"])
+	assert.Equal(t, "hello", m["ast"])
 }
 
 func TestParseGrammar(t *testing.T) {
@@ -263,9 +246,8 @@ func TestParseGrammar(t *testing.T) {
 	}
 	result, err := expr.ParseAt(ctx, nil)
 	assert.NoError(t, err)
-	rn, ok := result.(*trees.Node)
-	assert.True(t, ok, "expected RuleNode, got %T", result)
-	assert.Equal(t, "start", rn.TypeName)
+	m := asjson.AsJSON(result).(map[string]any)
+	assert.Equal(t, "start", m["__class__"])
 }
 
 func TestParseGrammarMultipleRules(t *testing.T) {
@@ -287,9 +269,8 @@ func TestParseGrammarMultipleRules(t *testing.T) {
 	}
 	result, err := expr.ParseAt(ctx, nil)
 	assert.NoError(t, err)
-	rn, ok := result.(*trees.Node)
-	assert.True(t, ok, "expected Node, got %T", result)
-	assert.Equal(t, "first", rn.TypeName)
+	m := asjson.AsJSON(result).(map[string]any)
+	assert.Equal(t, "first", m["__class__"])
 }
 
 func TestParseEOF(t *testing.T) {
@@ -311,8 +292,7 @@ func TestParseDot(t *testing.T) {
 	expr := &Dot{}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "x", tt.Value)
+	assert.Equal(t, "x", asjson.AsJSON(result))
 }
 
 func TestParseVoid(t *testing.T) {
@@ -343,8 +323,7 @@ func TestParseConstant(t *testing.T) {
 	expr := &Constant{Literal: "test"}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	tt := result.(*trees.Text)
-	assert.Equal(t, "test", tt.Value)
+	assert.Equal(t, "test", asjson.AsJSON(result))
 }
 
 func TestParseChoiceResetsCursor(t *testing.T) {
@@ -361,8 +340,8 @@ func TestParseChoiceResetsCursor(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	seq := result.(*trees.Seq)
-	assert.Equal(t, 2, len(seq.Items))
+	lst := asjson.AsJSON(result).([]any)
+	assert.Equal(t, 2, len(lst))
 }
 
 func TestParseClosureIncremental(t *testing.T) {
@@ -377,8 +356,8 @@ func TestParseClosureIncremental(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	seq := result.(*trees.Seq)
-	assert.Equal(t, 2, len(seq.Items), "expected 2 items (a + closure containing b c), got %d", len(seq.Items))
+	lst := asjson.AsJSON(result).([]any)
+	assert.Equal(t, 2, len(lst), "expected 2 items (a + closure containing b c), got %d", len(lst))
 }
 
 func TestParseKeywordIsKeyword(t *testing.T) {
@@ -403,10 +382,8 @@ func TestParseFoldIntegration(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	folded := trees.Fold(result)
-	m, ok := folded.(map[string]any)
-	assert.True(t, ok, "expected MapNode after Fold, got %T", folded)
-	assert.Equal(t, 2, len(m))
-	assert.NotZero(t, m["first"], "missing key 'first'")
-	assert.NotZero(t, m["second"], "missing key 'second'")
+	lst := asjson.AsJSON(result).([]any)
+	assert.Equal(t, 2, len(lst))
+	assert.Equal(t, "hello", lst[0].(map[string]any)["first"])
+	assert.Equal(t, "world", lst[1].(map[string]any)["second"])
 }

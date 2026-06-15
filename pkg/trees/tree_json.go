@@ -4,7 +4,6 @@
 package trees
 
 import (
-	"fmt"
 	"maps"
 
 	"github.com/neogeny/ogopego/pkg/asjson"
@@ -16,9 +15,6 @@ var _ asjson.AsJSONMixin = (*Node)(nil)
 func treeToJSON(t any) any {
 	if t == nil {
 		return nil
-	}
-	if _, ok := t.(asjson.AsJSONMixin); !ok {
-		panic("TreeToJSON: not an AsJSONMixin: " + fmt.Sprintf("%T", t))
 	}
 	switch v := t.(type) {
 	case *Text:

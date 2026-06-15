@@ -6,9 +6,9 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/neogeny/ogopego/api"
+	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/tool"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestModelReprOutput(t *testing.T) {
@@ -33,16 +33,11 @@ func TestPairFromTree(t *testing.T) {
 	tree, err := api.ParseInput(g, "(abc:123)", cfg)
 	assert.NoError(t, err, "parse")
 
-	n, ok := tree.(*trees.Node)
-	assert.True(t, ok, "expected *trees.Node, got %T", tree)
-	assert.Equal(t, "Pair", n.TypeName)
-	m, ok := n.Tree.(map[string]any)
-	assert.True(t, ok, "expected map, got %T", n.Tree)
-	assert.Equal(t, 2, len(m), "expected 2 entries")
-	key := m["key"].(*trees.Text).Value
-	val := m["val"].(*trees.Text).Value
-	assert.Equal(t, "abc", key, "key")
-	assert.Equal(t, "123", val, "val")
+	j := asjson.AsJSON(tree).(map[string]any)
+	assert.Equal(t, "Pair", j["__class__"])
+	assert.Equal(t, 3, len(j), "expected 3 entries (__class__, key, val)")
+	assert.Equal(t, "abc", j["key"], "key")
+	assert.Equal(t, "123", j["val"], "val")
 }
 
 func TestModelReprTypedRef(t *testing.T) {
@@ -67,20 +62,11 @@ func TestTypedRefFromTree(t *testing.T) {
 	cfg := &config.Cfg{}
 	tree, err := api.ParseInput(g, "(abc:123)", cfg)
 	assert.NoError(t, err, "parse")
-	// start::Start wraps: Node{Start, map{child: Node{Pair, map{key, val}}}}
-	ns, ok := tree.(*trees.Node)
-	assert.True(t, ok, "expected *trees.Node, got %T", tree)
-	assert.Equal(t, "Start", ns.TypeName)
-	m, ok := ns.Tree.(map[string]any)
-	assert.True(t, ok, "expected map, got %T", ns.Tree)
-	childTree := m["child"]
-	np, ok := childTree.(*trees.Node)
-	assert.True(t, ok, "expected *trees.Node for child, got %T", childTree)
-	assert.Equal(t, "Pair", np.TypeName)
-	pm, ok := np.Tree.(map[string]any)
-	assert.True(t, ok, "expected map for Pair, got %T", np.Tree)
-	key := pm["key"].(*trees.Text).Value
-	val := pm["val"].(*trees.Text).Value
-	assert.Equal(t, "abc", key, "key")
-	assert.Equal(t, "123", val, "val")
+
+	j := asjson.AsJSON(tree).(map[string]any)
+	assert.Equal(t, "Start", j["__class__"])
+	child := j["child"].(map[string]any)
+	assert.Equal(t, "Pair", child["__class__"])
+	assert.Equal(t, "abc", child["key"], "key")
+	assert.Equal(t, "123", child["val"], "val")
 }
