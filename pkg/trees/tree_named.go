@@ -10,11 +10,6 @@ type Named struct {
 }
 
 func (Named) tree() {}
-func (n *Named) fold(gather *FoldGather) any {
-	val := fold(gather, n.Value)
-	gather.insert(n.Name, val)
-	return val
-}
 
 // NamedAsList is like Named but its values are collected as a list.
 type NamedAsList struct {
@@ -23,11 +18,6 @@ type NamedAsList struct {
 }
 
 func (NamedAsList) tree() {}
-func (n *NamedAsList) fold(gather *FoldGather) any {
-	val := fold(gather, n.Value)
-	gather.insertAsList(n.Name, val)
-	return val
-}
 
 // Override indicates that the contained value should override other values
 // when folding into the result.
@@ -36,11 +26,6 @@ type Override struct {
 }
 
 func (Override) tree() {}
-func (o *Override) fold(gather *FoldGather) any {
-	val := fold(gather, o.Value)
-	gather.Root = appendTree(gather.Root, val)
-	return val
-}
 
 // OverrideAsList is a list-form override variant.
 type OverrideAsList struct {
@@ -48,8 +33,3 @@ type OverrideAsList struct {
 }
 
 func (OverrideAsList) tree() {}
-func (o *OverrideAsList) fold(gather *FoldGather) any {
-	val := fold(gather, o.Value)
-	gather.Root = appendAsSeq(gather.Root, val)
-	return val
-}

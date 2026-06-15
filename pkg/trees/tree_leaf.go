@@ -10,15 +10,13 @@ type Text struct {
 	Value string
 }
 
-func (Text) tree()                          {}
-func (t *Text) fold(gather *FoldGather) any { return t }
+func (Text) tree() {}
 
 // typeBottomTree is an internal sentinel node.
 type typeBottomTree struct {
 }
 
-func (typeBottomTree) tree()                          {}
-func (b *typeBottomTree) fold(gather *FoldGather) any { return b }
+func (typeBottomTree) tree() {}
 
 // TrueValue A JSON-compatible true value.
 type TrueValue struct {
@@ -26,8 +24,7 @@ type TrueValue struct {
 
 var TRUE Tree = &TrueValue{}
 
-func (TrueValue) tree()                          {}
-func (v *TrueValue) fold(gather *FoldGather) any { return v }
+func (TrueValue) tree() {}
 
 // FalseValue A JSON-compatible false value.
 type FalseValue struct {
@@ -35,8 +32,7 @@ type FalseValue struct {
 
 var FALSE Tree = &FalseValue{}
 
-func (FalseValue) tree()                          {}
-func (v *FalseValue) fold(gather *FoldGather) any { return v }
+func (FalseValue) tree() {}
 
 // NullValue A JSON-compatible null value.
 type NullValue struct {
@@ -44,13 +40,11 @@ type NullValue struct {
 
 var NULL Tree = &NullValue{}
 
-func (NullValue) tree()                          {}
-func (v *NullValue) fold(gather *FoldGather) any { return v }
+func (NullValue) tree() {}
 
 // Number represents JSON-compatible a numeric literal node.
 type Number struct {
 	Value float64
 }
 
-func (Number) tree()                          {}
-func (n *Number) fold(gather *FoldGather) any { return n }
+func (Number) tree() {}

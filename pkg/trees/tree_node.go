@@ -8,5 +8,4 @@ type Node struct {
 	Tree     any
 }
 
-func (Node) tree()                          {}
-func (r *Node) fold(gather *FoldGather) any { return r }
+func (Node) tree() {}

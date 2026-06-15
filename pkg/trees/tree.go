@@ -4,6 +4,7 @@
 package trees
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/neogeny/ogopego/pkg/util"
@@ -12,7 +13,6 @@ import (
 type Tree interface {
 	As_JSON_() any
 	tree()
-	fold(gather *FoldGather) any
 }
 
 type FoldGather struct {
@@ -31,7 +31,34 @@ func Fold(tree any) any {
 func fold(g *FoldGather, tree any) any {
 	switch val := tree.(type) {
 	case Tree:
-		return val.fold(g)
+		switch t := val.(type) {
+		case *Text, *Number, *TrueValue, *FalseValue, *NullValue, *typeBottomTree, *Node:
+			return t
+		case *Seq:
+			var out any = nil
+			for _, item := range t.Items {
+				out = MergeTrees(out, fold(g, item))
+			}
+			return out
+		case *Named:
+			v := fold(g, t.Value)
+			g.insert(t.Name, v)
+			return v
+		case *NamedAsList:
+			v := fold(g, t.Value)
+			g.insertAsList(t.Name, v)
+			return v
+		case *Override:
+			v := fold(g, t.Value)
+			g.Root = appendTree(g.Root, v)
+			return v
+		case *OverrideAsList:
+			v := fold(g, t.Value)
+			g.Root = appendAsSeq(g.Root, v)
+			return v
+		default:
+			panic(fmt.Sprintf("fold: unexpected Tree type %T", t))
+		}
 
 	case string, bool, nil,
 		int, int8, int16, int32, int64,
