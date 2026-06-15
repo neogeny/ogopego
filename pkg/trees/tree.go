@@ -12,10 +12,10 @@ import (
 type Tree interface {
 	As_JSON_() any
 	tree()
-	fold(gather *treeMerge) any
+	fold(gather *FoldGather) any
 }
 
-type treeMerge struct {
+type FoldGather struct {
 	Root any
 	Map  map[string]any
 }
@@ -24,11 +24,11 @@ func Fold(tree any) any {
 	if tree == nil {
 		return nil
 	}
-	g := &treeMerge{Map: make(map[string]any)}
+	g := &FoldGather{Map: make(map[string]any)}
 	return finish(g, fold(g, tree))
 }
 
-func fold(g *treeMerge, tree any) any {
+func fold(g *FoldGather, tree any) any {
 	switch val := tree.(type) {
 	case Tree:
 		return val.fold(g)
@@ -106,7 +106,7 @@ func fold(g *treeMerge, tree any) any {
 	}
 }
 
-func finish(g *treeMerge, base any) any {
+func finish(g *FoldGather, base any) any {
 	switch g.Root.(type) {
 	case nil:
 		{
@@ -130,7 +130,7 @@ func closed(t any) any {
 	return t
 }
 
-func merge(a, b any) any {
+func MergeTrees(a, b any) any {
 	switch {
 	case isNil(a):
 		return b
@@ -191,7 +191,7 @@ func appendAsSeq(a, b any) any {
 	return &Seq{Items: []any{a, b}}
 }
 
-func (m *treeMerge) insert(key string, val any) {
+func (m *FoldGather) insert(key string, val any) {
 	existing, ok := m.Map[key]
 	if !ok {
 		m.Map[key] = val
@@ -200,7 +200,7 @@ func (m *treeMerge) insert(key string, val any) {
 	}
 }
 
-func (m *treeMerge) insertAsList(key string, val any) {
+func (m *FoldGather) insertAsList(key string, val any) {
 	existing, ok := m.Map[key]
 	if !ok {
 		m.Map[key] = &Seq{Items: []any{val}}

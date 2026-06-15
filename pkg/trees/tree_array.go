@@ -9,10 +9,10 @@ type Seq struct {
 }
 
 func (Seq) tree() {}
-func (s *Seq) fold(gather *treeMerge) any {
+func (s *Seq) fold(gather *FoldGather) any {
 	var out any = nil
 	for _, item := range s.Items {
-		out = merge(out, fold(gather, item))
+		out = MergeTrees(out, fold(gather, item))
 	}
 	return out
 }

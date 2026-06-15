@@ -10,23 +10,23 @@ type Text struct {
 	Value string
 }
 
-func (Text) tree()                         {}
-func (t *Text) fold(gather *treeMerge) any { return t }
+func (Text) tree()                          {}
+func (t *Text) fold(gather *FoldGather) any { return t }
 
 // Bool represents a boolean node.
 type Bool struct {
 	Value bool
 }
 
-func (Bool) tree()                         {}
-func (b *Bool) fold(gather *treeMerge) any { return b }
+func (Bool) tree()                          {}
+func (b *Bool) fold(gather *FoldGather) any { return b }
 
 // Bottom is an internal sentinel node.
 type Bottom struct {
 }
 
-func (Bottom) tree()                         {}
-func (b *Bottom) fold(gather *treeMerge) any { return b }
+func (Bottom) tree()                          {}
+func (b *Bottom) fold(gather *FoldGather) any { return b }
 
 // TrueValue A JSON-compatible true value.
 type TrueValue struct {
@@ -34,8 +34,8 @@ type TrueValue struct {
 
 var TRUE Tree = &TrueValue{}
 
-func (TrueValue) tree()                         {}
-func (v *TrueValue) fold(gather *treeMerge) any { return v }
+func (TrueValue) tree()                          {}
+func (v *TrueValue) fold(gather *FoldGather) any { return v }
 
 // FalseValue A JSON-compatible false value.
 type FalseValue struct {
@@ -43,8 +43,8 @@ type FalseValue struct {
 
 var FALSE Tree = &FalseValue{}
 
-func (FalseValue) tree()                         {}
-func (v *FalseValue) fold(gather *treeMerge) any { return v }
+func (FalseValue) tree()                          {}
+func (v *FalseValue) fold(gather *FoldGather) any { return v }
 
 // NullValue A JSON-compatible null value.
 type NullValue struct {
@@ -52,13 +52,13 @@ type NullValue struct {
 
 var NULL Tree = &NullValue{}
 
-func (NullValue) tree()                         {}
-func (v *NullValue) fold(gather *treeMerge) any { return v }
+func (NullValue) tree()                          {}
+func (v *NullValue) fold(gather *FoldGather) any { return v }
 
 // Number represents JSON-compatible a numeric literal node.
 type Number struct {
 	Value float64
 }
 
-func (Number) tree()                         {}
-func (n *Number) fold(gather *treeMerge) any { return n }
+func (Number) tree()                          {}
+func (n *Number) fold(gather *FoldGather) any { return n }

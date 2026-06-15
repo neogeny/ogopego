@@ -16,24 +16,17 @@ type Sequence struct {
 // Parse implements the Model interface for Sequence.
 func (s *Sequence) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
-	var items []any
+	var out any
 	for _, el := range s.Sequence {
-		result, err := el.Parse(ctx)
+		tree, err := el.Parse(ctx)
 		if err != nil {
 			ctx.Reset(mark)
 			return nil, err
 		}
-		if result != nil {
-			items = append(items, result)
+		if tree == nil {
+			continue
 		}
+		out = trees.MergeTrees(out, tree)
 	}
-	var tree any = nil
-	switch len(items) {
-	case 0:
-	case 1:
-		tree = items[0]
-	default:
-		tree = &trees.Seq{Items: items}
-	}
-	return tree, nil
+	return out, nil
 }
