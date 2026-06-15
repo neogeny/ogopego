@@ -62,7 +62,7 @@ func TestFoldListToList(t *testing.T) {
 }
 
 func TestFoldNamedToMap(t *testing.T) {
-	result := Fold(&Named{Name: "x", Value: text("hello")})
+	result := Fold(&treeNamed{Name: "x", Value: text("hello")})
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.NotZero(t, m["x"], "expected key 'x'")
@@ -78,8 +78,8 @@ func TestFoldOverride(t *testing.T) {
 
 func TestFoldMultipleNamed(t *testing.T) {
 	result := Fold(seq(
-		&Named{Name: "a", Value: text("1")},
-		&Named{Name: "b", Value: text("2")},
+		&treeNamed{Name: "a", Value: text("1")},
+		&treeNamed{Name: "b", Value: text("2")},
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -89,8 +89,8 @@ func TestFoldMultipleNamed(t *testing.T) {
 
 func TestFoldNamedAccumulates(t *testing.T) {
 	result := Fold(seq(
-		&Named{Name: "x", Value: text("a")},
-		&Named{Name: "x", Value: text("b")},
+		&treeNamed{Name: "x", Value: text("a")},
+		&treeNamed{Name: "x", Value: text("b")},
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -99,7 +99,7 @@ func TestFoldNamedAccumulates(t *testing.T) {
 }
 
 func TestFoldNamedAsList(t *testing.T) {
-	result := Fold(&NamedAsList{Name: "items", Value: text("x")})
+	result := Fold(&treeNamedAsList{Name: "items", Value: text("x")})
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.Equal(t, 1, len(m["items"].([]any)))
@@ -108,8 +108,8 @@ func TestFoldNamedAsList(t *testing.T) {
 
 func TestFoldNamedAsListAccumulates(t *testing.T) {
 	result := Fold(seq(
-		&NamedAsList{Name: "items", Value: text("a")},
-		&NamedAsList{Name: "items", Value: text("b")},
+		&treeNamedAsList{Name: "items", Value: text("a")},
+		&treeNamedAsList{Name: "items", Value: text("b")},
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -120,7 +120,7 @@ func TestFoldNamedAsListAccumulates(t *testing.T) {
 
 func TestFoldOverrideWins(t *testing.T) {
 	result := Fold(seq(
-		&Named{Name: "x", Value: text("ignored")},
+		&treeNamed{Name: "x", Value: text("ignored")},
 		text("also ignored"),
 		&Override{Value: text("result")},
 	))
@@ -140,11 +140,11 @@ func TestFoldOverrideAsList(t *testing.T) {
 }
 
 func TestFoldNestedNamed(t *testing.T) {
-	result := Fold(&Named{
+	result := Fold(&treeNamed{
 		Name: "x",
 		Value: seq(
-			&Named{Name: "a", Value: text("1")},
-			&Named{Name: "b", Value: text("2")},
+			&treeNamed{Name: "a", Value: text("1")},
+			&treeNamed{Name: "b", Value: text("2")},
 		),
 	})
 	m, ok := result.(map[string]any)

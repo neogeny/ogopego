@@ -50,11 +50,11 @@ func fold(g *FoldGather, tree any) any {
 				out = MergeTrees(out, fold(g, item))
 			}
 			return out
-		case *Named:
+		case *treeNamed:
 			v := fold(g, t.Value)
 			g.insert(t.Name, v)
 			return v
-		case *NamedAsList:
+		case *treeNamedAsList:
 			v := fold(g, t.Value)
 			g.insertAsList(t.Name, v)
 			return v

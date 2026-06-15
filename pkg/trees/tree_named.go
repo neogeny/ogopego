@@ -3,21 +3,21 @@
 
 package trees
 
-// Named represents a named key/value pair folded from the parse tree.
-type Named struct {
+// treeNamed represents a named key/value pair folded from the parse tree.
+type treeNamed struct {
 	Name  string
 	Value any
 }
 
-func (Named) tree() {}
+func (treeNamed) tree() {}
 
-// NamedAsList is like Named but its values are collected as a list.
-type NamedAsList struct {
+// treeNamedAsList is like Named but its values are collected as a list.
+type treeNamedAsList struct {
 	Name  string
 	Value any
 }
 
-func (NamedAsList) tree() {}
+func (treeNamedAsList) tree() {}
 
 // Override indicates that the contained value should override other values
 // when folding into the result.

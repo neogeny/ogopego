@@ -10,6 +10,7 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/context"
 	"github.com/neogeny/ogopego/pkg/input"
+	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util/pyre"
 )
 
@@ -207,7 +208,8 @@ func TestParseNamed(t *testing.T) {
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
 	m := asjson.AsJSON(result).(map[string]any)
-	assert.Equal(t, "hello", m["greeting"])
+	assert.NotEqual(t, nil, m, "expected non-nil result %v", m)
+	assert.Equal(t, "hello", m[":greeting"], "expected [:greeting] to be 'hello' %v", m)
 }
 
 func TestParseOverride(t *testing.T) {
@@ -215,6 +217,7 @@ func TestParseOverride(t *testing.T) {
 	expr := &Override{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
+	result = trees.Fold(result)
 	assert.Equal(t, "hello", asjson.AsJSON(result))
 }
 
@@ -382,8 +385,9 @@ func TestParseFoldIntegration(t *testing.T) {
 	}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst := asjson.AsJSON(result).([]any)
-	assert.Equal(t, 2, len(lst))
-	assert.Equal(t, "hello", lst[0].(map[string]any)["first"])
-	assert.Equal(t, "world", lst[1].(map[string]any)["second"])
+	result = trees.Fold(result)
+	ast := asjson.AsJSON(result).(map[string]any)
+	assert.Equal(t, 2, len(ast))
+	assert.Equal(t, "hello", ast["first"])
+	assert.Equal(t, "world", ast["second"])
 }

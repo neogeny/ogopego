@@ -37,9 +37,9 @@ func treeToJSON(t any) any {
 			out[k] = treeToJSON(val)
 		}
 		return out
-	case *Named:
+	case *treeNamed:
 		return map[string]any{v.Name: treeToJSON(v.Value)}
-	case *NamedAsList:
+	case *treeNamedAsList:
 		return map[string]any{v.Name: treeToJSON(v.Value)}
 	case *Override:
 		return treeToJSON(v.Value)
@@ -63,10 +63,10 @@ func treeToJSON(t any) any {
 
 // As_JSON_ implementations for each concrete tree type.
 
-func (*typeBottomTree) As_JSON_() any   { return nil }
-func (s *Seq) As_JSON_() any            { return treeToJSON(s) }
-func (n *Named) As_JSON_() any          { return treeToJSON(n) }
-func (n *NamedAsList) As_JSON_() any    { return treeToJSON(n) }
-func (o *Override) As_JSON_() any       { return treeToJSON(o) }
-func (o *OverrideAsList) As_JSON_() any { return treeToJSON(o) }
-func (n *Node) As_JSON_() any           { return treeToJSON(n) }
+func (*typeBottomTree) As_JSON_() any    { return nil }
+func (s *Seq) As_JSON_() any             { return treeToJSON(s) }
+func (n *treeNamed) As_JSON_() any       { return treeToJSON(n) }
+func (n *treeNamedAsList) As_JSON_() any { return treeToJSON(n) }
+func (o *Override) As_JSON_() any        { return treeToJSON(o) }
+func (o *OverrideAsList) As_JSON_() any  { return treeToJSON(o) }
+func (n *Node) As_JSON_() any            { return treeToJSON(n) }
