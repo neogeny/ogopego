@@ -39,10 +39,10 @@ func TestFoldBool(t *testing.T) {
 }
 
 func TestFoldNumber(t *testing.T) {
-	result := Fold(&Number{Value: 42.5})
-	n, ok := result.(*Number)
-	assert.True(t, ok, "expected Number, got %T", result)
-	assert.Equal(t, 42.5, n.Value)
+	result := Fold(42.5)
+	f, ok := result.(float64)
+	assert.True(t, ok, "expected float64, got %T", result)
+	assert.Equal(t, 42.5, f)
 }
 
 func TestFoldSeqToSeq(t *testing.T) {
@@ -171,9 +171,8 @@ func TestTextAsJSON(t *testing.T) {
 }
 
 func TestNumberAsJSON(t *testing.T) {
-	var aj asjson.AsJSONMixin = &Number{Value: 42.5}
-	result := asjson.AsJSONStr(aj.As_JSON_())
-	assert.Equal(t, "42.5", result)
+	result := treeToJSON(42.5)
+	assert.Equal(t, 42.5, result)
 }
 
 func TestNodeAsJSONTree(t *testing.T) {

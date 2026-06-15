@@ -9,10 +9,3 @@ type Text struct {
 }
 
 func (Text) tree() {}
-
-// Number represents JSON-compatible a numeric literal node.
-type Number struct {
-	Value float64
-}
-
-func (Number) tree() {}

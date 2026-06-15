@@ -430,13 +430,13 @@ func (ctx *CoreCtx) Constant(literal any) (any, error) {
 	case string:
 		return &trees.Text{Value: v}, nil
 	case float64:
-		return &trees.Number{Value: v}, nil
+		return v, nil
 	case bool:
 		return v, nil
 	case nil:
 		return nil, nil
 	case int:
-		return &trees.Number{Value: float64(v)}, nil
+		return float64(v), nil
 	default:
 		return &trees.Text{Value: fmt.Sprintf("%v", v)}, nil
 	}

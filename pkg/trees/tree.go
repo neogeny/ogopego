@@ -29,10 +29,13 @@ func Fold(tree any) any {
 }
 
 func fold(g *FoldGather, tree any) any {
+	if tree == BOTTOM {
+		return tree
+	}
 	switch val := tree.(type) {
 	case Tree:
 		switch t := val.(type) {
-		case *Text, *Number, *typeBottomTree, *Node:
+		case *Text, *Node:
 			return t
 		case *Seq:
 			var out any = nil

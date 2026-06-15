@@ -40,7 +40,7 @@ func (m *IntMeta) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Number{Value: float64(n)}, nil
+	return float64(n), nil
 }
 
 func (m *UIntMeta) Parse(ctx Ctx) (any, error) {
@@ -48,7 +48,7 @@ func (m *UIntMeta) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Number{Value: float64(n)}, nil
+	return float64(n), nil
 }
 
 func (m *FloatMeta) Parse(ctx Ctx) (any, error) {
@@ -56,7 +56,7 @@ func (m *FloatMeta) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &trees.Number{Value: f}, nil
+	return f, nil
 }
 
 func (m *BoolMeta) Parse(ctx Ctx) (any, error) {
