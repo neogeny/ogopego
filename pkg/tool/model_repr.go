@@ -101,11 +101,11 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 				innerType := strings.TrimPrefix(f.goType, "[]")
 				switch {
 				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
-					// NamedList with typed refs — entry is *trees.Seq
+					// NamedList with typed refs — entry is *trees.TreeSeq
 					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
+					buf.WriteString("\t\tseq, ok := v.(*trees.TreeSeq)\n")
 					buf.WriteString("\t\tif !ok {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected Seq, got %%T\", v)\n", ri.typeName, f.goName)
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected TreeSeq, got %%T\", v)\n", ri.typeName, f.goName)
 					buf.WriteString("\t\t}\n")
 					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(seq.Items))\n", f.goName, f.goType)
 					buf.WriteString("\t\tfor i, item := range seq.Items {\n")
@@ -117,11 +117,11 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t}\n\n")
 
 				case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
-					// NamedList of string — entry is *trees.Seq
-			fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
+					// NamedList of string — entry is *trees.TreeSeq
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+					buf.WriteString("\t\tseq, ok := v.(*trees.TreeSeq)\n")
 					buf.WriteString("\t\tif !ok {\n")
-					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected Seq, got %%T\", v)\n", ri.typeName, f.goName)
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected TreeSeq, got %%T\", v)\n", ri.typeName, f.goName)
 					buf.WriteString("\t\t}\n")
 					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(seq.Items))\n", f.goName, f.goType)
 					buf.WriteString("\t\tfor i, item := range seq.Items {\n")

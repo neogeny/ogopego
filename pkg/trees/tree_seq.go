@@ -3,9 +3,9 @@
 
 package trees
 
-// Seq represents a sequence node whose items are merged when folding.
-type Seq struct {
+// TreeSeq represents a sequence node whose items are merged when folding.
+type TreeSeq struct {
 	Items []any
 }
 
-func (Seq) tree() {}
+func (TreeSeq) tree() {}

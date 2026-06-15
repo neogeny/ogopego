@@ -3,33 +3,35 @@
 
 package trees
 
-// treeNamed represents a named key/value pair folded from the parse tree.
-type treeNamed struct {
-	Name  string
-	Value any
+import "unicode"
+
+func validateUserKeyName(name string) {
+	for _, char := range name {
+		if !unicode.IsLetter(char) && char != '_' {
+			panic("invalid name: " + name)
+		}
+	}
 }
 
-func (treeNamed) tree() {}
-
-// treeNamedAsList is like Named but its values are collected as a list.
-type treeNamedAsList struct {
-	Name  string
-	Value any
+// TreeNamed represents a named key/value pair folded from the parse tree.
+func TreeNamed(name string, value any) any {
+	validateUserKeyName(name)
+	return map[string]any{keyNamed + name: value}
 }
 
-func (treeNamedAsList) tree() {}
+// TreeNamedAsList is like Named but its values are collected as a list.
+func TreeNamedAsList(name string, value any) any {
+	validateUserKeyName(name)
+	return map[string]any{keyListNamed + name: value}
+}
 
-// treeOverride indicates that the contained value should override other values
+// TreeOverride indicates that the contained value should override other values
 // when folding into the result.
-type treeOverride struct {
-	Value any
+func TreeOverride(value any) any {
+	return map[string]any{keyAt: value}
 }
 
-func (treeOverride) tree() {}
-
-// treeOverrideAsList is a list-form override variant.
-type treeOverrideAsList struct {
-	Value any
+// TreeOverrideAsList is a list-form override variant.
+func TreeOverrideAsList(value any) any {
+	return map[string]any{keyListAt: value}
 }
-
-func (treeOverrideAsList) tree() {}
