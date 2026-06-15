@@ -45,6 +45,7 @@ internal/_x/
 x/
 *tmp/
 datasets
+tatsu
 
 _out/
 out/
