@@ -68,20 +68,20 @@ func ModelRepr(g Grammar, pkg string) string {
 	}
 
 	for _, ri := range infos {
-		buf.WriteString(fmt.Sprintf("func %sFromTree(tree trees.Tree) (*%s, error) {\n", ri.typeName, ri.typeName))
+		buf.WriteString(fmt.Sprintf("func %sFromTree(tree any) (*%s, error) {\n", ri.typeName, ri.typeName))
 
 		if ri.hasNames {
-			buf.WriteString("\tm, ok := tree.(*trees.MapNode)\n")
+			buf.WriteString("\tm, ok := tree.(map[string]any)\n")
 			buf.WriteString("\tif !ok {\n")
 			buf.WriteString("\t\tn, ok := tree.(*trees.Node)\n")
 			buf.WriteString("\t\tif !ok {\n")
-			buf.WriteString(fmt.Sprintf("\t\t\treturn nil, fmt.Errorf(\"%sFromTree: expected Node or MapNode, got %%T\", tree)\n", ri.typeName))
+			buf.WriteString(fmt.Sprintf("\t\t\treturn nil, fmt.Errorf(\"%sFromTree: expected Node or map, got %%T\", tree)\n", ri.typeName))
 			buf.WriteString("\t\t}\n")
 			buf.WriteString(fmt.Sprintf("\t\treturn %sFromTree(n.Tree)\n", ri.typeName))
 			buf.WriteString("\t}\n")
 			buf.WriteString(fmt.Sprintf("\treturn &%s{\n", ri.typeName))
 			for _, f := range ri.named {
-				buf.WriteString(fmt.Sprintf("\t\t%s: m.Entries[\"%s\"].(*trees.Text).Value,\n", f.goName, f.name))
+				buf.WriteString(fmt.Sprintf("\t\t%s: m[\"%s\"].(*trees.Text).Value,\n", f.goName, f.name))
 			}
 			buf.WriteString("\t}, nil\n")
 		} else {

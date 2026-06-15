@@ -32,9 +32,9 @@ func printTreeRec(t *testing.T, indent string, node any) {
 			printTreeRec(t, indent+"  ", item)
 		}
 		t.Logf("%s]", indent)
-	case *trees.MapNode:
-		t.Logf("%sMapNode {", indent)
-		for k, v := range n.Entries {
+	case map[string]any:
+		t.Logf("%smap[string]any {", indent)
+		for k, v := range n {
 			t.Logf("%s  %s:", indent, k)
 			printTreeRec(t, indent+"    ", v)
 		}

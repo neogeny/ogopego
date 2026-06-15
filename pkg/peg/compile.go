@@ -65,26 +65,26 @@ func (c *comp) nodeCheck(tree any, typename string) (any, error) {
 	return inner, nil
 }
 
-// mapGet retrieves a value from a MapNode by key.
-func (c *comp) mapGet(tree any, key string) (trees.Tree, error) {
-	mn, ok := tree.(*trees.MapNode)
+// mapGet retrieves a value from a map by key.
+func (c *comp) mapGet(tree any, key string) (any, error) {
+	m, ok := tree.(map[string]any)
 	if !ok {
-		return nil, c.error(fmt.Sprintf("expected MapNode for key %q, got %T", key, tree))
+		return nil, c.error(fmt.Sprintf("expected map for key %q, got %T", key, tree))
 	}
-	val, ok := mn.Entries[key]
+	val, ok := m[key]
 	if !ok {
 		return nil, c.error(fmt.Sprintf("missing key %q", key))
 	}
 	return val, nil
 }
 
-// mapGetDefault retrieves a value from a MapNode by key, returning a default if not found.
+// mapGetDefault retrieves a value from a map by key, returning a default if not found.
 func (c *comp) mapGetDefault(tree any, key, def string) string {
-	mn, ok := tree.(*trees.MapNode)
+	m, ok := tree.(map[string]any)
 	if !ok {
 		return def
 	}
-	val, ok := mn.Entries[key]
+	val, ok := m[key]
 	if !ok {
 		return def
 	}
@@ -100,13 +100,15 @@ func textValue(tree any) string {
 	return ""
 }
 
-// listValue extracts a slice of trees from a Seq or List tree node.
+// listValue extracts a slice of values from various list-like tree types.
 func listValue(tree any) []any {
 	switch t := tree.(type) {
 	case *trees.Seq:
 		return t.Items
 	case *trees.Array:
 		return t.Items
+	case []any:
+		return t
 	default:
 		return nil
 	}
@@ -149,19 +151,19 @@ func (c *comp) compileGrammar(tree any) (*Grammar, error) {
 		return nil, err
 	}
 
-	mn, ok := inner.(*trees.MapNode)
+	m, ok := inner.(map[string]any)
 	if !ok {
-		return nil, cc.error(fmt.Sprintf("expected MapNode, got %T", inner))
+		return nil, cc.error(fmt.Sprintf("expected map, got %T", inner))
 	}
 
 	name := ""
-	if n, ok := mn.Entries["name"]; ok {
+	if n, ok := m["name"]; ok {
 		name = textValue(n)
 	}
 
 	var rules []*Rule
 
-	if rulesTree, ok := mn.Entries["rules"]; ok {
+	if rulesTree, ok := m["rules"]; ok {
 		ruleList := listValue(rulesTree)
 		if ruleList == nil {
 			return nil, cc.error("rules is not a list")
@@ -177,15 +179,15 @@ func (c *comp) compileGrammar(tree any) (*Grammar, error) {
 	}
 
 	var directives [][]string
-	if dirsTree, ok := mn.Entries["directives"]; ok {
+	if dirsTree, ok := m["directives"]; ok {
 		dirList := listValue(dirsTree)
 		for _, d := range dirList {
-			dm, dOk := d.(*trees.MapNode)
+			dm, dOk := d.(map[string]any)
 			if !dOk {
 				continue
 			}
-			n := textValue(dm.Entries["name"])
-			v := textValue(dm.Entries["value"])
+			n := textValue(dm["name"])
+			v := textValue(dm["value"])
 			if n != "" {
 				directives = append(directives, []string{n, v})
 				if n == "grammar" && name == "" {
@@ -200,7 +202,7 @@ func (c *comp) compileGrammar(tree any) (*Grammar, error) {
 	}
 
 	var keywords []string
-	if kwTree, ok := mn.Entries["keywords"]; ok {
+	if kwTree, ok := m["keywords"]; ok {
 		kwOuter := listValue(kwTree)
 		for _, innerList := range kwOuter {
 			for _, kw := range listValue(innerList) {
@@ -237,22 +239,19 @@ func (c *comp) compileRule(tree any) (*Rule, error) {
 		return nil, err
 	}
 
-	mn, ok := inner.(*trees.MapNode)
+	m, ok := inner.(map[string]any)
 	if !ok {
-		return nil, c.error(fmt.Sprintf("expected MapNode for Rule, got %T", inner))
+		return nil, c.error(fmt.Sprintf("expected map for Rule, got %T", inner))
 	}
 
-	name := textValue(mn.Entries["name"])
+	name := textValue(m["name"])
 	if name == "" {
 		return nil, c.error("rule has no name")
 	}
 
-	expTree, err := c.mapGet(inner, "exp")
+	expTree, err := c.mapGet(m, "exp")
 	if err != nil {
-		expTree, err = c.mapGet(mn, "exp")
-		if err != nil {
-			return nil, c.error("rule has no exp")
-		}
+		return nil, c.error("rule has no exp")
 	}
 
 	exp, err := c.compileExp(expTree)
@@ -260,10 +259,10 @@ func (c *comp) compileRule(tree any) (*Rule, error) {
 		return nil, err
 	}
 
-	decorators := strListValue(mn.Entries["decorators"])
+	decorators := strListValue(m["decorators"])
 
-	params := strListValue(mn.Entries["params"])
-	kwparams := strPairsListValue(mn.Entries["kwparams"])
+	params := strListValue(m["params"])
+	kwparams := strPairsListValue(m["kwparams"])
 
 	isName := slices.Contains(decorators, "name") ||
 		slices.Contains(decorators, "isname")

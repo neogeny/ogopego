@@ -115,6 +115,9 @@ func finish(g *treeMerge, base any) any {
 		return closed(g.Root)
 	}
 	if len(g.Map) > 0 {
+		for k, v := range g.Map {
+			g.Map[k] = closed(v)
+		}
 		return g.Map
 	}
 	return closed(base)

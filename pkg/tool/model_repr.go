@@ -68,16 +68,16 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 	}
 
 	for _, ri := range infos {
-		fmt.Fprintf(&buf, "func %sFromTree(tree trees.Tree) (*%s, error) {\n", ri.typeName, ri.typeName)
+		fmt.Fprintf(&buf, "func %sFromTree(tree any) (*%s, error) {\n", ri.typeName, ri.typeName)
 		buf.WriteString("\tn, ok := tree.(*trees.Node)\n")
 		buf.WriteString("\tif !ok {\n")
 		fmt.Fprintf(&buf, "\t\treturn nil, fmt.Errorf(\"%sFromTree: expected *trees.Node, got %%T\", tree)\n", ri.typeName)
 		buf.WriteString("\t}\n")
 
 		if len(ri.fields) > 0 {
-			buf.WriteString("\tm, ok := n.Tree.(*trees.MapNode)\n")
+			buf.WriteString("\tm, ok := n.Tree.(map[string]any)\n")
 			buf.WriteString("\tif !ok {\n")
-			fmt.Fprintf(&buf, "\t\treturn nil, fmt.Errorf(\"%sFromTree: expected MapNode, got %%T\", n.Tree)\n", ri.typeName)
+			fmt.Fprintf(&buf, "\t\treturn nil, fmt.Errorf(\"%sFromTree: expected map, got %%T\", n.Tree)\n", ri.typeName)
 			buf.WriteString("\t}\n")
 			buf.WriteString(fmt.Sprintf("\tvar result %s\n", ri.typeName))
 
@@ -98,11 +98,11 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 			buf.WriteString("\n")
 
 			for _, f := range ri.fields {
+				innerType := strings.TrimPrefix(f.goType, "[]")
 				switch {
 				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
 					// NamedList with typed refs — entry is *trees.Seq
-					innerType := strings.TrimPrefix(f.goType, "[]")
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
 					buf.WriteString("\t\tif !ok {\n")
 					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected Seq, got %%T\", v)\n", ri.typeName, f.goName)
@@ -118,7 +118,7 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 
 				case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
 					// NamedList of string — entry is *trees.Seq
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+			fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tseq, ok := v.(*trees.Seq)\n")
 					buf.WriteString("\t\tif !ok {\n")
 					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected Seq, got %%T\", v)\n", ri.typeName, f.goName)
@@ -128,11 +128,9 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 					fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(*trees.Text).Value\n", f.goName)
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
-
 				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
 					// Named with list-wrapped typed ref — entry is *trees.List
-					innerType := strings.TrimPrefix(f.goType, "[]")
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tlist, ok := v.(*trees.List)\n")
 					buf.WriteString("\t\tif !ok {\n")
 					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected List, got %%T\", v)\n", ri.typeName, f.goName)
@@ -148,7 +146,7 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 
 				case strings.HasPrefix(f.goType, "*"):
 					// Named with typed call — extract from *trees.Node (nil-safe for Optional)
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					buf.WriteString("\t\tif n, ok := v.(*trees.Node); ok {\n")
 					fmt.Fprintf(&buf, "\t\t\tresult.%s, err = %sFromTree(n)\n", f.goName, f.goType[1:])
 					buf.WriteString("\t\t\tif err != nil {\n")
@@ -159,13 +157,13 @@ func ModelRepr(g peg.Grammar, pkg string) string {
 
 				case f.goType == "string":
 					// Named with pattern/token — entry is *trees.Text
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					fmt.Fprintf(&buf, "\t\tresult.%s = v.(*trees.Text).Value\n", f.goName)
 					buf.WriteString("\t}\n\n")
 
 				default:
 					// Named with untyped/unknown inner — assign as any
-					fmt.Fprintf(&buf, "\tif v, ok := m.Entries[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
 					fmt.Fprintf(&buf, "\t\tresult.%s = v\n", f.goName)
 					buf.WriteString("\t}\n\n")
 				}
@@ -191,7 +189,7 @@ type fieldDef struct {
 
 // collectFields walks a peg.Model expression tree and collects named fields.
 // It discovers *peg.Named and *peg.NamedList nodes at compile time so the
-// generated FromTree can extract them from the folded MapNode at runtime.
+// generated FromTree can extract them from the folded map at runtime.
 func collectFields(fields *[]fieldDef, exp peg.Model, rules map[string]*peg.Rule) {
 	switch e := exp.(type) {
 	case *peg.Named:

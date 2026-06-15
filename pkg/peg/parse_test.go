@@ -132,8 +132,7 @@ func TestParseOptionalNoMatch(t *testing.T) {
 	expr := &Optional{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil for failed optional, got %T", result)
+	assert.True(t, result == nil, "expected nil for failed optional, got %T", result)
 	assert.Equal(t, 0, ctx.Mark(), "expected cursor at 0 after failed optional, got %d", ctx.Mark())
 }
 
@@ -188,8 +187,7 @@ func TestParseLookahead(t *testing.T) {
 	expr := &Lookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil after lookahead, got %T", result)
+	assert.True(t, result == nil, "expected nil after lookahead, got %T", result)
 	assert.Equal(t, 0, ctx.Mark(), "expected cursor restored to 0 after lookahead, got %d", ctx.Mark())
 }
 
@@ -205,8 +203,7 @@ func TestParseNegativeLookahead(t *testing.T) {
 	expr := &NegativeLookahead{Exp: &Token{Token: "hello"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil, got %T", result)
+	assert.True(t, result == nil, "expected nil, got %T", result)
 }
 
 func TestParseNegativeLookaheadFail(t *testing.T) {
@@ -324,8 +321,7 @@ func TestParseVoid(t *testing.T) {
 	expr := &Void{}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil, got %T", result)
+	assert.True(t, result == nil, "expected nil, got %T", result)
 }
 
 func TestParseFail(t *testing.T) {
@@ -340,8 +336,7 @@ func TestParseNull(t *testing.T) {
 	expr := &NULL{}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil, got %T", result)
+	assert.True(t, result == nil, "expected nil, got %T", result)
 }
 
 func TestParseConstant(t *testing.T) {
@@ -410,9 +405,9 @@ func TestParseFoldIntegration(t *testing.T) {
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
 	folded := trees.Fold(result)
-	mn, ok := folded.(*trees.MapNode)
+	m, ok := folded.(map[string]any)
 	assert.True(t, ok, "expected MapNode after Fold, got %T", folded)
-	assert.Equal(t, 2, len(mn.Entries))
-	assert.NotZero(t, mn.Entries["first"], "missing key 'first'")
-	assert.NotZero(t, mn.Entries["second"], "missing key 'second'")
+	assert.Equal(t, 2, len(m))
+	assert.NotZero(t, m["first"], "missing key 'first'")
+	assert.NotZero(t, m["second"], "missing key 'second'")
 }
