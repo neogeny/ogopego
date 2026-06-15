@@ -434,7 +434,7 @@ func (ctx *CoreCtx) Constant(literal any) (trees.Tree, error) {
 	case bool:
 		return &trees.Bool{Value: v}, nil
 	case nil:
-		return trees.NIL, nil
+		return nil, nil
 	case int:
 		return &trees.Number{Value: float64(v)}, nil
 	default:

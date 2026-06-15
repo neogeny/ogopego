@@ -23,11 +23,11 @@ func (s *Sequence) Parse(ctx Ctx) (any, error) {
 			ctx.Reset(mark)
 			return nil, err
 		}
-		if _, ok := result.(*trees.Nil); !ok {
+		if result != nil {
 			items = append(items, result)
 		}
 	}
-	var tree any = NIL
+	var tree any = nil
 	switch len(items) {
 	case 0:
 	case 1:

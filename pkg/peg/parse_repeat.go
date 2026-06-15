@@ -5,8 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // repeat parses an expression zero or more times (or one or more if positive is true).
@@ -43,7 +41,7 @@ func repeat(ctx Ctx, exp Model, positive bool) (any, error) {
 		}
 		items = append(items, result)
 	}
-	return &trees.Array{Items: items}, nil
+	return items, nil
 }
 
 // repeatWithSep parses an expression separated by another expression.
@@ -63,7 +61,7 @@ func repeatWithSep(
 		if positive {
 			return nil, err
 		}
-		return &trees.Array{Items: nil}, nil
+		return []any{}, nil
 	}
 	items = append(items, first)
 
@@ -99,5 +97,5 @@ func repeatWithSep(
 		}
 		items = append(items, result)
 	}
-	return &trees.Array{Items: items}, nil
+	return items, nil
 }

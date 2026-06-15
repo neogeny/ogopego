@@ -92,8 +92,7 @@ func TestBaseCtxConstant(t *testing.T) {
 	assert.True(t, ok, "expected Bool, got %T", t3)
 	assert.Equal(t, true, tb.Value)
 	t4, _ := ctx.Constant(nil)
-	_, ok = t4.(*trees.Nil)
-	assert.True(t, ok, "expected Nil, got %T", t4)
+	assert.True(t, t4 == nil, "expected nil, got %T", t4)
 }
 
 func TestBaseCtxEof(t *testing.T) {

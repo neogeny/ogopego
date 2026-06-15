@@ -3,10 +3,6 @@
 
 package peg
 
-import (
-	"github.com/neogeny/ogopego/pkg/trees"
-)
-
 // EmptyClosure represents a closure that always matches an empty sequence, yielding an empty list.
 type EmptyClosure struct {
 	ModelBase
@@ -14,5 +10,5 @@ type EmptyClosure struct {
 
 // Parse implements the Model interface for EmptyClosure.
 func (e *EmptyClosure) Parse(ctx Ctx) (any, error) {
-	return &trees.Array{Items: nil}, nil
+	return []any{}, nil
 }

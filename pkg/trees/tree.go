@@ -22,7 +22,7 @@ type treeMerge struct {
 
 func Fold(tree any) any {
 	if tree == nil {
-		return NIL
+		return nil
 	}
 	g := &treeMerge{Map: make(map[string]any)}
 	return finish(g, fold(g, tree))
@@ -108,7 +108,7 @@ func fold(g *treeMerge, tree any) any {
 
 func finish(g *treeMerge, base any) any {
 	switch g.Root.(type) {
-	case *Nil, nil:
+	case nil:
 		{
 		}
 	default:
@@ -210,9 +210,5 @@ func (m *treeMerge) insertAsList(key string, val any) {
 }
 
 func isNil(t any) bool {
-	if t == nil {
-		return true
-	}
-	_, ok := t.(*Nil)
-	return ok || t == nil
+	return t == nil
 }

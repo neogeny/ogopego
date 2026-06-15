@@ -10,15 +10,8 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
-func text(s string) *Text      { return &Text{Value: s} }
-func seq(items ...any) *Seq    { return &Seq{Items: items} }
-func list(items ...any) *Array { return &Array{Items: items} }
-
-func TestFoldNil(t *testing.T) {
-	result := Fold(&Nil{})
-	_, ok := result.(*Nil)
-	assert.True(t, ok, "expected Nil, got %T", result)
-}
+func text(s string) *Text   { return &Text{Value: s} }
+func seq(items ...any) *Seq { return &Seq{Items: items} }
 
 func TestFoldBottom(t *testing.T) {
 	result := Fold(&Bottom{})
@@ -28,8 +21,7 @@ func TestFoldBottom(t *testing.T) {
 
 func TestFoldGoNil(t *testing.T) {
 	result := Fold(nil)
-	_, ok := result.(*Nil)
-	assert.True(t, ok, "expected Nil, got %T", result)
+	assert.True(t, result == nil, "expected nil, got %T", result)
 }
 
 func TestFoldText(t *testing.T) {
@@ -62,11 +54,11 @@ func TestFoldSeqToSeq(t *testing.T) {
 }
 
 func TestFoldListToList(t *testing.T) {
-	result := Fold(list(text("a"), text("b"), text("c")))
-	l, ok := result.(*Array)
-	assert.True(t, ok, "expected List, got %T", result)
-	assert.Equal(t, 3, len(l.Items))
-	assert.Equal(t, "a", l.Items[0].(*Text).Value, "expected 'a'")
+	result := Fold([]any{text("a"), text("b"), text("c")})
+	l, ok := result.([]any)
+	assert.True(t, ok, "expected list, got %T", result)
+	assert.Equal(t, 3, len(l))
+	assert.Equal(t, "a", l[0].(*Text).Value, "expected 'a'")
 }
 
 func TestFoldNamedToMap(t *testing.T) {
@@ -166,9 +158,9 @@ func TestFoldNestedNamed(t *testing.T) {
 }
 
 func TestFoldSeqWithNil(t *testing.T) {
-	result := Fold(seq(text("a"), &Nil{}, text("b")))
+	result := Fold(seq(text("a"), nil, text("b")))
 	l, ok := result.([]any)
-	assert.True(t, ok, "expected List, got %T", result)
+	assert.True(t, ok, "expected list, got %T", result)
 	assert.Equal(t, 2, len(l))
 }
 

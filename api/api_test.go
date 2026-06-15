@@ -7,15 +7,13 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 func TestParseGrammar(t *testing.T) {
 	result, err := ParseGrammar("@@grammar :: Test start := 'x'", nil)
 	assert.NoError(t, err, "ParseGrammar error")
 	assert.NotZero(t, result, "expected non-nil Tree")
-	_, ok := result.(*trees.Nil)
-	assert.False(t, ok, "unexpected Nil tree")
+	assert.True(t, result != nil, "unexpected nil tree")
 }
 
 func TestCompile(t *testing.T) {

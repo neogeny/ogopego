@@ -103,12 +103,10 @@ func textValue(tree any) string {
 // listValue extracts a slice of values from various list-like tree types.
 func listValue(tree any) []any {
 	switch t := tree.(type) {
-	case *trees.Seq:
-		return t.Items
-	case *trees.Array:
-		return t.Items
 	case []any:
 		return t
+	case *trees.Seq:
+		return t.Items
 	default:
 		return nil
 	}

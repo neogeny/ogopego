@@ -3,7 +3,6 @@
 
 package trees
 
-var NIL = &Nil{}
 var BOTTOM = &Bottom{}
 
 // Text is a leaf node representing plain text.
@@ -21,13 +20,6 @@ type Bool struct {
 
 func (Bool) tree()                         {}
 func (b *Bool) fold(gather *treeMerge) any { return b }
-
-// Nil is the nil sentinel node used to represent empty results.
-type Nil struct {
-}
-
-func (Nil) tree()                         {}
-func (n *Nil) fold(gather *treeMerge) any { return n }
 
 // Bottom is an internal sentinel node.
 type Bottom struct {

@@ -64,11 +64,7 @@ func TestJavaEndToEnd(t *testing.T) {
 		v, ok := m["imports"]
 		assert.True(t, ok, "missing 'imports' entry")
 		impList, ok := v.([]any)
-		if !ok {
-			arr, ok2 := v.(*trees.Array)
-			assert.True(t, ok2, "imports: expected list, got %T", v)
-			impList = arr.Items
-		}
+		assert.True(t, ok, "imports: expected list, got %T", v)
 		assert.Equal(t, 1, len(impList), "imports: expected 1 item")
 		impNode, ok := impList[0].(*trees.Node)
 		assert.True(t, ok, "imports[0]: expected *trees.Node, got %T", impList[0])

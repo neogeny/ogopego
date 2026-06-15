@@ -74,8 +74,7 @@ func TestParseSequenceEmpty(t *testing.T) {
 	expr := &Sequence{Sequence: []Model{}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	_, ok := result.(*trees.Nil)
-	assert.True(t, ok, "expected Nil for empty sequence, got %T", result)
+	assert.True(t, result == nil, "expected nil for empty sequence, got %T", result)
 }
 
 func TestParseChoiceFirst(t *testing.T) {
@@ -141,9 +140,9 @@ func TestParseClosureMultiple(t *testing.T) {
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.Array)
-	assert.True(t, ok, "expected List, got %T", result)
-	assert.Equal(t, 3, len(lst.Items))
+	lst, ok := result.([]any)
+	assert.True(t, ok, "expected list, got %T", result)
+	assert.Equal(t, 3, len(lst))
 }
 
 func TestParseClosureZero(t *testing.T) {
@@ -151,9 +150,9 @@ func TestParseClosureZero(t *testing.T) {
 	expr := &Closure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.Array)
-	assert.True(t, ok, "expected List for zero closure, got %T", result)
-	assert.Equal(t, 0, len(lst.Items))
+	lst, ok := result.([]any)
+	assert.True(t, ok, "expected list for zero closure, got %T", result)
+	assert.Equal(t, 0, len(lst))
 }
 
 func TestParsePositiveClosure(t *testing.T) {
@@ -161,9 +160,9 @@ func TestParsePositiveClosure(t *testing.T) {
 	expr := &PositiveClosure{Exp: &Token{Token: "a"}}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	lst, ok := result.(*trees.Array)
-	assert.True(t, ok, "expected List, got %T", result)
-	assert.Equal(t, 3, len(lst.Items))
+	lst, ok := result.([]any)
+	assert.True(t, ok, "expected list, got %T", result)
+	assert.Equal(t, 3, len(lst))
 }
 
 func TestParsePositiveClosureFail(t *testing.T) {

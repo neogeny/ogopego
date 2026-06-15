@@ -27,8 +27,6 @@ func treeToJSON(t any) any {
 		return v.Value
 	case *Bool:
 		return v.Value
-	case *Nil:
-		return nil
 	case *Bottom:
 		return nil
 	case *TrueValue:
@@ -43,15 +41,15 @@ func treeToJSON(t any) any {
 			items[i] = treeToJSON(item)
 		}
 		return items
-	case *Array:
-		items := make([]any, len(v.Items))
-		for i, item := range v.Items {
+	case []any:
+		items := make([]any, len(v))
+		for i, item := range v {
 			items[i] = treeToJSON(item)
 		}
 		return items
-	case *MapNode:
-		out := make(map[string]any, len(v.Entries))
-		for k, val := range v.Entries {
+	case map[string]any:
+		out := make(map[string]any, len(v))
+		for k, val := range v {
 			out[k] = treeToJSON(val)
 		}
 		return out
@@ -84,14 +82,11 @@ func treeToJSON(t any) any {
 func (t *Text) As_JSON_() any           { return treeToJSON(t) }
 func (n *Number) As_JSON_() any         { return treeToJSON(n) }
 func (b *Bool) As_JSON_() any           { return treeToJSON(b) }
-func (*Nil) As_JSON_() any              { return nil }
 func (*Bottom) As_JSON_() any           { return nil }
 func (*TrueValue) As_JSON_() any        { return true }
 func (*FalseValue) As_JSON_() any       { return false }
 func (*NullValue) As_JSON_() any        { return nil }
 func (s *Seq) As_JSON_() any            { return treeToJSON(s) }
-func (a *Array) As_JSON_() any          { return treeToJSON(a) }
-func (m *MapNode) As_JSON_() any        { return treeToJSON(m) }
 func (n *Named) As_JSON_() any          { return treeToJSON(n) }
 func (n *NamedAsList) As_JSON_() any    { return treeToJSON(n) }
 func (o *Override) As_JSON_() any       { return treeToJSON(o) }

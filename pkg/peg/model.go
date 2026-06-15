@@ -10,7 +10,6 @@ import (
 
 	"github.com/neogeny/ogopego/pkg/asjson"
 	context2 "github.com/neogeny/ogopego/pkg/context"
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // Ctx is an alias for the parse-time context type.
@@ -21,9 +20,6 @@ type MemoKey = context2.MemoKey
 
 // OrderedMap is an alias for the JSON ordered map type used by models.
 type OrderedMap = asjson.OrderedMap
-
-// NIL is the sentinel nil-like tree value used to represent empty results.
-var NIL = trees.NIL
 
 // Model is the interface implemented by all grammar model nodes.
 type Model interface {
