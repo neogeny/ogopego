@@ -9,6 +9,13 @@ import (
 	"github.com/neogeny/ogopego/pkg/util"
 )
 
+var (
+	errStyle   = color.New(color.FgRed, color.Bold)
+	blueStyle  = color.New(color.FgBlue, color.Bold)
+	bold       = color.New(color.Bold)
+	grey       = color.New(color.FgHiBlack)
+)
+
 // Memento captures the state of the parser at a specific point for error reporting.
 type Memento struct {
 	Cursor    input.Cursor
@@ -41,11 +48,6 @@ func (m *Memento) InputSource() string {
 func (m *Memento) Error() string {
 	line, col := m.Cursor.PosAt(m.Mark)
 	var b strings.Builder
-
-	errStyle := color.New(color.FgRed, color.Bold)
-	blueStyle := color.New(color.FgBlue, color.Bold)
-	bold := color.New(color.Bold)
-	grey := color.New(color.FgHiBlack)
 
 	errLabel := errStyle.Sprint("error")
 	bluePipe := blueStyle.Sprint("|")

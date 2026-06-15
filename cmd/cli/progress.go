@@ -83,8 +83,7 @@ func (lp *LoadProgress) Finish() {
 	if lp == nil || lp.bar == nil {
 		return
 	}
-	lp.bar.SetTotal(0, true)
-	lp.bar.Wait()
+	lp.bar.Abort(true)
 }
 
 // FileProgress manages a progress bar for individual file processing.
