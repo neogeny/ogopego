@@ -14,6 +14,6 @@ func (n *NULL) Link(g *Grammar) error {
 }
 
 // Parse implements the Model interface for NULL.
-func (n *NULL) Parse(ctx Ctx) (Tree, error) {
-	return NIL, nil
+func (n *NULL) Parse(ctx Ctx) (any, error) {
+	return nil, nil
 }

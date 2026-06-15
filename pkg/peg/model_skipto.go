@@ -15,7 +15,7 @@ type SkipTo struct {
 }
 
 // Parse implements the Model interface for SkipTo.
-func (s *SkipTo) Parse(ctx Ctx) (Tree, error) {
+func (s *SkipTo) Parse(ctx Ctx) (any, error) {
 	for !ctx.Eof() {
 		mark := ctx.Mark()
 		result, err := s.Exp.Parse(ctx)

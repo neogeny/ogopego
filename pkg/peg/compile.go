@@ -101,7 +101,7 @@ func textValue(tree trees.Tree) string {
 }
 
 // listValue extracts a slice of trees from a Seq or List tree node.
-func listValue(tree trees.Tree) []trees.Tree {
+func listValue(tree any) [] any {
 	switch t := tree.(type) {
 	case *trees.Seq:
 		return t.Items

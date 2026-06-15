@@ -11,6 +11,6 @@ type Synth struct {
 }
 
 // Parse implements the Model interface for Synth.
-func (s *Synth) Parse(ctx Ctx) (Tree, error) {
+func (s *Synth) Parse(ctx Ctx) (any, error) {
 	return s.Exp.Parse(ctx)
 }

@@ -21,7 +21,7 @@ type Choice struct {
 }
 
 // Parse implements the Model interface for Option.
-func (o *Option) Parse(ctx Ctx) (Tree, error) {
+func (o *Option) Parse(ctx Ctx) (any, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (o *Option) Parse(ctx Ctx) (Tree, error) {
 	return result, nil
 }
 
-func (c *Choice) Parse(ctx Ctx) (Tree, error) {
+func (c *Choice) Parse(ctx Ctx) (any, error) {
 	startMark := ctx.Mark()
 	failure := func() error {
 		msg := "no option matched"

@@ -13,6 +13,6 @@ type EmptyClosure struct {
 }
 
 // Parse implements the Model interface for EmptyClosure.
-func (e *EmptyClosure) Parse(ctx Ctx) (Tree, error) {
+func (e *EmptyClosure) Parse(ctx Ctx) (any, error) {
 	return &trees.Array{Items: nil}, nil
 }

@@ -16,7 +16,7 @@ type RuleInclude struct {
 }
 
 // Parse implements the Model interface for RuleInclude.
-func (r *RuleInclude) Parse(ctx Ctx) (Tree, error) {
+func (r *RuleInclude) Parse(ctx Ctx) (any, error) {
 	if r.exp == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("RuleInclude %q has not been resolved", r.Name))
 	}

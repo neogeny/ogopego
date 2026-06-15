@@ -27,7 +27,7 @@ type FloatMeta struct{ MetaExp }
 // BoolMeta matches a @bool meta-expression.
 type BoolMeta struct{ MetaExp }
 
-func (m *NameMeta) Parse(ctx Ctx) (Tree, error) {
+func (m *NameMeta) Parse(ctx Ctx) (any, error) {
 	s, err := ctx.MatchName()
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (m *NameMeta) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Text{Value: s}, nil
 }
 
-func (m *IntMeta) Parse(ctx Ctx) (Tree, error) {
+func (m *IntMeta) Parse(ctx Ctx) (any, error) {
 	n, err := ctx.MatchInt()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (m *IntMeta) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Number{Value: float64(n)}, nil
 }
 
-func (m *UIntMeta) Parse(ctx Ctx) (Tree, error) {
+func (m *UIntMeta) Parse(ctx Ctx) (any, error) {
 	n, err := ctx.MatchUInt()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (m *UIntMeta) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Number{Value: float64(n)}, nil
 }
 
-func (m *FloatMeta) Parse(ctx Ctx) (Tree, error) {
+func (m *FloatMeta) Parse(ctx Ctx) (any, error) {
 	f, err := ctx.MatchFloat()
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (m *FloatMeta) Parse(ctx Ctx) (Tree, error) {
 	return &trees.Number{Value: f}, nil
 }
 
-func (m *BoolMeta) Parse(ctx Ctx) (Tree, error) {
+func (m *BoolMeta) Parse(ctx Ctx) (any, error) {
 	b, err := ctx.MatchBool()
 	if err != nil {
 		return nil, err

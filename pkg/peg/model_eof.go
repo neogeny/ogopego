@@ -13,7 +13,7 @@ type EOF struct {
 }
 
 // Parse implements the Model interface for EOF.
-func (e *EOF) Parse(ctx Ctx) (Tree, error) {
+func (e *EOF) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	ctx.NextToken()
 	if !ctx.Eof() {
@@ -23,5 +23,5 @@ func (e *EOF) Parse(ctx Ctx) (Tree, error) {
 			fmt.Errorf("expected EOF"),
 		)
 	}
-	return NIL, nil
+	return nil, nil
 }

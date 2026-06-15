@@ -468,12 +468,12 @@ func (ctx *CoreCtx) CutStackPop() bool {
 	return cutSeen
 }
 
-func (ctx *CoreCtx) ApplySemantics(node trees.Tree, ruleName string, params []string) (trees.Tree, bool) {
+func (ctx *CoreCtx) ApplySemantics(tree any, ruleName string, params []string) (any, bool) {
 	ctx.muLock()
 	sem := ctx.heavy.cfg.Semantics
 	ctx.muUnlock()
 	if sem != nil {
-		return sem.Apply(node, ruleName, params)
+		return sem.Apply(tree, ruleName, params)
 	}
-	return node, false
+	return tree, false
 }

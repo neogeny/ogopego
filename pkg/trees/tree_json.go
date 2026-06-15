@@ -13,7 +13,7 @@ import (
 var _ asjson.AsJSONMixin = (*Node)(nil)
 
 // / treeToJSONStr
-func treeToJSON(t Tree) any {
+func treeToJSON(t any) any {
 	if t == nil {
 		return nil
 	}

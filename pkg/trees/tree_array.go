@@ -5,28 +5,28 @@ package trees
 
 // Seq represents a sequence node whose items are merged when folding.
 type Seq struct {
-	Items []Tree
+	Items []any
 }
 
 func (Seq) tree() {}
-func (s *Seq) fold(gather *treeMerge) Tree {
-	var out Tree = &Nil{}
+func (s *Seq) fold(gather *treeMerge) any {
+	var out any = nil
 	for _, item := range s.Items {
-		out = merge(out, item.fold(gather))
+		out = merge(out, fold(gather, item))
 	}
 	return out
 }
 
 // Array represents a closed list node produced after folding sequences.
 type Array struct {
-	Items []Tree
+	Items []any
 }
 
 func (Array) tree() {}
-func (l *Array) fold(gather *treeMerge) Tree {
-	items := make([]Tree, len(l.Items))
+func (l *Array) fold(gather *treeMerge) any {
+	items := make([]any, len(l.Items))
 	for i, item := range l.Items {
-		items[i] = item.fold(gather)
+		items[i] = fold(gather, item)
 	}
 	return &Array{Items: items}
 }

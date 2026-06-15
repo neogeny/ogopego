@@ -21,7 +21,7 @@ type NegativeLookahead struct {
 }
 
 // Parse implements the Model interface for Lookahead.
-func (l *Lookahead) Parse(ctx Ctx) (Tree, error) {
+func (l *Lookahead) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	defer ctx.Reset(mark)
 	ctx.EnterLookahead()
@@ -31,11 +31,11 @@ func (l *Lookahead) Parse(ctx Ctx) (Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NIL, nil
+	return nil, nil
 }
 
 // Parse implements the Model interface for NegativeLookahead.
-func (n *NegativeLookahead) Parse(ctx Ctx) (Tree, error) {
+func (n *NegativeLookahead) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	defer ctx.Reset(mark)
 	ctx.EnterLookahead()
@@ -51,5 +51,5 @@ func (n *NegativeLookahead) Parse(ctx Ctx) (Tree, error) {
 			),
 		)
 	}
-	return NIL, nil
+	return nil, nil
 }

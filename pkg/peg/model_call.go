@@ -17,7 +17,7 @@ type Call struct {
 }
 
 // Parse implements the Model interface for Call.
-func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
+func (c *Call) Parse(ctx Ctx) (any, error) {
 	if c.rule == nil {
 		return nil, ctx.Failure(ctx.Mark(), fmt.Errorf("call to %q has not been linked", c.Name))
 	}
@@ -27,7 +27,7 @@ func (c *Call) Parse(ctx Ctx) (trees.Tree, error) {
 	return call(ctx, name, rule)
 }
 
-func call(ctx Ctx, name string, rule *Rule) (trees.Tree, error) {
+func call(ctx Ctx, name string, rule *Rule) (any, error) {
 	start := ctx.Mark()
 
 	if !rule.IsToken() {
@@ -69,7 +69,7 @@ func call(ctx Ctx, name string, rule *Rule) (trees.Tree, error) {
 	return result, nil
 }
 
-func ruleCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (trees.Tree, error) {
+func ruleCall(ctx Ctx, name string, rule *Rule, key MemoKey, start int) (any, error) {
 	if memo, ok := ctx.Memo(key); ok {
 		ctx.Reset(memo.Mark)
 		if _, isBottom := memo.Tree.(*trees.Bottom); isBottom {

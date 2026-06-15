@@ -43,7 +43,8 @@ grammar/java.*
 internal/x/
 internal/_x/
 x/
-tmp/
+*tmp/
+datasets
 
 _out/
 out/

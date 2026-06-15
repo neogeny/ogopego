@@ -11,6 +11,6 @@ type Group struct {
 }
 
 // Parse implements the Model interface for Group.
-func (g *Group) Parse(ctx Ctx) (Tree, error) {
+func (g *Group) Parse(ctx Ctx) (any, error) {
 	return g.Exp.Parse(ctx)
 }

@@ -14,7 +14,7 @@ func (v *Void) Link(g *Grammar) error {
 }
 
 // Parse implements the Model interface for Void.
-func (v *Void) Parse(ctx Ctx) (Tree, error) {
+func (v *Void) Parse(ctx Ctx) (any, error) {
 	ctx.Void()
-	return NIL, nil
+	return nil, nil
 }

@@ -9,6 +9,6 @@ type Fail struct {
 }
 
 // Parse implements the Model interface for Fail.
-func (f *Fail) Parse(ctx Ctx) (Tree, error) {
+func (f *Fail) Parse(ctx Ctx) (any, error) {
 	return nil, ctx.Fail()
 }

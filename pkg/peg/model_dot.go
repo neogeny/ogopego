@@ -13,7 +13,7 @@ type Dot struct {
 }
 
 // Parse implements the Model interface for Dot.
-func (d *Dot) Parse(ctx Ctx) (Tree, error) {
+func (d *Dot) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	r, err := ctx.Dot()
 	if err != nil {

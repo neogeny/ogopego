@@ -21,7 +21,7 @@ type OverrideList struct {
 }
 
 // Parse implements the Model interface for Override.
-func (o *Override) Parse(ctx Ctx) (Tree, error) {
+func (o *Override) Parse(ctx Ctx) (any, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (o *Override) Parse(ctx Ctx) (Tree, error) {
 }
 
 // Parse implements the Model interface for OverrideList.
-func (o *OverrideList) Parse(ctx Ctx) (Tree, error) {
+func (o *OverrideList) Parse(ctx Ctx) (any, error) {
 	result, err := o.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err

@@ -3,8 +3,6 @@
 
 package peg
 
-import "github.com/neogeny/ogopego/pkg/trees"
-
 // Optional represents an optional expression that may succeed with a
 // Nil result if the nested expression fails without a cut.
 type Optional struct {
@@ -13,7 +11,7 @@ type Optional struct {
 }
 
 // Parse implements the Model interface for Optional.
-func (o *Optional) Parse(ctx Ctx) (Tree, error) {
+func (o *Optional) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 
 	ctx.CutStackPush()
@@ -25,7 +23,7 @@ func (o *Optional) Parse(ctx Ctx) (Tree, error) {
 		if cutSeen {
 			return nil, err
 		}
-		return trees.NIL, nil
+		return nil, nil
 	}
 	return result, nil
 }

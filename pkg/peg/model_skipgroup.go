@@ -10,10 +10,10 @@ type SkipGroup struct {
 }
 
 // Parse implements the Model interface for SkipGroup.
-func (s *SkipGroup) Parse(ctx Ctx) (Tree, error) {
+func (s *SkipGroup) Parse(ctx Ctx) (any, error) {
 	_, err := s.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return NIL, nil
+	return nil, nil
 }

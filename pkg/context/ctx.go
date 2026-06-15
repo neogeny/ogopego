@@ -106,5 +106,5 @@ type Ctx interface {
 	CutStackPop() bool
 
 	// ApplySemantics apply the semantics of Tree transformations in the Cfg for the grammar
-	ApplySemantics(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
+	ApplySemantics(tree any, ruleName string, params []string) (any, bool)
 }

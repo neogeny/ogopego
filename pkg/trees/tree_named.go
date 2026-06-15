@@ -6,12 +6,12 @@ package trees
 // Named represents a named key/value pair folded from the parse tree.
 type Named struct {
 	Name  string
-	Value Tree
+	Value any
 }
 
 func (Named) tree() {}
-func (n *Named) fold(gather *treeMerge) Tree {
-	val := n.Value.fold(gather)
+func (n *Named) fold(gather *treeMerge) any {
+	val := fold(gather, n.Value)
 	gather.insert(n.Name, val)
 	return val
 }
@@ -19,12 +19,12 @@ func (n *Named) fold(gather *treeMerge) Tree {
 // NamedAsList is like Named but its values are collected as a list.
 type NamedAsList struct {
 	Name  string
-	Value Tree
+	Value any
 }
 
 func (NamedAsList) tree() {}
-func (n *NamedAsList) fold(gather *treeMerge) Tree {
-	val := n.Value.fold(gather)
+func (n *NamedAsList) fold(gather *treeMerge) any {
+	val := fold(gather, n.Value)
 	gather.insertAsList(n.Name, val)
 	return val
 }
@@ -32,24 +32,24 @@ func (n *NamedAsList) fold(gather *treeMerge) Tree {
 // Override indicates that the contained value should override other values
 // when folding into the result.
 type Override struct {
-	Value Tree
+	Value any
 }
 
 func (Override) tree() {}
-func (o *Override) fold(gather *treeMerge) Tree {
-	val := o.Value.fold(gather)
+func (o *Override) fold(gather *treeMerge) any {
+	val := fold(gather, o.Value)
 	gather.Root = appendTree(gather.Root, val)
 	return val
 }
 
 // OverrideAsList is a list-form override variant.
 type OverrideAsList struct {
-	Value Tree
+	Value any
 }
 
 func (OverrideAsList) tree() {}
-func (o *OverrideAsList) fold(gather *treeMerge) Tree {
-	val := o.Value.fold(gather)
-	gather.Root = appendAsList(gather.Root, val)
+func (o *OverrideAsList) fold(gather *treeMerge) any {
+	val := fold(gather, o.Value)
+	gather.Root = appendAsSeq(gather.Root, val)
 	return val
 }

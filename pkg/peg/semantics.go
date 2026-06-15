@@ -7,9 +7,9 @@ import "github.com/neogeny/ogopego/pkg/trees"
 type EBNFGrammarSemantics struct{}
 
 func (EBNFGrammarSemantics) Apply(
-	node trees.Tree,
+	node any,
 	ruleName string,
-	params []string) (trees.Tree, bool) {
+	params []string) (any, bool) {
 	switch ruleName {
 	case "true":
 		return trees.TRUE, true

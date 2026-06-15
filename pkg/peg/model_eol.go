@@ -5,8 +5,6 @@ package peg
 
 import (
 	"fmt"
-
-	"github.com/neogeny/ogopego/pkg/trees"
 )
 
 // EOL matches an end-of-line sequence.
@@ -15,12 +13,12 @@ type EOL struct {
 }
 
 // Parse implements the Model interface for EOL.
-func (e *EOL) Parse(ctx Ctx) (Tree, error) {
+func (e *EOL) Parse(ctx Ctx) (any, error) {
 	if !ctx.MatchEOL() {
 		return nil, ctx.Failure(
 			ctx.Mark(),
 			fmt.Errorf("expected EOL"),
 		)
 	}
-	return trees.NIL, nil
+	return nil, nil
 }

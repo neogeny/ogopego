@@ -38,7 +38,7 @@ type Rule struct {
 }
 
 // Parse implements the Model interface for Rule.
-func (r *Rule) Parse(ctx Ctx) (Tree, error) {
+func (r *Rule) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	result, err := r.Exp.Parse(ctx)
 	if err != nil {

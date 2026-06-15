@@ -28,7 +28,7 @@ var NIL = trees.NIL
 // Model is the interface implemented by all grammar model nodes.
 type Model interface {
 	// Parse attempts to parse the input using the model.
-	Parse(ctx Ctx) (Tree, error)
+	Parse(ctx Ctx) (any, error)
 	// Link resolves rule references within the model.
 	Link(g *Grammar) error
 	// ValidateLinked checks if all rule references are resolved.

@@ -20,7 +20,7 @@ type NamedList struct {
 }
 
 // Parse implements the Model interface for Named.
-func (n *Named) Parse(ctx Ctx) (Tree, error) {
+func (n *Named) Parse(ctx Ctx) (any, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (n *Named) Parse(ctx Ctx) (Tree, error) {
 }
 
 // Parse implements the Model interface for NamedList.
-func (n *NamedList) Parse(ctx Ctx) (Tree, error) {
+func (n *NamedList) Parse(ctx Ctx) (any, error) {
 	result, err := n.Exp.Parse(ctx)
 	if err != nil {
 		return nil, err

@@ -17,11 +17,11 @@ type PositiveClosure struct {
 }
 
 // Parse implements the Model interface for Closure.
-func (c *Closure) Parse(ctx Ctx) (Tree, error) {
+func (c *Closure) Parse(ctx Ctx) (any, error) {
 	return repeat(ctx, c.Exp, false)
 }
 
 // Parse implements the Model interface for PositiveClosure.
-func (p *PositiveClosure) Parse(ctx Ctx) (Tree, error) {
+func (p *PositiveClosure) Parse(ctx Ctx) (any, error) {
 	return repeat(ctx, p.Exp, true)
 }

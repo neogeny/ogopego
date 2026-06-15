@@ -16,7 +16,7 @@ type Token struct {
 }
 
 // Parse implements the Model interface for Token.
-func (t *Token) Parse(ctx Ctx) (Tree, error) {
+func (t *Token) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
 	if !ctx.MatchToken(t.Token) {
 		ctx.Reset(mark)

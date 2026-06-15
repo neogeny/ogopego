@@ -14,7 +14,7 @@ type Pattern struct {
 }
 
 // Parse implements the Model interface for Pattern.
-func (p *Pattern) Parse(ctx Ctx) (Tree, error) {
+func (p *Pattern) Parse(ctx Ctx) (any, error) {
 	matched, err := ctx.MatchPattern(p.Pattern)
 	if err != nil {
 		return nil, err

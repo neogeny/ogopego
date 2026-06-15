@@ -16,11 +16,11 @@ type Alert struct {
 }
 
 // Parse implements the Model interface for Constant.
-func (c *Constant) Parse(ctx Ctx) (Tree, error) {
+func (c *Constant) Parse(ctx Ctx) (any, error) {
 	return ctx.Constant(c.Literal)
 }
 
 // Parse implements the Model interface for Alert.
-func (a *Alert) Parse(ctx Ctx) (Tree, error) {
+func (a *Alert) Parse(ctx Ctx) (any, error) {
 	return ctx.Constant(a.Literal)
 }

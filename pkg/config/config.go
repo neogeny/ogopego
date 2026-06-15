@@ -6,7 +6,6 @@ package config
 import (
 	"strings"
 
-	"github.com/neogeny/ogopego/pkg/trees"
 	"github.com/neogeny/ogopego/pkg/util"
 	"github.com/neogeny/ogopego/pkg/util/heartbeat"
 )
@@ -25,7 +24,7 @@ type Configurable interface {
 }
 
 type GrammarSemantics interface {
-	Apply(node trees.Tree, ruleName string, params []string) (trees.Tree, bool)
+	Apply(tree any, ruleName string, params []string) (any, bool)
 }
 
 // Cfg configures grammar compilation and input parsing. Use DefaultCfg() or

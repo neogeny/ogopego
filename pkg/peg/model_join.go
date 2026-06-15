@@ -34,21 +34,21 @@ type PositiveGather struct {
 }
 
 // Parse implements the Model interface for Join.
-func (j *Join) Parse(ctx Ctx) (Tree, error) {
+func (j *Join) Parse(ctx Ctx) (any, error) {
 	return repeatWithSep(ctx, j.Exp, j.Sep, false, true)
 }
 
 // Parse implements the Model interface for PositiveJoin.
-func (p *PositiveJoin) Parse(ctx Ctx) (Tree, error) {
+func (p *PositiveJoin) Parse(ctx Ctx) (any, error) {
 	return repeatWithSep(ctx, p.Exp, p.Sep, true, true)
 }
 
 // Parse implements the Model interface for Gather.
-func (g *Gather) Parse(ctx Ctx) (Tree, error) {
+func (g *Gather) Parse(ctx Ctx) (any, error) {
 	return repeatWithSep(ctx, g.Exp, g.Sep, false, false)
 }
 
 // Parse implements the Model interface for PositiveGather.
-func (p *PositiveGather) Parse(ctx Ctx) (Tree, error) {
+func (p *PositiveGather) Parse(ctx Ctx) (any, error) {
 	return repeatWithSep(ctx, p.Exp, p.Sep, true, false)
 }

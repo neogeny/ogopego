@@ -10,9 +10,9 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
 
-func text(s string) *Text       { return &Text{Value: s} }
-func seq(items ...Tree) *Seq    { return &Seq{Items: items} }
-func list(items ...Tree) *Array { return &Array{Items: items} }
+func text(s string) *Text      { return &Text{Value: s} }
+func seq(items ...any) *Seq    { return &Seq{Items: items} }
+func list(items ...any) *Array { return &Array{Items: items} }
 
 func TestFoldNil(t *testing.T) {
 	result := Fold(&Nil{})

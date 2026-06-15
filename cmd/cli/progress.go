@@ -105,9 +105,9 @@ func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 		mpb.BarStyle().
 			Lbound(" ").
 			Rbound(" ").
-			Filler("-").FillerMeta(yellow).
+			Filler("─").FillerMeta(yellow).
 			Padding("  ").
-			Tip("-").TipMeta(yellow),
+			Tip("─").TipMeta(yellow),
 		mpb.PrependDecorators(
 			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
 		),

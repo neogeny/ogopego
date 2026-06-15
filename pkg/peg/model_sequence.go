@@ -14,9 +14,9 @@ type Sequence struct {
 }
 
 // Parse implements the Model interface for Sequence.
-func (s *Sequence) Parse(ctx Ctx) (Tree, error) {
+func (s *Sequence) Parse(ctx Ctx) (any, error) {
 	mark := ctx.Mark()
-	var items []Tree
+	var items []any
 	for _, el := range s.Sequence {
 		result, err := el.Parse(ctx)
 		if err != nil {
