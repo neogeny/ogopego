@@ -72,12 +72,12 @@ func optimizeExpr(m Model) Model {
 
 	// --- Collections: clone and recurse into children ---
 	case *Choice:
-		opts := make([]*Option, len(e.Options))
+		opts := make([]Model, len(e.Options))
 		for i, o := range e.Options {
-			opts[i] = &Option{ModelBase: o.ModelBase, Exp: optimizeExpr(o.Exp)}
+			opts[i] = optimizeExpr(o)
 		}
 		if len(opts) == 1 {
-			return opts[0].Exp
+			return opts[0]
 		}
 		return &Choice{ModelBase: e.ModelBase, Options: opts}
 

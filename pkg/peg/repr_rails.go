@@ -319,7 +319,7 @@ func walkExp(m Model) []string {
 	case *Choice:
 		var tracks [][]string
 		for _, opt := range exp.Options {
-			tracks = append(tracks, walkExp(opt.Exp))
+			tracks = append(tracks, walkExp(opt))
 		}
 		return layOut(tracks)
 

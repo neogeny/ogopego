@@ -100,49 +100,49 @@ func GenerateGrammarModel(g peg.Grammar, pkg string) string {
 			for _, f := range ri.fields {
 				innerType := strings.TrimPrefix(f.goType, "[]")
 				switch {
-			case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
-				// NamedList with typed refs — entry is []any
-				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-				buf.WriteString("\t\titems, ok := v.([]any)\n")
-				buf.WriteString("\t\tif !ok {\n")
-				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
-				buf.WriteString("\t\t}\n")
-				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
-				buf.WriteString("\t\tfor i, item := range items {\n")
-				fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
-				buf.WriteString("\t\t\tif err != nil {\n")
-				fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
-				buf.WriteString("\t\t\t}\n")
-				buf.WriteString("\t\t}\n")
-				buf.WriteString("\t}\n\n")
+				case f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					// NamedList with typed refs — entry is []any
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+					buf.WriteString("\t\titems, ok := v.([]any)\n")
+					buf.WriteString("\t\tif !ok {\n")
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t}\n")
+					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+					buf.WriteString("\t\tfor i, item := range items {\n")
+					fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
+					buf.WriteString("\t\t\tif err != nil {\n")
+					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t\t}\n")
+					buf.WriteString("\t\t}\n")
+					buf.WriteString("\t}\n\n")
 
-			case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
-				// NamedList of string — entry is []any
-				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-				buf.WriteString("\t\titems, ok := v.([]any)\n")
-				buf.WriteString("\t\tif !ok {\n")
-				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
-				buf.WriteString("\t\t}\n")
-				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
-				buf.WriteString("\t\tfor i, item := range items {\n")
-				fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(string)\n", f.goName)
-				buf.WriteString("\t\t}\n")
-				buf.WriteString("\t}\n\n")
-			case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
-				// Named with list-wrapped typed ref — entry is []any
-				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-				buf.WriteString("\t\titems, ok := v.([]any)\n")
-				buf.WriteString("\t\tif !ok {\n")
-				fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
-				buf.WriteString("\t\t}\n")
-				fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
-				buf.WriteString("\t\tfor i, item := range items {\n")
-				fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
-				buf.WriteString("\t\t\tif err != nil {\n")
-				fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
-				buf.WriteString("\t\t\t}\n")
-				buf.WriteString("\t\t}\n")
-				buf.WriteString("\t}\n\n")
+				case f.fromNamedList && strings.HasPrefix(f.goType, "[]"):
+					// NamedList of string — entry is []any
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+					buf.WriteString("\t\titems, ok := v.([]any)\n")
+					buf.WriteString("\t\tif !ok {\n")
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t}\n")
+					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+					buf.WriteString("\t\tfor i, item := range items {\n")
+					fmt.Fprintf(&buf, "\t\t\tresult.%s[i] = item.(string)\n", f.goName)
+					buf.WriteString("\t\t}\n")
+					buf.WriteString("\t}\n\n")
+				case !f.fromNamedList && strings.HasPrefix(f.goType, "[]*"):
+					// Named with list-wrapped typed ref — entry is []any
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+					buf.WriteString("\t\titems, ok := v.([]any)\n")
+					buf.WriteString("\t\tif !ok {\n")
+					fmt.Fprintf(&buf, "\t\t\treturn nil, fmt.Errorf(\"%s.%s: expected []any, got %%T\", v)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t}\n")
+					fmt.Fprintf(&buf, "\t\tresult.%s = make(%s, len(items))\n", f.goName, f.goType)
+					buf.WriteString("\t\tfor i, item := range items {\n")
+					fmt.Fprintf(&buf, "\t\t\tresult.%s[i], err = %sFromTree(item)\n", f.goName, innerType)
+					buf.WriteString("\t\t\tif err != nil {\n")
+					fmt.Fprintf(&buf, "\t\t\t\treturn nil, fmt.Errorf(\"%s.%s[%%d]: %%w\", i, err)\n", ri.typeName, f.goName)
+					buf.WriteString("\t\t\t}\n")
+					buf.WriteString("\t\t}\n")
+					buf.WriteString("\t}\n\n")
 
 				case strings.HasPrefix(f.goType, "*"):
 					// Named with typed call — extract from *trees.Node (nil-safe for Optional)
@@ -155,10 +155,10 @@ func GenerateGrammarModel(g peg.Grammar, pkg string) string {
 					buf.WriteString("\t\t}\n")
 					buf.WriteString("\t}\n\n")
 
-			case f.goType == "string":
-				// Named with pattern/token — entry is string
-				fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
-				fmt.Fprintf(&buf, "\t\tresult.%s = v.(string)\n", f.goName)
+				case f.goType == "string":
+					// Named with pattern/token — entry is string
+					fmt.Fprintf(&buf, "\tif v, ok := m[\"%s\"]; ok {\n", f.name)
+					fmt.Fprintf(&buf, "\t\tresult.%s = v.(string)\n", f.goName)
 					buf.WriteString("\t}\n\n")
 
 				default:
@@ -234,7 +234,7 @@ func collectFields(fields *[]fieldDef, exp peg.Model, rules map[string]*peg.Rule
 		}
 	case *peg.Choice:
 		for _, opt := range e.Options {
-			collectFields(fields, opt.Exp, rules)
+			collectFields(fields, opt, rules)
 		}
 	case *peg.Option:
 		collectFields(fields, e.Exp, rules)
@@ -294,7 +294,7 @@ func resolvedTypeName(exp peg.Model, rules map[string]*peg.Rule) string {
 		return resolvedTypeName(e.Exp, rules)
 	case *peg.Choice:
 		for _, opt := range e.Options {
-			if tn := resolvedTypeName(opt.Exp, rules); tn != "" {
+			if tn := resolvedTypeName(opt, rules); tn != "" {
 				return tn
 			}
 		}

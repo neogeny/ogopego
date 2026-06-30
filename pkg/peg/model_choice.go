@@ -17,7 +17,7 @@ type Option struct {
 // Choice represents a PEG choice expression (ordered choice).
 type Choice struct {
 	ModelBase
-	Options []*Option
+	Options []Model
 }
 
 // Parse implements the Model interface for Option.
@@ -42,7 +42,7 @@ func (c *Choice) Parse(ctx Ctx) (any, error) {
 		ctx.Reset(startMark)
 
 		ctx.CutStackPush()
-		result, err := opt.Exp.Parse(ctx)
+		result, err := opt.Parse(ctx)
 		cutSeen := ctx.CutStackPop()
 
 		if err == nil {

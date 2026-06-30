@@ -22,9 +22,9 @@ func (c *Choice) ParsePar(ctx Ctx) (any, error) {
 		chans[i] = make(chan Result, 1)
 		clones[i] = ctx.Clone()
 
-		go func(ch chan Result, o *Option, wCtx Ctx) {
+		go func(ch chan Result, o Model, wCtx Ctx) {
 			wCtx.CutStackPush()
-			tree, err := o.Exp.Parse(wCtx)
+			tree, err := o.Parse(wCtx)
 			cutSeen := wCtx.CutStackPop()
 
 			ch <- Result{Tree: tree, Err: err, Cut: cutSeen}

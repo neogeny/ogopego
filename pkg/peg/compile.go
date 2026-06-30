@@ -327,7 +327,7 @@ func (c *comp) compileExp(tree any) (Model, error) {
 
 	case "Choice":
 		items := listValue(inner)
-		var opts []*Option
+		var opts []Model
 		for _, item := range items {
 			e, err := cc.compileExp(item)
 			if err != nil {
@@ -530,30 +530,32 @@ func (c *comp) compileExp(tree any) (Model, error) {
 	case "Pattern":
 		exp = &Pattern{Pattern: textValue(inner)}
 
-	case "Patterns":
-		var items []any
-		if t, err := cc.mapGet(inner, "tree"); err == nil {
-			items = listValue(t)
-		} else {
-			items = listValue(inner)
-		}
-		var exps []Model
-		for _, item := range items {
-			e, err := cc.compileExp(item)
-			if err != nil {
-				return nil, err
-			}
-			exps = append(exps, e)
-		}
-		if len(exps) == 1 {
-			exp = exps[0]
-		} else {
-			var opts []*Option
-			for _, e := range exps {
-				opts = append(opts, &Option{Exp: e})
-			}
-			exp = &Choice{Options: opts}
-		}
+	// WARNING this is deprecated
+	// FIXME
+	// case "Patterns":
+	// 	var items []any
+	// 	if t, err := cc.mapGet(inner, "tree"); err == nil {
+	// 		items = listValue(t)
+	// 	} else {
+	// 		items = listValue(inner)
+	// 	}
+	// 	var exps []Model
+	// 	for _, item := range items {
+	// 		e, err := cc.compileExp(item)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		exps = append(exps, e)
+	// 	}
+	// 	if len(exps) == 1 {
+	// 		exp = exps[0]
+	// 	} else {
+	// 		var opts []Model
+	// 		for _, e := range exps {
+	// 			opts = append(opts, &Option{Exp: e})
+	// 		}
+	// 		exp = &Choice{Options: opts}
+	// 	}
 
 	case "PositiveClosure":
 		e, err := cc.compileExp(inner)

@@ -197,10 +197,10 @@ func TestPrettySequence(t *testing.T) {
 
 func TestPrettyChoice(t *testing.T) {
 	m := &Choice{
-		Options: []*Option{
-			{Exp: &Token{Token: "a"}},
-			{Exp: &Token{Token: "b"}},
-			{Exp: &Token{Token: "c"}},
+		Options: []Model{
+			&Option{Exp: &Token{Token: "a"}},
+			&Option{Exp: &Token{Token: "b"}},
+			&Option{Exp: &Token{Token: "c"}},
 		},
 	}
 	got := m.PrettyPrint()
@@ -241,9 +241,9 @@ func TestPrettyPositiveGather(t *testing.T) {
 func TestPrettyRule(t *testing.T) {
 	r := &Rule{
 		Exp: &Choice{
-			Options: []*Option{
-				{Exp: &Token{Token: "hello"}},
-				{Exp: &Token{Token: "world"}},
+			Options: []Model{
+				&Option{Exp: &Token{Token: "hello"}},
+				&Option{Exp: &Token{Token: "world"}},
 			},
 		},
 		Name: "greeting",
@@ -367,9 +367,9 @@ func TestRailroadsSequence(t *testing.T) {
 
 func TestRailroadsChoice(t *testing.T) {
 	m := &Choice{
-		Options: []*Option{
-			{Exp: &Token{Token: "a"}},
-			{Exp: &Token{Token: "b"}},
+		Options: []Model{
+			&Option{Exp: &Token{Token: "a"}},
+			&Option{Exp: &Token{Token: "b"}},
 		},
 	}
 	got := m.Railroads()

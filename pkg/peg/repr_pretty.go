@@ -250,7 +250,7 @@ func (m *Sequence) PrettyPrint() string {
 func (m *Choice) PrettyPrint() string {
 	opts := make([]string, len(m.Options))
 	for i, opt := range m.Options {
-		opts[i] = opt.Exp.PrettyPrint()
+		opts[i] = opt.PrettyPrint()
 	}
 	hasMulti := false
 	for _, s := range opts {

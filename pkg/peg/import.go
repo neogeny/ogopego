@@ -356,7 +356,7 @@ func modelFromJSON(h *helper, err error) (Model, error) {
 		if err != nil {
 			return nil, err
 		}
-		var opts []*Option
+		var opts []Model
 		for _, ih := range items {
 			cls, _ := ih.getClass()
 			var exp Model

@@ -74,9 +74,9 @@ func TestParseSequenceEmpty(t *testing.T) {
 func TestParseChoiceFirst(t *testing.T) {
 	ctx := ctxFrom("hello")
 	expr := &Choice{
-		Options: []*Option{
-			{Exp: &Token{Token: "hello"}},
-			{Exp: &Token{Token: "world"}},
+		Options: []Model{
+			&Option{Exp: &Token{Token: "hello"}},
+			&Option{Exp: &Token{Token: "world"}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -87,9 +87,9 @@ func TestParseChoiceFirst(t *testing.T) {
 func TestParseChoiceSecond(t *testing.T) {
 	ctx := ctxFrom("world")
 	expr := &Choice{
-		Options: []*Option{
-			{Exp: &Token{Token: "hello"}},
-			{Exp: &Token{Token: "world"}},
+		Options: []Model{
+			&Option{Exp: &Token{Token: "hello"}},
+			&Option{Exp: &Token{Token: "world"}},
 		},
 	}
 	result, err := expr.Parse(ctx)
@@ -100,9 +100,9 @@ func TestParseChoiceSecond(t *testing.T) {
 func TestParseChoiceFail(t *testing.T) {
 	ctx := ctxFrom("nope")
 	expr := &Choice{
-		Options: []*Option{
-			{Exp: &Token{Token: "hello"}},
-			{Exp: &Token{Token: "world"}},
+		Options: []Model{
+			&Option{Exp: &Token{Token: "hello"}},
+			&Option{Exp: &Token{Token: "world"}},
 		},
 	}
 	_, err := expr.Parse(ctx)
@@ -332,11 +332,11 @@ func TestParseConstant(t *testing.T) {
 func TestParseChoiceResetsCursor(t *testing.T) {
 	ctx := ctxFrom("hello world")
 	expr := &Choice{
-		Options: []*Option{
-			{Exp: &Sequence{
+		Options: []Model{
+			&Option{Exp: &Sequence{
 				Sequence: []Model{&Token{Token: "wrong"}, &Token{Token: "stuff"}},
 			}},
-			{Exp: &Sequence{
+			&Option{Exp: &Sequence{
 				Sequence: []Model{&Token{Token: "hello"}, &Token{Token: "world"}},
 			}},
 		},
