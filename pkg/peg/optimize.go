@@ -105,19 +105,27 @@ func optimizeExpr(m Model) Model {
 //     inline the target rule's optimized body (alias resolution).
 func (r *Rule) Optimized() *Rule {
 	opt := *r
-	opt.Exp = optimizeExpr(r.Exp)
+	exp := optimizeExpr(r.Exp)
 
-	// Unwrap single-element Sequences (matching Python's Rule.optimized)
-	for seq, ok := opt.Exp.(*Sequence); ok && len(seq.Sequence) == 1; {
-		opt.Exp = seq.Sequence[0]
-		seq, ok = opt.Exp.(*Sequence)
+	var prev Model
+	for exp != prev {
+		prev = exp
+		for seq, ok := exp.(*Sequence); ok && len(seq.Sequence) == 1; {
+			exp = seq.Sequence[0]
+			seq, ok = exp.(*Sequence)
+		}
+
+		if call, ok := exp.(*Call); ok {
+			if call.rule != nil && len(call.rule.Params) == 0 {
+				exp = optimizeExpr(call.rule.Exp)
+			}
+		}
+		if group, ok := exp.(*Group); ok {
+			exp = optimizeExpr(group.Exp)
+		}
 	}
 
-	// If the body is a single Call to another rule, inline that rule's body
-	if call, ok := opt.Exp.(*Call); ok && call.rule != nil {
-		opt.Exp = optimizeExpr(call.rule.Exp)
-	}
-
+	opt.Exp = exp
 	return &opt
 }
 
