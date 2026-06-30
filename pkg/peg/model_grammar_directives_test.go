@@ -15,7 +15,7 @@ func TestBootGrammarCfgFromDirectives(t *testing.T) {
 
 	cfg := *g.CfgFromDirectives()
 
-	assert.Equal(t, "TatSuBootstrap", cfg.Grammar)
+	assert.Equal(t, "TatSu", cfg.Grammar)
 	assert.Equal(t, "", cfg.Name)
 	assert.Equal(t, nil, cfg.Whitespace, "expected Whitespace pattern")
 	// NOTE Now TatSu relies on the default whitespace definition

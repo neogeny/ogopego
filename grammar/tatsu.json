@@ -1,8 +1,8 @@
 {
   "__class__": "Grammar",
-  "name": "TatSuBootstrap",
+  "name": "TatSu",
   "directives": {
-    "grammar": "TatSuBootstrap",
+    "grammar": "TatSu",
     "comments": "(?ms)[(][*]\\s*(.*?)\\s*[*][)]|/[*]\\s*(.*?)\\s*[*]/",
     "eol_comments": "(?ms)(?:#|//)(.*?)$",
     "parseinfo": true,
@@ -2687,8 +2687,7 @@
       "is_memo": true,
       "is_lrec": false,
       "exp": {
-        "__class__": "Call",
-        "name": "word"
+        "__class__": "NameMeta"
       }
     },
     {

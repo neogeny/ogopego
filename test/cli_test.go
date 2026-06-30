@@ -118,7 +118,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	gram := TatSuBootstrapParser()
+	gram := TatSuParser()
 	if err := gram.Initialize(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
