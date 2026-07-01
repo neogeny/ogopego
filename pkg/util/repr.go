@@ -174,7 +174,7 @@ func reprOrderedMap(om *OrderedMap, seen map[uintptr]bool) string {
 	keys := om.Keys()
 	typeName := ""
 	if len(keys) > 0 && keys[0] == "__class__" {
-		if cls, ok := om.Get("__class__"); ok {
+		if cls, err := om.Get("__class__"); err == nil {
 			typeName = fmt.Sprint(cls)
 		}
 		keys = keys[1:]

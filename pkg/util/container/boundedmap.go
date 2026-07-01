@@ -1,160 +1,118 @@
 package container
 
 import (
-	"bytes"
-	"container/list"
 	"encoding/json"
 	"iter"
+
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
-type cacheEntry[K comparable, V any] struct {
-	key   K
-	value V
-}
-
+// BoundedMap is an ordered map that optionally acts as an LRU cache.
+//
+// When created with capacity <= 0, it's an unbounded insertion-ordered map.
+// When created with capacity > 0, it's an LRU cache: the least recently used
+// entry is evicted when the map reaches capacity.
+//
+// The map preserves insertion/access order for iteration, JSON marshaling, etc.
+// It is safe for use with any comparable key type and any value type.
 type BoundedMap[K comparable, V any] struct {
-	capacity  int
-	items     map[K]*list.Element
-	evictList *list.List
+	capacity int
+	items    *orderedmap.OrderedMap[K, V]
 }
 
+// NewBoundedMap creates a new BoundedMap with the given capacity.
+// capacity <= 0 means unbounded.
 func NewBoundedMap[K comparable, V any](capacity int) BoundedMap[K, V] {
 	return BoundedMap[K, V]{
-		capacity:  capacity,
-		items:     make(map[K]*list.Element, capacity), // Pre-allocated capacity
-		evictList: list.New(),
+		capacity: capacity,
+		items:    orderedmap.New[K, V](),
 	}
 }
 
-func (bm *BoundedMap[K, V]) Get(key K) (V, bool) {
-	if elem, exists := bm.items[key]; exists {
-		if bm.capacity > 0 {
-			bm.evictList.MoveToFront(elem)
-		}
-		return elem.Value.(*cacheEntry[K, V]).value, true
-	}
-	var zero V
-	return zero, false
-}
-
-func (bm *BoundedMap[K, V]) Set(key K, value V) {
-	// 1. Update if it already exists
-	if elem, exists := bm.items[key]; exists {
-		if bm.capacity > 0 {
-			bm.evictList.MoveToFront(elem)
-		}
-		elem.Value.(*cacheEntry[K, V]).value = value
-		return
-	}
-
-	// 2. Evict if we hit the boundary limit
-	if bm.capacity > 0 && bm.evictList.Len() >= bm.capacity {
-		oldest := bm.evictList.Back()
-		if oldest != nil {
-			bm.evictList.Remove(oldest)
-			kv := oldest.Value.(*cacheEntry[K, V])
-			delete(bm.items, kv.key) // Free map slot
-		}
-	}
-
-	// 3. Insert new entry (front for LRU, back for ordered)
-	entry := &cacheEntry[K, V]{key: key, value: value}
-	var elem *list.Element
+// Get retrieves the value for the given key.
+// With capacity > 0, the entry is promoted to most recently used.
+// Returns KeyNotFoundError if the key is not present.
+func (bm *BoundedMap[K, V]) Get(key K) (V, error) {
 	if bm.capacity > 0 {
-		elem = bm.evictList.PushFront(entry)
-	} else {
-		elem = bm.evictList.PushBack(entry)
+		return bm.items.GetAndMoveToBack(key)
 	}
-	bm.items[key] = elem
+	pair := bm.items.GetPair(key)
+	if pair == nil {
+		var zero V
+		return zero, &orderedmap.KeyNotFoundError[K]{MissingKey: key}
+	}
+	return pair.Value, nil
 }
 
-func (bm *BoundedMap[K, V]) Keys() []K {
-	keys := make([]K, 0, bm.evictList.Len())
-	for e := bm.evictList.Front(); e != nil; e = e.Next() {
-		if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
-			keys = append(keys, pair.key)
+// Set inserts or updates a key-value pair.
+// With capacity > 0, the entry is promoted to most recently used,
+// and the least recently used entry is evicted if at capacity.
+func (bm *BoundedMap[K, V]) Set(key K, value V) error {
+	// Update existing entry
+	if _, present := bm.items.Get(key); present {
+		bm.items.Set(key, value)
+		if bm.capacity > 0 {
+			return bm.items.MoveToBack(key)
 		}
+		return nil
+	}
+
+	// Evict LRU entry if at capacity
+	if bm.capacity > 0 && bm.items.Len() >= bm.capacity {
+		if oldest := bm.items.Oldest(); oldest != nil {
+			bm.items.Delete(oldest.Key)
+		}
+	}
+
+	// Insert new entry
+	bm.items.Set(key, value)
+	return nil
+}
+
+// Keys returns the keys in order (oldest to newest).
+func (bm *BoundedMap[K, V]) Keys() []K {
+	keys := make([]K, 0, bm.items.Len())
+	for pair := bm.items.Oldest(); pair != nil; pair = pair.Next() {
+		keys = append(keys, pair.Key)
 	}
 	return keys
 }
 
+// Entries returns an iterator over key-value pairs in order (oldest to newest).
 func (bm *BoundedMap[K, V]) Entries() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		// Traverse the doubly-linked list from front to back
-		for e := bm.evictList.Front(); e != nil; e = e.Next() {
-			// Type-assert the element's Value back to our internal entry struct
-			if pair, ok := e.Value.(*cacheEntry[K, V]); ok {
-				// yield passes the key/value to the for-range loop.
-				// If yield returns false, the loop broke early, so we stop.
-				if !yield(pair.key, pair.value) {
-					return
-				}
+		for pair := bm.items.Oldest(); pair != nil; pair = pair.Next() {
+			if !yield(pair.Key, pair.Value) {
+				return
 			}
 		}
 	}
 }
 
+// Delete removes the key-value pair for the given key.
 func (bm *BoundedMap[K, V]) Delete(key K) {
-	// 1. Check if the item exists
-	elem, exists := bm.items[key]
-	if !exists {
-		return // No-op if the key isn't in the map
-	}
-
-	// 2. Remove the element from the LRU ordering list
-	bm.evictList.Remove(elem)
-
-	// 3. Delete the key from the underlying map to reclaim memory slot
-	delete(bm.items, key)
+	bm.items.Delete(key)
 }
 
+// Retain removes all key-value pairs that do not satisfy the keep function.
 func (bm *BoundedMap[K, V]) Retain(keep func(K, V) bool) {
-	for key, elem := range bm.items {
-		ent := elem.Value.(*cacheEntry[K, V])
-		if !keep(ent.key, ent.value) {
-			bm.evictList.Remove(elem)
-			delete(bm.items, key)
+	var toDelete []K
+	for pair := bm.items.Oldest(); pair != nil; pair = pair.Next() {
+		if !keep(pair.Key, pair.Value) {
+			toDelete = append(toDelete, pair.Key)
 		}
+	}
+	for _, key := range toDelete {
+		bm.items.Delete(key)
 	}
 }
 
+// Len returns the number of entries in the map.
 func (bm *BoundedMap[K, V]) Len() int {
-	return bm.evictList.Len()
+	return bm.items.Len()
 }
 
+// MarshalJSON implements json.Marshaler.
 func (bm *BoundedMap[K, V]) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteByte('{')
-
-	// Create a single encoder bound to our buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false) // Stop the escaping madness
-
-	first := true
-	for e := bm.evictList.Front(); e != nil; e = e.Next() {
-		pair := e.Value.(*cacheEntry[K, V])
-		if !first {
-			buf.WriteByte(',')
-		}
-		first = false
-
-		// 1. Encode the Key
-		if err := enc.Encode(pair.key); err != nil {
-			return nil, err
-		}
-		// Strip the trailing newline added by enc.Encode
-		buf.Truncate(buf.Len() - 1)
-
-		buf.WriteByte(':')
-
-		// 2. Encode the Value
-		if err := enc.Encode(pair.value); err != nil {
-			return nil, err
-		}
-		// Strip the trailing newline added by enc.Encode
-		buf.Truncate(buf.Len() - 1)
-	}
-
-	buf.WriteByte('}')
-	return buf.Bytes(), nil
+	return json.Marshal(bm.items)
 }

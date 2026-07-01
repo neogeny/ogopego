@@ -55,7 +55,7 @@ func PubMapOf(ref any) any {
 	t := v.Type()
 	typeName := t.String()
 	out := ctn.NewBoundedMap[string, any](0)
-	out.Set("__class__", typeName)
+	_ = out.Set("__class__", typeName)
 	flattenFields(t, v, &out)
 	return &out
 }
@@ -72,6 +72,6 @@ func flattenFields(t reflect.Type, v reflect.Value, out *OrderedMap) {
 			}
 			continue
 		}
-		out.Set(f.Name, v.Field(i).Interface())
+		_ = out.Set(f.Name, v.Field(i).Interface())
 	}
 }

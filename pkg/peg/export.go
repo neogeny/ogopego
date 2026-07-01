@@ -129,11 +129,11 @@ func ModelToJSON(v Model) any {
 
 func mapClass(class string, kv ...any) *ctn.BoundedMap[string, any] {
 	out := ctn.NewBoundedMap[string, any](0)
-	out.Set("__class__", class)
+	_ = out.Set("__class__", class)
 	for i := 0; i < len(kv); i += 2 {
 		k := kv[i].(string)
 		v := kv[i+1]
-		out.Set(k, v)
+		_ = out.Set(k, v)
 	}
 	return &out
 }
@@ -142,8 +142,8 @@ func mapClass(class string, kv ...any) *ctn.BoundedMap[string, any] {
 // that can be read back by LoadGrammarFromJSON.
 func serializeGrammar(g *Grammar) any {
 	out := ctn.NewBoundedMap[string, any](0)
-	out.Set("__class__", "Grammar")
-	out.Set("name", g.Name)
+	_ = out.Set("__class__", "Grammar")
+	_ = out.Set("name", g.Name)
 
 	dirs := ctn.NewBoundedMap[string, any](0)
 	for _, d := range g.Directives {
@@ -157,46 +157,46 @@ func serializeGrammar(g *Grammar) any {
 		case "null", "None":
 			value = nil
 		}
-		dirs.Set(d[0], value)
+		_ = dirs.Set(d[0], value)
 	}
-	out.Set("directives", &dirs)
+	_ = out.Set("directives", &dirs)
 
 	kw := make([]string, len(g.Keywords))
 	copy(kw, g.Keywords)
-	out.Set("keywords", kw)
+	_ = out.Set("keywords", kw)
 
 	rules := make([]any, len(g.Rules))
 	for i, rule := range g.Rules {
 		rules[i] = serializeRule(rule)
 	}
-	out.Set("rules", rules)
+	_ = out.Set("rules", rules)
 	return &out
 }
 
 func serializeRule(r *Rule) *ctn.BoundedMap[string, any] {
 	r.normalize()
 	out := ctn.NewBoundedMap[string, any](0)
-	out.Set("__class__", "Rule")
-	out.Set("name", r.Name)
+	_ = out.Set("__class__", "Rule")
+	_ = out.Set("name", r.Name)
 	// NOTE This is the field order used by TatSu @ 2026-05-27
-	out.Set("exp", ModelToJSON(r.Exp))
+	_ = out.Set("exp", ModelToJSON(r.Exp))
 	if r.Params == nil {
-		out.Set("params", []string{})
+		_ = out.Set("params", []string{})
 	} else {
-		out.Set("params", r.Params)
+		_ = out.Set("params", r.Params)
 	}
 	if r.KWParams == nil {
-		out.Set("kwparams", map[string]any{})
+		_ = out.Set("kwparams", map[string]any{})
 	} else {
-		out.Set("kwparams", r.KWParams)
+		_ = out.Set("kwparams", r.KWParams)
 	}
-	out.Set("decorators", r.Decorators)
-	out.Set("base", nil)
-	out.Set("is_name", r.IsName)
-	out.Set("is_tokn", r.IsTokn)
-	out.Set("no_memo", r.NoMemo)
-	out.Set("no_stak", r.NoStak)
-	out.Set("is_memo", r.IsMemo)
-	out.Set("is_lrec", r.IsLrec)
+	_ = out.Set("decorators", r.Decorators)
+	_ = out.Set("base", nil)
+	_ = out.Set("is_name", r.IsName)
+	_ = out.Set("is_tokn", r.IsTokn)
+	_ = out.Set("no_memo", r.NoMemo)
+	_ = out.Set("no_stak", r.NoStak)
+	_ = out.Set("is_memo", r.IsMemo)
+	_ = out.Set("is_lrec", r.IsLrec)
 	return &out
 }
