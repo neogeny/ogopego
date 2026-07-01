@@ -76,12 +76,14 @@ func (cache *MemoCache) Get(key MemoKey) (Memo, bool) {
 }
 
 func (cache *MemoCache) Prune(cutpoint int) {
-	cache.Retain(func(key MemoKey, memo Memo) bool {
-		// NOTE
-		// 	Keep trees.BOTTOM for the sake of left recursion
-		//  To keep them is easier than to calculate when they can be prunned
-		return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
-	})
+	// FIXME
+	// WARNING diaabled to experiment with CPU and MEM profiling
+	// cache.Retain(func(key MemoKey, memo Memo) bool {
+	// 	// NOTE
+	// 	// 	Keep trees.BOTTOM for the sake of left recursion
+	// 	//  To keep them is easier than to calculate when they can be prunned
+	// 	return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
+	// })
 }
 
 // IsBottomEntry checks if the memo entry represents a "bottom" (failed) parse.

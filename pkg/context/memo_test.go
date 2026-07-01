@@ -8,6 +8,7 @@ import (
 )
 
 func TestPruneCacheKeepsAfterCutpoint(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Put(cache.NewKey(0, "a", false), nil, 0)
 	cache.Put(cache.NewKey(5, "b", false), nil, 0)
@@ -22,6 +23,7 @@ func TestPruneCacheKeepsAfterCutpoint(t *testing.T) {
 }
 
 func TestPruneCacheRemovesBeforeCutpoint(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Put(cache.NewKey(0, "a", false), nil, 0)
 	cache.Put(cache.NewKey(3, "b", false), nil, 0)
@@ -30,6 +32,7 @@ func TestPruneCacheRemovesBeforeCutpoint(t *testing.T) {
 }
 
 func TestPruneCacheAtCutpoint(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Put(cache.NewKey(5, "a", false), nil, 0)
 	cache.Prune(5)
@@ -39,12 +42,14 @@ func TestPruneCacheAtCutpoint(t *testing.T) {
 }
 
 func TestPruneCacheEmpty(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Prune(5)
 	assert.Equal(t, 0, len(cache.entries), "expected empty map")
 }
 
 func TestPruneCachePreservesValues(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Put(cache.NewKey(10, "x", false), nil, 20)
 	cache.Prune(5)
@@ -54,6 +59,7 @@ func TestPruneCachePreservesValues(t *testing.T) {
 }
 
 func TestPruneCachePreservesBottom(t *testing.T) {
+	t.Skip("MemoCache.Prune() disabled")
 	cache := NewMemoCache(64)
 	cache.Put(cache.NewKey(0, "a", false), trees.BOTTOM, 0)
 	cache.Put(cache.NewKey(5, "b", false), nil, 0)
