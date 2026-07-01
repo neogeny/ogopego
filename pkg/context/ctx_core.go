@@ -57,7 +57,7 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	)
 	heavy := &CoreCtxHeavy{
 		cfg:       cfgS,
-		memoCache: NewMemoMache(memoCapacity),
+		memoCache: NewMemoCache(memoCapacity),
 		tracer:    NullTracer{},
 		heartbeat: heartbeat.NullHeart{},
 	}
@@ -194,17 +194,17 @@ func (ctx *CoreCtx) HeartbeatTick() {
 func (ctx *CoreCtx) pruneCache(cutPoint int) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	PruneMemoCache(ctx.heavy.memoCache, cutPoint)
+	ctx.heavy.memoCache.Prune(cutPoint)
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
-	return MemoKey{Mark: ctx.Mark(), Name: name, CanMemo: canMemo}
+	return ctx.heavy.memoCache.NewKey(ctx.Mark(), name, canMemo)
 }
 
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	value, ok := ctx.heavy.memoCache[key]
+	value, ok := ctx.heavy.memoCache.Get(key)
 	return value, ok
 }
 
@@ -213,7 +213,7 @@ func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 		return
 	}
 	ctx.muLock()
-	ctx.heavy.memoCache[key] = Memo{Tree: tree, Mark: mark}
+	ctx.heavy.memoCache.Put(key, tree, mark)
 	ctx.muUnlock()
 }
 
