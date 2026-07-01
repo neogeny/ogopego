@@ -136,8 +136,9 @@ func (t ConsoleTracer) TraceEvent(ctx Ctx, event Event, msg string) {
 	var cs string
 	bold := color.New(color.FgWhite, color.Bold)
 	callStack := ctx.CallStack()
-	for i := len(callStack) - 1; i >= 0; i-- {
-		cs += bold.Sprint(callStack[i]) + ssym
+	entries := callStack.ToSlice()
+	for i := len(entries) - 1; i >= 0; i-- {
+		cs += bold.Sprint(entries[i]) + ssym
 		if len(cs) >= cols-8 {
 			cs += "••"
 			break

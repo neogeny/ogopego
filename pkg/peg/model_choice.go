@@ -22,11 +22,7 @@ type Choice struct {
 
 // Parse implements the Model interface for Option.
 func (o *Option) Parse(ctx Ctx) (any, error) {
-	result, err := o.Exp.Parse(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return o.Exp.Parse(ctx)
 }
 
 func (c *Choice) Parse(ctx Ctx) (any, error) {
@@ -51,7 +47,7 @@ func (c *Choice) Parse(ctx Ctx) (any, error) {
 
 		if cutSeen {
 			ctx.Reset(startMark)
-			return nil, failure()
+			return nil, err
 		}
 	}
 	ctx.Reset(startMark)

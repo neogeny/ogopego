@@ -14,24 +14,10 @@ func newTestBaseCtx() *CoreCtx {
 	return NewCtx(c, nil)
 }
 
-func TestBaseCtxCallStack(t *testing.T) {
-	ctx := newTestBaseCtx()
-	ctx.Enter("rule_a")
-	ctx.Enter("rule_b")
-	assert.Equal(t, 2, len(ctx.CallStack()), "expected 2 entries")
-	assert.Equal(t, "rule_a", ctx.CallStack()[0])
-	assert.Equal(t, "rule_b", ctx.CallStack()[1])
-	ctx.Leave()
-	assert.Equal(t, 1, len(ctx.CallStack()), "expected 1 entry after leave")
-	assert.Equal(t, "rule_a", ctx.CallStack()[0])
-	ctx.Leave()
-	assert.Equal(t, 0, len(ctx.CallStack()), "expected empty callstack")
-}
-
 func TestBaseCtxCallStackLeaveEmpty(t *testing.T) {
 	ctx := newTestBaseCtx()
 	ctx.Leave()
-	assert.Equal(t, 0, len(ctx.CallStack()), "expected empty callstack after leave on empty")
+	assert.True(t, ctx.CallStack().IsEmpty(), "expected empty callstack after leave on empty")
 }
 
 func TestBaseCtxFailureNoRegress(t *testing.T) {

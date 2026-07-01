@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
+// SPDX-License-Identifier: Apache-2.0
 package context
 
 import (
@@ -23,20 +25,18 @@ type Memento struct {
 	Msg       string
 	Start     int
 	Mark      int
-	CallStack []string
+	CallStack CallStack
 }
 
 // NewMemento constructs a Memento capturing cursor state and a message for
 // later diagnostic reporting.
-func NewMemento(start int, msg string, cursor input.Cursor, callstack []string) Memento {
-	cs := make([]string, len(callstack))
-	copy(cs, callstack)
+func NewMemento(start int, msg string, cursor input.Cursor, callstack CallStack) Memento {
 	return Memento{
 		Cursor:    cursor,
 		Msg:       msg,
 		Start:     start,
 		Mark:      cursor.Mark(),
-		CallStack: cs,
+		CallStack: callstack,
 	}
 }
 
@@ -73,10 +73,10 @@ func (m *Memento) Error() string {
 	pad := strings.Repeat(" ", col)
 	_, _ = fmt.Fprintf(&b, " %5s%s %s\n", "", bluePipe, errStyle.Sprintf("%s⌃ %s", pad, errMsg))
 
-	if len(m.CallStack) > 0 {
+	if !m.CallStack.IsEmpty() {
 		b.WriteString("\n")
-		for i := len(m.CallStack) - 1; i >= 0; i-- {
-			b.WriteString(fmt.Sprintf(" %s %s\n", errStyle.Sprint("→"), grey.Sprint(m.CallStack[i])))
+		for name := range m.CallStack.All() {
+			b.WriteString(fmt.Sprintf(" %s %s\n", errStyle.Sprint("→"), grey.Sprint(name)))
 		}
 	}
 

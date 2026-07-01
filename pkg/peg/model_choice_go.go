@@ -31,7 +31,7 @@ func (c *Choice) ParsePar(ctx Ctx) (any, error) {
 		}(chans[i], opt, clones[i])
 	}
 
-	for i := 0; i < numOptions; i++ {
+	for i := range numOptions {
 		res := <-chans[i]
 
 		if res.Err == nil {

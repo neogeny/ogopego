@@ -129,7 +129,7 @@ func TestTraceWithCallstack(t *testing.T) {
 	ctx.Enter("term")
 	et := ctx.Tracer()
 	et.TraceEntry(ctx)
-	assert.Equal(t, 3, len(ctx.CallStack()), "expected 3 callstack entries")
+	assert.Equal(t, 3, ctx.CallStack().Len(), "expected 3 callstack entries")
 }
 
 func TestBaseCtxNewWithTracer(t *testing.T) {

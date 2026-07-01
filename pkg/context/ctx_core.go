@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Juancarlo Añez (apalala@gmail.com)
+// SPDX-License-Identifier: Apache-2.0
 package context
 
 import (
@@ -10,11 +12,12 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/neogeny/ogopego/pkg/util"
 	"github.com/neogeny/ogopego/pkg/util/heartbeat"
 )
 
 // CallStack is a slice of call-site names representing the parser call stack.
-type CallStack []string
+type CallStack = util.TokenStack
 
 // CoreCtxHeavy holds shared heavyweight state used across context clones.
 type CoreCtxHeavy struct {
@@ -61,7 +64,7 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	ctx := CoreCtx{
 		heavy:     heavy,
 		cursor:    cursor,
-		callStack: make(CallStack, 0, stackCapacity),
+		callStack: util.NewTokenStack(),
 		cutStack:  make([]bool, 1, stackCapacity),
 	}
 	return &ctx
@@ -71,7 +74,7 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 func (ctx *CoreCtx) Clone() Ctx {
 	return &CoreCtx{
 		cursor:         ctx.cursor.Clone(),
-		callStack:      append(CallStack(nil), ctx.callStack...),
+		callStack:      ctx.callStack,
 		cutStack:       append([]bool(nil), ctx.cutStack...),
 		recursionKey:   ctx.recursionKey,
 		recursionDepth: ctx.recursionDepth,
@@ -137,9 +140,7 @@ func (ctx *CoreCtx) SetTracer(tracer Tracer) {
 func (ctx *CoreCtx) Cursor() Cursor { return ctx.cursor }
 
 func (ctx *CoreCtx) CallStack() CallStack {
-	cs := make([]string, len(ctx.callStack))
-	copy(cs, ctx.callStack)
-	return cs
+	return ctx.callStack
 }
 
 func (ctx *CoreCtx) Tracer() Tracer {
@@ -270,12 +271,12 @@ func (ctx *CoreCtx) MatchToken(token string) bool {
 }
 
 func (ctx *CoreCtx) Enter(name string) {
-	ctx.callStack = append(ctx.callStack, name)
+	ctx.callStack.Push(name)
 }
 
 func (ctx *CoreCtx) Leave() {
-	if len(ctx.callStack) > 0 {
-		ctx.callStack = ctx.callStack[:len(ctx.callStack)-1]
+	if tail, ok := ctx.callStack.Tail(); ok {
+		ctx.callStack = tail
 	}
 }
 
