@@ -3,8 +3,11 @@ package context
 import (
 	"unique"
 
+	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/trees"
 )
+
+const MemoCachePruningDisabled = config.MemoCachePruningDisabled
 
 // MemoKey represents a key for memoization, combining the input mark and rule name.
 type MemoKey struct {
@@ -76,14 +79,15 @@ func (cache *MemoCache) Get(key MemoKey) (Memo, bool) {
 }
 
 func (cache *MemoCache) Prune(cutpoint int) {
-	// FIXME
-	// WARNING diaabled to experiment with CPU and MEM profiling
-	// cache.Retain(func(key MemoKey, memo Memo) bool {
-	// 	// NOTE
-	// 	// 	Keep trees.BOTTOM for the sake of left recursion
-	// 	//  To keep them is easier than to calculate when they can be prunned
-	// 	return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
-	// })
+	if config.MemoCachePruningDisabled {
+		return
+	}
+	cache.Retain(func(key MemoKey, memo Memo) bool {
+		// NOTE
+		// 	Keep trees.BOTTOM for the sake of left recursion
+		//  To keep them is easier than to calculate when they can be prunned
+		return key.Mark >= cutpoint || memo.Tree == trees.BOTTOM
+	})
 }
 
 // IsBottomEntry checks if the memo entry represents a "bottom" (failed) parse.

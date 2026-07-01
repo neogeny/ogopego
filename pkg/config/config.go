@@ -18,6 +18,10 @@ const ProgramName = "OGoPEGo"
 // DefaultPerLineMemos is the default number of memo entries per input line.
 const DefaultPerLineMemos = 8 // NOTE: Magic !!!
 
+// FIXME
+// WARNING diaabled to experiment with CPU and MEM profiling
+const MemoCachePruningDisabled = true
+
 // Configurable is implemented by types that can be configured using a Cfg.
 type Configurable interface {
 	Configure(cfg Cfg)
