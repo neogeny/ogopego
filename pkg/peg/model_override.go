@@ -26,7 +26,7 @@ func (o *Override) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return trees.TreeOverride(result), nil
+	return trees.OverrideTree(result), nil
 }
 
 // Parse implements the Model interface for OverrideList.
@@ -35,5 +35,5 @@ func (o *OverrideList) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return trees.TreeOverrideAsList(result), nil
+	return trees.OverrideTreeSeq(result), nil
 }

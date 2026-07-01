@@ -207,9 +207,10 @@ func TestParseNamed(t *testing.T) {
 	expr := &Named{Exp: &Token{Token: "hello"}, Name: "greeting"}
 	result, err := expr.Parse(ctx)
 	assert.NoError(t, err)
-	m := asjson.AsJSON(result).(map[string]any)
+	f := trees.Fold(result)
+	m := asjson.AsJSON(f).(map[string]any)
 	assert.NotEqual(t, nil, m, "expected non-nil result %v", m)
-	assert.Equal(t, "hello", m[":greeting"], "expected [:greeting] to be 'hello' %v", m)
+	assert.Equal(t, "hello", m["greeting"], "expected [:greeting] to be 'hello' %v", m)
 }
 
 func TestParseOverride(t *testing.T) {

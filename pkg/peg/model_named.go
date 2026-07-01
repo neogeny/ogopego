@@ -25,7 +25,7 @@ func (n *Named) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return trees.TreeNamed(n.Name, result), nil
+	return trees.NamedTree(n.Name, result), nil
 }
 
 // Parse implements the Model interface for NamedList.
@@ -34,5 +34,5 @@ func (n *NamedList) Parse(ctx Ctx) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return trees.TreeNamedAsList(n.Name, result), nil
+	return trees.NamedTreeSeq(n.Name, result), nil
 }

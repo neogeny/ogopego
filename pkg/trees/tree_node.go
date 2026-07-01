@@ -8,4 +8,4 @@ type Node struct {
 	Tree     any
 }
 
-func (Node) tree() {}
+func (Node) isTree() {}

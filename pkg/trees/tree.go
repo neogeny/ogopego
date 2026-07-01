@@ -19,7 +19,7 @@ const (
 
 type Tree interface {
 	As_JSON_(seen map[uintptr]bool) any
-	tree()
+	isTree()
 }
 
 func Fold(tree any) any {
@@ -39,14 +39,31 @@ func fold(ast map[string]any, tree any) any {
 		switch t := val.(type) {
 		case *Node:
 			return t
-		case *TreeSeq:
+		case *treeSeq:
 			var out any = nil
 			for _, item := range t.Items {
 				out = MergeTrees(out, fold(ast, item))
 			}
 			return out
 		default:
-			panic(fmt.Sprintf("fold: unexpected Tree type %T", t))
+			var f any
+			switch n := t.(type) {
+			case *namedTreeT:
+				f := fold(ast, n.Tree)
+				mapTree(ast, n.Name(), f)
+			case *namedTreeSeqT:
+				f := fold(ast, n.Tree)
+				mapTreeAsSeq(ast, n.Name(), f)
+			case *ovrTreeT:
+				f := fold(ast, n.Tree)
+				mapTree(ast, keyAt, f)
+			case *overrideTreeSeqT:
+				f := fold(ast, n.Tree)
+				mapTreeAsSeq(ast, keyAt, f)
+			default:
+				panic(fmt.Sprintf("fold: unexpected Tree type %T", t))
+			}
+			return f
 		}
 
 	case string, bool, nil,
@@ -68,28 +85,6 @@ func fold(ast map[string]any, tree any) any {
 		out := make(map[string]any, len(val))
 		for k, item := range val {
 			out[k] = fold(ast, item)
-		}
-		if len(out) != 1 {
-			return out
-		}
-		for key := range out {
-			tree := val[key]
-			if key == keyListAt {
-				mapTreeAsSeq(ast, keyAt, tree)
-				return tree
-			}
-			if key == keyAt {
-				mapTree(ast, keyAt, tree)
-				return tree
-			}
-			if len(key) > len(keyListNamed) && key[0:len(keyListNamed)] == keyListNamed {
-				mapTreeAsSeq(ast, key[len(keyListNamed):], tree)
-				return tree
-			}
-			if len(key) > len(keyNamed) && key[0:len(keyNamed)] == keyNamed {
-				mapTree(ast, key[len(keyNamed):], tree)
-				return tree
-			}
 		}
 		return out
 
@@ -137,7 +132,7 @@ func finish(ast map[string]any, base any) any {
 }
 
 func closed(t any) any {
-	if s, ok := t.(*TreeSeq); ok {
+	if s, ok := t.(*treeSeq); ok {
 		return s.Items
 	}
 	return t
@@ -150,26 +145,26 @@ func MergeTrees(a, b any) any {
 	case isNil(b):
 		return a
 	default:
-		sa, aIsSeq := a.(*TreeSeq)
-		sb, bIsSeq := b.(*TreeSeq)
+		sa, aIsSeq := a.(*treeSeq)
+		sb, bIsSeq := b.(*treeSeq)
 		switch {
 		case aIsSeq && bIsSeq:
 			items := make([]any, len(sa.Items)+len(sb.Items))
 			copy(items, sa.Items)
 			copy(items[len(sa.Items):], sb.Items)
-			return &TreeSeq{Items: items}
+			return &treeSeq{Items: items}
 		case aIsSeq:
 			items := make([]any, len(sa.Items)+1)
 			copy(items, sa.Items)
 			items[len(sa.Items)] = b
-			return &TreeSeq{Items: items}
+			return &treeSeq{Items: items}
 		case bIsSeq:
 			items := make([]any, 1+len(sb.Items))
 			items[0] = a
 			copy(items[1:], sb.Items)
-			return &TreeSeq{Items: items}
+			return &treeSeq{Items: items}
 		default:
-			return &TreeSeq{Items: []any{a, b}}
+			return &treeSeq{Items: []any{a, b}}
 		}
 	}
 }
@@ -181,27 +176,27 @@ func appendTree(a, b any) any {
 	case isNil(b):
 		return a
 	default:
-		if s, ok := a.(*TreeSeq); ok {
+		if s, ok := a.(*treeSeq); ok {
 			items := make([]any, len(s.Items)+1)
 			copy(items, s.Items)
 			items[len(s.Items)] = b
-			return &TreeSeq{Items: items}
+			return &treeSeq{Items: items}
 		}
-		return &TreeSeq{Items: []any{a, b}}
+		return &treeSeq{Items: []any{a, b}}
 	}
 }
 
 func appendAsSeq(a, b any) any {
 	if isNil(a) {
-		return &TreeSeq{Items: []any{b}}
+		return &treeSeq{Items: []any{b}}
 	}
-	if s, aIsSeq := a.(*TreeSeq); aIsSeq {
+	if s, aIsSeq := a.(*treeSeq); aIsSeq {
 		items := make([]any, len(s.Items)+1)
 		copy(items, s.Items)
 		items[len(s.Items)] = b
-		return &TreeSeq{Items: items}
+		return &treeSeq{Items: items}
 	}
-	return &TreeSeq{Items: []any{a, b}}
+	return &treeSeq{Items: []any{a, b}}
 }
 
 func mapTree(m map[string]any, key string, val any) {
@@ -216,7 +211,7 @@ func mapTree(m map[string]any, key string, val any) {
 func mapTreeAsSeq(m map[string]any, key string, val any) {
 	existing, ok := m[key]
 	if !ok {
-		m[key] = &TreeSeq{Items: []any{val}}
+		m[key] = &treeSeq{Items: []any{val}}
 	} else {
 		m[key] = appendAsSeq(existing, val)
 	}

@@ -14,7 +14,7 @@ var BOTTOM typeBOTTOM = &typeBottomTree{}
 type typeBottomTree struct {
 }
 
-func (typeBottomTree) tree() {}
+func (typeBottomTree) isTree() {}
 
 func (typeBottomTree) isBottom() bool {
 	return true

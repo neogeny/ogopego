@@ -11,7 +11,7 @@ import (
 )
 
 func text(s string) string      { return s }
-func seq(items ...any) *TreeSeq { return &TreeSeq{Items: items} }
+func seq(items ...any) *treeSeq { return &treeSeq{Items: items} }
 
 func TestFoldBottom(t *testing.T) {
 	result := Fold(&typeBottomTree{})
@@ -62,7 +62,7 @@ func TestFoldListToList(t *testing.T) {
 }
 
 func TestFoldNamedToMap(t *testing.T) {
-	result := Fold(TreeNamed("x", text("hello")))
+	result := Fold(NamedTree("x", text("hello")))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.NotZero(t, m["x"], "expected key 'x'")
@@ -70,7 +70,7 @@ func TestFoldNamedToMap(t *testing.T) {
 }
 
 func TestFoldOverride(t *testing.T) {
-	result := Fold(TreeOverride(text("result")))
+	result := Fold(OverrideTree(text("result")))
 	s, ok := result.(string)
 	assert.True(t, ok, "expected Text, got %T", result)
 	assert.Equal(t, "result", s, "expected 'result'")
@@ -78,8 +78,8 @@ func TestFoldOverride(t *testing.T) {
 
 func TestFoldMultipleNamed(t *testing.T) {
 	result := Fold(seq(
-		TreeNamed("a", text("1")),
-		TreeNamed("b", text("2")),
+		NamedTree("a", text("1")),
+		NamedTree("b", text("2")),
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -89,8 +89,8 @@ func TestFoldMultipleNamed(t *testing.T) {
 
 func TestFoldNamedAccumulates(t *testing.T) {
 	result := Fold(seq(
-		TreeNamed("x", text("a")),
-		TreeNamed("x", text("b")),
+		NamedTree("x", text("a")),
+		NamedTree("x", text("b")),
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -99,7 +99,7 @@ func TestFoldNamedAccumulates(t *testing.T) {
 }
 
 func TestFoldNamedAsList(t *testing.T) {
-	result := Fold(TreeNamedAsList("items", text("x")))
+	result := Fold(NamedTreeSeq("items", text("x")))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
 	assert.Equal(t, 1, len(m["items"].([]any)))
@@ -108,8 +108,8 @@ func TestFoldNamedAsList(t *testing.T) {
 
 func TestFoldNamedAsListAccumulates(t *testing.T) {
 	result := Fold(seq(
-		TreeNamedAsList("items", text("a")),
-		TreeNamedAsList("items", text("b")),
+		NamedTreeSeq("items", text("a")),
+		NamedTreeSeq("items", text("b")),
 	))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)
@@ -120,9 +120,9 @@ func TestFoldNamedAsListAccumulates(t *testing.T) {
 
 func TestFoldOverrideWins(t *testing.T) {
 	result := Fold(seq(
-		TreeNamed("x", text("ignored")),
+		NamedTree("x", text("ignored")),
 		text("also ignored"),
-		TreeOverride(text("result")),
+		OverrideTree(text("result")),
 	))
 	s, ok := result.(string)
 	assert.True(t, ok, "expected string, got %v", result)
@@ -131,8 +131,8 @@ func TestFoldOverrideWins(t *testing.T) {
 
 func TestFoldOverrideAsList(t *testing.T) {
 	result := Fold(seq(
-		TreeOverrideAsList(text("a")),
-		TreeOverrideAsList(text("b")),
+		OverrideTreeSeq(text("a")),
+		OverrideTreeSeq(text("b")),
 	))
 	l, ok := result.([]any)
 	assert.True(t, ok, "expected List, got %T", result)
@@ -140,9 +140,9 @@ func TestFoldOverrideAsList(t *testing.T) {
 }
 
 func TestFoldNestedNamed(t *testing.T) {
-	result := Fold(TreeNamed("x", seq(
-		TreeNamed("a", text("1")),
-		TreeNamed("b", text("2")),
+	result := Fold(NamedTree("x", seq(
+		NamedTree("a", text("1")),
+		NamedTree("b", text("2")),
 	)))
 	m, ok := result.(map[string]any)
 	assert.True(t, ok, "expected MapNode, got %T", result)

@@ -19,7 +19,7 @@ func treeToJSON(t any, seen ...map[uintptr]bool) any {
 	switch v := t.(type) {
 	case *typeBottomTree:
 		return nil
-	case *TreeSeq:
+	case *treeSeq:
 		items := make([]any, len(v.Items))
 		for i, item := range v.Items {
 			items[i] = treeToJSON(item, seen...)
@@ -60,5 +60,5 @@ func treeToJSON(t any, seen ...map[uintptr]bool) any {
 // As_JSON_ implementations for each concrete tree type.
 
 func (*typeBottomTree) As_JSON_(seen map[uintptr]bool) any { return BOTTOM }
-func (s *TreeSeq) As_JSON_(seen map[uintptr]bool) any      { return treeToJSON(s, seen) }
+func (s *treeSeq) As_JSON_(seen map[uintptr]bool) any      { return treeToJSON(s, seen) }
 func (n *Node) As_JSON_(seen map[uintptr]bool) any         { return treeToJSON(n, seen) }

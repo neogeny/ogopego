@@ -3,7 +3,40 @@
 
 package trees
 
-import "unicode"
+import (
+	"unicode"
+	"unique"
+)
+
+type namedTreeT struct {
+	NameHandle unique.Handle[string]
+	Tree       any
+}
+
+func (*namedTreeT) isTree()                              {}
+func (t *namedTreeT) As_JSON_(seen map[uintptr]bool) any { return treeToJSON(t, seen) }
+
+type namedTreeSeqT struct {
+	NameHandle unique.Handle[string]
+	Tree       any
+}
+
+func (*namedTreeSeqT) isTree()                              {}
+func (t *namedTreeSeqT) As_JSON_(seen map[uintptr]bool) any { return treeToJSON(t, seen) }
+
+type ovrTreeT struct {
+	Tree any
+}
+
+func (*ovrTreeT) isTree()                              {}
+func (t *ovrTreeT) As_JSON_(seen map[uintptr]bool) any { return treeToJSON(t, seen) }
+
+type overrideTreeSeqT struct {
+	Tree any
+}
+
+func (*overrideTreeSeqT) isTree()                              {}
+func (t *overrideTreeSeqT) As_JSON_(seen map[uintptr]bool) any { return treeToJSON(t, seen) }
 
 func validateUserKeyName(name string) {
 	for _, char := range name {
@@ -13,25 +46,33 @@ func validateUserKeyName(name string) {
 	}
 }
 
-// TreeNamed represents a named key/value pair folded from the parse tree.
-func TreeNamed(name string, value any) any {
+// NamedTree represents a named key/value pair folded from the parse tree.
+func NamedTree(name string, tree any) *namedTreeT {
 	validateUserKeyName(name)
-	return map[string]any{keyNamed + name: value}
+	return &namedTreeT{NameHandle: unique.Make(name), Tree: tree}
 }
 
-// TreeNamedAsList is like Named but its values are collected as a list.
-func TreeNamedAsList(name string, value any) any {
+// NamedTreeSeq is like Named but its values are collected as a list.
+func NamedTreeSeq(name string, tree any) *namedTreeSeqT {
 	validateUserKeyName(name)
-	return map[string]any{keyListNamed + name: value}
+	return &namedTreeSeqT{NameHandle: unique.Make(name), Tree: tree}
 }
 
-// TreeOverride indicates that the contained value should override other values
+func (t *namedTreeT) Name() string {
+	return t.NameHandle.Value()
+}
+
+func (named *namedTreeSeqT) Name() string {
+	return named.NameHandle.Value()
+}
+
+// OverrideTree indicates that the contained value should override other values
 // when folding into the result.
-func TreeOverride(value any) any {
-	return map[string]any{keyAt: value}
+func OverrideTree(tree any) *ovrTreeT {
+	return &ovrTreeT{Tree: tree}
 }
 
-// TreeOverrideAsList is a list-form override variant.
-func TreeOverrideAsList(value any) any {
-	return map[string]any{keyListAt: value}
+// OverrideTreeSeq is a list-form override variant.
+func OverrideTreeSeq(tree any) *overrideTreeSeqT {
+	return &overrideTreeSeqT{Tree: tree}
 }
