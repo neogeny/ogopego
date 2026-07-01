@@ -8,11 +8,11 @@ package pyre
 const LookaheadSupport = false
 
 func Compile(pattern string) (Pattern, error) {
-	return NewRegexp2V2Pattern(pattern)
+	return NewGoPattern(pattern)
 }
 
 func MustCompile(pattern string) Pattern {
-	p, err := NewRegexp2V2Pattern(pattern)
+	p, err := NewGoPattern(pattern)
 	if err != nil {
 		panic(err)
 	}

@@ -53,7 +53,7 @@ func ParseGrammar(grammar string, cfg *Cfg) (any, error) {
 		return nil, fmt.Errorf("boot grammar semantics not set")
 	}
 
-	cursor := input.NewRuneCursor(grammar)
+	cursor := input.NewStrCursor(grammar)
 	directivesCfg := boot.CfgFromDirectives()
 	if directivesCfg.Semantics == nil {
 		// FIXME: this looks like debugging boot Grammar semantics
@@ -140,7 +140,7 @@ func CompileToJSONString(grammar string, cfg *Cfg) (string, error) {
 // ParseInput parses the given text using a compiled Grammar and returns the
 // resulting AST as a Tree value.
 func ParseInput(parser *peg.Grammar, text string, cfg *Cfg) (any, error) {
-	ctx := context.NewCtx(input.NewRuneCursor(text), cfg)
+	ctx := context.NewCtx(input.NewStrCursor(text), cfg)
 
 	opt, err := parser.Optimized()
 	if err == nil && opt != nil {
