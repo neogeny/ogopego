@@ -10,6 +10,7 @@ import (
 	"sort"
 	"sync"
 	"time"
+	"unique"
 
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/pkg/util"
@@ -296,7 +297,7 @@ func (ctx *CoreCtx) Failure(start int, source error) error {
 	ctx.Reset(start)
 	msg := source.Error()
 	dis := &ParseFailure{
-		location: loc,
+		location: unique.Make(loc),
 		Inner:    source,
 		Memento: NewMemento(
 			start,

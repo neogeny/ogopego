@@ -5,6 +5,7 @@ package context
 import (
 	"fmt"
 	"strings"
+	"unique"
 
 	"github.com/fatih/color"
 	"github.com/neogeny/ogopego/pkg/input"
@@ -22,7 +23,7 @@ var (
 // Memento captures the state of the parser at a specific point for error reporting.
 type Memento struct {
 	Cursor    input.Cursor
-	Msg       string
+	msg       unique.Handle[string]
 	Start     int
 	Mark      int
 	CallStack CallStack
@@ -33,11 +34,15 @@ type Memento struct {
 func NewMemento(start int, msg string, cursor input.Cursor, callstack CallStack) Memento {
 	return Memento{
 		Cursor:    cursor,
-		Msg:       msg,
+		msg:       unique.Make(msg),
 		Start:     start,
 		Mark:      cursor.Mark(),
 		CallStack: callstack,
 	}
+}
+
+func (m *Memento) Msg() string {
+	return m.msg.Value()
 }
 
 // InputSource returns the name of the input source.
@@ -54,7 +59,7 @@ func (m *Memento) Error() string {
 	bluePipe := blueStyle.Sprint("│")
 	arrow := blueStyle.Sprint("─→")
 
-	errMsg := fmt.Sprintf("%s: %s\n", errLabel, bold.Sprint(m.Msg))
+	errMsg := fmt.Sprintf("%s: %s\n", errLabel, bold.Sprint(m.Msg()))
 	b.WriteString("\n")
 	b.WriteString(errMsg)
 	b.WriteString(fmt.Sprintf("  %s %s @ [%d:%d]\n", arrow, m.Cursor.InputSource(), line, col))

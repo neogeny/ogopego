@@ -19,7 +19,7 @@ func TestMementoNew(t *testing.T) {
 	cs.Push("rule2")
 
 	m := NewMemento(0, "expected token", cursor, cs)
-	assert.Equal(t, "expected token", m.Msg)
+	assert.Equal(t, "expected token", m.Msg())
 	assert.Equal(t, "some input", m.InputSource())
 	assert.Equal(t, 2, m.CallStack.Len(), "expected 2 callstack entries")
 }

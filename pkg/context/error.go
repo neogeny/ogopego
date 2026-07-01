@@ -3,6 +3,7 @@ package context
 import (
 	"fmt"
 	"path/filepath"
+	"unique"
 )
 
 // Location represents a source code location with file and line number.
@@ -15,8 +16,12 @@ type Location struct {
 // state, inner error and tracing memento for diagnostic reporting.
 type ParseFailure struct {
 	Inner    error
-	location Location
+	location unique.Handle[Location]
 	Memento  Memento
+}
+
+func (f *ParseFailure) Location() Location {
+	return f.location.Value()
 }
 
 // Error returns a string representation of the ParseFailure.
@@ -28,8 +33,9 @@ func (e *ParseFailure) Error() string {
 
 	memento := e.Memento.Error()
 
-	filename := filepath.Base(e.location.File)
-	location := fmt.Sprintf("%s@%d", filename, e.location.Line)
+	loc := e.Location()
+	filename := filepath.Base(loc.File)
+	location := fmt.Sprintf("%s@%d", filename, loc.Line)
 
 	return fmt.Sprintf(
 		"\nDisasterReport(\nLoc: %v,\nError: %s\n\n%s\n)",
