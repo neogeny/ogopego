@@ -217,7 +217,9 @@ func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 		return
 	}
 	ctx.muLock()
-	_ = ctx.heavy.memoCache.Set(key, Memo{Tree: tree, Mark: mark})
+	if err := ctx.heavy.memoCache.Set(key, Memo{Tree: tree, Mark: mark}); err != nil {
+		panic(fmt.Sprintf("memoize: %v", err))
+	}
 	ctx.muUnlock()
 }
 

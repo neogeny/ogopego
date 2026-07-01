@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
-	ctn "github.com/neogeny/ogopego/pkg/util/container"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type ReprTestStruct struct {
@@ -92,17 +92,17 @@ func TestReprTypedStringSlice(t *testing.T) {
 }
 
 func TestReprOrderedMap(t *testing.T) {
-	om := ctn.NewBoundedMap[string, any](0)
+	om := orderedmap.New[string, any]()
 	om.Set("count", 42)
 	om.Set("hello", "world")
-	got := Repr(&om)
+	got := Repr(om)
 	want := `map[string]any{count: 42, hello: "world"}`
 	assert.Equal(t, want, got)
 }
 
 func TestReprEmptyOrderedMap(t *testing.T) {
-	om := ctn.NewBoundedMap[string, any](0)
-	got := Repr(&om)
+	om := orderedmap.New[string, any]()
+	got := Repr(om)
 	want := "map[string]any{}"
 	assert.Equal(t, want, got)
 }

@@ -6,12 +6,10 @@ package util
 import (
 	"reflect"
 
-	ctn "github.com/neogeny/ogopego/pkg/util/container"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 const MaxPointerDerefDepth = 4
-
-type OrderedMap = ctn.BoundedMap[string, any]
 
 func DeRef(ref any) any {
 	if ref == nil {
@@ -54,10 +52,10 @@ func PubMapOf(ref any) any {
 
 	t := v.Type()
 	typeName := t.String()
-	out := ctn.NewBoundedMap[string, any](0)
-	_ = out.Set("__class__", typeName)
-	flattenFields(t, v, &out)
-	return &out
+	out := orderedmap.New[string, any]()
+	out.Set("__class__", typeName)
+	flattenFields(t, v, out)
+	return out
 }
 
 func flattenFields(t reflect.Type, v reflect.Value, out *OrderedMap) {
@@ -72,6 +70,6 @@ func flattenFields(t reflect.Type, v reflect.Value, out *OrderedMap) {
 			}
 			continue
 		}
-		_ = out.Set(f.Name, v.Field(i).Interface())
+		out.Set(f.Name, v.Field(i).Interface())
 	}
 }

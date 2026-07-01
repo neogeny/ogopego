@@ -9,9 +9,9 @@ import (
 
 func TestPruneCacheKeepsAfterCutpoint(t *testing.T) {
 	cache := NewMemoMache(64)
-	_ = cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{})
-	_ = cache.Set(MemoKey{Mark: 5, Name: "b"}, Memo{})
-	_ = cache.Set(MemoKey{Mark: 10, Name: "c"}, Memo{})
+	assert.NoError(t, cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{}))
+	assert.NoError(t, cache.Set(MemoKey{Mark: 5, Name: "b"}, Memo{}))
+	assert.NoError(t, cache.Set(MemoKey{Mark: 10, Name: "c"}, Memo{}))
 	PruneMemoCache(cache, 5)
 	_, err := cache.Get(MemoKey{Mark: 0, Name: "a"})
 	assert.Error(t, err, "expected entry at mark 0 to be removed")
@@ -23,15 +23,15 @@ func TestPruneCacheKeepsAfterCutpoint(t *testing.T) {
 
 func TestPruneCacheRemovesBeforeCutpoint(t *testing.T) {
 	cache := NewMemoMache(64)
-	_ = cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{})
-	_ = cache.Set(MemoKey{Mark: 3, Name: "b"}, Memo{})
+	assert.NoError(t, cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{}))
+	assert.NoError(t, cache.Set(MemoKey{Mark: 3, Name: "b"}, Memo{}))
 	PruneMemoCache(cache, 5)
 	assert.Equal(t, 0, cache.Len(), "expected 0 entries")
 }
 
 func TestPruneCacheAtCutpoint(t *testing.T) {
 	cache := NewMemoMache(64)
-	_ = cache.Set(MemoKey{Mark: 5, Name: "a"}, Memo{})
+	assert.NoError(t, cache.Set(MemoKey{Mark: 5, Name: "a"}, Memo{}))
 	PruneMemoCache(cache, 5)
 	assert.Equal(t, 1, cache.Len(), "expected 1 entry")
 	_, err := cache.Get(MemoKey{Mark: 5, Name: "a"})
@@ -46,7 +46,7 @@ func TestPruneCacheEmpty(t *testing.T) {
 
 func TestPruneCachePreservesValues(t *testing.T) {
 	cache := NewMemoMache(64)
-	_ = cache.Set(MemoKey{Mark: 10, Name: "x"}, Memo{Mark: 20})
+	assert.NoError(t, cache.Set(MemoKey{Mark: 10, Name: "x"}, Memo{Mark: 20}))
 	PruneMemoCache(cache, 5)
 	m, err := cache.Get(MemoKey{Mark: 10, Name: "x"})
 	assert.NoError(t, err, "expected entry to be kept")
@@ -55,8 +55,8 @@ func TestPruneCachePreservesValues(t *testing.T) {
 
 func TestPruneCachePreservesBottom(t *testing.T) {
 	cache := NewMemoMache(64)
-	_ = cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{Tree: trees.BOTTOM})
-	_ = cache.Set(MemoKey{Mark: 5, Name: "b"}, Memo{})
+	assert.NoError(t, cache.Set(MemoKey{Mark: 0, Name: "a"}, Memo{Tree: trees.BOTTOM}))
+	assert.NoError(t, cache.Set(MemoKey{Mark: 5, Name: "b"}, Memo{}))
 	PruneMemoCache(cache, 5)
 	_, err := cache.Get(MemoKey{Mark: 0, Name: "a"})
 	assert.NoError(t, err, "expected bottom entry at mark 0 to be preserved")

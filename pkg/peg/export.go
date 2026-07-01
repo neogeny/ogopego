@@ -4,21 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 
-	ctn "github.com/neogeny/ogopego/pkg/util/container"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 func ModelToJSONStr(v Model) string {
 	out := ModelToJSON(v)
 
-	// Temporarily print the concrete types inside your map/struct
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "  ")
-	enc.SetEscapeHTML(false) // Prevents escaping Unicode/HTML
+	enc.SetEscapeHTML(false)
 
 	_ = enc.Encode(out)
 
-	// Trim the trailing newline so it behaves exactly like MarshalIndent
 	return string(bytes.TrimRight(buf.Bytes(), "\n"))
 }
 
@@ -127,25 +125,23 @@ func ModelToJSON(v Model) any {
 	}
 }
 
-func mapClass(class string, kv ...any) *ctn.BoundedMap[string, any] {
-	out := ctn.NewBoundedMap[string, any](0)
-	_ = out.Set("__class__", class)
+func mapClass(class string, kv ...any) *orderedmap.OrderedMap[string, any] {
+	out := orderedmap.New[string, any]()
+	out.Set("__class__", class)
 	for i := 0; i < len(kv); i += 2 {
 		k := kv[i].(string)
 		v := kv[i+1]
-		_ = out.Set(k, v)
+		out.Set(k, v)
 	}
-	return &out
+	return out
 }
 
-// serializeGrammar returns a JSON string representation of g
-// that can be read back by LoadGrammarFromJSON.
 func serializeGrammar(g *Grammar) any {
-	out := ctn.NewBoundedMap[string, any](0)
-	_ = out.Set("__class__", "Grammar")
-	_ = out.Set("name", g.Name)
+	out := orderedmap.New[string, any]()
+	out.Set("__class__", "Grammar")
+	out.Set("name", g.Name)
 
-	dirs := ctn.NewBoundedMap[string, any](0)
+	dirs := orderedmap.New[string, any]()
 	for _, d := range g.Directives {
 		v := d[1]
 		var value any = v
@@ -157,46 +153,45 @@ func serializeGrammar(g *Grammar) any {
 		case "null", "None":
 			value = nil
 		}
-		_ = dirs.Set(d[0], value)
+		dirs.Set(d[0], value)
 	}
-	_ = out.Set("directives", &dirs)
+	out.Set("directives", dirs)
 
 	kw := make([]string, len(g.Keywords))
 	copy(kw, g.Keywords)
-	_ = out.Set("keywords", kw)
+	out.Set("keywords", kw)
 
 	rules := make([]any, len(g.Rules))
 	for i, rule := range g.Rules {
 		rules[i] = serializeRule(rule)
 	}
-	_ = out.Set("rules", rules)
-	return &out
+	out.Set("rules", rules)
+	return out
 }
 
-func serializeRule(r *Rule) *ctn.BoundedMap[string, any] {
+func serializeRule(r *Rule) *orderedmap.OrderedMap[string, any] {
 	r.normalize()
-	out := ctn.NewBoundedMap[string, any](0)
-	_ = out.Set("__class__", "Rule")
-	_ = out.Set("name", r.Name)
-	// NOTE This is the field order used by TatSu @ 2026-05-27
-	_ = out.Set("exp", ModelToJSON(r.Exp))
+	out := orderedmap.New[string, any]()
+	out.Set("__class__", "Rule")
+	out.Set("name", r.Name)
+	out.Set("exp", ModelToJSON(r.Exp))
 	if r.Params == nil {
-		_ = out.Set("params", []string{})
+		out.Set("params", []string{})
 	} else {
-		_ = out.Set("params", r.Params)
+		out.Set("params", r.Params)
 	}
 	if r.KWParams == nil {
-		_ = out.Set("kwparams", map[string]any{})
+		out.Set("kwparams", map[string]any{})
 	} else {
-		_ = out.Set("kwparams", r.KWParams)
+		out.Set("kwparams", r.KWParams)
 	}
-	_ = out.Set("decorators", r.Decorators)
-	_ = out.Set("base", nil)
-	_ = out.Set("is_name", r.IsName)
-	_ = out.Set("is_tokn", r.IsTokn)
-	_ = out.Set("no_memo", r.NoMemo)
-	_ = out.Set("no_stak", r.NoStak)
-	_ = out.Set("is_memo", r.IsMemo)
-	_ = out.Set("is_lrec", r.IsLrec)
-	return &out
+	out.Set("decorators", r.Decorators)
+	out.Set("base", nil)
+	out.Set("is_name", r.IsName)
+	out.Set("is_tokn", r.IsTokn)
+	out.Set("no_memo", r.NoMemo)
+	out.Set("no_stak", r.NoStak)
+	out.Set("is_memo", r.IsMemo)
+	out.Set("is_lrec", r.IsLrec)
+	return out
 }

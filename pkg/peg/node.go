@@ -94,6 +94,7 @@ func (n *Node) getChildren() []*Node {
 		return nil
 	}
 	children := make([]*Node, 0)
+	seen := make(map[*Node]bool)
 
 	dfs := func(obj any) {}
 	dfs = func(obj any) {
@@ -102,6 +103,10 @@ func (n *Node) getChildren() []*Node {
 		}
 		switch val := obj.(type) {
 		case *Node:
+			if seen[val] {
+				return
+			}
+			seen[val] = true
 			val.setParent(n)
 			children = append(children, val)
 			return
@@ -115,8 +120,8 @@ func (n *Node) getChildren() []*Node {
 				dfs(item)
 			}
 			return
-		case OrderedMap:
-			for _, item := range val.Entries() {
+		case *OrderedMap:
+			for _, item := range util.OrderedMapEntries(val) {
 				dfs(item)
 			}
 			return
@@ -126,8 +131,8 @@ func (n *Node) getChildren() []*Node {
 	}
 	dfs(n.Ast)
 	pub := util.PubMapOf(n)
-	if m, ok := pub.(OrderedMap); ok {
-		for _, obj := range m.Entries() {
+	if m, ok := pub.(*OrderedMap); ok {
+		for _, obj := range util.OrderedMapEntries(m) {
 			dfs(obj)
 		}
 	}

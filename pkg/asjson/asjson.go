@@ -51,9 +51,11 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 	switch val := v.(type) {
 	case *OrderedMap:
 		out := make(map[string]any, val.Len())
-		for _, k := range val.Keys() {
-			item, _ := val.Get(k)
-			out[PythonizeName(k)] = toJSONValue(item, seen)
+		for _, k := range util.OrderedMapKeys(val) {
+			item, ok := val.Get(k)
+			if ok {
+				out[PythonizeName(k)] = toJSONValue(item, seen)
+			}
 		}
 		return out
 

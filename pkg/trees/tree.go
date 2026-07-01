@@ -57,9 +57,10 @@ func fold(ast map[string]any, tree any) any {
 
 	case *util.OrderedMap:
 		out := make(map[string]any, val.Len())
-		for _, k := range val.Keys() {
-			item, _ := val.Get(k)
-			out[k] = fold(ast, item)
+		for _, k := range util.OrderedMapKeys(val) {
+			if item, ok := val.Get(k); ok {
+				out[k] = fold(ast, item)
+			}
 		}
 		return fold(ast, out)
 

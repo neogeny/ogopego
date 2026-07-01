@@ -171,10 +171,10 @@ func reprValue(v any, seen map[uintptr]bool) string {
 }
 
 func reprOrderedMap(om *OrderedMap, seen map[uintptr]bool) string {
-	keys := om.Keys()
+	keys := OrderedMapKeys(om)
 	typeName := ""
 	if len(keys) > 0 && keys[0] == "__class__" {
-		if cls, err := om.Get("__class__"); err == nil {
+		if cls, ok := om.Get("__class__"); ok {
 			typeName = fmt.Sprint(cls)
 		}
 		keys = keys[1:]
@@ -185,10 +185,12 @@ func reprOrderedMap(om *OrderedMap, seen map[uintptr]bool) string {
 		}
 		return typeName + "{}"
 	}
-	parts := make([]string, len(keys))
-	for i, k := range keys {
-		item, _ := om.Get(k)
-		parts[i] = fmt.Sprintf("%s: %s", k, reprValue(item, seen))
+	parts := make([]string, 0, len(keys))
+	for _, k := range keys {
+		item, ok := om.Get(k)
+		if ok {
+			parts = append(parts, fmt.Sprintf("%s: %s", k, reprValue(item, seen)))
+		}
 	}
 	if typeName == "" {
 		return Fold("", parts, "map[string]any{", "}")
