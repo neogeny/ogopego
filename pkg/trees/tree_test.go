@@ -172,8 +172,7 @@ func TestNumberAsJSON(t *testing.T) {
 
 func TestNodeAsJSONTree(t *testing.T) {
 	n := &Node{TypeName: "expr", Tree: text("42")}
-	var aj asjson.AsJSONMixin = n
-	result := asjson.AsJSONStr(aj.As_JSON_())
+	result := asjson.AsJSONStr(n)
 	want := "{\n  \"__class__\": \"expr\",\n  \"ast\": \"42\"\n}"
 	assert.Equal(t, want, result)
 }

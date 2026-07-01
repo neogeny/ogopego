@@ -12,6 +12,7 @@ apply: always
 - Always consult with the User before making changes that impact multiple files
 - Evaluate changes before applying them (no "apply and see" approach)
 - Do not act on assumptions. Always verify assumptions with the User.
+- Always read a file again to verify its current state before making changes. Never assume state from memory.
 
 
 ## Justfile

@@ -4,7 +4,7 @@
 package trees
 
 import (
-	"maps"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 
 	"github.com/neogeny/ogopego/pkg/asjson"
 )
@@ -12,7 +12,7 @@ import (
 var _ asjson.AsJSONMixin = (*Node)(nil)
 
 // / treeToJSONStr
-func treeToJSON(t any) any {
+func treeToJSON(t any, seen ...map[uintptr]bool) any {
 	if t == nil {
 		return nil
 	}
@@ -22,39 +22,43 @@ func treeToJSON(t any) any {
 	case *TreeSeq:
 		items := make([]any, len(v.Items))
 		for i, item := range v.Items {
-			items[i] = treeToJSON(item)
+			items[i] = treeToJSON(item, seen...)
 		}
 		return items
 	case []any:
 		items := make([]any, len(v))
 		for i, item := range v {
-			items[i] = treeToJSON(item)
+			items[i] = treeToJSON(item, seen...)
 		}
 		return items
 	case map[string]any:
 		out := make(map[string]any, len(v))
 		for k, val := range v {
-			out[k] = treeToJSON(val)
+			out[k] = treeToJSON(val, seen...)
+		}
+		return out
+	case *orderedmap.OrderedMap[string, any]:
+		out := make(map[string]any, v.Len())
+		for pair := v.Oldest(); pair != nil; pair = pair.Next() {
+			out[pair.Key] = treeToJSON(pair.Value, seen...)
 		}
 		return out
 	case *Node:
-		child := treeToJSON(v.Tree)
+		child := treeToJSON(v.Tree, seen...)
 		if m, ok := child.(map[string]any); ok {
 			if _, has := m["__class__"]; !has {
-				out := make(map[string]any, len(m)+1)
-				out["__class__"] = v.TypeName
-				maps.Copy(out, m)
-				return out
+				m["__class__"] = v.TypeName
+				return m
 			}
 		}
 		return map[string]any{"__class__": v.TypeName, "ast": child}
 	default:
-		return t
+		return asjson.AsJSON(t, seen...)
 	}
 }
 
 // As_JSON_ implementations for each concrete tree type.
 
-func (*typeBottomTree) As_JSON_() any { return BOTTOM }
-func (s *TreeSeq) As_JSON_() any      { return treeToJSON(s) }
-func (n *Node) As_JSON_() any         { return treeToJSON(n) }
+func (*typeBottomTree) As_JSON_(seen map[uintptr]bool) any { return BOTTOM }
+func (s *TreeSeq) As_JSON_(seen map[uintptr]bool) any      { return treeToJSON(s, seen) }
+func (n *Node) As_JSON_(seen map[uintptr]bool) any         { return treeToJSON(n, seen) }

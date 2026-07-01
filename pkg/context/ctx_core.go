@@ -204,12 +204,8 @@ func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	m, err := ctx.heavy.memoCache.Get(key)
-	if err != nil {
-		var zero Memo
-		return zero, false
-	}
-	return m, true
+	value, ok := ctx.heavy.memoCache[key]
+	return value, ok
 }
 
 func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
@@ -217,9 +213,7 @@ func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 		return
 	}
 	ctx.muLock()
-	if err := ctx.heavy.memoCache.Set(key, Memo{Tree: tree, Mark: mark}); err != nil {
-		panic(fmt.Sprintf("memoize: %v", err))
-	}
+	ctx.heavy.memoCache[key] = Memo{Tree: tree, Mark: mark}
 	ctx.muUnlock()
 }
 

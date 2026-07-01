@@ -16,23 +16,25 @@ import (
 type OrderedMap = util.OrderedMap
 
 type AsJSONMixin interface {
-	As_JSON_() any
-}
-
-func AsJSON(v any) any {
-	return toJSONValue(v, make(map[uintptr]bool))
+	As_JSON_(seen map[uintptr]bool) any
 }
 
 // AsJSONStr returns a JSON string representation of the given value.
 func AsJSONStr(v any) string {
-	bts, err := json.MarshalIndent(v, "", "  ")
+	bts, err := json.MarshalIndent(AsJSON(v), "", "  ")
 	if err != nil {
 		return fmt.Sprintf("!json:%v", err)
 	}
 	return string(bts)
 }
 
-func toJSONValue(v any, seen map[uintptr]bool) any {
+func AsJSON(v any, optseen ...map[uintptr]bool) any {
+	var seen map[uintptr]bool
+	if len(optseen) > 0 {
+		seen = optseen[0]
+	} else {
+		seen = make(map[uintptr]bool)
+	}
 	id := util.Id(v)
 	if in, ok := seen[id]; ok && in {
 		return fmt.Sprintf("%T@%p", v, v)
@@ -44,32 +46,29 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 
 	// v = util.DeRef(v)
 	if m, ok := v.(AsJSONMixin); ok {
-		return m.As_JSON_()
+		return AsJSON(m.As_JSON_(seen))
 	}
 
 	v = util.PubMapOf(v)
 	switch val := v.(type) {
 	case *OrderedMap:
 		out := make(map[string]any, val.Len())
-		for _, k := range util.OrderedMapKeys(val) {
-			item, ok := val.Get(k)
-			if ok {
-				out[PythonizeName(k)] = toJSONValue(item, seen)
-			}
+		for pair := val.Oldest(); pair != nil; pair = pair.Next() {
+			out[PythonizeName(pair.Key)] = AsJSON(pair.Value, seen)
 		}
 		return out
 
 	case map[string]any:
 		out := make(map[string]any, len(val))
 		for k, item := range val {
-			out[PythonizeName(k)] = toJSONValue(item, seen)
+			out[PythonizeName(k)] = AsJSON(item, seen)
 		}
 		return out
 
 	case []any:
 		out := make([]any, 0, len(val))
 		for _, item := range val {
-			out = append(out, toJSONValue(item, seen))
+			out = append(out, AsJSON(item, seen))
 		}
 		return out
 
@@ -93,7 +92,7 @@ func toJSONValue(v any, seen map[uintptr]bool) any {
 			length := rv.Len()
 			out := make([]any, 0, length)
 			for i := range length {
-				out = append(out, toJSONValue(rv.Index(i).Interface(), seen))
+				out = append(out, AsJSON(rv.Index(i).Interface(), seen))
 			}
 			return out
 

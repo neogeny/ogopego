@@ -18,7 +18,7 @@ const (
 )
 
 type Tree interface {
-	As_JSON_() any
+	As_JSON_(seen map[uintptr]bool) any
 	tree()
 }
 
