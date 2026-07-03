@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"sort"
-	"sync"
 	"time"
 	"unique"
 
@@ -32,7 +31,6 @@ type CoreCtx struct {
 	lastCutMark    int
 	furthest       *ParseFailure
 
-	mu            *sync.Mutex
 	memoCache     *MemoCache
 	tracer        Tracer
 	keywords      map[string]struct{}
@@ -59,7 +57,6 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 		cursor:        cursor,
 		callStack:     util.NewTokenStack(),
 		cutStack:      make([]bool, 1, stackCapacity),
-		mu:            &sync.Mutex{},
 		memoCache:     &cache,
 		tracer:        NullTracer{},
 		heartbeat:     heartbeat.NullHeart{},
@@ -68,22 +65,31 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 	return &ctx
 }
 
-// Clone creates a deep copy of the CoreCtx, sharing the pointer-based fields.
+// Clone creates an independent copy of the CoreCtx with its own copy of
+// mutable state (memo cache, keywords, heartbeat timer). The cursor is
+// independently positioned. This is safe for use in concurrent choice
+// evaluation — each clone is fully isolated.
 func (ctx *CoreCtx) Clone() Ctx {
+	now := time.Now()
+	kw := make(map[string]struct{}, len(ctx.keywords))
+	for k := range ctx.keywords {
+		kw[k] = struct{}{}
+	}
 	return &CoreCtx{
 		cursor:         ctx.cursor.Clone(),
+		cfg:            ctx.cfg,
 		callStack:      ctx.callStack,
 		cutStack:       append([]bool(nil), ctx.cutStack...),
 		recursionKey:   ctx.recursionKey,
 		recursionDepth: ctx.recursionDepth,
 		lookaheadDepth: ctx.lookaheadDepth,
 		lastCutMark:    ctx.lastCutMark,
-		mu:             ctx.mu,
-		memoCache:      ctx.memoCache,
+		furthest:       ctx.furthest,
+		memoCache:      &MemoCache{entries: make(MemoEntries)},
 		tracer:         ctx.tracer,
-		keywords:       ctx.keywords,
+		keywords:       kw,
 		heartbeat:      ctx.heartbeat,
-		heartbeatTime:  ctx.heartbeatTime,
+		heartbeatTime:  &now,
 	}
 }
 
@@ -92,31 +98,14 @@ func (ctx *CoreCtx) Merge(other Ctx) {
 	ctx.furthest = other.FurthestFailure()
 }
 
-func (ctx *CoreCtx) muLock() {
-	if ctx.cfg.Concurrency {
-		ctx.mu.Lock()
-	}
-}
-
-func (ctx *CoreCtx) muUnlock() {
-	if ctx.cfg.Concurrency {
-		ctx.mu.Unlock()
-	}
-}
-
 func (ctx *CoreCtx) Cfg() Cfg {
-	ctx.muLock()
-	defer ctx.muUnlock()
 	return ctx.cfg
 }
 
 func (ctx *CoreCtx) Configure(cfg Cfg) {
-	ctx.muLock()
 	ctx.cfg = ctx.cfg.Override(&cfg)
-	ctx.muUnlock()
 	ctx.cursor.Configure(cfg)
 
-	ctx.muLock()
 	ctx.setKeywords(cfg.Keywords)
 
 	if cfg.Trace {
@@ -131,13 +120,10 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 	if cfg.Heart != nil {
 		ctx.heartbeat = cfg.Heart
 	}
-	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) SetTracer(tracer Tracer) {
-	ctx.muLock()
 	ctx.tracer = tracer
-	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) Cursor() Cursor { return ctx.cursor }
@@ -147,8 +133,6 @@ func (ctx *CoreCtx) CallStack() CallStack {
 }
 
 func (ctx *CoreCtx) Tracer() Tracer {
-	ctx.muLock()
-	defer ctx.muUnlock()
 	return ctx.tracer
 }
 
@@ -179,9 +163,6 @@ func (ctx *CoreCtx) MatchEOL() bool { return ctx.cursor.MatchEOL() }
 func (ctx *CoreCtx) NextToken() { ctx.cursor.NextToken() }
 
 func (ctx *CoreCtx) HeartbeatTick() {
-	ctx.muLock()
-	defer ctx.muUnlock()
-
 	bpsInterval := time.Duration(
 		float64(time.Second) * float64(1.0) / *ctx.cfg.HeartBPS,
 	)
@@ -199,8 +180,6 @@ func (ctx *CoreCtx) HeartbeatTick() {
 }
 
 func (ctx *CoreCtx) pruneCache(cutPoint int) {
-	ctx.muLock()
-	defer ctx.muUnlock()
 	ctx.memoCache.Prune(cutPoint)
 }
 
@@ -209,19 +188,14 @@ func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
 }
 
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
-	ctx.muLock()
-	defer ctx.muUnlock()
-	value, ok := ctx.memoCache.Get(key)
-	return value, ok
+	return ctx.memoCache.Get(key)
 }
 
 func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 	if !key.CanMemo {
 		return
 	}
-	ctx.muLock()
 	ctx.memoCache.Put(key, tree, mark)
-	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) TrackRecursionDepth(key MemoKey) error {
@@ -250,8 +224,6 @@ func (ctx *CoreCtx) Untrack(key MemoKey) {
 func (ctx *CoreCtx) Intern(s string) string { return s }
 
 func (ctx *CoreCtx) IsKeyword(name string) bool {
-	ctx.muLock()
-	defer ctx.muUnlock()
 	_, ok := ctx.keywords[name]
 	return ok
 }
@@ -477,11 +449,8 @@ func (ctx *CoreCtx) CutStackPop() bool {
 }
 
 func (ctx *CoreCtx) ApplySemantics(tree any, ruleName string, params []string) (any, bool) {
-	ctx.muLock()
-	sem := ctx.cfg.Semantics
-	ctx.muUnlock()
-	if sem != nil {
-		return sem.Apply(tree, ruleName, params)
+	if ctx.cfg.Semantics != nil {
+		return ctx.cfg.Semantics.Apply(tree, ruleName, params)
 	}
 	return tree, false
 }
