@@ -129,7 +129,7 @@ func runCmd(cli CLIConfig, parserConfig *config.Cfg) (string, []tOutputItem) {
 				if report, ok := errors.AsType[*context.ParseFailure](err); ok {
 					err = &report.Memento
 				}
-				parseFailures = append(parseFailures, result.Error)
+				parseFailures = append(parseFailures, err)
 				continue
 			}
 
