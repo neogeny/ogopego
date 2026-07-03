@@ -64,6 +64,7 @@ type Cfg struct {
 
 	Semantics GrammarSemantics
 	Heart     heartbeat.Heart // progress callback (CLI progress bars)
+	HeartBPS  *float64
 }
 
 // DefaultCfg returns the default configuration. Pass nil to API functions
@@ -81,6 +82,7 @@ func DefaultCfg() *Cfg {
 		Whitespace:        nil,
 		Keywords:          nil,
 		ParseInfo:         false,
+		HeartBPS:          new(2.0),
 	}
 }
 
@@ -117,6 +119,7 @@ func (cfg *Cfg) Override(other *Cfg) Cfg {
 		Keywords:          util.EitherSlice(other.Keywords, cfg.Keywords),
 		ParseInfo:         util.Either(other.ParseInfo, cfg.ParseInfo),
 		Heart:             util.Either(other.Heart, cfg.Heart),
+		HeartBPS:          util.Either(other.HeartBPS, cfg.HeartBPS),
 	}
 	if other.Semantics != nil {
 		result.Semantics = other.Semantics

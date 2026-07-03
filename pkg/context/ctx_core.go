@@ -20,20 +20,10 @@ import (
 // CallStack is a slice of call-site names representing the parser call stack.
 type CallStack = util.TokenStack
 
-// CoreCtxHeavy holds shared heavyweight state used across context clones.
-type CoreCtxHeavy struct {
-	mu            sync.Mutex
-	cfg           Cfg
-	memoCache     MemoCache
-	tracer        Tracer
-	keywords      map[string]struct{}
-	heartbeat     heartbeat.Heart
-	heartbeatTime time.Time
-}
-
 // CoreCtx is the concrete implementation of Ctx used by the parser runtime.
 type CoreCtx struct {
 	cursor         Cursor
+	cfg            Cfg
 	callStack      CallStack
 	cutStack       []bool
 	recursionKey   MemoKey
@@ -41,7 +31,13 @@ type CoreCtx struct {
 	lookaheadDepth int
 	lastCutMark    int
 	furthest       *ParseFailure
-	heavy          *CoreCtxHeavy
+
+	mu            *sync.Mutex
+	memoCache     *MemoCache
+	tracer        Tracer
+	keywords      map[string]struct{}
+	heartbeat     heartbeat.Heart
+	heartbeatTime *time.Time
 }
 
 // NewCtx creates a new CoreCtx backed by the provided Cursor and optional
@@ -56,22 +52,23 @@ func NewCtx(cursor Cursor, cfg *Cfg) *CoreCtx {
 		stackCapacity,
 		int(math.Round(cfgS.PerLineMemos*float64(cursor.LineCount()))),
 	)
-	heavy := &CoreCtxHeavy{
-		cfg:       cfgS,
-		memoCache: NewMemoCache(memoCapacity),
-		tracer:    NullTracer{},
-		heartbeat: heartbeat.NullHeart{},
-	}
+	cache := NewMemoCache(memoCapacity)
+	now := time.Now()
 	ctx := CoreCtx{
-		heavy:     heavy,
-		cursor:    cursor,
-		callStack: util.NewTokenStack(),
-		cutStack:  make([]bool, 1, stackCapacity),
+		cfg:           cfgS,
+		cursor:        cursor,
+		callStack:     util.NewTokenStack(),
+		cutStack:      make([]bool, 1, stackCapacity),
+		mu:            &sync.Mutex{},
+		memoCache:     &cache,
+		tracer:        NullTracer{},
+		heartbeat:     heartbeat.NullHeart{},
+		heartbeatTime: &now,
 	}
 	return &ctx
 }
 
-// Clone creates a deep copy of the CoreCtx, sharing the heavy state.
+// Clone creates a deep copy of the CoreCtx, sharing the pointer-based fields.
 func (ctx *CoreCtx) Clone() Ctx {
 	return &CoreCtx{
 		cursor:         ctx.cursor.Clone(),
@@ -81,7 +78,12 @@ func (ctx *CoreCtx) Clone() Ctx {
 		recursionDepth: ctx.recursionDepth,
 		lookaheadDepth: ctx.lookaheadDepth,
 		lastCutMark:    ctx.lastCutMark,
-		heavy:          ctx.heavy,
+		mu:             ctx.mu,
+		memoCache:      ctx.memoCache,
+		tracer:         ctx.tracer,
+		keywords:       ctx.keywords,
+		heartbeat:      ctx.heartbeat,
+		heartbeatTime:  ctx.heartbeatTime,
 	}
 }
 
@@ -91,26 +93,26 @@ func (ctx *CoreCtx) Merge(other Ctx) {
 }
 
 func (ctx *CoreCtx) muLock() {
-	if ctx.heavy.cfg.Concurrency {
-		ctx.heavy.mu.Lock()
+	if ctx.cfg.Concurrency {
+		ctx.mu.Lock()
 	}
 }
 
 func (ctx *CoreCtx) muUnlock() {
-	if ctx.heavy.cfg.Concurrency {
-		ctx.heavy.mu.Unlock()
+	if ctx.cfg.Concurrency {
+		ctx.mu.Unlock()
 	}
 }
 
 func (ctx *CoreCtx) Cfg() Cfg {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	return ctx.heavy.cfg
+	return ctx.cfg
 }
 
 func (ctx *CoreCtx) Configure(cfg Cfg) {
 	ctx.muLock()
-	ctx.heavy.cfg = ctx.heavy.cfg.Override(&cfg)
+	ctx.cfg = ctx.cfg.Override(&cfg)
 	ctx.muUnlock()
 	ctx.cursor.Configure(cfg)
 
@@ -122,19 +124,19 @@ func (ctx *CoreCtx) Configure(cfg Cfg) {
 			color.Output = os.Stderr
 			color.NoColor = false
 		}
-		ctx.heavy.tracer = ConsoleTracer{}
+		ctx.tracer = ConsoleTracer{}
 	} else {
-		ctx.heavy.tracer = NullTracer{}
+		ctx.tracer = NullTracer{}
 	}
 	if cfg.Heart != nil {
-		ctx.heavy.heartbeat = cfg.Heart
+		ctx.heartbeat = cfg.Heart
 	}
 	ctx.muUnlock()
 }
 
 func (ctx *CoreCtx) SetTracer(tracer Tracer) {
 	ctx.muLock()
-	ctx.heavy.tracer = tracer
+	ctx.tracer = tracer
 	ctx.muUnlock()
 }
 
@@ -147,7 +149,7 @@ func (ctx *CoreCtx) CallStack() CallStack {
 func (ctx *CoreCtx) Tracer() Tracer {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	return ctx.heavy.tracer
+	return ctx.tracer
 }
 
 func (ctx *CoreCtx) Mark() int { return ctx.cursor.Mark() }
@@ -180,7 +182,11 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	ctx.muLock()
 	defer ctx.muUnlock()
 
-	if time.Since(ctx.heavy.heartbeatTime) < 128*time.Millisecond {
+	bpsInterval := time.Duration(
+		float64(time.Second) * float64(1.0) / *ctx.cfg.HeartBPS,
+	)
+	if time.Since(*ctx.heartbeatTime) < bpsInterval {
+		// ...
 		return
 	}
 	mark := ctx.Mark()
@@ -188,24 +194,24 @@ func (ctx *CoreCtx) HeartbeatTick() {
 	if total == 0 {
 		return
 	}
-	ctx.heavy.heartbeat.Beat(mark, total)
-	ctx.heavy.heartbeatTime = time.Now()
+	ctx.heartbeat.Beat(mark, total)
+	*ctx.heartbeatTime = time.Now()
 }
 
 func (ctx *CoreCtx) pruneCache(cutPoint int) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	ctx.heavy.memoCache.Prune(cutPoint)
+	ctx.memoCache.Prune(cutPoint)
 }
 
 func (ctx *CoreCtx) Key(name string, canMemo bool) MemoKey {
-	return ctx.heavy.memoCache.NewKey(ctx.Mark(), name, canMemo)
+	return ctx.memoCache.NewKey(ctx.Mark(), name, canMemo)
 }
 
 func (ctx *CoreCtx) Memo(key MemoKey) (Memo, bool) {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	value, ok := ctx.heavy.memoCache.Get(key)
+	value, ok := ctx.memoCache.Get(key)
 	return value, ok
 }
 
@@ -214,7 +220,7 @@ func (ctx *CoreCtx) Memoize(key MemoKey, tree any, mark int) {
 		return
 	}
 	ctx.muLock()
-	ctx.heavy.memoCache.Put(key, tree, mark)
+	ctx.memoCache.Put(key, tree, mark)
 	ctx.muUnlock()
 }
 
@@ -246,7 +252,7 @@ func (ctx *CoreCtx) Intern(s string) string { return s }
 func (ctx *CoreCtx) IsKeyword(name string) bool {
 	ctx.muLock()
 	defer ctx.muUnlock()
-	_, ok := ctx.heavy.keywords[name]
+	_, ok := ctx.keywords[name]
 	return ok
 }
 
@@ -256,7 +262,7 @@ func (ctx *CoreCtx) setKeywords(keywords []string) {
 	for _, kw := range keywords {
 		set[kw] = struct{}{}
 	}
-	ctx.heavy.keywords = set
+	ctx.keywords = set
 }
 
 func (ctx *CoreCtx) MatchToken(token string) bool {
@@ -448,7 +454,7 @@ func (ctx *CoreCtx) Cut() {
 	ctx.cutStack[len(ctx.cutStack)-1] = true
 	ctx.Tracer().TraceCut(ctx)
 
-	if !ctx.heavy.cfg.NoPruneMemosOnCut && !ctx.InLookahead() {
+	if !ctx.cfg.NoPruneMemosOnCut && !ctx.InLookahead() {
 		mark := ctx.Mark()
 		if mark > ctx.lastCutMark {
 			ctx.pruneCache(ctx.lastCutMark)
@@ -472,7 +478,7 @@ func (ctx *CoreCtx) CutStackPop() bool {
 
 func (ctx *CoreCtx) ApplySemantics(tree any, ruleName string, params []string) (any, bool) {
 	ctx.muLock()
-	sem := ctx.heavy.cfg.Semantics
+	sem := ctx.cfg.Semantics
 	ctx.muUnlock()
 	if sem != nil {
 		return sem.Apply(tree, ruleName, params)
