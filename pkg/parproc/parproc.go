@@ -11,7 +11,7 @@ import (
 
 type Result[P, R any] struct {
 	Payload P
-	Rutcome R
+	Outcome R
 	Error   error
 }
 
@@ -34,9 +34,9 @@ func ParProc[P, R any](
 				nworkers = runtime.GOMAXPROCS(0)
 			}
 			var wg sync.WaitGroup
-			sem := make(chan struct{}, nworkers)
+			sem := make(chan int, nworkers)
 
-			for _, path := range payloads {
+			for i, path := range payloads {
 				// Check cancellation before pulling a new worker slot
 				select {
 				case <-done:
@@ -47,7 +47,7 @@ func ParProc[P, R any](
 				select {
 				case <-done:
 					return
-				case sem <- struct{}{}:
+				case sem <- i:
 				}
 
 				wg.Add(1)
@@ -65,7 +65,7 @@ func ParProc[P, R any](
 					result, err := proc(p)
 
 					// Safely deliver the result
-					out <- Result[P, R]{Payload: p, Rutcome: result, Error: err}
+					out <- Result[P, R]{Payload: p, Outcome: result, Error: err}
 				}(path)
 			}
 			wg.Wait()
