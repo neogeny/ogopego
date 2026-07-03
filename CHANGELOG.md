@@ -20,12 +20,22 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Added
+
+- Generic `ParProc[P, R any]` parallel processor in `pkg/parproc/` with bounded concurrency, cancellation, and per-task timing.
+- `STYLE.md` — project-wide coding conventions captured from the codebase.
+
 ### Changed
+
+- Refactored `cmd_run` to use a two-phase pipeline (sequential read, parallel parse) with `ParProc`.
+- Eliminated `CoreCtxHeavy` — its fields are now inlined into `CoreCtx` behind explicit pointers for shared mutable state.
+- Removed the experimental `sync.Mutex` from `CoreCtx`. Each `Clone()` now deep-copies mutable state, making every context fully isolated and safe for concurrent use.
+- Revised progress-bar cosmetics (wider file bars, shorter labels, color tweaks) and added `progress.Write` for goroutine-safe output.
+- Heartbeat interval now computed in beats-per-second (BPS).
 
 #### Optimization
 
-- The latest round of hunting for bottlenecks has **OGoPEGo** generating the fastest parsers in its family. The **OGoPEGo** model-based parser for Java is 1.18x faster than the one produced by [TatSu] with procedural code generation, the previous fastest.
-
+- The latest round of hunting for bottlenecks has **OGoPEGo** generating the fastest parsers in its family. The **OGoPEGo** model-based parser for Java is 1.18x faster than the one produced by [TatSu] with procedural code generation, the previous fastest. Without the out-of-process overhead when executed as a Python package, the Go parser is 4x faster than the best Python parser.
 - The latest heuristics for optimizing grammar models were ported from [TatSu].
 
 ## [v0.1.13] 2026-06-14 New syntax + optimized grammar models
