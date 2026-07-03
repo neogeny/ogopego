@@ -23,9 +23,9 @@ const (
 	modeDir
 )
 
-type outputItem struct {
-	Name    string
-	Payload string
+type tOutputItem struct {
+	Path   string
+	Output string
 }
 
 func parseCLI() (CLIConfig, *kong.Context) {
@@ -54,7 +54,7 @@ func Main() {
 
 	var (
 		useColorOutput bool
-		outputs        []outputItem
+		outputs        []tOutputItem
 		lang           string
 	)
 
@@ -143,7 +143,7 @@ func replaceExt(name, newExt string) string {
 	return name + newExt
 }
 
-func writeOutputs(outputs []outputItem, lang string, path string, color bool) error {
+func writeOutputs(outputs []tOutputItem, lang string, path string, color bool) error {
 	switch outputMode(path) {
 	case modeStdout:
 		if lang == "jsonl" {
@@ -167,12 +167,13 @@ func writeOutputs(outputs []outputItem, lang string, path string, color bool) er
 			return fmt.Errorf("creating output directory: %w", err)
 		}
 		for _, o := range outputs {
-			outPath := filepath.Join(path, replaceExt(o.Name, ext))
-			data := []byte(o.Payload)
+			name := filepath.Base(o.Path)
+			outPath := filepath.Join(path, replaceExt(name, ext))
+			data := []byte(o.Output)
 			if lang == "jsonl" {
 				var buf bytes.Buffer
 				if err := json.Compact(&buf, data); err != nil {
-					return fmt.Errorf("compacting json for %s: %w", o.Name, err)
+					return fmt.Errorf("compacting json for %s: %w", name, err)
 				}
 				buf.WriteByte('\n')
 				data = buf.Bytes()
@@ -186,11 +187,11 @@ func writeOutputs(outputs []outputItem, lang string, path string, color bool) er
 	return nil
 }
 
-func formatOutputs(outputs []outputItem, compact bool) ([]byte, error) {
+func formatOutputs(outputs []tOutputItem, compact bool) ([]byte, error) {
 	if compact {
 		var buf bytes.Buffer
 		for _, o := range outputs {
-			if err := json.Compact(&buf, []byte(o.Payload)); err != nil {
+			if err := json.Compact(&buf, []byte(o.Output)); err != nil {
 				return nil, fmt.Errorf("compacting json: %w", err)
 			}
 			buf.WriteByte('\n')
@@ -200,10 +201,10 @@ func formatOutputs(outputs []outputItem, compact bool) ([]byte, error) {
 	return []byte(joinOutputs(outputs)), nil
 }
 
-func joinOutputs(outputs []outputItem) string {
+func joinOutputs(outputs []tOutputItem) string {
 	payloads := make([]string, len(outputs))
 	for i, o := range outputs {
-		payloads[i] = o.Payload
+		payloads[i] = o.Output
 	}
 	return strings.Join(payloads, "\n")
 }

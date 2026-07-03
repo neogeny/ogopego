@@ -13,8 +13,8 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
-	var outputs []outputItem
+func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []tOutputItem) {
+	var outputs []tOutputItem
 	var p *mpb.Progress
 	if !cli.Quiet {
 		hideCursor()
@@ -47,31 +47,31 @@ func grammarCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		p.Wait()
 		showCursor()
 	}
-	var payload string
+	var output string
 	var lang string
 	switch {
 	case cli.Grammar.Json:
-		payload = peg.ModelToJSONStr(gram)
+		output = peg.ModelToJSONStr(gram)
 		lang = "json"
 	case cli.Grammar.Pretty:
-		payload = gram.PrettyPrint()
+		output = gram.PrettyPrint()
 		lang = "ebnf"
 	case cli.Grammar.Railroads:
-		payload = gram.Railroads()
+		output = gram.Railroads()
 		lang = "apl"
 	case cli.Grammar.Model:
-		payload = util.Repr(gram)
+		output = util.Repr(gram)
 		lang = "go"
 	case cli.Grammar.Parser != "":
-		payload = peg.ParserRepr(*gram, cli.Grammar.Parser)
+		output = peg.ParserRepr(*gram, cli.Grammar.Parser)
 		lang = "go"
 	case cli.Grammar.ModelGen != "":
-		payload = tool.GenerateGrammarModel(*gram, cli.Grammar.ModelGen)
+		output = tool.GenerateGrammarModel(*gram, cli.Grammar.ModelGen)
 		lang = "go"
 	default:
-		payload = gram.PrettyPrint()
+		output = gram.PrettyPrint()
 		lang = "ebnf"
 	}
-	outputs = append(outputs, outputItem{Name: filepath.Base(cli.Grammar.Grammar), Payload: payload})
+	outputs = append(outputs, tOutputItem{Path: cli.Grammar.Grammar, Output: output})
 	return lang, outputs
 }

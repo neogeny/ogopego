@@ -9,8 +9,8 @@ import (
 	"github.com/neogeny/ogopego/pkg/util"
 )
 
-func bootCmd(cli CLIConfig) (string, []outputItem) {
-	var outputs []outputItem
+func bootCmd(cli CLIConfig) (string, []tOutputItem) {
+	var outputs []tOutputItem
 	gram, err := api.BootGrammar()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error loading boot grammar:", err)
@@ -35,6 +35,6 @@ func bootCmd(cli CLIConfig) (string, []outputItem) {
 		payload = gram.PrettyPrint()
 		lang = "ebnf"
 	}
-	outputs = append(outputs, outputItem{Name: "boot", Payload: payload})
+	outputs = append(outputs, tOutputItem{Path: "boot", Output: payload})
 	return lang, outputs
 }

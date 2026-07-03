@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -16,6 +14,8 @@ import (
 	"github.com/neogeny/ogopego/pkg/asjson"
 	"github.com/neogeny/ogopego/pkg/config"
 	"github.com/neogeny/ogopego/pkg/context"
+	"github.com/neogeny/ogopego/pkg/parproc"
+	"github.com/neogeny/ogopego/pkg/peg"
 	"github.com/neogeny/ogopego/pkg/util"
 )
 
@@ -25,24 +25,34 @@ var (
 	tableGoodStyle  = color.New(color.FgGreen)
 	tableBadStyle   = color.New(color.FgRed)
 	tableMidStyle   = color.New(color.FgYellow)
+	tableDimStyle   = color.New(color.FgWhite, color.Faint)
 
 	diagErrStyle = color.New(color.FgRed)
 )
 
-func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
-	var outputs []outputItem
-	var errcount int
+type tPayload struct {
+	Path string
+	Text string
+	Gram *peg.Grammar
+	Cfg  *config.Cfg
+	Prog *ProgressUI
+}
+
+func runCmd(cli CLIConfig, parserConfig *config.Cfg) (string, []tOutputItem) {
+	var outputs []tOutputItem
+	var parseFailures []error
 	var totlLines int
 	var codeLines int
 	var cmntLines int
 	var blnkLines int
 	var succCount int
+	var failCount int
 	var succLines int
 	var runTime float64
 	startTime := time.Now()
 
 	if cli.Run.Start != "" {
-		cliCfg.Start = cli.Run.Start
+		parserConfig.Start = cli.Run.Start
 	}
 
 	var inputs []string
@@ -58,7 +68,7 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 	if len(inputs) > 0 {
 		prog := NewProgressUI(len(cli.Run.Inputs), cli.Quiet)
 		loader := prog.Loading("loading grammar")
-		loadCfg := *cliCfg
+		loadCfg := *parserConfig
 		loadCfg.Heart = loader.Heartbeat()
 		gram, err := api.LoadGrammar(cli.Run.Grammar, &loadCfg)
 		loader.Finish()
@@ -68,88 +78,86 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		}
 
 		maxWorkers := cli.Run.Nproc
-		if maxWorkers <= 0 {
-			maxWorkers = runtime.GOMAXPROCS(0)
+		var payloads []tPayload
+		for _, path := range inputs {
+			text, err := os.ReadFile(path)
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
+				continue
+			}
+			payloads = append(
+				payloads,
+				tPayload{
+					Path: path,
+					Text: string(text),
+					Gram: gram,
+					Cfg:  parserConfig,
+					Prog: prog,
+				},
+			)
+
 		}
-		var mu sync.Mutex
-		var wg sync.WaitGroup
-		var sem = make(chan int, maxWorkers)
-		for i, path := range inputs {
-			wg.Add(1)
-			sem <- i
-			go func(path string) {
-				defer wg.Done()
-				fName := filepath.Base(path)
-				fp := prog.AddFile(fName)
+		for result := range parproc.ParProc(parseTask, payloads, maxWorkers) {
+			payload := result.Payload
+			name := filepath.Base(payload.Path)
+			tree := result.Outcome
 
-				data, err := os.ReadFile(path)
-				if err != nil {
-					if cli.Verbose && !cli.Quiet {
-						_, _ = fmt.Fprintf(os.Stderr, "\nerror reading %s: %v\n", path, err)
-					}
-					errcount++
-					prog.IncFiles()
-					return
+			lc := util.CountLines(payload.Text)
+			totlLines += lc.Total
+			codeLines += lc.Code
+			cmntLines += lc.Comment
+			blnkLines += lc.Blank
+			runTime += result.Elapsed.Seconds()
+
+			if cli.Verbose && !cli.Quiet {
+				var style *color.Color
+				var symbol string
+				if result.Error != nil {
+					style = tableBadStyle
+					symbol = "✗"
+				} else {
+					style = tableGoodStyle
+					symbol = "✓"
 				}
-				input := string(data)
-				fileStart := time.Now()
-				lc := util.CountLines(input)
-				fp.SetLength(len(data))
-
-				fileCfg := *cliCfg
-				fileCfg.Heart = fp.Heartbeat()
-				fileCfg.Source, _ = util.PathRelativeToCwd(path)
-
-				tree, err := api.ParseInput(gram, input, &fileCfg)
-				prog.IncFiles()
-				<-sem
-
-				mu.Lock()
-				defer mu.Unlock()
-				totlLines += lc.Total
-				codeLines += lc.Code
-				cmntLines += lc.Comment
-				blnkLines += lc.Blank
-				runTime += time.Since(fileStart).Seconds()
-				if err != nil {
-					fp.Fail()
-					errcount++
-					if cli.Verbose && !cli.Quiet {
-						if report, ok := errors.AsType[*context.ParseFailure](err); ok {
-							err = &report.Memento
-						}
-						_, _ = fmt.Fprintf(os.Stderr, "\n%v\n", err)
-					}
-					return
+				msg := style.Sprintf("%3s", symbol) +
+					tableDimStyle.Sprintf(" %-50s ", name) +
+					style.Sprintf("⏲ %6.2f s\n", result.Elapsed.Seconds())
+				_, _ = prog.Write([]byte(msg))
+			}
+			if result.Error != nil {
+				err := result.Error
+				if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+					err = &report.Memento
 				}
+				parseFailures = append(parseFailures, result.Error)
+				continue
+			}
 
-				succCount++
-				succLines += lc.Total
-				fp.Success()
-				var payload string
-				switch {
-				case cli.Run.Model:
-					payload = util.Repr(tree)
-				default:
-					payload = asjson.AsJSONStr(tree)
-				}
-				item := outputItem{Name: fName, Payload: payload}
-				outputs = append(outputs, item)
-			}(path)
+			succCount++
+			succLines += lc.Total
+			var output string
+			switch {
+			case cli.Run.Model:
+				output = util.Repr(tree)
+			default:
+				output = asjson.AsJSONStr(tree)
+			}
+			outputs = append(outputs, tOutputItem{
+				Path:   payload.Path,
+				Output: output,
+			})
 		}
-
-		wg.Wait()
 		prog.Finish()
 	}
 
 	if !cli.Quiet && runTime > 0 {
+		total := len(inputs)
+		failCount = total - succCount
 		slocsAvg := float64(totlLines) / runTime
-		succRate := float64(succCount) / float64(len(inputs))
-		failures := len(inputs) - succCount
+		succRate := float64(succCount) / float64(total)
 		wallTime := time.Since(startTime).Seconds()
 
 		fmt.Fprintln(os.Stderr)
-
 		type tableRow struct {
 			label    string
 			value    string
@@ -178,16 +186,25 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 		}
 
 		rows := []tableRow{
-			{"       files input", fmt.Sprintf("%d", len(inputs)), tableLabelStyle, tableValueStyle},
+			{"       files input", fmt.Sprintf("%d", total), tableLabelStyle, tableValueStyle},
 			{" source lines input", fmt.Sprintf("%d", totlLines), tableLabelStyle, tableValueStyle},
 			{"     success lines", fmt.Sprintf("%d", succLines), tableLabelStyle, tableValueStyle},
 			{"              sloc", fmt.Sprintf("%d", codeLines), tableLabelStyle, tableValueStyle},
 			{"         successes", fmt.Sprintf("%d", succCount), tableGoodStyle, tableGoodStyle},
-			{"          failures", fmt.Sprintf("%d", failures), tableBadStyle, tableBadStyle},
+			{"          failures", fmt.Sprintf("%d", failCount), tableBadStyle, tableBadStyle},
 			{"      success rate", fmt.Sprintf("%12.0f %%", 100.0*succRate), tableLabelStyle, rateClr},
 			{"         sloc/sec", fmt.Sprintf("%12.0f sl/s", slocsAvg), tableLabelStyle, slocClr},
 			{"          run time", fmtDuration(runTime), tableLabelStyle, tableValueStyle},
 			{"         wall time", fmtDuration(wallTime), tableLabelStyle, tableValueStyle},
+		}
+
+		if cli.Verbose {
+			for _, err := range parseFailures {
+				if report, ok := errors.AsType[*context.ParseFailure](err); ok {
+					err = &report.Memento
+				}
+				_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
 		}
 
 		for _, r := range rows {
@@ -195,25 +212,6 @@ func runCmd(cli CLIConfig, cliCfg *config.Cfg) (string, []outputItem) {
 			r.valueClr.Fprintf(os.Stderr, "%12s\n", r.value)
 		}
 	}
-
-	/*
-		fmt.Fprintln(os.Stderr)
-
-		passed := len(cli.Run.Inputs) - errcount
-		elapsed := time.Since(startTime)
-		rate := int(float64(codeLines) / elapsed.Seconds())
-
-		errors := ""
-		if errcount > 0 {
-			errors = summaryFailStyle.Sprintf(" %d errors", errcount)
-		}
-		_, _ = fmt.Fprintf(os.Stderr, "Parsed%s%s%s%s\n",
-			summaryFilesStyle.Sprintf(" %d files", len(cli.Run.Inputs)),
-			summaryPassedStyle.Sprintf(" %d passed", passed),
-			errors,
-			summaryRateStyle.Sprintf(" %d sloc/s", rate),
-		)
-	*/
 
 	var lang string
 	switch {
@@ -236,4 +234,23 @@ func fmtDuration(seconds float64) string {
 		return fmt.Sprintf("%d:%02d:%02d", h, m, s)
 	}
 	return fmt.Sprintf("%d:%02d", m, s)
+}
+func parseTask(payload tPayload) (any, error) {
+	path := payload.Path
+	fName := filepath.Base(path)
+	fp := payload.Prog.AddFile(fName)
+	fp.SetLength(len(payload.Text))
+
+	fileCfg := payload.Cfg
+	fileCfg.Heart = fp.Heartbeat()
+	fileCfg.Source, _ = util.PathRelativeToCwd(path)
+
+	tree, err := api.ParseInput(payload.Gram, payload.Text, fileCfg)
+	payload.Prog.IncFiles()
+	if err != nil {
+		fp.Fail()
+		return nil, err
+	}
+	fp.Success()
+	return tree, nil
 }

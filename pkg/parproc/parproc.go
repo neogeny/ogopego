@@ -7,10 +7,12 @@ import (
 	"iter"
 	"runtime"
 	"sync"
+	"time"
 )
 
 type Result[P, R any] struct {
 	Payload P
+	Elapsed time.Duration
 	Outcome R
 	Error   error
 }
@@ -62,10 +64,17 @@ func ParProc[P, R any](
 					default:
 					}
 
+					start := time.Now()
 					result, err := proc(p)
+					elapsed := time.Since(start)
 
 					// Safely deliver the result
-					out <- Result[P, R]{Payload: p, Outcome: result, Error: err}
+					out <- Result[P, R]{
+						Payload: p,
+						Elapsed: elapsed,
+						Outcome: result,
+						Error:   err,
+					}
 				}(path)
 			}
 			wg.Wait()

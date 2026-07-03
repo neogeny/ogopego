@@ -2,6 +2,7 @@ package cli
 
 //goland:noinspection GoRedundantImportAlias
 import (
+	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -108,7 +109,7 @@ func NewFileProgress(p *mpb.Progress, name string) *FileProgress {
 			Padding("  ").
 			Tip("─").TipMeta(yellow),
 		mpb.PrependDecorators(
-			decor.Name(name, decor.WC{W: 40, C: decor.DindentRight}),
+			decor.Name(fmt.Sprintf("   %s", name), decor.WC{W: 52, C: decor.DindentRight}),
 		),
 		mpb.AppendDecorators(
 			decor.Percentage(),
@@ -168,16 +169,16 @@ func NewProgressUI(total int, quiet bool) *ProgressUI {
 	hideCursor()
 	p := mpb.New(mpb.WithOutput(os.Stderr))
 
-	green := func(s string) string { return color.GreenString(s) }
+	yellow := func(s string) string { return color.YellowString(s) }
 	files := p.New(int64(total),
 		mpb.BarStyle().
 			Lbound(" ").
 			Rbound(" ").
-			Filler(".").FillerMeta(green).
+			Filler("-").FillerMeta(yellow).
 			Padding(" ").
-			Tip(".").TipMeta(green),
+			Tip("-").TipMeta(yellow),
 		mpb.PrependDecorators(
-			decor.CountersNoUnit("%d/%d files"),
+			decor.CountersNoUnit("%d/%d"),
 		),
 		mpb.BarRemoveOnComplete(),
 	)
@@ -207,6 +208,14 @@ func (ui *ProgressUI) IncFiles() {
 		return
 	}
 	ui.files.Increment()
+}
+
+// Write writes b to the progress output, appearing above the progress bars.
+func (ui *ProgressUI) Write(b []byte) (int, error) {
+	if ui == nil || ui.p == nil {
+		return len(b), nil
+	}
+	return ui.p.Write(b)
 }
 
 // Finish marks the overall progress UI as complete.
