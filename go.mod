@@ -2,8 +2,6 @@ module github.com/neogeny/ogopego
 
 go 1.26.3
 
-retract [v0.1.2, v1.0.9]
-
 require (
 	github.com/alecthomas/assert/v2 v2.11.0
 	github.com/alecthomas/chroma/v2 v2.27.0
